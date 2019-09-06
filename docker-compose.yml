@@ -1,0 +1,25 @@
+version: '3.4'
+
+services:
+
+  sql.data:
+    image: microsoft/mssql-server-linux:2017-latest
+    # environment:
+      # - ID=SA
+    #  - SA_PASSWORD=Pass_word
+    #  - ACCEPT_EULA=Y
+    # ports:
+    #  - "1433:1433"
+      # Map a TCP port on the host environment (first value) 
+      # with a TCP port in the container (second value). In 
+      # this example, SQL Server is listening on TCP 1433 in 
+      # the container and this is exposed to the port, 1433, 
+      # on the host.
+
+  tvq:
+    image: ${DOCKER_REGISTRY-}tvq
+    build:
+      context: .
+      dockerfile: TVQ/Dockerfile
+    depends_on:
+      - sql.data

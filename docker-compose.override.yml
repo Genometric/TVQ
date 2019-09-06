@@ -1,0 +1,23 @@
+version: '3.4'
+
+services:
+
+  sql.data:
+    environment:
+      # - ID=SA
+      - SA_PASSWORD=Pass_word
+      - ACCEPT_EULA=Y
+    ports:
+      - "1433:1433"
+
+  tvq:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_HTTPS_PORT=44376
+    ports:
+      - "61936:80"
+      - "44376:443"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
