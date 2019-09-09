@@ -3,6 +3,7 @@ using Autofac.Extensions.DependencyInjection;
 using Genometric.TVQ.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -31,6 +32,7 @@ namespace Genometric.TVQ
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddCustomDbContext(Configuration);
 
             var container = new ContainerBuilder();
@@ -64,7 +66,7 @@ namespace Genometric.TVQ
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.AddDbContext<RepoItemContext>(options =>
+            void OptionsBuilder(DbContextOptionsBuilder options)
             {
                 options.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"),
@@ -86,8 +88,10 @@ namespace Genometric.TVQ
                         RelationalEventId.QueryClientEvaluationWarning));
                 /// Check Client vs. Server evaluation: 
                 /// https://docs.microsoft.com/en-us/ef/core/querying/client-eval
-            });
+            }
 
+            services.AddDbContext<RepoItemContext>(options => OptionsBuilder(options));
+            services.AddDbContext<ToolShedItemContext>(options => OptionsBuilder(options));
             return services;
         }
     }

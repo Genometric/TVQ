@@ -36,6 +36,17 @@ namespace Genometric.TVQ
                         .Wait();
                 });
 
+                host.MigrateDbContext<ToolShedItemContext>((context, services) =>
+                {
+                    var env = services.GetService<IHostingEnvironment>();
+                    var settings = services.GetService<IOptions<ToolShedItemSettings>>();
+                    var logger = services.GetService<ILogger<ToolShedItemContextSeed>>();
+
+                    new ToolShedItemContextSeed()
+                        .SeedAsync(context, env, settings, logger)
+                        .Wait();
+                });
+
                 Log.Information("Starting web host ({ApplicationContext})...", AppName);
                 host.Run();
                 //return 0;
