@@ -4,18 +4,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Genometric.TVQ.Infrastructure
 {
-    public class ToolShedItemContext : DbContext
+    public class TVQContext : DbContext
     {
-        public ToolShedItemContext(
-            DbContextOptions<ToolShedItemContext> options) : base(options)
+        public TVQContext(
+            DbContextOptions<TVQContext> options) : base(options)
         {
 
         }
 
-        public DbSet<ToolShedItem> ToolSheds { set; get; }
+        public DbSet<RepoItem> RepoItems { set; get; }
+        public DbSet<ToolShedItem> ToolShedItems { set; get; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.ApplyConfiguration(new RepoItemEntityTypeConfiguration());
             builder.ApplyConfiguration(new ToolShedItemEntityTypeConfiguration());
         }
     }

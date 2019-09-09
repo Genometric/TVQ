@@ -25,24 +25,13 @@ namespace Genometric.TVQ
             try
             {
                 var host = BuildWebHost(configuration, args);
-                host.MigrateDbContext<RepoItemContext>((context, services) =>
+                host.MigrateDbContext<TVQContext>((context, services) =>
                 {
                     var env = services.GetService<IHostingEnvironment>();
-                    var settings = services.GetService<IOptions<RepoItemSettings>>();
-                    var logger = services.GetService<ILogger<RepoItemContextSeed>>();
+                    var settings = services.GetService<IOptions<TVQSettings>>();
+                    var logger = services.GetService<ILogger<TVQContextSeed>>();
 
-                    new RepoItemContextSeed()
-                        .SeedAsync(context, env, settings, logger)
-                        .Wait();
-                });
-
-                host.MigrateDbContext<ToolShedItemContext>((context, services) =>
-                {
-                    var env = services.GetService<IHostingEnvironment>();
-                    var settings = services.GetService<IOptions<ToolShedItemSettings>>();
-                    var logger = services.GetService<ILogger<ToolShedItemContextSeed>>();
-
-                    new ToolShedItemContextSeed()
+                    new TVQContextSeed()
                         .SeedAsync(context, env, settings, logger)
                         .Wait();
                 });

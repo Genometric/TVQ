@@ -12,41 +12,49 @@ using System.Threading.Tasks;
 
 namespace Genometric.TVQ.Infrastructure
 {
-    public class RepoItemContextSeed
+    public class TVQContextSeed
     {
         public async Task SeedAsync(
-            RepoItemContext context, 
-            IHostingEnvironment env, 
-            IOptions<RepoItemSettings> settings, 
-            ILogger<RepoItemContextSeed> logger)
+            TVQContext context,
+            IHostingEnvironment env,
+            IOptions<TVQSettings> settings,
+            ILogger<TVQContextSeed> logger)
         {
-            var policy = CreatePolicy(logger, nameof(RepoItemContextSeed));
+            var policy = CreatePolicy(logger, nameof(TVQContextSeed));
 
             await policy.ExecuteAsync(async () =>
             {
                 var useCustomizationData = settings.Value.UseCustomizationData;
                 var contentRootPath = env.ContentRootPath;
-                var picturePath = env.WebRootPath;
 
-                if (!context.Repos.Any())
+                if (!context.RepoItems.Any())
                 {
-                    await context.Repos.AddRangeAsync(useCustomizationData
-                        ? GetDatasFromFile(contentRootPath, logger)
-                        : GetPreconfiguredDatas());
+                    await context.RepoItems.AddRangeAsync(
+                        GetPreconfiguredRepos(
+                            contentRootPath,
+                            useCustomizationData,
+                            logger));
+
+                    await context.SaveChangesAsync();
+                }
+
+                if (!context.ToolShedItems.Any())
+                {
+                    await context.ToolShedItems.AddRangeAsync(
+                        GetPreconfiguredToolSheds(
+                            contentRootPath,
+                            useCustomizationData,
+                            logger));
 
                     await context.SaveChangesAsync();
                 }
             });
         }
 
-        private IEnumerable<RepoItem> GetDatasFromFile(
+        private IEnumerable<RepoItem> GetPreconfiguredRepos(
             string contentRootPath, 
-            ILogger<RepoItemContextSeed> logger)
-        {
-            return GetPreconfiguredDatas();
-        }
-
-        private IEnumerable<RepoItem> GetPreconfiguredDatas()
+            bool useCustomizationData, 
+            ILogger<TVQContextSeed> logger)
         {
             return new List<RepoItem>()
             {
@@ -56,8 +64,21 @@ namespace Genometric.TVQ.Infrastructure
             };
         }
 
+        private IEnumerable<ToolShedItem> GetPreconfiguredToolSheds(
+            string contentRootPath, 
+            bool useCustomizationData, 
+            ILogger<TVQContextSeed> logger)
+        {
+            return new List<ToolShedItem>()
+            {
+                new ToolShedItem(){ },
+                new ToolShedItem(){ },
+                new ToolShedItem(){ }
+            };
+        }
+
         private AsyncRetryPolicy CreatePolicy(
-            ILogger<RepoItemContextSeed> logger, 
+            ILogger<TVQContextSeed> logger, 
             string prefix, 
             int retries = 3)
         {

@@ -12,10 +12,10 @@ namespace Genometric.TVQ.Controllers
     [ApiController]
     public class ReposController : ControllerBase
     {
-        private readonly RepoItemContext _context;
+        private readonly TVQContext _context;
 
         public ReposController(
-            RepoItemContext context)
+            TVQContext context)
         {
             _context = context;
         }
@@ -24,7 +24,7 @@ namespace Genometric.TVQ.Controllers
         [HttpGet]
         public IEnumerable<RepoItem> GetDatas()
         {
-            var repos = _context.Repos;
+            var repos = _context.RepoItems;
             return repos;
         }
 
@@ -37,7 +37,7 @@ namespace Genometric.TVQ.Controllers
                 return BadRequest(ModelState);
             }
 
-            var DataItem = await _context.Repos.FindAsync(id);
+            var DataItem = await _context.RepoItems.FindAsync(id);
 
             if (DataItem == null)
             {
@@ -91,7 +91,7 @@ namespace Genometric.TVQ.Controllers
                 return BadRequest(ModelState);
             }
 
-            _context.Repos.Add(DataItem);
+            _context.RepoItems.Add(DataItem);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetRequestItems", new { }, DataItem);
@@ -106,13 +106,13 @@ namespace Genometric.TVQ.Controllers
                 return BadRequest(ModelState);
             }
 
-            var DataItem = await _context.Repos.FindAsync(id);
+            var DataItem = await _context.RepoItems.FindAsync(id);
             if (DataItem == null)
             {
                 return NotFound();
             }
 
-            _context.Repos.Remove(DataItem);
+            _context.RepoItems.Remove(DataItem);
             await _context.SaveChangesAsync();
 
             return Ok(DataItem);
@@ -120,7 +120,7 @@ namespace Genometric.TVQ.Controllers
 
         private bool DataItemExists(int id)
         {
-            return _context.Repos.Any(e => e.ID == id);
+            return _context.RepoItems.Any(e => e.ID == id);
         }
     }
 }

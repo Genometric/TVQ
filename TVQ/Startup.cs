@@ -66,7 +66,7 @@ namespace Genometric.TVQ
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            void OptionsBuilder(DbContextOptionsBuilder options)
+            services.AddDbContext<TVQContext>(options =>
             {
                 options.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"),
@@ -88,10 +88,8 @@ namespace Genometric.TVQ
                         RelationalEventId.QueryClientEvaluationWarning));
                 /// Check Client vs. Server evaluation: 
                 /// https://docs.microsoft.com/en-us/ef/core/querying/client-eval
-            }
+            });
 
-            services.AddDbContext<RepoItemContext>(options => OptionsBuilder(options));
-            services.AddDbContext<ToolShedItemContext>(options => OptionsBuilder(options));
             return services;
         }
     }

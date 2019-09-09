@@ -1,6 +1,6 @@
 ﻿namespace Genometric.TVQ
 {
-    public class ToolShedItemSettings
+    public class TVQSettings
     {
         public bool UseCustomizationData { get; set; }
     }

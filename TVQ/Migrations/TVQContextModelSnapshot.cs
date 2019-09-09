@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Genometric.TVQ.Migrations
 {
-    [DbContext(typeof(RepoItemContext))]
-    partial class RepoItemContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(TVQContext))]
+    partial class TVQContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -27,6 +27,17 @@ namespace Genometric.TVQ.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("Repos");
+                });
+
+            modelBuilder.Entity("Genometric.TVQ.Model.ToolShedItem", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.HasKey("ID");
+
+                    b.ToTable("ToolSheds");
                 });
 #pragma warning restore 612, 618
         }
