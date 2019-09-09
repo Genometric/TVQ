@@ -27,10 +27,10 @@ namespace Genometric.TVQ.Infrastructure
                 var useCustomizationData = settings.Value.UseCustomizationData;
                 var contentRootPath = env.ContentRootPath;
 
-                if (!context.RepoItems.Any())
+                if (!context.Tools.Any())
                 {
-                    await context.RepoItems.AddRangeAsync(
-                        GetPreconfiguredRepos(
+                    await context.Tools.AddRangeAsync(
+                        GetPreconfiguredTools(
                             contentRootPath,
                             useCustomizationData,
                             logger));
@@ -38,10 +38,10 @@ namespace Genometric.TVQ.Infrastructure
                     await context.SaveChangesAsync();
                 }
 
-                if (!context.ToolShedItems.Any())
+                if (!context.Repositories.Any())
                 {
-                    await context.ToolShedItems.AddRangeAsync(
-                        GetPreconfiguredToolSheds(
+                    await context.Repositories.AddRangeAsync(
+                        GetPreconfiguredRepositories(
                             contentRootPath,
                             useCustomizationData,
                             logger));
@@ -51,29 +51,27 @@ namespace Genometric.TVQ.Infrastructure
             });
         }
 
-        private IEnumerable<RepoItem> GetPreconfiguredRepos(
+        private IEnumerable<Tool> GetPreconfiguredTools(
             string contentRootPath, 
             bool useCustomizationData, 
             ILogger<TVQContextSeed> logger)
         {
-            return new List<RepoItem>()
+            return new List<Tool>()
             {
-                new RepoItem(){ },
-                new RepoItem(){ },
-                new RepoItem(){ }
+                new Tool(){ },
+                new Tool(){ },
+                new Tool(){ }
             };
         }
 
-        private IEnumerable<ToolShedItem> GetPreconfiguredToolSheds(
+        private IEnumerable<Repository> GetPreconfiguredRepositories(
             string contentRootPath, 
             bool useCustomizationData, 
             ILogger<TVQContextSeed> logger)
         {
-            return new List<ToolShedItem>()
+            return new List<Repository>()
             {
-                new ToolShedItem(){ },
-                new ToolShedItem(){ },
-                new ToolShedItem(){ }
+                new Repository(){ URI = "https://toolshed.g2.bx.psu.edu/api/repositories" },
             };
         }
 

@@ -3,24 +3,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Genometric.TVQ.Migrations
 {
-    public partial class AddToolShed : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Repos",
+                name: "Repositories",
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    URI = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Repos", x => x.ID);
+                    table.PrimaryKey("PK_Repositories", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ToolSheds",
+                name: "Tools",
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
@@ -28,17 +29,17 @@ namespace Genometric.TVQ.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ToolSheds", x => x.ID);
+                    table.PrimaryKey("PK_Tools", x => x.ID);
                 });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Repos");
+                name: "Repositories");
 
             migrationBuilder.DropTable(
-                name: "ToolSheds");
+                name: "Tools");
         }
     }
 }

@@ -12,13 +12,13 @@ namespace Genometric.TVQ.Infrastructure
 
         }
 
-        public DbSet<RepoItem> RepoItems { set; get; }
-        public DbSet<ToolShedItem> ToolShedItems { set; get; }
+        public DbSet<Tool> Tools { set; get; }
+        public DbSet<Repository> Repositories { set; get; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.ApplyConfiguration(new RepoItemEntityTypeConfiguration());
-            builder.ApplyConfiguration(new ToolShedItemEntityTypeConfiguration());
+            builder.ApplyConfiguration(new ToolEntityTypeConfiguration());
+            builder.ApplyConfiguration(new RepositoryItemEntityTypeConfiguration());
         }
     }
 }

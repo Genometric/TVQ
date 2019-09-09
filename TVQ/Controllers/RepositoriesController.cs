@@ -10,25 +10,24 @@ namespace Genometric.TVQ.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ToolShedsController : ControllerBase
+    public class RepositoriesController : ControllerBase
     {
         private readonly TVQContext _context;
 
-        public ToolShedsController(
+        public RepositoriesController(
             TVQContext context)
         {
             _context = context;
         }
 
-        // GET: api/toolsheds
+        // GET: api/repositories
         [HttpGet]
-        public IEnumerable<RepoItem> GetDatas()
+        public IEnumerable<Repository> GetDatas()
         {
-            var repos = _context.RepoItems;
-            return repos;
+            return _context.Repositories;
         }
 
-        // GET: api/toolsheds/5
+        // GET: api/repositories/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDataItem([FromRoute] int id)
         {
@@ -37,7 +36,7 @@ namespace Genometric.TVQ.Controllers
                 return BadRequest(ModelState);
             }
 
-            var DataItem = await _context.RepoItems.FindAsync(id);
+            var DataItem = await _context.Tools.FindAsync(id);
 
             if (DataItem == null)
             {
@@ -47,9 +46,9 @@ namespace Genometric.TVQ.Controllers
             return Ok(DataItem);
         }
 
-        // PUT: api/toolsheds/5
+        // PUT: api/repositories/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDataItem([FromRoute] int id, [FromBody] RepoItem DataItem)
+        public async Task<IActionResult> PutDataItem([FromRoute] int id, [FromBody] Tool DataItem)
         {
             if (!ModelState.IsValid)
             {
@@ -82,22 +81,22 @@ namespace Genometric.TVQ.Controllers
             return NoContent();
         }
 
-        // POST: api/toolsheds
+        // POST: api/repositories
         [HttpPost]
-        public async Task<IActionResult> PostDataItem([FromBody] RepoItem DataItem)
+        public async Task<IActionResult> PostDataItem([FromBody] Tool DataItem)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.RepoItems.Add(DataItem);
+            _context.Tools.Add(DataItem);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetRequestItems", new { }, DataItem);
         }
 
-        // DELETE: api/toolsheds/5
+        // DELETE: api/repositories/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDataItem([FromRoute] int id)
         {
@@ -106,13 +105,13 @@ namespace Genometric.TVQ.Controllers
                 return BadRequest(ModelState);
             }
 
-            var DataItem = await _context.RepoItems.FindAsync(id);
+            var DataItem = await _context.Tools.FindAsync(id);
             if (DataItem == null)
             {
                 return NotFound();
             }
 
-            _context.RepoItems.Remove(DataItem);
+            _context.Tools.Remove(DataItem);
             await _context.SaveChangesAsync();
 
             return Ok(DataItem);
@@ -120,7 +119,7 @@ namespace Genometric.TVQ.Controllers
 
         private bool DataItemExists(int id)
         {
-            return _context.RepoItems.Any(e => e.ID == id);
+            return _context.Tools.Any(e => e.ID == id);
         }
     }
 }

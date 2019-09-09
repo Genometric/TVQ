@@ -2,10 +2,12 @@
 
 namespace Genometric.TVQ.Model
 {
-    public class ToolShedItem
+    public class Repository
     {
         public int ID { set; get; }
 
-        public ToolShedItem() { }
+        public string URI { set; get; }
+
+        public Repository() { }
     }
 }

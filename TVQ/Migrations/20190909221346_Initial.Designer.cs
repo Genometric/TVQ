@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Genometric.TVQ.Migrations
 {
     [DbContext(typeof(TVQContext))]
-    [Migration("20190909213343_AddToolShed")]
-    partial class AddToolShed
+    [Migration("20190909221346_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,18 +20,21 @@ namespace Genometric.TVQ.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Genometric.TVQ.Model.RepoItem", b =>
+            modelBuilder.Entity("Genometric.TVQ.Model.Repository", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("URI")
+                        .IsRequired();
+
                     b.HasKey("ID");
 
-                    b.ToTable("Repos");
+                    b.ToTable("Repositories");
                 });
 
-            modelBuilder.Entity("Genometric.TVQ.Model.ToolShedItem", b =>
+            modelBuilder.Entity("Genometric.TVQ.Model.Tool", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -39,7 +42,7 @@ namespace Genometric.TVQ.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("ToolSheds");
+                    b.ToTable("Tools");
                 });
 #pragma warning restore 612, 618
         }

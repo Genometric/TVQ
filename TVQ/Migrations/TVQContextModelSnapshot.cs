@@ -18,18 +18,21 @@ namespace Genometric.TVQ.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Genometric.TVQ.Model.RepoItem", b =>
+            modelBuilder.Entity("Genometric.TVQ.Model.Repository", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("URI")
+                        .IsRequired();
+
                     b.HasKey("ID");
 
-                    b.ToTable("Repos");
+                    b.ToTable("Repositories");
                 });
 
-            modelBuilder.Entity("Genometric.TVQ.Model.ToolShedItem", b =>
+            modelBuilder.Entity("Genometric.TVQ.Model.Tool", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -37,7 +40,7 @@ namespace Genometric.TVQ.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("ToolSheds");
+                    b.ToTable("Tools");
                 });
 #pragma warning restore 612, 618
         }

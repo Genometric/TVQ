@@ -1,9 +1,9 @@
 ﻿namespace Genometric.TVQ.Model
 {
-    public class RepoItem
+    public class Tool
     {
         public int ID { set; get; }
 
-        public RepoItem() { }
+        public Tool() { }
     }
 }
