@@ -11,11 +11,18 @@ namespace Genometric.TVQ.API.Infrastructure.EntityConfigurations
         {
             builder.ToTable("Repositories");
 
-            builder.HasKey(obj => obj.ID);
+            builder.HasKey(obj => obj.Id);
 
-            builder.Property(obj => obj.ID).IsRequired(true);
+            builder.Property(obj => obj.Id).IsRequired(true);
             builder.Property(obj => obj.URI).IsRequired(true);
-            builder.Property(obj => obj.Name).IsRequired(false);
+
+            foreach (var p in typeof(Repository).GetProperties())
+            {
+                if (p.Name == nameof(Repository.Id) ||
+                    p.Name == nameof(Repository.URI))
+                    continue;
+                builder.Property(p.Name);
+            }
         }
     }
 }

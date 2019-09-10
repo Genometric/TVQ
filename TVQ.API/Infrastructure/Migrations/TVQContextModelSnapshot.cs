@@ -3,16 +3,14 @@ using Genometric.TVQ.API.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Genometric.TVQ.API.Migrations
+namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
     [DbContext(typeof(TVQContext))]
-    [Migration("20190910153955_Initial")]
-    partial class Initial
+    partial class TVQContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,29 +20,59 @@ namespace Genometric.TVQ.API.Migrations
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.Repository", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int?>("Name");
 
+                    b.Property<int>("ToolCount");
+
                     b.Property<string>("URI")
                         .IsRequired();
 
-                    b.HasKey("ID");
+                    b.HasKey("Id");
 
                     b.ToTable("Repositories");
                 });
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.Tool", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.HasKey("ID");
+                    b.Property<string>("CodeRepo");
+
+                    b.Property<string>("Description");
+
+                    b.Property<string>("Homepage");
+
+                    b.Property<string>("IDinRepo");
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("Owner");
+
+                    b.Property<int>("RepositoryID");
+
+                    b.Property<int>("TimesDownloaded");
+
+                    b.Property<string>("UserID");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RepositoryID");
 
                     b.ToTable("Tools");
+                });
+
+            modelBuilder.Entity("Genometric.TVQ.API.Model.Tool", b =>
+                {
+                    b.HasOne("Genometric.TVQ.API.Model.Repository", "Repo")
+                        .WithMany()
+                        .HasForeignKey("RepositoryID")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

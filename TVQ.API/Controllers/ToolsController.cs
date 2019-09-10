@@ -55,7 +55,7 @@ namespace Genometric.TVQ.API.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (id != DataItem.ID)
+            if (id != DataItem.Id)
             {
                 return BadRequest();
             }
@@ -119,7 +119,7 @@ namespace Genometric.TVQ.API.Controllers
 
         private bool DataItemExists(int id)
         {
-            return _context.Tools.Any(e => e.ID == id);
+            return _context.Tools.Any(e => e.Id == id);
         }
     }
 }

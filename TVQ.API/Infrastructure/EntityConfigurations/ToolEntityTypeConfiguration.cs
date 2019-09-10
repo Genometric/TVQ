@@ -11,8 +11,20 @@ namespace Genometric.TVQ.API.Infrastructure.EntityConfigurations
         {
             builder.ToTable("Tools");
 
-            builder.HasKey(obi => obi.ID);
-            builder.Property(obj => obj.ID).IsRequired(true);
+            builder.HasKey(obi => obi.Id);
+
+            builder.Property(obj => obj.Id).IsRequired(true);
+            builder.HasOne(obj => obj.Repo)
+                .WithMany()
+                .HasForeignKey(obj => obj.RepositoryID);
+
+            foreach (var p in typeof(Tool).GetProperties())
+            {
+                if (p.Name == nameof(Tool.Id) ||
+                    p.Name == nameof(Tool.Repo))
+                    continue;
+                builder.Property(p.Name);
+            }
         }
     }
 }

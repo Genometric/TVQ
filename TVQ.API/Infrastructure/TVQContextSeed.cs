@@ -27,17 +27,6 @@ namespace Genometric.TVQ.API.Infrastructure
                 var useCustomizationData = settings.Value.UseCustomizationData;
                 var contentRootPath = env.ContentRootPath;
 
-                if (!context.Tools.Any())
-                {
-                    await context.Tools.AddRangeAsync(
-                        GetPreconfiguredTools(
-                            contentRootPath,
-                            useCustomizationData,
-                            logger));
-
-                    await context.SaveChangesAsync();
-                }
-
                 if (!context.Repositories.Any())
                 {
                     await context.Repositories.AddRangeAsync(
@@ -49,19 +38,6 @@ namespace Genometric.TVQ.API.Infrastructure
                     await context.SaveChangesAsync();
                 }
             });
-        }
-
-        private IEnumerable<Tool> GetPreconfiguredTools(
-            string contentRootPath, 
-            bool useCustomizationData, 
-            ILogger<TVQContextSeed> logger)
-        {
-            return new List<Tool>()
-            {
-                new Tool(){ },
-                new Tool(){ },
-                new Tool(){ }
-            };
         }
 
         private IEnumerable<Repository> GetPreconfiguredRepositories(

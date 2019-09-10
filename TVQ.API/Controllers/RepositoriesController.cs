@@ -1,4 +1,5 @@
-﻿using Genometric.TVQ.API.Infrastructure;
+﻿using Genometric.TVQ.API.Crawlers;
+using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -48,7 +49,7 @@ namespace Genometric.TVQ.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (id != dataItem.ID)
+            if (id != dataItem.Id)
                 return BadRequest();
 
             _context.Entry(dataItem).State = EntityState.Modified;
@@ -99,22 +100,40 @@ namespace Genometric.TVQ.API.Controllers
         }
 
         // GET: api/repositories/scan/1
-        [HttpGet("scan/{id}")]
+        [HttpGet("{id}/scan")]
         public async Task<IActionResult> ScanToolsInRepo([FromRoute] int id)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var DataItem = await _context.Repositories.FindAsync(id);
-            if (DataItem == null)
+            var dataItem = await _context.Repositories.FindAsync(id);
+            if (dataItem == null)
                 return NotFound();
 
-            return Ok(DataItem);
+            /// TODO: Can use `ConfigureAwait(false)` in the following to 
+            /// request getting a separate thread for the following task.
+            /// However, since it is not a process-bound task, it may not 
+            /// be necessary. However, it shall be further investigated.
+            await new Crawler().CrawlAsync(dataItem);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!DataItemExists(id))
+                    return NotFound();
+                else
+                    throw;
+            }
+
+            return Ok(dataItem);
         }
 
         private bool DataItemExists(int id)
         {
-            return _context.Repositories.Any(e => e.ID == id);
+            return _context.Repositories.Any(e => e.Id == id);
         }
     }
 }
