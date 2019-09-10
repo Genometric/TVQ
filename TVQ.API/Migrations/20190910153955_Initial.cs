@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Genometric.TVQ.Migrations
+namespace Genometric.TVQ.API.Migrations
 {
     public partial class Initial : Migration
     {
@@ -13,6 +13,7 @@ namespace Genometric.TVQ.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<int>(nullable: true),
                     URI = table.Column<string>(nullable: false)
                 },
                 constraints: table =>

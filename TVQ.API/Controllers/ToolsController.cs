@@ -1,12 +1,12 @@
-﻿using Genometric.TVQ.Infrastructure;
-using Genometric.TVQ.Model;
+﻿using Genometric.TVQ.API.Infrastructure;
+using Genometric.TVQ.API.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Genometric.TVQ.Controllers
+namespace Genometric.TVQ.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

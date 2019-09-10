@@ -1,12 +1,12 @@
-﻿using Genometric.TVQ.Infrastructure;
-using Genometric.TVQ.Model;
+﻿using Genometric.TVQ.API.Infrastructure;
+using Genometric.TVQ.API.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Genometric.TVQ.Controllers
+namespace Genometric.TVQ.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -32,35 +32,26 @@ namespace Genometric.TVQ.Controllers
         public async Task<IActionResult> GetDataItem([FromRoute] int id)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
 
-            var DataItem = await _context.Tools.FindAsync(id);
-
+            var DataItem = await _context.Repositories.FindAsync(id);
             if (DataItem == null)
-            {
                 return NotFound();
-            }
 
             return Ok(DataItem);
         }
 
         // PUT: api/repositories/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDataItem([FromRoute] int id, [FromBody] Tool DataItem)
+        public async Task<IActionResult> PutDataItem([FromRoute] int id, [FromBody] Repository dataItem)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
 
-            if (id != DataItem.ID)
-            {
+            if (id != dataItem.ID)
                 return BadRequest();
-            }
 
-            _context.Entry(DataItem).State = EntityState.Modified;
+            _context.Entry(dataItem).State = EntityState.Modified;
 
             try
             {
@@ -69,13 +60,9 @@ namespace Genometric.TVQ.Controllers
             catch (DbUpdateConcurrencyException)
             {
                 if (!DataItemExists(id))
-                {
                     return NotFound();
-                }
                 else
-                {
                     throw;
-                }
             }
 
             return NoContent();
@@ -83,17 +70,15 @@ namespace Genometric.TVQ.Controllers
 
         // POST: api/repositories
         [HttpPost]
-        public async Task<IActionResult> PostDataItem([FromBody] Tool DataItem)
+        public async Task<IActionResult> PostDataItem([FromBody] Repository dataItem)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
 
-            _context.Tools.Add(DataItem);
+            _context.Repositories.Add(dataItem);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetRequestItems", new { }, DataItem);
+            return CreatedAtAction("GetRequestItems", new { }, dataItem);
         }
 
         // DELETE: api/repositories/5
@@ -101,25 +86,35 @@ namespace Genometric.TVQ.Controllers
         public async Task<IActionResult> DeleteDataItem([FromRoute] int id)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
 
-            var DataItem = await _context.Tools.FindAsync(id);
-            if (DataItem == null)
-            {
+            var dataItem = await _context.Repositories.FindAsync(id);
+            if (dataItem == null)
                 return NotFound();
-            }
 
-            _context.Tools.Remove(DataItem);
+            _context.Repositories.Remove(dataItem);
             await _context.SaveChangesAsync();
+
+            return Ok(dataItem);
+        }
+
+        // GET: api/repositories/scan/1
+        [HttpGet("scan/{id}")]
+        public async Task<IActionResult> ScanToolsInRepo([FromRoute] int id)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var DataItem = await _context.Repositories.FindAsync(id);
+            if (DataItem == null)
+                return NotFound();
 
             return Ok(DataItem);
         }
 
         private bool DataItemExists(int id)
         {
-            return _context.Tools.Any(e => e.ID == id);
+            return _context.Repositories.Any(e => e.ID == id);
         }
     }
 }

@@ -1,8 +1,8 @@
-﻿using Genometric.TVQ.Model;
+﻿using Genometric.TVQ.API.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Genometric.TVQ.Infrastructure.EntityConfigurations
+namespace Genometric.TVQ.API.Infrastructure.EntityConfigurations
 {
     public class ToolEntityTypeConfiguration :
         IEntityTypeConfiguration<Tool>

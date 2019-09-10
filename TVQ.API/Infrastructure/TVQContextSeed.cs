@@ -1,4 +1,4 @@
-﻿using Genometric.TVQ.Model;
+﻿using Genometric.TVQ.API.Model;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -10,7 +10,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Genometric.TVQ.Infrastructure
+namespace Genometric.TVQ.API.Infrastructure
 {
     public class TVQContextSeed
     {
@@ -65,13 +65,17 @@ namespace Genometric.TVQ.Infrastructure
         }
 
         private IEnumerable<Repository> GetPreconfiguredRepositories(
-            string contentRootPath, 
-            bool useCustomizationData, 
+            string contentRootPath,
+            bool useCustomizationData,
             ILogger<TVQContextSeed> logger)
         {
             return new List<Repository>()
             {
-                new Repository(){ URI = "https://toolshed.g2.bx.psu.edu/api/repositories" },
+                new Repository()
+                {
+                    Name = Repository.Repo.ToolShed,
+                    URI = "https://toolshed.g2.bx.psu.edu/api/repositories"
+                },
             };
         }
 

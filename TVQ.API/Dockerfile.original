@@ -5,7 +5,7 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/core/sdk:2.2-stretch AS build
 WORKDIR /src
-COPY ["TVQ/TVQ.csproj", "TVQ/"]
+COPY ["TVQ.API/TVQ.API.csproj", "TVQ.API/"]
 RUN dotnet restore "TVQ/TVQ.csproj"
 COPY . .
 WORKDIR "/src/TVQ"

@@ -1,4 +1,4 @@
-﻿namespace Genometric.TVQ
+﻿namespace Genometric.TVQ.API
 {
     public class TVQSettings
     {

@@ -1,8 +1,8 @@
-﻿using Genometric.TVQ.Infrastructure.EntityConfigurations;
-using Genometric.TVQ.Model;
+﻿using Genometric.TVQ.API.Infrastructure.EntityConfigurations;
+using Genometric.TVQ.API.Model;
 using Microsoft.EntityFrameworkCore;
 
-namespace Genometric.TVQ.Infrastructure
+namespace Genometric.TVQ.API.Infrastructure
 {
     public class TVQContext : DbContext
     {

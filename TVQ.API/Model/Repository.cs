@@ -1,4 +1,4 @@
-﻿namespace Genometric.TVQ.Model
+﻿namespace Genometric.TVQ.API.Model
 {
     public class Repository
     {

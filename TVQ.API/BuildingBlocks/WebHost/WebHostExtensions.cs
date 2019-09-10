@@ -6,7 +6,7 @@ using Polly;
 using System;
 using System.Data.SqlClient;
 
-namespace Genometric.TVQ.BuildingBlocks.WebHost
+namespace Genometric.TVQ.API.BuildingBlocks.WebHost
 {
     public static class IWebHostExtensions
     {

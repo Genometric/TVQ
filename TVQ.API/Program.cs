@@ -1,5 +1,5 @@
-﻿using Genometric.TVQ.BuildingBlocks.WebHost;
-using Genometric.TVQ.Infrastructure;
+﻿using Genometric.TVQ.API.BuildingBlocks.WebHost;
+using Genometric.TVQ.API.Infrastructure;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -10,7 +10,7 @@ using Serilog;
 using System;
 using System.IO;
 
-namespace Genometric.TVQ
+namespace Genometric.TVQ.API
 {
     public class Program
     {
