@@ -21,7 +21,8 @@ namespace Genometric.TVQ.API.Infrastructure.EntityConfigurations
             foreach (var p in typeof(Tool).GetProperties())
             {
                 if (p.Name == nameof(Tool.Id) ||
-                    p.Name == nameof(Tool.Repo))
+                    p.Name == nameof(Tool.Repo) ||
+                    p.Name == nameof(Tool.Pub))
                     continue;
                 builder.Property(p.Name);
             }

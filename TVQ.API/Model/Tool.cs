@@ -15,6 +15,10 @@ namespace Genometric.TVQ.API.Model
 
         public Repository Repo { set; get; }
 
+        public int PublicationID { set; get; }
+
+        public Publication Pub { set; get; }
+
         public string IDinRepo { set; get; }
 
         public string Name { set; get; }
