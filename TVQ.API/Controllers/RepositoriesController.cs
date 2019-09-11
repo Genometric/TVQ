@@ -114,10 +114,11 @@ namespace Genometric.TVQ.API.Controllers
             /// request getting a separate thread for the following task.
             /// However, since it is not a process-bound task, it may not 
             /// be necessary. However, it shall be further investigated.
-            await new Crawler().CrawlAsync(dataItem);
+            var tools = await new Crawler().CrawlAsync(dataItem);
 
             try
             {
+                await _context.Tools.AddRangeAsync(tools);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)

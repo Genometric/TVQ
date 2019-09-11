@@ -9,7 +9,7 @@ namespace Genometric.TVQ.API.Model
 {
     public class ToolJsonConverter : JsonConverter
     {
-        private Dictionary<string, string> _propertyMappings;
+        private readonly Dictionary<string, string> _propertyMappings;
 
         public ToolJsonConverter()
         {
@@ -59,7 +59,18 @@ namespace Genometric.TVQ.API.Model
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            throw new NotImplementedException();
+            JObject obj = new JObject();
+            Type type = value.GetType();
+
+            foreach (PropertyInfo prop in type.GetProperties())
+                if (prop.CanRead)
+                {
+                    object propVal = prop.GetValue(value, null);
+                    if (propVal != null)
+                        obj.Add(prop.Name, JToken.FromObject(propVal, serializer));
+                }
+
+            obj.WriteTo(writer);
         }
     }
 }
