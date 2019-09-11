@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Genometric.TVQ.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class RepositoriesController : ControllerBase
     {
