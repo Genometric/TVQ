@@ -1,8 +1,10 @@
 ﻿using Genometric.TVQ.API.Crawlers;
 using Genometric.TVQ.API.Infrastructure;
+using Genometric.TVQ.API.Infrastructure.BackgroundTasks;
 using Genometric.TVQ.API.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,11 +16,17 @@ namespace Genometric.TVQ.API.Controllers
     public class RepositoriesController : ControllerBase
     {
         private readonly TVQContext _context;
+        private readonly IBackgroundTaskQueue _queue;
+        private readonly ILogger<RepositoriesController> _logger;
 
         public RepositoriesController(
-            TVQContext context)
+            TVQContext context, 
+            IBackgroundTaskQueue queue,
+            ILogger<RepositoriesController> logger)
         {
             _context = context;
+            _queue = queue;
+            _logger = logger;
         }
 
         // GET: api/v1/repositories
@@ -109,28 +117,14 @@ namespace Genometric.TVQ.API.Controllers
             var repository = await _context.Repositories.FindAsync(id);
             if (repository == null)
                 return NotFound();
+            if (!DataItemExists(id))
+                return NotFound();
 
-            /// TODO: Can use `ConfigureAwait(false)` in the following to 
-            /// request getting a separate thread for the following task.
-            /// However, since it is not a process-bound task, it may not 
-            /// be necessary. However, it shall be further investigated.
-            var crawler = new Crawler();
-            var tools = await crawler.GetToolsAsync(repository);
-            var publs = await crawler.GetPublicationsAsync(repository, tools);
-
-            try
+            _queue.QueueBackgroundWorkItem(async response =>
             {
-                await _context.Tools.AddRangeAsync(tools);
-                await _context.Publications.AddRangeAsync(publs);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DataItemExists(id))
-                    return NotFound();
-                else
-                    throw;
-            }
+                var crawler = new Crawler(_context);
+                await crawler.CrawlAsync(repository);
+            });
 
             return Ok(repository);
         }

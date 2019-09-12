@@ -3,9 +3,9 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.IO.Compression;
 using System.Xml.Linq;
 
 namespace Genometric.TVQ.API.Crawlers

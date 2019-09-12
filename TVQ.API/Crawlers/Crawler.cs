@@ -1,4 +1,6 @@
-﻿using Genometric.TVQ.API.Model;
+﻿using Genometric.TVQ.API.Infrastructure;
+using Genometric.TVQ.API.Model;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using static Genometric.TVQ.API.Model.Repository;
@@ -7,9 +9,31 @@ namespace Genometric.TVQ.API.Crawlers
 {
     public class Crawler
     {
-        public Crawler() { }
+        private readonly TVQContext _dbContext;
 
-        public async Task<List<Tool>> GetToolsAsync(Repository repo)
+        public Crawler(TVQContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
+        public async Task CrawlAsync(Repository repo)
+        {
+            var tools = await GetToolsAsync(repo);
+            var publs = await GetPublicationsAsync(repo, tools);
+
+            try
+            {
+                await _dbContext.Tools.AddRangeAsync(tools);
+                await _dbContext.Publications.AddRangeAsync(publs);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+        }
+
+        private async Task<List<Tool>> GetToolsAsync(Repository repo)
         {
             switch (repo.Name)
             {
@@ -22,7 +46,7 @@ namespace Genometric.TVQ.API.Crawlers
             }
         }
 
-        public async Task<List<Publication>> GetPublicationsAsync(Repository repo, List<Tool> tools)
+        private async Task<List<Publication>> GetPublicationsAsync(Repository repo, List<Tool> tools)
         {
             switch (repo.Name)
             {
