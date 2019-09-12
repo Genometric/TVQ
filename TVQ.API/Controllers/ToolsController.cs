@@ -20,14 +20,14 @@ namespace Genometric.TVQ.API.Controllers
             _context = context;
         }
 
-        // GET: api/tools
+        // GET: api/v1/tools
         [HttpGet]
         public IEnumerable<Tool> GetDatas()
         {
             return _context.Tools;
         }
 
-        // GET: api/tools/5
+        // GET: api/v1/tools/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDataItem([FromRoute] int id)
         {
@@ -46,7 +46,7 @@ namespace Genometric.TVQ.API.Controllers
             return Ok(DataItem);
         }
 
-        // PUT: api/tools/5
+        // PUT: api/v1/tools/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDataItem([FromRoute] int id, [FromBody] Tool DataItem)
         {
@@ -81,7 +81,7 @@ namespace Genometric.TVQ.API.Controllers
             return NoContent();
         }
 
-        // POST: api/tools
+        // POST: api/v1/tools
         [HttpPost]
         public async Task<IActionResult> PostDataItem([FromBody] Tool DataItem)
         {
@@ -96,7 +96,7 @@ namespace Genometric.TVQ.API.Controllers
             return CreatedAtAction("GetRequestItems", new { }, DataItem);
         }
 
-        // DELETE: api/tools/5
+        // DELETE: api/v1/tools/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDataItem([FromRoute] int id)
         {

@@ -9,16 +9,29 @@ namespace Genometric.TVQ.API.Crawlers
     {
         public Crawler() { }
 
-        public async Task<List<Tool>> CrawlAsync(Repository repo)
+        public async Task<List<Tool>> GetToolsAsync(Repository repo)
         {
             switch (repo.Name)
             {
                 case Repo.ToolShed:
-                    return await new ToolShed().Crawl(repo);
+                    return await new ToolShed().GetTools(repo);
 
                 default:
                     /// TODO: replace with an exception.
                     return new List<Tool>();
+            }
+        }
+
+        public async Task<List<Publication>> GetPublicationsAsync(Repository repo, List<Tool> tools)
+        {
+            switch (repo.Name)
+            {
+                case Repo.ToolShed:
+                    return await new ToolShed().GetPublications(repo, tools);
+
+                default:
+                    /// TODO: replace with an exception.
+                    return new List<Publication>();
             }
         }
     }

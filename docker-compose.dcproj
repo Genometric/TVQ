@@ -5,7 +5,7 @@
     <DockerTargetOS>Linux</DockerTargetOS>
     <ProjectGuid>44e9c443-0341-4a5d-a160-495121c51ffb</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
-    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/api/repositories</DockerServiceUrl>
+    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/api/v1/repositories</DockerServiceUrl>
     <DockerServiceName>tvq</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>

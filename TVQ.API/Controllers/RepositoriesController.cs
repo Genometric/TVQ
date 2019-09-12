@@ -21,14 +21,14 @@ namespace Genometric.TVQ.API.Controllers
             _context = context;
         }
 
-        // GET: api/repositories
+        // GET: api/v1/repositories
         [HttpGet]
         public IEnumerable<Repository> GetDatas()
         {
             return _context.Repositories;
         }
 
-        // GET: api/repositories/5
+        // GET: api/v1/repositories/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDataItem([FromRoute] int id)
         {
@@ -42,7 +42,7 @@ namespace Genometric.TVQ.API.Controllers
             return Ok(DataItem);
         }
 
-        // PUT: api/repositories/5
+        // PUT: api/v1/repositories/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDataItem([FromRoute] int id, [FromBody] Repository dataItem)
         {
@@ -69,7 +69,7 @@ namespace Genometric.TVQ.API.Controllers
             return NoContent();
         }
 
-        // POST: api/repositories
+        // POST: api/v1/repositories
         [HttpPost]
         public async Task<IActionResult> PostDataItem([FromBody] Repository dataItem)
         {
@@ -82,7 +82,7 @@ namespace Genometric.TVQ.API.Controllers
             return CreatedAtAction("GetRequestItems", new { }, dataItem);
         }
 
-        // DELETE: api/repositories/5
+        // DELETE: api/v1/repositories/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDataItem([FromRoute] int id)
         {
@@ -99,26 +99,29 @@ namespace Genometric.TVQ.API.Controllers
             return Ok(dataItem);
         }
 
-        // GET: api/repositories/scan/1
+        // GET: api/v1/repositories/scan/1
         [HttpGet("{id}/scan")]
         public async Task<IActionResult> ScanToolsInRepo([FromRoute] int id)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var dataItem = await _context.Repositories.FindAsync(id);
-            if (dataItem == null)
+            var repository = await _context.Repositories.FindAsync(id);
+            if (repository == null)
                 return NotFound();
 
             /// TODO: Can use `ConfigureAwait(false)` in the following to 
             /// request getting a separate thread for the following task.
             /// However, since it is not a process-bound task, it may not 
             /// be necessary. However, it shall be further investigated.
-            var tools = await new Crawler().CrawlAsync(dataItem);
+            var crawler = new Crawler();
+            var tools = await crawler.GetToolsAsync(repository);
+            var publs = await crawler.GetPublicationsAsync(repository, tools);
 
             try
             {
                 await _context.Tools.AddRangeAsync(tools);
+                await _context.Publications.AddRangeAsync(publs);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -129,7 +132,7 @@ namespace Genometric.TVQ.API.Controllers
                     throw;
             }
 
-            return Ok(dataItem);
+            return Ok(repository);
         }
 
         private bool DataItemExists(int id)
