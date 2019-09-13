@@ -65,7 +65,7 @@ namespace Genometric.TVQ.API.Crawlers
                             tool.Name)),
                         fileName: zipFileName);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
 
                 }
@@ -94,7 +94,7 @@ namespace Genometric.TVQ.API.Crawlers
                     /// This exception is thrown when the Zip archive
                     /// cannot be read.
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
 
                 }
@@ -110,23 +110,28 @@ namespace Genometric.TVQ.API.Crawlers
             XElement toolDoc = XElement.Load(filename);
 
             foreach (var item in toolDoc.Elements("citations").Descendants())
-                switch (item.Attribute("type").Value.Trim().ToLower())
-                {
-                    case "doi":
-                        pubs.Add(new Publication()
-                        {
-                            ToolId = tool.Id,
-                            DOI = item.Value
-                        });
-                        break;
+                if (item.Attribute("type") != null)
+                    switch (item.Attribute("type").Value.Trim().ToLower())
+                    {
+                        case "doi":
+                            pubs.Add(new Publication()
+                            {
+                                ToolId = tool.Id,
+                                DOI = item.Value
+                            });
+                            break;
 
-                    case "bibtex":
-                        pubs.Add(new Publication()
-                        {
-                            ToolId = tool.Id,
-                            Citation = item.Value
-                        });
-                        break;
+                        case "bibtex":
+                            pubs.Add(new Publication()
+                            {
+                                ToolId = tool.Id,
+                                Citation = item.Value
+                            });
+                            break;
+                    }
+                else
+                {
+
                 }
 
             return pubs;
