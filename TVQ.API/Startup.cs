@@ -69,29 +69,31 @@ namespace Genometric.TVQ.API
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.AddDbContext<TVQContext>(options =>
-            {
-                options.UseSqlServer(
-                    configuration.GetConnectionString("DefaultConnection"),
-                    sqlServerOptionsAction: sqlOptions =>
-                    {
-                        sqlOptions.MigrationsAssembly(typeof(Startup).GetTypeInfo().Assembly.GetName().Name);
-                        /// Configuring Connection Resiliency: 
-                        /// https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency 
-                        sqlOptions.EnableRetryOnFailure(
-                            maxRetryCount: 10,
-                            maxRetryDelay: TimeSpan.FromSeconds(30),
-                            errorNumbersToAdd: null);
-                    });
+            services.AddDbContext<TVQContext>(
+                options =>
+                {
+                    options.UseSqlServer(
+                        configuration.GetConnectionString("DefaultConnection"),
+                        sqlServerOptionsAction: sqlOptions =>
+                        {
+                            sqlOptions.MigrationsAssembly(typeof(Startup).GetTypeInfo().Assembly.GetName().Name);
+                            /// Configuring Connection Resiliency: 
+                            /// https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency 
+                            sqlOptions.EnableRetryOnFailure(
+                                maxRetryCount: 10,
+                                maxRetryDelay: TimeSpan.FromSeconds(30),
+                                errorNumbersToAdd: null);
+                        });
 
-                /// Changing default behavior when client evaluation occurs to throw. 
-                /// Default in EF Core would be to log a warning when client evaluation is performed.
-                options.ConfigureWarnings(
-                    warnings => warnings.Throw(
-                        RelationalEventId.QueryClientEvaluationWarning));
-                /// Check Client vs. Server evaluation: 
-                /// https://docs.microsoft.com/en-us/ef/core/querying/client-eval
-            });
+                    /// Changing default behavior when client evaluation occurs to throw. 
+                    /// Default in EF Core would be to log a warning when client evaluation is performed.
+                    options.ConfigureWarnings(
+                        warnings => warnings.Throw(
+                            RelationalEventId.QueryClientEvaluationWarning));
+                    /// Check Client vs. Server evaluation: 
+                    /// https://docs.microsoft.com/en-us/ef/core/querying/client-eval
+                },
+                ServiceLifetime.Singleton);
 
             return services;
         }
