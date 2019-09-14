@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AssemblyName>Genometric.TVQ.CLI</AssemblyName>
+    <RootNamespace>Genometric.TVQ.CLI</RootNamespace>
+    <Authors>Vahid Jalili</Authors>
+    <Company>Genometric</Company>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TVQ.API\TVQ.API.csproj" />
+  </ItemGroup>
+
+</Project>
