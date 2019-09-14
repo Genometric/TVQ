@@ -122,8 +122,7 @@ namespace Genometric.TVQ.API.Controllers
 
             _queue.QueueBackgroundWorkItem(async response =>
             {
-                var crawler = new Crawler(_context);
-                await crawler.CrawlAsync(repository);
+                await new Crawler(_context).CrawlAsync(repository);
             });
 
             return Ok(repository);

@@ -1,11 +1,14 @@
 ﻿using Genometric.TVQ.API.Model;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using System.Xml.Linq;
 
 namespace Genometric.TVQ.API.Crawlers
@@ -13,10 +16,20 @@ namespace Genometric.TVQ.API.Crawlers
     internal class ToolShed
     {
         private readonly HttpClient _client;
+        private string _sessionTempPath;
+        private ConcurrentBag<Publication> _publications;
 
         public ToolShed()
         {
             _client = new HttpClient();
+            _publications = new ConcurrentBag<Publication>();
+
+            _sessionTempPath = Path.GetFullPath(Path.GetTempPath()) +
+                new Random().Next(100000, 10000000) +
+                Path.DirectorySeparatorChar;
+            if (Directory.Exists(_sessionTempPath))
+                Directory.Delete(_sessionTempPath, true);
+            Directory.CreateDirectory(_sessionTempPath);
         }
 
         public async Task<List<Tool>> GetTools(Repository repo)
@@ -37,104 +50,119 @@ namespace Genometric.TVQ.API.Crawlers
             return tools;
         }
 
+
         public async Task<List<Publication>> GetPublications(Repository repo, List<Tool> tools)
         {
-            var pubs = new List<Publication>();
-            var rnd = new Random();
-            var tmpPath =
-                Path.GetFullPath(Path.GetTempPath()) +
-                rnd.Next(100000, 10000000) +
-                Path.DirectorySeparatorChar;
-            if (Directory.Exists(tmpPath))
-                Directory.Delete(tmpPath, true);
-            Directory.CreateDirectory(tmpPath);
+            var execOptions = new ExecutionDataflowBlockOptions
+            {
+                MaxDegreeOfParallelism = 50
+            };
+
+            var linkOptions = new DataflowLinkOptions
+            {
+                PropagateCompletion = true
+            };
+
+            var downloader = new TransformBlock<Tool, Tool>(new Func<Tool, Tool>(Downloader), execOptions);
+            var extracXMLs = new TransformBlock<Tool, Tuple<Tool, string[]>>(new Func<Tool, Tuple<Tool, string[]>>(WrapperExtractor), execOptions);
+            var extractPublications = new ActionBlock<Tuple<Tool, string[]>>(input => { ExtractPublications(input); }, execOptions);
+
+            downloader.LinkTo(extracXMLs, linkOptions);
+            extracXMLs.LinkTo(extractPublications, linkOptions);
 
             foreach (var tool in tools)
-            {
-                string zipFileName = tmpPath + tool.Id;
-                try
-                {
-                    /// TODO: creating a new client for every request 
-                    /// maybe way too expensive. Maybe should check if 
-                    /// client can run multiple concurrent requests in 
-                    /// a thread-safe fashion?
-                    new System.Net.WebClient().DownloadFile(
-                        address: new Uri(string.Format(
-                            "https://toolshed.g2.bx.psu.edu/repos/{0}/{1}/archive/tip.zip",
-                            tool.Owner,
-                            tool.Name)),
-                        fileName: zipFileName);
-                }
-                catch (Exception e)
-                {
+                downloader.Post(tool);
 
-                }
+            downloader.Complete();
 
-                /// Normalizes the path.
-                /// To avoid `path traversal attacks` from malicious software, 
-                /// there must be a trailing path separator at the end of the path. 
-                string extractPath =
-                    tmpPath + tool.Id + "_" + rnd.Next(100000, 10000000) + "_" +
-                    Path.DirectorySeparatorChar;
-                Directory.CreateDirectory(extractPath);
+            await extractPublications.Completion;
 
-                try
-                {
-                    using (ZipArchive archive = ZipFile.OpenRead(zipFileName))
-                        foreach (ZipArchiveEntry entry in archive.Entries)
-                            if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
-                            {
-                                var extractedFileName = extractPath + Path.GetFileName(entry.FullName);
-                                entry.ExtractToFile(extractedFileName);
-                                pubs.AddRange(ExtractCitation(extractedFileName, tool));
-                            }
-                }
-                catch (InvalidDataException e)
-                {
-                    /// This exception is thrown when the Zip archive
-                    /// cannot be read.
-                }
-                catch (Exception e)
-                {
-
-                }
-            }
-
-            Directory.Delete(tmpPath, true);
-            return pubs;
+            Directory.Delete(_sessionTempPath, true);
+            return _publications.ToList();
         }
 
-        private List<Publication> ExtractCitation(string filename, Tool tool)
+        private Tool Downloader(Tool tool)
         {
-            var pubs = new List<Publication>();
-            XElement toolDoc = XElement.Load(filename);
+            new System.Net.WebClient().DownloadFileTaskAsync(
+                address: new Uri(string.Format(
+                    "https://toolshed.g2.bx.psu.edu/repos/{0}/{1}/archive/tip.zip",
+                    tool.Owner,
+                    tool.Name)),
+                fileName: _sessionTempPath + tool.Id);
+            return tool;
+        }
 
-            foreach (var item in toolDoc.Elements("citations").Descendants())
-                if (item.Attribute("type") != null)
-                    switch (item.Attribute("type").Value.Trim().ToLower())
-                    {
-                        case "doi":
-                            pubs.Add(new Publication()
-                            {
-                                ToolId = tool.Id,
-                                DOI = item.Value
-                            });
-                            break;
+        private Tuple<Tool, string[]> WrapperExtractor(Tool tool)
+        {
+            /// To avoid `path traversal attacks` from malicious software, 
+            /// there must be a trailing path separator at the end of the path. 
+            string extractPath =
+                _sessionTempPath + tool.Id + "_" + new Random().Next(100000, 10000000) + "_" +
+                Path.DirectorySeparatorChar;
+            Directory.CreateDirectory(extractPath);
 
-                        case "bibtex":
-                            pubs.Add(new Publication()
-                            {
-                                ToolId = tool.Id,
-                                Citation = item.Value
-                            });
-                            break;
-                    }
-                else
+            var xmlFiles = new List<string>();
+            try
+            {
+                using (ZipArchive archive = ZipFile.OpenRead(_sessionTempPath + tool.Id))
+                    foreach (ZipArchiveEntry entry in archive.Entries)
+                        if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var extractedFileName = extractPath + Path.GetFileName(entry.FullName);
+                            entry.ExtractToFile(extractedFileName);
+                            xmlFiles.Add(extractedFileName);
+                        }
+            }
+            catch (InvalidDataException e)
+            {
+                /// This exception is thrown when the Zip archive
+                /// cannot be read.
+            }
+
+            return new Tuple<Tool, string[]>(tool, xmlFiles.ToArray<string>());
+        }
+
+        private void ExtractPublications(Tuple<Tool, string[]> input)
+        {
+            var tool = input.Item1;
+            var xmlFiles = input.Item2;
+            foreach (var filename in xmlFiles)
+            {
+                try
                 {
+                    XElement toolDoc = XElement.Load(filename);
 
+                    foreach (var item in toolDoc.Elements("citations").Descendants())
+                    {
+                        if (item.Attribute("type") != null)
+                        {
+                            switch (item.Attribute("type").Value.Trim().ToLower())
+                            {
+                                case "doi":
+                                    _publications.Add(new Publication()
+                                    {
+                                        ToolId = tool.Id,
+                                        DOI = item.Value
+                                    });
+                                    break;
+
+                                case "bibtex":
+                                    _publications.Add(new Publication()
+                                    {
+                                        ToolId = tool.Id,
+                                        Citation = item.Value
+                                    });
+                                    break;
+                            }
+                        }
+                    }
                 }
-
-            return pubs;
+                catch(System.Xml.XmlException e)
+                {
+                    /// This exception may happen if the XML 
+                    /// file has multiple roots.
+                }
+            }
         }
     }
 }

@@ -18,14 +18,12 @@ namespace Genometric.TVQ.API.Crawlers
 
         public async Task CrawlAsync(Repository repo)
         {
-            var tools = await GetToolsAsync(repo);
-            var publs = await GetPublicationsAsync(repo, tools);
-
             try
             {
+                var tools = await GetToolsAsync(repo);
                 await _dbContext.Tools.AddRangeAsync(tools);
+                var publs = await GetPublicationsAsync(repo, tools);
                 await _dbContext.Publications.AddRangeAsync(publs);
-                await _dbContext.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
