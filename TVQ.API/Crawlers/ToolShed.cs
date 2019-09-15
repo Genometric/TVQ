@@ -53,19 +53,33 @@ namespace Genometric.TVQ.API.Crawlers
 
         public async Task<List<Publication>> GetPublications(Repository repo, List<Tool> tools)
         {
-            var execOptions = new ExecutionDataflowBlockOptions
-            {
-                MaxDegreeOfParallelism = 50
-            };
-
             var linkOptions = new DataflowLinkOptions
             {
                 PropagateCompletion = true
             };
 
-            var downloader = new TransformBlock<Tool, Tool>(new Func<Tool, Tool>(Downloader), execOptions);
-            var extracXMLs = new TransformBlock<Tool, Tuple<Tool, string[]>>(new Func<Tool, Tuple<Tool, string[]>>(WrapperExtractor), execOptions);
-            var extractPublications = new ActionBlock<Tuple<Tool, string[]>>(input => { ExtractPublications(input); }, execOptions);
+            var downloader = new TransformBlock<Tool, Tool>(
+                new Func<Tool, Tool>(Downloader),
+                new ExecutionDataflowBlockOptions
+                {
+                    MaxDegreeOfParallelism = 3
+                });
+
+            var extracXMLs = new TransformBlock<Tool, Tuple<Tool, string[]>>(
+                new Func<Tool, Tuple<Tool, string[]>>(WrapperExtractor),
+                new ExecutionDataflowBlockOptions
+                {
+                    BoundedCapacity = Environment.ProcessorCount * 3,
+                    MaxDegreeOfParallelism = Environment.ProcessorCount * 3
+                });
+
+            var extractPublications = new ActionBlock<Tuple<Tool, string[]>>(
+                input => { ExtractPublications(input); },
+                new ExecutionDataflowBlockOptions
+                {
+                    BoundedCapacity = Environment.ProcessorCount * 3,
+                    MaxDegreeOfParallelism = Environment.ProcessorCount * 3
+                });
 
             downloader.LinkTo(extracXMLs, linkOptions);
             extracXMLs.LinkTo(extractPublications, linkOptions);
