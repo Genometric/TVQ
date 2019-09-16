@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -53,8 +54,11 @@ namespace TVQ.CLI
         {
             var zipFiles = Directory.GetFiles(downloadPath);
 
+            Console.WriteLine("Extracting wrappers ...");
+            int c = 0;
             foreach (var zipFile in zipFiles)
             {
+                Console.Write(string.Format("Archive {0}/{1} ...", ++c, zipFiles.Length));
                 var tool = tools.Find(x => x.IDinRepo == Path.GetFileNameWithoutExtension(zipFile));
                 try
                 {
@@ -62,17 +66,18 @@ namespace TVQ.CLI
                         foreach (ZipArchiveEntry entry in archive.Entries)
                             if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
                             {
-                                var extractedFileName = Path.GetTempFileName() + new Random().Next(100, 100000) + ".xml";
+                                string extractedFileName = Path.GetTempFileName() + RandomString() + ".xml";
                                 entry.ExtractToFile(extractedFileName);
-
                                 ExtractPublications(extractedFileName, tool);
 
                                 using (StreamWriter writer = new StreamWriter(citationsFileName + tool.IDinRepo + ".json"))
-                                    using (JsonWriter jWriter = new JsonTextWriter(writer))
-                                {
+                                using (JsonWriter jWriter = new JsonTextWriter(writer))
                                     new JsonSerializer().Serialize(jWriter, tool);
-                                }   
+
+                                File.Delete(extractedFileName);
                             }
+
+                    Console.WriteLine("\tDone!");
                 }
                 catch (InvalidDataException e)
                 {
@@ -81,7 +86,7 @@ namespace TVQ.CLI
                 }
                 catch (Exception e)
                 {
-
+                    Console.WriteLine(string.Format("\tError, skipping! msg: {0}", e.Message));
                 }
             }
 
@@ -124,6 +129,14 @@ namespace TVQ.CLI
                 /// This exception may happen if the XML 
                 /// file has multiple roots.
             }
+        }
+
+        public static string RandomString(int length=25)
+        {
+            var random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+              .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

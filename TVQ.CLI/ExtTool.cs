@@ -1,8 +1,10 @@
 ﻿using Genometric.TVQ.API.Model;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace Genometric.TVQ.CLI
 {
+    [JsonConverter(typeof(ExtToolJsonConverter))]
     public class ExtTool : Tool
     {
         public List<Publication> Publications { set; get; }
