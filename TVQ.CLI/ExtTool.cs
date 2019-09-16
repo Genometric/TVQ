@@ -7,6 +7,8 @@ namespace Genometric.TVQ.CLI
     {
         public List<Publication> Publications { set; get; }
 
+        public ExtTool() { }
+
         public ExtTool(Tool tool)
         {
             Id = tool.Id;

@@ -15,10 +15,14 @@ namespace TVQ.CLI
             foreach (var tool in tools.Result)
                 extTools.Add(new ExtTool(tool));
 
-            //var report = toolShed.DownloadArchives(tools.Result, args[0]);
-            //report.Wait();
+            var report = toolShed.DownloadArchives(tools.Result, args[0]);
+            report.Wait();
 
-            toolShed.ExtractCitation(args[0], @"C:\Users\Vahid\Desktop\test\", extTools);
+            string toolJSerializePath = @"C:\Users\Vahid\Desktop\test\";
+            toolShed.ExtractCitation(args[0], toolJSerializePath, extTools).Wait();
+
+            var scopusClient = new Scopus("...");
+            scopusClient.GetCitations(toolJSerializePath, @"C:\Users\Vahid\Desktop\SumCitations.txt");
         }
     }
 }
