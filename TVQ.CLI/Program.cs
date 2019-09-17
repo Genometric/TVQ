@@ -19,7 +19,7 @@ namespace TVQ.CLI
             report.Wait();
 
             string toolJSerializePath = @"C:\Users\Vahid\Desktop\test\";
-            toolShed.ExtractCitation(args[0], toolJSerializePath, extTools).Wait();
+            toolShed.ExtractCitation(args[0], toolJSerializePath, extTools);
 
             var scopusClient = new Scopus("...");
             scopusClient.GetCitations(toolJSerializePath, @"C:\Users\Vahid\Desktop\SumCitations.txt");

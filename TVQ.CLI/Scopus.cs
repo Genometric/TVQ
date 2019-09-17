@@ -2,6 +2,8 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -13,11 +15,31 @@ namespace Genometric.TVQ.CLI
 {
     public class Scopus
     {
-        private string _apiKey;
+        private readonly string _apiKey;
+
+        private List<string> _moreThanOneCitations;
+        public ReadOnlyCollection<string> MoreThanOneCitations
+        {
+            get
+            {
+                return _moreThanOneCitations.AsReadOnly();
+            }
+        }
+
+        private List<string> _zeroCitations;
+        public ReadOnlyCollection<string> ZeroCitations
+        {
+            get
+            {
+                return _zeroCitations.AsReadOnly();
+            }
+        }
 
         public Scopus(string apiKey)
         {
             _apiKey = apiKey;
+            _moreThanOneCitations = new List<string>();
+            _zeroCitations = new List<string>();
         }
 
         public void GetCitations(string toolsPath, string totalCitationsFileName)
@@ -29,7 +51,7 @@ namespace Genometric.TVQ.CLI
                 var files = Directory.GetFiles(toolsPath);
                 foreach (var file in files)
                 {
-                    Console.Write(string.Format("Tool {0}/{1} ...", ++counter, files.Length));
+                    Console.Write(string.Format("\r\tProcessing tool {0}/{1}", ++counter, files.Length));
                     using (var reader = new StreamReader(file))
                     {
                         var jReader = new JsonTextReader(reader);
@@ -39,12 +61,35 @@ namespace Genometric.TVQ.CLI
                             string.Format(
                                 "{0}\t{1}\t{2}",
                                 tool.IDinRepo,
-                                tool.Name,
-                                totalCitations));
+                                totalCitations,
+                                tool.Name));
                     }
-
-                    Console.WriteLine("\tDone!");
                 }
+            }
+
+            if (_moreThanOneCitations.Count > 0)
+            {
+                var fileName = AppDomain.CurrentDomain.BaseDirectory + "MoreThanOneCitation.txt";
+                using (var writer = new StreamWriter(fileName))
+                {
+                    writer.WriteLine("Tool_id\tSearch_result_count");
+                    foreach (var item in _moreThanOneCitations)
+                        writer.WriteLine(item);
+                }
+                Console.WriteLine(string.Format(
+                    "\n\n\tAggregated multiple citations for {0} tools." +
+                    " Details logged in file {1}.", _moreThanOneCitations.Count, fileName));
+            }
+
+            if (_zeroCitations.Count > 0)
+            {
+                var fileName = AppDomain.CurrentDomain.BaseDirectory + "ZeroCitations.txt";
+                using (var writer = new StreamWriter(fileName))
+                    foreach (var item in _zeroCitations)
+                        writer.WriteLine(item);
+                Console.WriteLine(string.Format(
+                    "\tSkipped {0} tools with zero citations. " +
+                    "Details logged in file {1}.\n\n", _zeroCitations.Count, fileName));
             }
         }
 
@@ -52,11 +97,11 @@ namespace Genometric.TVQ.CLI
         {
             int totalCitations = 0;
             foreach (var pub in tool.Publications)
-                totalCitations += await FetchCitation(pub);
+                totalCitations += await FetchCitation(tool, pub);
             return totalCitations;
         }
 
-        private async Task<int> FetchCitation(Publication publication)
+        private async Task<int> FetchCitation(ExtTool tool, Publication publication)
         {
             var _client = new HttpClient();
 
@@ -104,14 +149,14 @@ namespace Genometric.TVQ.CLI
                 switch(totalResults)
                 {
                     case 0:
-                        Console.Write("No results found.");
+                        _zeroCitations.Add(tool.IDinRepo);
                         return 0;
 
                     case 1:
                         break;
 
                     default:
-                        Console.Write("More than one result found, summing their citation count.");
+                        _moreThanOneCitations.Add(string.Format("{0}\t{1}", tool.IDinRepo, totalResults));
                         break;
                 }
                 var citations = from entry in obj["search-results"]["entry"]

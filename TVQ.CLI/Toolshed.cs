@@ -3,6 +3,7 @@ using Genometric.TVQ.CLI;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -14,9 +15,33 @@ namespace TVQ.CLI
 {
     public class ToolShed
     {
+        private List<string> _invalidXMLs;
+        public ReadOnlyCollection<string> InvalidXMLs
+        {
+            get
+            {
+                return _invalidXMLs.AsReadOnly();
+            }
+        }
+
+        private List<string> _invalidArchive;
+        public ReadOnlyCollection<string> InvalidArchives
+        {
+            get
+            {
+                return _invalidArchive.AsReadOnly();
+            }
+        }
+
+        public ToolShed()
+        {
+            _invalidXMLs = new List<string>();
+            _invalidArchive = new List<string>();
+        }
+
         public async Task<List<Tool>> GetToolsList()
         {
-            Console.Write("Getting tools list ... ");
+            Console.Write("Getting tools list from the ToolShed ... ");
             var _client = new HttpClient();
             HttpResponseMessage response = await _client.GetAsync("https://toolshed.g2.bx.psu.edu/api/repositories");
             string content;
@@ -27,7 +52,7 @@ namespace TVQ.CLI
                 return new List<Tool>();
 
             var tools = JsonConvert.DeserializeObject<List<Tool>>(content);
-            Console.WriteLine("\tDone!");
+            Console.WriteLine("Done!");
             return tools;
         }
 
@@ -50,7 +75,7 @@ namespace TVQ.CLI
             }
         }
 
-        public async Task ExtractCitation(string downloadPath, string citationsFileName, List<ExtTool> tools)
+        public void ExtractCitation(string downloadPath, string citationsFileName, List<ExtTool> tools)
         {
             var zipFiles = Directory.GetFiles(downloadPath);
 
@@ -58,7 +83,7 @@ namespace TVQ.CLI
             int c = 0;
             foreach (var zipFile in zipFiles)
             {
-                Console.Write(string.Format("Archive {0}/{1} ...", ++c, zipFiles.Length));
+                Console.Write(string.Format("\r\tProcessing archive {0}/{1}", ++c, zipFiles.Length));
                 var tool = tools.Find(x => x.IDinRepo == Path.GetFileNameWithoutExtension(zipFile));
                 try
                 {
@@ -66,7 +91,7 @@ namespace TVQ.CLI
                         foreach (ZipArchiveEntry entry in archive.Entries)
                             if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
                             {
-                                string extractedFileName = Path.GetTempFileName() + RandomString() + ".xml";
+                                string extractedFileName = Path.GetTempPath() + RandomString() + ".xml";
                                 entry.ExtractToFile(extractedFileName);
                                 ExtractPublications(extractedFileName, tool);
 
@@ -76,21 +101,38 @@ namespace TVQ.CLI
 
                                 File.Delete(extractedFileName);
                             }
-
-                    Console.WriteLine("\tDone!");
                 }
                 catch (InvalidDataException e)
                 {
-                    /// This exception is thrown when the Zip archive
-                    /// cannot be read.
+                    _invalidArchive.Add(string.Format("{0}\t{1}", tool.IDinRepo, e.Message));
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(string.Format("\tError, skipping! msg: {0}", e.Message));
+                    _invalidArchive.Add(string.Format("{0}\t{1}", tool.IDinRepo, e.Message));
                 }
             }
 
-            var xmlFiles = new List<string>();
+            if (_invalidArchive.Count > 0)
+            {
+                var fileName = AppDomain.CurrentDomain.BaseDirectory + "SkippedArchives.txt";
+                using (var writer = new StreamWriter(fileName))
+                    foreach (var item in _invalidArchive)
+                        writer.WriteLine(item);
+                Console.WriteLine(string.Format(
+                    "\n\n\tSkipped {0} invalid archives. " +
+                    "Details logged in file {1}.", _invalidArchive.Count, fileName));
+            }
+
+            if (_invalidXMLs.Count > 0)
+            {
+                var fileName = AppDomain.CurrentDomain.BaseDirectory + "SkippedXMLs.txt";
+                using (var writer = new StreamWriter(fileName))
+                    foreach (var item in _invalidXMLs)
+                        writer.WriteLine(item);
+                Console.WriteLine(string.Format(
+                    "\tSkipped {0} invalid XML files. " +
+                    "Details logged in file {1}.\n\n", _invalidXMLs.Count, fileName));
+            }
         }
 
         private void ExtractPublications(string xmlFile, ExtTool tool)
@@ -126,8 +168,7 @@ namespace TVQ.CLI
             }
             catch (System.Xml.XmlException e)
             {
-                /// This exception may happen if the XML 
-                /// file has multiple roots.
+                _invalidXMLs.Add(string.Format("{0}\t{1}", tool.IDinRepo, e.Message));
             }
         }
 
