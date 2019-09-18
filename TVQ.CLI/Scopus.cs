@@ -129,7 +129,7 @@ namespace Genometric.TVQ.CLI
 
                     default:
                         // not supported type at the moment.
-                        break;
+                        return 0;
 
                 }
             }
