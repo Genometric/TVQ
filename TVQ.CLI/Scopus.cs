@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -16,6 +17,9 @@ namespace Genometric.TVQ.CLI
     public class Scopus
     {
         private readonly string _apiKey;
+
+        private string BaseAPI { get { return "https://api.elsevier.com/content/"; } }
+        private string CitationOverviewAPI { get { return BaseAPI + "abstract/citations/"; } }
 
         private List<string> _moreThanOneCitations;
         public ReadOnlyCollection<string> MoreThanOneCitations
@@ -40,6 +44,12 @@ namespace Genometric.TVQ.CLI
             _apiKey = apiKey;
             _moreThanOneCitations = new List<string>();
             _zeroCitations = new List<string>();
+        }
+
+        private async Task<HttpResponseMessage> GetAsync(string api, NameValueCollection parameters)
+        {
+            var _client = new HttpClient();
+            var uriBuilder = new UriBuilder(api);
         }
 
         public void GetCitations(string toolsPath, string totalCitationsFileName)
@@ -99,6 +109,37 @@ namespace Genometric.TVQ.CLI
             foreach (var pub in tool.Publications)
                 totalCitations += await FetchCitation(tool, pub);
             return totalCitations;
+        }
+
+        public async Task<int> GetCitationCount(ExtTool tool, DateTime startDate, DateTime endDate)
+        {
+            // The currently supported view by Scopus.
+            string view = "STANDARD";
+            string date = string.Format("{0}-{1}", startDate.Year, endDate.Year);
+            //var uriBuilder = new UriBuilder(CitationOverviewAPI + "2-s2.0-84860718683");
+            var parameters = HttpUtility.ParseQueryString(string.Empty);
+            parameters["apiKey"] = _apiKey;
+            parameters["view"] = view;
+            parameters["date"] = date;
+
+            /// EDI is like this: 2-s2.0-84860718683 and scopus ID is this part of it: 84860718683
+            parameters["scopus_id"] = "84860718683";
+
+            uriBuilder.Query = parameters.ToString();
+
+            _client.DefaultRequestHeaders.Add("X-ELS-APIKey", "APIKey");
+            _client.DefaultRequestHeaders.Add("Accept", "application/json");
+            _client.DefaultRequestHeaders.Add("User-Agent", "TVQv1");
+
+            HttpResponseMessage response = await _client.GetAsync(uriBuilder.Uri);
+            if (!response.IsSuccessStatusCode)
+                /// TODO: replace with an exception.
+                return 0;
+
+            var content = await response.Content.ReadAsStringAsync();
+            var obj = JObject.Parse(content);
+
+            return 0;
         }
 
         private async Task<int> FetchCitation(ExtTool tool, Publication publication)

@@ -11,6 +11,14 @@ namespace Genometric.TVQ.API.Model
 
         public int ToolId { set; get; }
 
+        public int ExternalID { set; get; }
+
+        public string Title { set; get; }
+
+        public string Year { set; get; }
+
+        public int CitedBy { set; get; }
+
         public string DOI { set; get; }
 
         public string Citation { set; get; }
