@@ -55,40 +55,5 @@ namespace Genometric.TVQ.API.Crawlers
         }
 
         public abstract Task ScanAsync();
-
-        /// <summary>
-        /// Gets a list of tools available in the given repository.
-        /// </summary>
-        /// <param name="repo">The repository to search 
-        /// for a list of tools.</param>
-        /// <returns>A list of the tools available in 
-        /// the given repository.</returns>
-        //public abstract Task<List<Tool>> GetToolsAsync(Repository repo);
-
-        /// <summary>
-        /// Gets a list of publications for the given tool 
-        /// in the given repository. 
-        /// </summary>
-        /// <param name="repo">The repository where the tool is 
-        /// located.</param>
-        /// <param name="tool">The tool whose publications should be 
-        /// determined.</param>
-        /// <returns>A list of the publications available in the 
-        /// given repo for the given tool.</returns>
-        //public abstract Task<List<Publication>> GetPublicationsAsync(Repository repo, Tool tool);
-
-        /// <summary>
-        /// Get a list of publications for given tools from the 
-        /// given repository. 
-        /// This method efficiently implements <see cref="GetPublicationsAsync"/>
-        /// for multiple tools (using the task parallel library). 
-        /// </summary>
-        /// <param name="repo">The repository where the tool is
-        /// located.</param>
-        /// <param name="tools">A list of tools whose publications
-        /// should be determined.</param>
-        /// <returns>A list of the publications available in the 
-        /// given repo for the given list of tools.</returns>
-        //public abstract Task<List<Publication>> GetPublicationsAsync(Repository repo, List<Tool> tools);
     }
 }
