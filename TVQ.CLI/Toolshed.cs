@@ -75,9 +75,13 @@ namespace TVQ.CLI
             }
         }
 
-        public void ExtractCitation(string downloadPath, string citationsFileName, List<ExtTool> tools)
+        public void ExtractCitation(string downloadPath, string citationsPath, List<ExtTool> tools)
         {
             var zipFiles = Directory.GetFiles(downloadPath);
+
+            if (Directory.Exists(citationsPath))
+                Directory.Delete(citationsPath, true);
+            Directory.CreateDirectory(citationsPath);
 
             Console.WriteLine("Extracting wrappers ...");
             int c = 0;
@@ -91,11 +95,11 @@ namespace TVQ.CLI
                         foreach (ZipArchiveEntry entry in archive.Entries)
                             if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
                             {
-                                string extractedFileName = Path.GetTempPath() + RandomString() + ".xml";
+                                string extractedFileName = Path.GetTempPath() + Utilities.GetRandomString() + ".xml";
                                 entry.ExtractToFile(extractedFileName);
                                 ExtractPublications(extractedFileName, tool);
 
-                                using (StreamWriter writer = new StreamWriter(citationsFileName + tool.IDinRepo + ".json"))
+                                using (StreamWriter writer = new StreamWriter(citationsPath + tool.IDinRepo + ".json"))
                                 using (JsonWriter jWriter = new JsonTextWriter(writer))
                                     new JsonSerializer().Serialize(jWriter, tool);
 
@@ -170,14 +174,6 @@ namespace TVQ.CLI
             {
                 _invalidXMLs.Add(string.Format("{0}\t{1}", tool.IDinRepo, e.Message));
             }
-        }
-
-        public static string RandomString(int length=25)
-        {
-            var random = new Random();
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(chars, length)
-              .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

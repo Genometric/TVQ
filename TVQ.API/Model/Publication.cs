@@ -1,8 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Genometric.TVQ.API.Model
 {
+    [JsonConverter(typeof(PublicationJsonConverter))]
     public class Publication
     {
         [Key]
@@ -13,6 +15,8 @@ namespace Genometric.TVQ.API.Model
 
         public int ExternalID { set; get; }
 
+        public string PubMedID { set; get; }
+
         public string Title { set; get; }
 
         public string Year { set; get; }
@@ -22,5 +26,8 @@ namespace Genometric.TVQ.API.Model
         public string DOI { set; get; }
 
         public string Citation { set; get; }
+
+        public Publication()
+        { }
     }
 }

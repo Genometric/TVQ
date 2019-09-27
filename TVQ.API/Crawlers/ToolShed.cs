@@ -1,4 +1,5 @@
-﻿using Genometric.TVQ.API.Model;
+﻿using Genometric.TVQ.API.Infrastructure;
+using Genometric.TVQ.API.Model;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -13,46 +14,44 @@ using System.Xml.Linq;
 
 namespace Genometric.TVQ.API.Crawlers
 {
-    internal class ToolShed
+    internal class ToolShed: ToolRepoCrawler
     {
-        private readonly HttpClient _client;
-        private string _sessionTempPath;
-        private ConcurrentBag<Publication> _publications;
+        public ToolShed(TVQContext dbContext, Repository repo) :
+            base(dbContext, repo)
+        { }
 
-        public ToolShed()
+        public override async Task ScanAsync()
         {
-            _client = new HttpClient();
-            _publications = new ConcurrentBag<Publication>();
-
-            _sessionTempPath = Path.GetFullPath(Path.GetTempPath()) +
-                new Random().Next(100000, 10000000) +
-                Path.DirectorySeparatorChar;
-            if (Directory.Exists(_sessionTempPath))
-                Directory.Delete(_sessionTempPath, true);
-            Directory.CreateDirectory(_sessionTempPath);
+            await GetToolsAsync();
+            _dbContext.Tools.AddRange(Tools);
+            await GetPublicationsAsync();
+            _dbContext.Publications.AddRange(Publications);
         }
 
-        public async Task<List<Tool>> GetTools(Repository repo)
+        private async Task GetToolsAsync()
         {
-            HttpResponseMessage response = await _client.GetAsync(repo.URI);
+            HttpResponseMessage response = await _httpClient.GetAsync(_repo.URI);
             string content;
             if (response.IsSuccessStatusCode)
                 content = await response.Content.ReadAsStringAsync();
             else
                 /// TODO: replace with an exception.
-                return new List<Tool>();
+                return;
 
-            var tools = JsonConvert.DeserializeObject<List<Tool>>(content);
-            foreach (var tool in tools)
-                tool.Repo = repo;
-            repo.ToolCount += tools.Count;
+            _tools = new ConcurrentBag<Tool>(JsonConvert.DeserializeObject<List<Tool>>(content));
+            foreach (var tool in _tools)
+                tool.Repo = _repo;
 
-            return tools;
+            // TODO: do NOT repo here. 
+            _repo.ToolCount += _tools.Count;
         }
 
-
-        public async Task<List<Publication>> GetPublications(Repository repo, List<Tool> tools)
+        private async Task GetPublicationsAsync()
         {
+            // This method is implemented using the Task Parallel Library (TPL).
+            // Read the following page for more info on the flow: 
+            // https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-parallel-library-tpl
+
             var linkOptions = new DataflowLinkOptions
             {
                 PropagateCompletion = true
@@ -65,7 +64,7 @@ namespace Genometric.TVQ.API.Crawlers
                     MaxDegreeOfParallelism = 3
                 });
 
-            var extracXMLs = new TransformBlock<Tool, Tuple<Tool, string[]>>(
+            var extractXMLs = new TransformBlock<Tool, Tuple<Tool, string[]>>(
                 new Func<Tool, Tuple<Tool, string[]>>(WrapperExtractor),
                 new ExecutionDataflowBlockOptions
                 {
@@ -81,23 +80,21 @@ namespace Genometric.TVQ.API.Crawlers
                     MaxDegreeOfParallelism = Environment.ProcessorCount * 3
                 });
 
-            downloader.LinkTo(extracXMLs, linkOptions);
-            extracXMLs.LinkTo(extractPublications, linkOptions);
+            downloader.LinkTo(extractXMLs, linkOptions);
+            extractXMLs.LinkTo(extractPublications, linkOptions);
 
-            foreach (var tool in tools)
+            foreach (var tool in _tools)
                 downloader.Post(tool);
-
             downloader.Complete();
 
             await extractPublications.Completion;
 
             Directory.Delete(_sessionTempPath, true);
-            return _publications.ToList();
         }
 
         private Tool Downloader(Tool tool)
         {
-            new System.Net.WebClient().DownloadFileTaskAsync(
+            _webClient.DownloadFileTaskAsync(
                 address: new Uri(string.Format(
                     "https://toolshed.g2.bx.psu.edu/repos/{0}/{1}/archive/tip.zip",
                     tool.Owner,
@@ -150,24 +147,18 @@ namespace Genometric.TVQ.API.Crawlers
                     {
                         if (item.Attribute("type") != null)
                         {
+                            var pub = new Publication() { ToolId = tool.Id };
                             switch (item.Attribute("type").Value.Trim().ToLower())
                             {
                                 case "doi":
-                                    _publications.Add(new Publication()
-                                    {
-                                        ToolId = tool.Id,
-                                        DOI = item.Value
-                                    });
+                                    pub.DOI = item.Value;
                                     break;
 
                                 case "bibtex":
-                                    _publications.Add(new Publication()
-                                    {
-                                        ToolId = tool.Id,
-                                        Citation = item.Value
-                                    });
+                                    pub.Citation = item.Value;
                                     break;
                             }
+                            _publications.Add(pub);
                         }
                     }
                 }
@@ -175,6 +166,10 @@ namespace Genometric.TVQ.API.Crawlers
                 {
                     /// This exception may happen if the XML 
                     /// file has multiple roots.
+                }
+                finally
+                {
+                    File.Delete(filename);
                 }
             }
         }

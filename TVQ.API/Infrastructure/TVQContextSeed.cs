@@ -52,6 +52,11 @@ namespace Genometric.TVQ.API.Infrastructure
                     Name = Repository.Repo.ToolShed,
                     URI = "https://toolshed.g2.bx.psu.edu/api/repositories"
                 },
+                new Repository()
+                {
+                    Name = Repository.Repo.BioTools,
+                    URI = "https://github.com/bio-tools/content/archive/master.zip"
+                }
             };
         }
 

@@ -7,23 +7,20 @@ using System.Reflection;
 
 namespace Genometric.TVQ.API.Model
 {
-    public class ToolJsonConverter : JsonConverter
+    public class PublicationJsonConverter : JsonConverter
     {
         private readonly Dictionary<string, string> _propertyMappings;
 
-        public ToolJsonConverter()
+        public PublicationJsonConverter()
         {
             _propertyMappings = new Dictionary<string, string>
             {
-                {"times_downloaded", nameof(Tool.TimesDownloaded)},
-                {"user_id", nameof(Tool.UserID)},
-                {"name", nameof(Tool.Name)},
-                {"homepage", nameof(Tool.Homepage)},
-                {"homepage_url", nameof(Tool.Homepage)},
-                {"owner", nameof(Tool.Owner)},
-                {"id", nameof(Tool.IDinRepo)},
-                {"remote_repository_url", nameof(Tool.CodeRepo)},
-                {"description", nameof(Tool.Description)}
+                {"title", nameof(Publication.Title)},
+                {"year", nameof(Publication.Year)},
+                {"CitedBy", nameof(Publication.CitedBy)},
+                {"doi", nameof(Publication.DOI)},
+                {"citation", nameof(Publication.Citation)},
+                {"pmid", nameof(Publication.PubMedID)}
             };
         }
 

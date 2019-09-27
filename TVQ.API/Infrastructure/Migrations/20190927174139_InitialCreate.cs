@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
-    public partial class Initial : Migration
+    public partial class InitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -14,6 +14,11 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     ToolId = table.Column<int>(nullable: false),
+                    ExternalID = table.Column<int>(nullable: false),
+                    PubMedID = table.Column<string>(nullable: true),
+                    Title = table.Column<string>(nullable: true),
+                    Year = table.Column<string>(nullable: true),
+                    CitedBy = table.Column<int>(nullable: false),
                     DOI = table.Column<string>(nullable: true),
                     Citation = table.Column<string>(nullable: true)
                 },

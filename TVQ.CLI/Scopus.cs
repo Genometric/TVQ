@@ -46,12 +46,6 @@ namespace Genometric.TVQ.CLI
             _zeroCitations = new List<string>();
         }
 
-        private async Task<HttpResponseMessage> GetAsync(string api, NameValueCollection parameters)
-        {
-            var _client = new HttpClient();
-            var uriBuilder = new UriBuilder(api);
-        }
-
         public void GetCitations(string toolsPath, string totalCitationsFileName)
         {
             int counter = 0;
@@ -67,6 +61,7 @@ namespace Genometric.TVQ.CLI
                         var jReader = new JsonTextReader(reader);
                         var tool = new JsonSerializer().Deserialize<ExtTool>(jReader);
                         var totalCitations = GetCitationCount(tool).Result;
+                        var aaaa = GetCitationCount(tool, new DateTime(2016, 01, 01), new DateTime(2019, 01, 01));
                         writer.WriteLine(
                             string.Format(
                                 "{0}\t{1}\t{2}",
@@ -116,7 +111,7 @@ namespace Genometric.TVQ.CLI
             // The currently supported view by Scopus.
             string view = "STANDARD";
             string date = string.Format("{0}-{1}", startDate.Year, endDate.Year);
-            //var uriBuilder = new UriBuilder(CitationOverviewAPI + "2-s2.0-84860718683");
+            var uriBuilder = new UriBuilder(CitationOverviewAPI + "2-s2.0-84860718683");
             var parameters = HttpUtility.ParseQueryString(string.Empty);
             parameters["apiKey"] = _apiKey;
             parameters["view"] = view;
@@ -126,18 +121,26 @@ namespace Genometric.TVQ.CLI
             parameters["scopus_id"] = "84860718683";
 
             uriBuilder.Query = parameters.ToString();
-
+            var _client = new HttpClient();
             _client.DefaultRequestHeaders.Add("X-ELS-APIKey", "APIKey");
             _client.DefaultRequestHeaders.Add("Accept", "application/json");
             _client.DefaultRequestHeaders.Add("User-Agent", "TVQv1");
 
-            HttpResponseMessage response = await _client.GetAsync(uriBuilder.Uri);
-            if (!response.IsSuccessStatusCode)
-                /// TODO: replace with an exception.
-                return 0;
+            try
+            {
+                var tmpuri = uriBuilder.Uri;
+                HttpResponseMessage response = await _client.GetAsync(uriBuilder.Uri);
+                if (!response.IsSuccessStatusCode)
+                    /// TODO: replace with an exception.
+                    return 0;
 
-            var content = await response.Content.ReadAsStringAsync();
-            var obj = JObject.Parse(content);
+                var content = await response.Content.ReadAsStringAsync();
+                var obj = JObject.Parse(content);
+            }
+            catch (Exception e)
+            {
+
+            }
 
             return 0;
         }
