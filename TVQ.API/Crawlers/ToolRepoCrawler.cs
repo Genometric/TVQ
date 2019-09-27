@@ -1,5 +1,6 @@
 ﻿using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Model;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Genometric.TVQ.API.Crawlers
 {
-    public abstract class ToolRepoCrawler
+    public abstract class ToolRepoCrawler : IDisposable
     {
         protected ConcurrentBag<Tool> _tools;
         public ReadOnlyCollection<Tool> Tools
@@ -55,5 +56,16 @@ namespace Genometric.TVQ.API.Crawlers
         }
 
         public abstract Task ScanAsync();
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            Directory.Delete(_sessionTempPath, true);
+        }
     }
 }

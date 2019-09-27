@@ -36,6 +36,7 @@ namespace Genometric.TVQ.API.Crawlers
                 }
 
                 await crawler.ScanAsync();
+                crawler.Dispose();
             }
             catch (DbUpdateConcurrencyException)
             {
