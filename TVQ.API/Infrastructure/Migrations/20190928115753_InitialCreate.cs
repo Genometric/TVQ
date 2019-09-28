@@ -8,30 +8,10 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Publications",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    ToolId = table.Column<int>(nullable: false),
-                    ExternalID = table.Column<int>(nullable: false),
-                    PubMedID = table.Column<string>(nullable: true),
-                    Title = table.Column<string>(nullable: true),
-                    Year = table.Column<string>(nullable: true),
-                    CitedBy = table.Column<int>(nullable: false),
-                    DOI = table.Column<string>(nullable: true),
-                    Citation = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Publications", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Repositories",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<int>(nullable: true),
                     URI = table.Column<string>(nullable: false),
@@ -39,18 +19,16 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Repositories", x => x.Id);
+                    table.PrimaryKey("PK_Repositories", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Tools",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     RepositoryID = table.Column<int>(nullable: false),
-                    PublicationID = table.Column<int>(nullable: false),
-                    PubId = table.Column<int>(nullable: true),
                     IDinRepo = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
                     Homepage = table.Column<string>(nullable: true),
@@ -62,25 +40,44 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tools", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Tools_Publications_PubId",
-                        column: x => x.PubId,
-                        principalTable: "Publications",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                    table.PrimaryKey("PK_Tools", x => x.ID);
                     table.ForeignKey(
                         name: "FK_Tools_Repositories_RepositoryID",
                         column: x => x.RepositoryID,
                         principalTable: "Repositories",
-                        principalColumn: "Id",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Publications",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    ToolID = table.Column<int>(nullable: false),
+                    PubMedID = table.Column<string>(nullable: true),
+                    Title = table.Column<string>(nullable: true),
+                    Year = table.Column<string>(nullable: true),
+                    CitedBy = table.Column<int>(nullable: false),
+                    DOI = table.Column<string>(nullable: true),
+                    Citation = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Publications", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Publications_Tools_ToolID",
+                        column: x => x.ToolID,
+                        principalTable: "Tools",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tools_PubId",
-                table: "Tools",
-                column: "PubId");
+                name: "IX_Publications_ToolID",
+                table: "Publications",
+                column: "ToolID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tools_RepositoryID",
@@ -91,10 +88,10 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Tools");
+                name: "Publications");
 
             migrationBuilder.DropTable(
-                name: "Publications");
+                name: "Tools");
 
             migrationBuilder.DropTable(
                 name: "Repositories");

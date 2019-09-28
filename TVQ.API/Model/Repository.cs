@@ -1,6 +1,5 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
 namespace Genometric.TVQ.API.Model
 {
@@ -8,15 +7,15 @@ namespace Genometric.TVQ.API.Model
     {
         public enum Repo { ToolShed, BioTools };
 
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { set; get; }
+        public int ID { set; get; }
 
         public Repo? Name { set; get; }
 
         public string URI { set; get; }
 
         public int ToolCount { set; get; }
+
+        public virtual List<Tool> Tools { set; get; }
 
         public Repository() { }
 

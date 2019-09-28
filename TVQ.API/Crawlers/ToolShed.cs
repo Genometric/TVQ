@@ -40,10 +40,7 @@ namespace Genometric.TVQ.API.Crawlers
 
             _tools = new ConcurrentBag<Tool>(JsonConvert.DeserializeObject<List<Tool>>(content));
             foreach (var tool in _tools)
-                tool.Repo = _repo;
-
-            // TODO: do NOT repo here. 
-            _repo.ToolCount += _tools.Count;
+                tool.Repository = _repo;
         }
 
         private async Task GetPublicationsAsync()
@@ -83,8 +80,13 @@ namespace Genometric.TVQ.API.Crawlers
             downloader.LinkTo(extractXMLs, linkOptions);
             extractXMLs.LinkTo(extractPublications, linkOptions);
 
+            int c = 10;
             foreach (var tool in _tools)
+            {
                 downloader.Post(tool);
+                if (c-- == 0)
+                    break;
+            }
             downloader.Complete();
 
             await extractPublications.Completion;
@@ -99,7 +101,7 @@ namespace Genometric.TVQ.API.Crawlers
                     "https://toolshed.g2.bx.psu.edu/repos/{0}/{1}/archive/tip.zip",
                     tool.Owner,
                     tool.Name)),
-                fileName: _sessionTempPath + tool.Id);
+                fileName: _sessionTempPath + tool.ID);
             return tool;
         }
 
@@ -108,14 +110,14 @@ namespace Genometric.TVQ.API.Crawlers
             /// To avoid `path traversal attacks` from malicious software, 
             /// there must be a trailing path separator at the end of the path. 
             string extractPath =
-                _sessionTempPath + tool.Id + "_" + new Random().Next(100000, 10000000) + "_" +
+                _sessionTempPath + tool.ID + "_" + new Random().Next(100000, 10000000) + "_" +
                 Path.DirectorySeparatorChar;
             Directory.CreateDirectory(extractPath);
 
             var xmlFiles = new List<string>();
             try
             {
-                using (ZipArchive archive = ZipFile.OpenRead(_sessionTempPath + tool.Id))
+                using (ZipArchive archive = ZipFile.OpenRead(_sessionTempPath + tool.ID))
                     foreach (ZipArchiveEntry entry in archive.Entries)
                         if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
                         {
@@ -142,12 +144,12 @@ namespace Genometric.TVQ.API.Crawlers
                 try
                 {
                     XElement toolDoc = XElement.Load(filename);
-
+                    var pubs = new List<Publication>();
                     foreach (var item in toolDoc.Elements("citations").Descendants())
                     {
                         if (item.Attribute("type") != null)
                         {
-                            var pub = new Publication() { ToolId = tool.Id };
+                            var pub = new Publication();
                             switch (item.Attribute("type").Value.Trim().ToLower())
                             {
                                 case "doi":
@@ -158,9 +160,10 @@ namespace Genometric.TVQ.API.Crawlers
                                     pub.Citation = item.Value;
                                     break;
                             }
-                            _publications.Add(pub);
+                            pubs.Add(pub);
                         }
                     }
+                    tool.Publications = pubs;
                 }
                 catch(System.Xml.XmlException e)
                 {

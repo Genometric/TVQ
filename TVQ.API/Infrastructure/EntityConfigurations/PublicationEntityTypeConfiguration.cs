@@ -11,13 +11,14 @@ namespace Genometric.TVQ.API.Infrastructure.EntityConfigurations
         {
             builder.ToTable("Publications");
 
-            builder.HasKey(obi => obi.Id);
+            builder.HasKey(obi => obi.ID);
 
-            builder.Property(obj => obj.Id).IsRequired(true);
+            builder.Property(obj => obj.ID).IsRequired(true);
 
             foreach (var p in typeof(Publication).GetProperties())
             {
-                if (p.Name == nameof(Publication.Id))
+                if (p.Name == nameof(Publication.ID) ||
+                    p.Name == nameof(Publication.Tool))
                     continue;
                 builder.Property(p.Name);
             }

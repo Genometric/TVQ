@@ -13,11 +13,10 @@ namespace Genometric.TVQ.CLI
 
         public ExtTool(Tool tool)
         {
-            Id = tool.Id;
-            RepositoryID = tool.RepositoryID;
-            Repo = tool.Repo;
-            PublicationID = tool.PublicationID;
-            Pub = tool.Pub;
+            ID = tool.ID;
+            RepoID = tool.RepoID;
+            Repository = tool.Repository;
+            base.Publications = tool.Publications;
             IDinRepo = tool.IDinRepo;
             Name = tool.Name;
             Homepage = tool.Homepage;

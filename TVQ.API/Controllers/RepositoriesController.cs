@@ -57,7 +57,7 @@ namespace Genometric.TVQ.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (id != dataItem.Id)
+            if (id != dataItem.ID)
                 return BadRequest();
 
             _context.Entry(dataItem).State = EntityState.Modified;
@@ -130,7 +130,7 @@ namespace Genometric.TVQ.API.Controllers
 
         private bool DataItemExists(int id)
         {
-            return _context.Repositories.Any(e => e.Id == id);
+            return _context.Repositories.Any(e => e.ID == id);
         }
     }
 }

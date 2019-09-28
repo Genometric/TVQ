@@ -2,6 +2,7 @@
 using Genometric.TVQ.API.Model;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net;
@@ -56,6 +57,14 @@ namespace Genometric.TVQ.API.Crawlers
         }
 
         public abstract Task ScanAsync();
+
+        protected void AddEntities(Tool tool, List<Publication> pubs)
+        {
+            tool.Repository = _repo;
+            tool.Publications = pubs;
+            _dbContext.Tools.Add(tool);
+            _dbContext.Publications.AddRange(pubs);
+        }
 
         public void Dispose()
         {

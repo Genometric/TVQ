@@ -1,19 +1,13 @@
 ﻿using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Genometric.TVQ.API.Model
 {
     [JsonConverter(typeof(PublicationJsonConverter))]
     public class Publication
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { set; get; }
+        public int ID { set; get; }
 
-        public int ToolId { set; get; }
-
-        public int ExternalID { set; get; }
+        public int ToolID { set; get; }
 
         public string PubMedID { set; get; }
 
@@ -26,6 +20,8 @@ namespace Genometric.TVQ.API.Model
         public string DOI { set; get; }
 
         public string Citation { set; get; }
+
+        public virtual Tool Tool { set; get; }
 
         public Publication()
         { }

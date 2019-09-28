@@ -154,7 +154,7 @@ namespace TVQ.CLI
                             case "doi":
                                 tool.Publications.Add(new Publication()
                                 {
-                                    ToolId = tool.Id,
+                                    ToolID = tool.ID,
                                     DOI = item.Value
                                 });
                                 break;
@@ -162,7 +162,7 @@ namespace TVQ.CLI
                             case "bibtex":
                                 tool.Publications.Add(new Publication()
                                 {
-                                    ToolId = tool.Id,
+                                    ToolID = tool.ID,
                                     Citation = item.Value
                                 });
                                 break;

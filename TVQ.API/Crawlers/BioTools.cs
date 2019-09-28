@@ -3,6 +3,7 @@ using Genometric.TVQ.API.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
@@ -41,9 +42,9 @@ namespace Genometric.TVQ.API.Crawlers
                             string extractedFileName = _sessionTempPath + Utilities.GetRandomString() + ".json";
                             entry.ExtractToFile(extractedFileName);
                             var tool = ExtractTool(extractedFileName);
-                            _dbContext.Tools.Add(tool);
-                            _tools.Add(tool);
-                            ExtractPublications(tool, extractedFileName);
+                            var pubs = ExtractPublications(extractedFileName);
+                            AddEntities(tool, pubs);
+                            
                             File.Delete(extractedFileName);
                         }
                 }
@@ -60,8 +61,9 @@ namespace Genometric.TVQ.API.Crawlers
                 return JsonConvert.DeserializeObject<Tool>(r.ReadToEnd());
         }
 
-        private void ExtractPublications(Tool tool, string toolFileName)
+        private List<Publication> ExtractPublications(string toolFileName)
         {
+            var pubs = new List<Publication>();
             using (StreamReader r = new StreamReader(toolFileName))
             {
                 dynamic array = JsonConvert.DeserializeObject(r.ReadToEnd());
@@ -70,16 +72,12 @@ namespace Genometric.TVQ.API.Crawlers
                     if (jProperty.Name == "publication")
                     {
                         foreach (JObject jPub in jProperty.Value)
-                        {
-                            var pub = JsonConvert.DeserializeObject<Publication>(jPub.ToString());
-                            pub.ToolId = tool.Id;
-                            _dbContext.Publications.Add(pub);
-                            _publications.Add(pub);
-                        }
+                            pubs.Add(JsonConvert.DeserializeObject<Publication>(jPub.ToString()));
                         break;
                     }
                 }
             }
+            return pubs;
         }
     }
 }

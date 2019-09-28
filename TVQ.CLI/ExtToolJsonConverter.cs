@@ -15,7 +15,7 @@ namespace Genometric.TVQ.CLI
         {
             _propertyMappings = new Dictionary<string, string>
             {
-                {"Id", nameof(ExtTool.Id)},
+                {"Id", nameof(ExtTool.ID)},
                 {"CodeRepo", nameof(ExtTool.CodeRepo)},
                 {"Description", nameof(ExtTool.Description)},
                 {"Homepage", nameof(ExtTool.Homepage)},
@@ -26,8 +26,7 @@ namespace Genometric.TVQ.CLI
                 {"UserID", nameof(ExtTool.UserID)},
 
                 /// May not need the following two.
-                {"PublicationID", nameof(ExtTool.PublicationID)},
-                {"RepositoryID", nameof(ExtTool.RepositoryID)}
+                {"RepositoryID", nameof(ExtTool.RepoID)}
             };
         }
 
