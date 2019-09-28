@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace Genometric.TVQ.API.Model
 {
+    [JsonConverter(typeof(RepositoryJsonConverter))]
     public class Repository
     {
         public enum Repo { ToolShed, BioTools };
@@ -13,7 +15,16 @@ namespace Genometric.TVQ.API.Model
 
         public string URI { set; get; }
 
-        public int ToolCount { set; get; }
+        public int ToolsCount
+        {
+            get
+            {
+                if (Tools != null)
+                    return Tools.Count;
+                else
+                    return 0;
+            }
+        }
 
         public virtual List<Tool> Tools { set; get; }
 

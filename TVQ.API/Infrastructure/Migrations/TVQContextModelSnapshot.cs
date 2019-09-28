@@ -53,8 +53,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
 
                     b.Property<int?>("Name");
 
-                    b.Property<int>("ToolCount");
-
                     b.Property<string>("URI")
                         .IsRequired();
 

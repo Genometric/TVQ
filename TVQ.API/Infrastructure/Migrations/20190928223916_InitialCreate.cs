@@ -14,8 +14,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<int>(nullable: true),
-                    URI = table.Column<string>(nullable: false),
-                    ToolCount = table.Column<int>(nullable: false)
+                    URI = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
