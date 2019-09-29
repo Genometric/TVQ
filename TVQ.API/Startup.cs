@@ -32,7 +32,13 @@ namespace Genometric.TVQ.API
         /// </summary>
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc(
+                options => options.EnableEndpointRouting = false
+                ).SetCompatibilityVersion(
+                CompatibilityVersion.Version_3_0);
+
+            services.AddMvc().AddNewtonsoftJson();
+
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddCustomDbContext(Configuration);
             services.AddHostedService<QueuedHostedService>();
