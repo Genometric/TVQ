@@ -3,6 +3,7 @@ version: '3.4'
 services:
 
   sql.data:
+    container_name: tvq_db
     image: microsoft/mssql-server-linux:2017-latest
     # environment:
       # - ID=SA
@@ -17,6 +18,7 @@ services:
       # on the host.
 
   tvq:
+    container_name: tvq_container
     image: ${DOCKER_REGISTRY-}tvq
     build:
       context: .
