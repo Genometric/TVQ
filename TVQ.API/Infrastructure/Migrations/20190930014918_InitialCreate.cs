@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Genometric.TVQ.API.Infrastructure.Migrations
@@ -12,7 +12,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<int>(nullable: true),
                     URI = table.Column<string>(nullable: false)
                 },
@@ -26,7 +26,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     RepositoryID = table.Column<int>(nullable: false),
                     IDinRepo = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
@@ -53,14 +53,14 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     ToolID = table.Column<int>(nullable: false),
                     PubMedID = table.Column<string>(nullable: true),
                     Title = table.Column<string>(nullable: true),
                     Year = table.Column<string>(nullable: true),
                     CitedBy = table.Column<int>(nullable: false),
                     DOI = table.Column<string>(nullable: true),
-                    Citation = table.Column<string>(nullable: true)
+                    TotalCitationCount = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -72,6 +72,32 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "Citations",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PublicationID = table.Column<int>(nullable: false),
+                    Count = table.Column<int>(nullable: false),
+                    Date = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Citations", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Citations_Publications_PublicationID",
+                        column: x => x.PublicationID,
+                        principalTable: "Publications",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Citations_PublicationID",
+                table: "Citations",
+                column: "PublicationID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Publications_ToolID",
@@ -86,6 +112,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Citations");
+
             migrationBuilder.DropTable(
                 name: "Publications");
 

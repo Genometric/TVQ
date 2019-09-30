@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace Genometric.TVQ.API.Model
 {
@@ -19,7 +20,9 @@ namespace Genometric.TVQ.API.Model
 
         public string DOI { set; get; }
 
-        public string Citation { set; get; }
+        public string TotalCitationCount { set; get; }
+
+        public virtual List<Citation> Citations { set; get; }
 
         public virtual Tool Tool { set; get; }
 

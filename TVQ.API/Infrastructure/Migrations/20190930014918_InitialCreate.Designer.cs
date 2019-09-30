@@ -4,14 +4,16 @@ using Genometric.TVQ.API.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
     [DbContext(typeof(TVQContext))]
-    partial class TVQContextModelSnapshot : ModelSnapshot
+    [Migration("20190930014918_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
