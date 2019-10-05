@@ -28,6 +28,8 @@ namespace Genometric.TVQ.API.Model
 
         public virtual Repository Repository { set; get; }
 
+        public virtual List<ToolDownloadRecord> Downloads { get; }
+
         public virtual List<Publication> Publications { set; get; }
 
         public Tool() { }

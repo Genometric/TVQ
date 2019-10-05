@@ -60,13 +60,34 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     Year = table.Column<string>(nullable: true),
                     CitedBy = table.Column<int>(nullable: false),
                     DOI = table.Column<string>(nullable: true),
-                    TotalCitationCount = table.Column<string>(nullable: true)
+                    BibTeXEntry = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Publications", x => x.ID);
                     table.ForeignKey(
                         name: "FK_Publications_Tools_ToolID",
+                        column: x => x.ToolID,
+                        principalTable: "Tools",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ToolDownloadRecord",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ToolID = table.Column<int>(nullable: false),
+                    Count = table.Column<int>(nullable: false),
+                    Date = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ToolDownloadRecord", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_ToolDownloadRecord_Tools_ToolID",
                         column: x => x.ToolID,
                         principalTable: "Tools",
                         principalColumn: "ID",
@@ -105,6 +126,11 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 column: "ToolID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ToolDownloadRecord_ToolID",
+                table: "ToolDownloadRecord",
+                column: "ToolID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Tools_RepositoryID",
                 table: "Tools",
                 column: "RepositoryID");
@@ -114,6 +140,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Citations");
+
+            migrationBuilder.DropTable(
+                name: "ToolDownloadRecord");
 
             migrationBuilder.DropTable(
                 name: "Publications");
