@@ -37,7 +37,10 @@ namespace Genometric.TVQ.API
                 ).SetCompatibilityVersion(
                 CompatibilityVersion.Version_3_0);
 
-            services.AddMvc().AddNewtonsoftJson();
+            services.AddMvc().AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            });
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddCustomDbContext(Configuration);

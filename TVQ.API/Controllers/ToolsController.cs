@@ -22,9 +22,14 @@ namespace Genometric.TVQ.API.Controllers
 
         // GET: api/v1/tools
         [HttpGet]
-        public IEnumerable<Tool> GetDatas()
+        public List<ToolDTO> GetDatas()
         {
-            return _context.Tools;
+            // Exceptionally return List instead of IEnumerable
+            // in this API, because the tools count can be more 
+            // than the default maximum size of IEnumerable.
+            var tools = from tool in _context.Tools
+                        select new ToolDTO(tool);
+            return tools.ToList();
         }
 
         // GET: api/v1/tools/5
