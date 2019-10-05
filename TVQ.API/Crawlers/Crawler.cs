@@ -30,6 +30,10 @@ namespace Genometric.TVQ.API.Crawlers
                         crawler = new BioTools(_dbContext, repo);
                         break;
 
+                    case Repo.Bioconductor:
+                        crawler = new Bioconductor(_dbContext, repo);
+                        break;
+
                     default:
                         /// TODO: replace with an exception.
                         return;

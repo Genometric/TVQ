@@ -7,7 +7,7 @@ namespace Genometric.TVQ.API.Model
     [JsonConverter(typeof(RepositoryJsonConverter))]
     public class Repository
     {
-        public enum Repo { ToolShed, BioTools };
+        public enum Repo { ToolShed, BioTools, Bioconductor };
 
         public int ID { set; get; }
 

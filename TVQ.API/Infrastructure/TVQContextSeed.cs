@@ -56,6 +56,11 @@ namespace Genometric.TVQ.API.Infrastructure
                 {
                     Name = Repository.Repo.BioTools,
                     URI = "https://github.com/bio-tools/content/archive/master.zip"
+                },
+                new Repository()
+                {
+                    Name = Repository.Repo.Bioconductor,
+                    URI = "https://github.com/Genometric/ToolVisibilityQuantifier/raw/master/data/bioconductor/"
                 }
             };
         }
