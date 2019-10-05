@@ -30,5 +30,5 @@ if __name__ == "__main__":
             citation = get_citation(file)
             tools[filename] = citation
 
-    with open('data.json', 'w', encoding='utf-8') as f:
+    with open('citations.json', 'w', encoding='utf-8') as f:
         json.dump(tools, f, ensure_ascii=False, indent=4)
