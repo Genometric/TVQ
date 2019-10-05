@@ -157,7 +157,7 @@ namespace Genometric.TVQ.API.Crawlers
                                     break;
 
                                 case "bibtex":
-                                    pub.TotalCitationCount = item.Value;
+                                    pub.BibTeXEntry = item.Value;
                                     break;
                             }
                             pubs.Add(pub);

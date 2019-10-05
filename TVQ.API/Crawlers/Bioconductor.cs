@@ -31,7 +31,7 @@ namespace Genometric.TVQ.API.Crawlers
                 foreach (var item in items)
                 {
                     var tool = new Tool() { Name = item.Key, Repository = _repo };
-                    var pubs = new List<Publication> { new Publication() { TotalCitationCount = item.Value, Tool = tool } };
+                    var pubs = new List<Publication> { new Publication() { BibTeXEntry = item.Value, Tool = tool } };
                     AddEntities(tool, pubs);
                 }
             }

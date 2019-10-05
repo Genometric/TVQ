@@ -157,14 +157,14 @@ namespace Genometric.TVQ.CLI
             }
             else
             {
-                var type = new Regex(@".*@(?<type>.+){.*").Match(publication.TotalCitationCount).Groups["type"].Value.ToLower().Trim();
+                var type = new Regex(@".*@(?<type>.+){.*").Match(publication.BibTeXEntry).Groups["type"].Value.ToLower().Trim();
                 switch(type)
                 {
                     case "misc":
                     case "article":
                     case "book":
                     case "inproceedings":
-                        var title = new Regex(@".*title={(?<title>.+)}.*").Match(publication.TotalCitationCount).Groups["title"].Value;
+                        var title = new Regex(@".*title={(?<title>.+)}.*").Match(publication.BibTeXEntry).Groups["title"].Value;
                         //var author = new Regex(@".*author={(?<author>.+)}.*").Match(publication.Citation).Groups["author"].Value;
                         //var year = new Regex(@".*year={(?<year>.+)}.*").Match(publication.Citation).Groups["year"].Value;
                         parameters["query"] = string.Format("TITLE(\"{0}\")", title);

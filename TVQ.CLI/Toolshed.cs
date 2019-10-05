@@ -163,7 +163,7 @@ namespace TVQ.CLI
                                 tool.Publications.Add(new Publication()
                                 {
                                     ToolID = tool.ID,
-                                    TotalCitationCount = item.Value
+                                    BibTeXEntry = item.Value
                                 });
                                 break;
                         }

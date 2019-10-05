@@ -19,7 +19,7 @@ namespace Genometric.TVQ.API.Model
                 {"year", nameof(Publication.Year)},
                 {"CitedBy", nameof(Publication.CitedBy)},
                 {"doi", nameof(Publication.DOI)},
-                {"citation", nameof(Publication.TotalCitationCount)},
+                {"citation", nameof(Publication.BibTeXEntry)},
                 {"pmid", nameof(Publication.PubMedID)}
             };
         }

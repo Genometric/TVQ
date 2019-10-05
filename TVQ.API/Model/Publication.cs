@@ -20,7 +20,7 @@ namespace Genometric.TVQ.API.Model
 
         public string DOI { set; get; }
 
-        public string TotalCitationCount { set; get; }
+        public string BibTeXEntry { set; get; }
 
         public virtual List<Citation> Citations { set; get; }
 
