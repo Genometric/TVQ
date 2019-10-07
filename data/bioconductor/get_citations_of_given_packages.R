@@ -1,0 +1,11 @@
+# chooseCRANmirror()
+# install.packages("BiocManager")
+# install.packages("knitcitations")
+# install.packages("RGtk2")
+packages <- BiocManager::available()
+packages_vector = strsplit(packages, " ")
+package = read.table("input.txt")
+name = package[1, 1]
+if (!requireNamespace(name, quietly = TRUE))
+  BiocManager::install(name)
+capture.output(citation(name), file = paste(name, ".txt"))
