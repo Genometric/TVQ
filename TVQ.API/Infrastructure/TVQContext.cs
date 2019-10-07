@@ -13,6 +13,7 @@ namespace Genometric.TVQ.API.Infrastructure
         }
 
         public DbSet<Tool> Tools { set; get; }
+        public DbSet<ToolDownloadRecord> ToolDownloadRecords { set; get; }
         public DbSet<Repository> Repositories { set; get; }
         public DbSet<Publication> Publications { set; get; }
         public DbSet<Citation> Citations { set; get; }
@@ -23,6 +24,7 @@ namespace Genometric.TVQ.API.Infrastructure
             builder.ApplyConfiguration(new PublicationEntityTypeConfiguration());
             builder.ApplyConfiguration(new RepositoryItemEntityTypeConfiguration());
             builder.ApplyConfiguration(new CitationEntityTypeConfiguration());
+            builder.ApplyConfiguration(new ToolDownloadRecordEntityTypeConfiguration());
         }
     }
 }
