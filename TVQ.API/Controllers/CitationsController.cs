@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace TVQ.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class CitationsController : ControllerBase
     {
@@ -19,14 +19,14 @@ namespace TVQ.API.Controllers
             _context = context;
         }
 
-        // GET: api/Citations
+        // GET: api/v1/Citations
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Citation>>> GetCitations()
         {
             return await _context.Citations.ToListAsync().ConfigureAwait(false);
         }
 
-        // GET: api/Citations/5
+        // GET: api/v1/Citations/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Citation>> GetCitation(int id)
         {
@@ -40,7 +40,7 @@ namespace TVQ.API.Controllers
             return citation;
         }
 
-        // PUT: api/Citations/5
+        // PUT: api/v1/Citations/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut("{id}")]
@@ -72,7 +72,7 @@ namespace TVQ.API.Controllers
             return NoContent();
         }
 
-        // POST: api/Citations
+        // POST: api/v1/Citations
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPost]
@@ -84,7 +84,7 @@ namespace TVQ.API.Controllers
             return CreatedAtAction("GetCitation", new { id = citation.ID }, citation);
         }
 
-        // DELETE: api/Citations/5
+        // DELETE: api/v1/Citations/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<Citation>> DeleteCitation(int id)
         {
