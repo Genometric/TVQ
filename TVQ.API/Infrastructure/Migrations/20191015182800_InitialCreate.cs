@@ -74,7 +74,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ToolDownloadRecord",
+                name: "ToolDownloadRecords",
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
@@ -85,9 +85,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ToolDownloadRecord", x => x.ID);
+                    table.PrimaryKey("PK_ToolDownloadRecords", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_ToolDownloadRecord_Tools_ToolID",
+                        name: "FK_ToolDownloadRecords_Tools_ToolID",
                         column: x => x.ToolID,
                         principalTable: "Tools",
                         principalColumn: "ID",
@@ -102,7 +102,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PublicationID = table.Column<int>(nullable: false),
                     Count = table.Column<int>(nullable: false),
-                    Date = table.Column<DateTime>(nullable: false)
+                    Date = table.Column<DateTime>(nullable: false),
+                    Source = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -126,8 +127,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 column: "ToolID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ToolDownloadRecord_ToolID",
-                table: "ToolDownloadRecord",
+                name: "IX_ToolDownloadRecords_ToolID",
+                table: "ToolDownloadRecords",
                 column: "ToolID");
 
             migrationBuilder.CreateIndex(
@@ -142,7 +143,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 name: "Citations");
 
             migrationBuilder.DropTable(
-                name: "ToolDownloadRecord");
+                name: "ToolDownloadRecords");
 
             migrationBuilder.DropTable(
                 name: "Publications");

@@ -35,6 +35,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<int>("PublicationID")
                         .HasColumnType("int");
 
+                    b.Property<int?>("Source")
+                        .HasColumnType("int");
+
                     b.HasKey("ID");
 
                     b.HasIndex("PublicationID");
@@ -157,7 +160,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
 
                     b.HasIndex("ToolID");
 
-                    b.ToTable("ToolDownloadRecord");
+                    b.ToTable("ToolDownloadRecords");
                 });
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.Citation", b =>

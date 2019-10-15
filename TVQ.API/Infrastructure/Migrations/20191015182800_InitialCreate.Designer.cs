@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
     [DbContext(typeof(TVQContext))]
-    [Migration("20191005235022_InitialCreate")]
+    [Migration("20191015182800_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,6 +35,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("PublicationID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Source")
                         .HasColumnType("int");
 
                     b.HasKey("ID");
@@ -159,7 +162,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
 
                     b.HasIndex("ToolID");
 
-                    b.ToTable("ToolDownloadRecord");
+                    b.ToTable("ToolDownloadRecords");
                 });
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.Citation", b =>
