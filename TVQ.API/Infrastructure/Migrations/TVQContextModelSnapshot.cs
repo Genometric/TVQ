@@ -61,7 +61,13 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<string>("DOI")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("EID")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PubMedID")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ScopusID")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")

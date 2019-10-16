@@ -12,6 +12,10 @@ namespace Genometric.TVQ.API.Model
 
         public string PubMedID { set; get; }
 
+        public string EID { set; get; }
+
+        public string ScopusID { set; get; }
+
         public string Title { set; get; }
 
         public string Year { set; get; }

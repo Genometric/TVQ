@@ -1,7 +1,10 @@
-﻿using Genometric.TVQ.API.Infrastructure;
+﻿using Genometric.TVQ.API.Crawlers;
+using Genometric.TVQ.API.Infrastructure;
+using Genometric.TVQ.API.Infrastructure.BackgroundTasks;
 using Genometric.TVQ.API.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,10 +16,17 @@ namespace TVQ.API.Controllers
     public class CitationsController : ControllerBase
     {
         private readonly TVQContext _context;
+        private readonly IBackgroundTaskQueue _queue;
+        private readonly ILogger<CitationsController> _logger;
 
-        public CitationsController(TVQContext context)
+        public CitationsController(
+            TVQContext context,
+            IBackgroundTaskQueue queue,
+            ILogger<CitationsController> logger)
         {
             _context = context;
+            _queue = queue;
+            _logger = logger;
         }
 
         // GET: api/v1/Citations
@@ -98,6 +108,23 @@ namespace TVQ.API.Controllers
             await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return citation;
+        }
+
+        // GET: api/v1/citations/scan/
+        [HttpGet("scan")]
+        public async Task<IActionResult> ScanToolsInRepo()
+        {
+            // THIS IS A TMP METHOD, IT WILL BE UPDATED TO ADHERE WITH 
+            // A RESFUL APPROACH.
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            _queue.QueueBackgroundWorkItem(async response =>
+            {
+                await new Scopus(_context).CrawlAsync();
+            });
+
+            return Ok();
         }
 
         private bool CitationExists(int id)

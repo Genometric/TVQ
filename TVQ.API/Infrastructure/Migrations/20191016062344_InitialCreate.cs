@@ -56,6 +56,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ToolID = table.Column<int>(nullable: false),
                     PubMedID = table.Column<string>(nullable: true),
+                    EID = table.Column<string>(nullable: true),
+                    ScopusID = table.Column<string>(nullable: true),
                     Title = table.Column<string>(nullable: true),
                     Year = table.Column<string>(nullable: true),
                     CitedBy = table.Column<int>(nullable: false),
