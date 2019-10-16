@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using System.Web;
 
 namespace Genometric.TVQ.API.Crawlers
@@ -37,31 +38,44 @@ namespace Genometric.TVQ.API.Crawlers
 
         public async Task CrawlAsync()
         {
-            /// Generally this implementation is preferred over 
-            /// `Parallel.ForEach` and `Task.WaitAll`. 
-            /// 
-            /// `Parallel.ForEach` is useful for CPU-bound operations,
-            /// but this task IO-bound, hence it hangs threads waiting 
-            /// for IO response.
-            /// 
-            /// `Task.WaitAll` block threads from running any other 
-            /// operation until this task has ended.
-            /// 
-            /// The following method is ideal for IO-bound operations,
-            /// as is here, and does not block threads. Indeed, this 
-            /// can return control to the caller, which can handle 
-            /// waiting.
-            /// 
+            // This method is implemented using the Task Parallel Library (TPL).
+            // Read the following page for more info on the flow: 
+            // https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-parallel-library-tpl
 
-            Task.WhenAll(
-                _dbContext.Publications.Select(
-                    pub => GetCitations(pub))).Wait();
+            var linkOptions = new DataflowLinkOptions
+            {
+                PropagateCompletion = true
+            };
+
+            var blockOptions = new ExecutionDataflowBlockOptions
+            {
+                MaxDegreeOfParallelism = 3
+            };
+
+            var updateWithScopusInfo = new TransformBlock<Publication, Publication>(
+                new Func<Publication, Publication>(UpdateWithScopusInfo),
+                blockOptions);
+
+            var getCitations = new TransformBlock<Publication, List<Citation>>(
+                new Func<Publication, List<Citation>>(GetCitations),
+                blockOptions);
+
+            var saveToDatabase = new ActionBlock<List<Citation>>(
+                input => { _dbContext.Citations.AddRangeAsync(input); },
+                blockOptions);
+
+            updateWithScopusInfo.LinkTo(getCitations, linkOptions);
+            getCitations.LinkTo(saveToDatabase, linkOptions);
+
+            foreach (var publication in _dbContext.Publications)
+                updateWithScopusInfo.Post(publication);
+            
+            updateWithScopusInfo.Complete();
+
+            await saveToDatabase.Completion.ConfigureAwait(false);
         }
 
-
-
-        // todo: the following method should only query scopus and get EID, and store it in the db. 
-        private async Task FetchScopusEID(Publication publication)
+        private Publication UpdateWithScopusInfo(Publication publication)
         {
             var _client = new HttpClient();
 
@@ -87,44 +101,44 @@ namespace Genometric.TVQ.API.Crawlers
                         parameters["query"] = string.Format("TITLE(\"{0}\")", title);
                         break;
 
-                    default:
+                    //default:
                         // not supported type at the moment.
                         //return 0;
-                        return;
+                        //throw
 
                 }
             }
             uriBuilder.Query = parameters.ToString();
 
-            HttpResponseMessage response = await _client.GetAsync(uriBuilder.Uri).ConfigureAwait(false);
+
+            HttpResponseMessage response = _client.GetAsync(uriBuilder.Uri).ConfigureAwait(false).GetAwaiter().GetResult(); //await _client.GetAsync(uriBuilder.Uri).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
                 /// TODO: replace with an exception.
                 //return 0;
             }
 
-            var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var content = response.Content.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult(); //await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             var obj = JObject.Parse(content);
 
             var entries = (JArray)obj["search-results"]["entry"];
 
-            if(entries.Count == 0)
+            if (entries.Count == 0)
             {
                 // log error
-                return;
+                //return;
             }
-            else if(entries.Count >= 1)
+            else if (entries.Count >= 1)
             {
                 // log error
             }
 
             publication.EID = entries.Select(x => x["eid"]).First().ToString();
             publication.ScopusID = entries.Select(x => x["dc:identifier"]).First().ToString().Split(':')[1];
+            return publication;
         }
 
-
-
-        private async Task GetCitations(Publication publication)
+        private List<Citation> GetCitations(Publication publication)
         {
             DateTime startDate = new DateTime(2000, 01, 01);
             DateTime endDate = new DateTime(2020, 01, 01);
@@ -150,14 +164,14 @@ namespace Genometric.TVQ.API.Crawlers
             try
             {
                 var tmpuri = uriBuilder.Uri;
-                HttpResponseMessage response = await _client.GetAsync(uriBuilder.Uri).ConfigureAwait(false);
+                HttpResponseMessage response = _client.GetAsync(uriBuilder.Uri).ConfigureAwait(false).GetAwaiter().GetResult();
                 if (!response.IsSuccessStatusCode)
                 {
                     /// TODO: replace with an exception.
                     //return 0;
                 }
 
-                var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var content = response.Content.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult();
                 var obj = JObject.Parse(content);
                 var columnHeading = (JArray)obj["abstract-citations-response"]["citeColumnTotalXML"]["citeCountHeader"]["columnHeading"];
                 var years = columnHeading.Select(c => (int)c["$"]).ToList();
@@ -176,12 +190,14 @@ namespace Genometric.TVQ.API.Crawlers
                     });
                 }
 
-                _dbContext.Citations.AddRangeAsync(citations).Wait();
+                return citations;
             }
             catch (Exception e)
             {
 
             }
+
+            throw new Exception();
         }
     }
 }
