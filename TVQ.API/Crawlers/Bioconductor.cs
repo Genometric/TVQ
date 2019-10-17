@@ -19,11 +19,13 @@ namespace Genometric.TVQ.API.Crawlers
 
         public override async Task ScanAsync()
         {
-            ReadCitationsFile();
-            ReadDownloadStats();
+            await ReadCitationsFile().ConfigureAwait(false);
+            var records = GetDownloadStats();
+            await _dbContext.ToolDownloadRecords.AddRangeAsync(records).ConfigureAwait(false);
+            await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        private void ReadCitationsFile()
+        private async Task ReadCitationsFile()
         {
             var citationsFileName = _sessionTempPath + Utilities.GetRandomString();
             _webClient.DownloadFileTaskAsync(_repo.GetURI() + _citationsFileName, citationsFileName).Wait();
@@ -40,17 +42,18 @@ namespace Genometric.TVQ.API.Crawlers
                         continue;
                     }
 
-                    TryAddEntities(
+                    await TryAddEntities(
                         new Tool() { Name = item.Key.Trim() },
-                        new Publication() { BibTeXEntry = item.Value });
+                        new Publication() { BibTeXEntry = item.Value }
+                        ).ConfigureAwait(false);
                 }
             }
 
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync().ConfigureAwait(false);
             File.Delete(citationsFileName);
         }
 
-        private void ReadDownloadStats()
+        private List<ToolDownloadRecord> GetDownloadStats()
         {
             var statsFileName = _sessionTempPath + Utilities.GetRandomString();
             _webClient.DownloadFileTaskAsync(_repo.GetURI() + _statsFileName, statsFileName).Wait();
@@ -58,6 +61,7 @@ namespace Genometric.TVQ.API.Crawlers
             string line;
             using var reader = new StreamReader(statsFileName);
             reader.ReadLine();
+            var records = new List<ToolDownloadRecord>();
             while ((line = reader.ReadLine()) != null)
             {
                 var cols = line.Split('\t');
@@ -87,7 +91,7 @@ namespace Genometric.TVQ.API.Crawlers
                         Count = int.Parse(cols[3], CultureInfo.CurrentCulture)
                     };
 
-                    _dbContext.ToolDownloadRecords.Add(downloadRecord);
+                    records.Add(downloadRecord);
                 }
                 catch (InvalidOperationException e)
                 {
@@ -102,6 +106,8 @@ namespace Genometric.TVQ.API.Crawlers
                     // TODO: log exception and continue, do NOT break the while loop.
                 }
             }
+
+            return records;
         }
     }
 }

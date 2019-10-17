@@ -1,7 +1,6 @@
 ﻿using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Model;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using System.Threading.Tasks;
 using static Genometric.TVQ.API.Model.Repository;
 
@@ -41,8 +40,8 @@ namespace Genometric.TVQ.API.Crawlers
                         return;
                 }
 
-                await crawler.ScanAsync();
-                await _dbContext.SaveChangesAsync();
+                await crawler.ScanAsync().ConfigureAwait(false);
+                await _dbContext.SaveChangesAsync().ConfigureAwait(false);
                 crawler.Dispose();
             }
             catch (DbUpdateConcurrencyException)

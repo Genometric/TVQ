@@ -57,7 +57,7 @@ namespace Genometric.TVQ.API.Crawlers
 
         public abstract Task ScanAsync();
 
-        protected bool TryAddTool(Tool tool)
+        protected async Task<bool> TryAddTool(Tool tool)
         {
             tool.Name = tool.Name.Trim();
             if (Tools.ContainsKey(tool.Name))
@@ -70,24 +70,24 @@ namespace Genometric.TVQ.API.Crawlers
 
             // TODO: handle failure of the following attempt. 
             Tools.TryAdd(tool.Name, tool);
-            _dbContext.Tools.Add(tool);
+            await _dbContext.Tools.AddAsync(tool);
             return true;
         }
 
-        protected void TryAddEntities(Tool tool, Publication pub)
+        protected async Task TryAddEntities(Tool tool, Publication pub)
         {
-            TryAddEntities(tool, new List<Publication> { pub });
+            await TryAddEntities(tool, new List<Publication> { pub }).ConfigureAwait(false);
         }
 
-        protected void TryAddEntities(Tool tool, List<Publication> pubs)
+        protected async Task TryAddEntities(Tool tool, List<Publication> pubs)
         {
             foreach (var pub in pubs)
                 pub.Tool = tool;
             tool.Publications = pubs;
 
             // TODO: handle the failure of the following.
-            TryAddTool(tool);
-            _dbContext.Publications.AddRange(pubs);
+            await TryAddTool(tool).ConfigureAwait(false);
+            await _dbContext.Publications.AddRangeAsync(pubs).ConfigureAwait(false);
         }
 
         public void Dispose()

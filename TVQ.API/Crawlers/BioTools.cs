@@ -19,7 +19,7 @@ namespace Genometric.TVQ.API.Crawlers
         public override async Task ScanAsync()
         {
             var archiveFileName = DownloadArchive();
-            TraverseArchive(archiveFileName);
+            await TraverseArchive(archiveFileName).ConfigureAwait(false);
         }
 
         private string DownloadArchive()
@@ -29,7 +29,7 @@ namespace Genometric.TVQ.API.Crawlers
             return archiveFileName;
         }
 
-        private void TraverseArchive(string archiveFileName)
+        private async Task TraverseArchive(string archiveFileName)
         {
             try
             {
@@ -43,7 +43,7 @@ namespace Genometric.TVQ.API.Crawlers
                             entry.ExtractToFile(extractedFileName);
                             var tool = ExtractTool(extractedFileName);
                             var pubs = ExtractPublications(extractedFileName);
-                            TryAddEntities(tool, pubs);
+                            await TryAddEntities(tool, pubs).ConfigureAwait(false);
                             
                             File.Delete(extractedFileName);
                         }
