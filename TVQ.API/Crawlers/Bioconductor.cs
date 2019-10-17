@@ -35,12 +35,22 @@ namespace Genometric.TVQ.API.Crawlers
                 var items = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
                 foreach (var item in items)
                 {
+                    var toolsWithSameNameCount = _dbContext.Tools.Count(x => x.Name == item.Key);
+                    if (toolsWithSameNameCount > 0)
+                    {
+                        // TODO: log this info.
+                        // If you want to consider tool name as a unique property, then avoid
+                        // adding tools with same name. In that case, apply that logic here and 
+                        // in all the other crawlers.
+                    }
+
                     var tool = new Tool() { Name = item.Key, Repository = _repo };
                     var pubs = new List<Publication> { new Publication() { BibTeXEntry = item.Value, Tool = tool } };
                     AddEntities(tool, pubs);
                 }
             }
 
+            _dbContext.SaveChanges();
             File.Delete(citationsFileName);
         }
 
@@ -50,17 +60,32 @@ namespace Genometric.TVQ.API.Crawlers
             _webClient.DownloadFileTaskAsync(_repo.GetURI() + _statsFileName, statsFileName).Wait();
 
             string line;
-            using (var reader = new StreamReader(statsFileName))
+            using var reader = new StreamReader(statsFileName);
+            reader.ReadLine();
+            while ((line = reader.ReadLine()) != null)
             {
-                reader.ReadLine();
-                while ((line = reader.ReadLine()) != null)
+
+                var cols = line.Split('\t');
+                if (cols[2] == "all")
+                    continue;
+
+                Tool tool = null;
+                try
                 {
-                    var cols = line.Split('\t');
-                    var tool = _dbContext.Tools.Single(x => x.Name == cols[0]);
+                    tool = _dbContext.Tools.First(x => x.Name == cols[0]);
+                }
+                catch (InvalidOperationException e)
+                {
+                    // TODO log the error.
+                    continue;
+                }
+
+                try
+                {
                     var date = new DateTime(
-                        year: int.Parse(cols[1], CultureInfo.CurrentCulture),
-                        month: DateTime.ParseExact(cols[2], "MMM", CultureInfo.CurrentCulture).Month,
-                        day: 1);
+                       year: int.Parse(cols[1], CultureInfo.CurrentCulture),
+                       month: DateTime.ParseExact(cols[2], "MMM", CultureInfo.CurrentCulture).Month,
+                       day: 1);
 
                     var downloadRecord = new ToolDownloadRecord()
                     {
@@ -71,6 +96,18 @@ namespace Genometric.TVQ.API.Crawlers
                     };
 
                     _dbContext.ToolDownloadRecords.Add(downloadRecord);
+                }
+                catch (InvalidOperationException e)
+                {
+                    // TODO: log exception and continue, do NOT break the while loop.
+                }
+                catch (FormatException e)
+                {
+                    // TODO: log exception and continue, do NOT break the while loop.
+                }
+                catch (Exception e)
+                {
+                    // TODO: log exception and continue, do NOT break the while loop.
                 }
             }
         }
