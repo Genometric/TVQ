@@ -15,6 +15,8 @@ namespace Genometric.TVQ.API.Infrastructure.EntityConfigurations
 
             builder.Property(obj => obj.ID).IsRequired(true);
 
+            builder.HasIndex(obj => obj.Name).IsUnique();
+
             foreach (var p in typeof(Tool).GetProperties())
             {
                 if (p.Name == nameof(Tool.ID) ||

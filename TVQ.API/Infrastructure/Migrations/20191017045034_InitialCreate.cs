@@ -134,6 +134,13 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 column: "ToolID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Tools_Name",
+                table: "Tools",
+                column: "Name",
+                unique: true,
+                filter: "[Name] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Tools_RepositoryID",
                 table: "Tools",
                 column: "RepositoryID");
