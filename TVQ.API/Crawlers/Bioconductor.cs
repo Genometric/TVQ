@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Genometric.TVQ.API.Crawlers
@@ -35,18 +34,15 @@ namespace Genometric.TVQ.API.Crawlers
                 var items = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
                 foreach (var item in items)
                 {
-                    var toolsWithSameNameCount = _dbContext.Tools.Count(x => x.Name == item.Key);
-                    if (toolsWithSameNameCount > 0)
+                    if (Tools.ContainsKey(item.Key.Trim()))
                     {
-                        // TODO: log this info.
-                        // If you want to consider tool name as a unique property, then avoid
-                        // adding tools with same name. In that case, apply that logic here and 
-                        // in all the other crawlers.
+                        // TODO: log this.
+                        continue;
                     }
 
-                    var tool = new Tool() { Name = item.Key, Repository = _repo };
-                    var pubs = new List<Publication> { new Publication() { BibTeXEntry = item.Value, Tool = tool } };
-                    AddEntities(tool, pubs);
+                    TryAddEntities(
+                        new Tool() { Name = item.Key.Trim() },
+                        new Publication() { BibTeXEntry = item.Value });
                 }
             }
 
@@ -64,19 +60,15 @@ namespace Genometric.TVQ.API.Crawlers
             reader.ReadLine();
             while ((line = reader.ReadLine()) != null)
             {
-
                 var cols = line.Split('\t');
                 if (cols[2] == "all")
                     continue;
 
-                Tool tool = null;
-                try
+                if (!Tools.TryGetValue(cols[0], out Tool tool))
                 {
-                    tool = _dbContext.Tools.First(x => x.Name == cols[0]);
-                }
-                catch (InvalidOperationException e)
-                {
-                    // TODO log the error.
+                    // TODO: log this.
+                    // This mean the tool for which we have stats 
+                    // is not recognized.
                     continue;
                 }
 

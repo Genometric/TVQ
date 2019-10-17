@@ -2,7 +2,6 @@
 using Genometric.TVQ.API.Model;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -16,14 +15,17 @@ namespace Genometric.TVQ.API.Crawlers
 {
     internal class ToolShed: ToolRepoCrawler
     {
-        public ToolShed(TVQContext dbContext, Repository repo) :
+        private List<Tool> _tools;
+
+        public ToolShed(
+            TVQContext dbContext, 
+            Repository repo) :
             base(dbContext, repo)
         { }
 
         public override async Task ScanAsync()
         {
             await GetToolsAsync();
-            _dbContext.Tools.AddRange(Tools);
             await GetPublicationsAsync();
             _dbContext.Publications.AddRange(Publications);
         }
@@ -38,9 +40,11 @@ namespace Genometric.TVQ.API.Crawlers
                 /// TODO: replace with an exception.
                 return;
 
-            _tools = new ConcurrentBag<Tool>(JsonConvert.DeserializeObject<List<Tool>>(content));
-            foreach (var tool in _tools)
-                tool.Repository = _repo;
+            var tools = new List<Tool>(JsonConvert.DeserializeObject<List<Tool>>(content));
+            _tools = new List<Tool>();
+            foreach (var tool in tools)
+                if (!TryAddTool(tool))
+                    _tools.Add(tool);
         }
 
         private async Task GetPublicationsAsync()
@@ -80,13 +84,8 @@ namespace Genometric.TVQ.API.Crawlers
             downloader.LinkTo(extractXMLs, linkOptions);
             extractXMLs.LinkTo(extractPublications, linkOptions);
 
-            int c = 10;
             foreach (var tool in _tools)
-            {
                 downloader.Post(tool);
-                if (c-- == 0)
-                    break;
-            }
             downloader.Complete();
 
             await extractPublications.Completion;

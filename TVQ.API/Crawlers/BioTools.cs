@@ -43,7 +43,7 @@ namespace Genometric.TVQ.API.Crawlers
                             entry.ExtractToFile(extractedFileName);
                             var tool = ExtractTool(extractedFileName);
                             var pubs = ExtractPublications(extractedFileName);
-                            AddEntities(tool, pubs);
+                            TryAddEntities(tool, pubs);
                             
                             File.Delete(extractedFileName);
                         }

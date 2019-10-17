@@ -1,6 +1,7 @@
 ﻿using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Model;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Threading.Tasks;
 using static Genometric.TVQ.API.Model.Repository;
 
@@ -17,6 +18,7 @@ namespace Genometric.TVQ.API.Crawlers
 
         public async Task CrawlAsync(Repository repo)
         {
+            // TODO: check if another async operation is ongoing, if so, wait for that to finish before running this. 
             try
             {
                 ToolRepoCrawler crawler;
