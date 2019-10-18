@@ -17,13 +17,13 @@ namespace Genometric.TVQ.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, IHostingEnvironment env)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
-            HostingEnvironment = env;
+            WebHostEnvironment = env;
         }
 
-        public IHostingEnvironment HostingEnvironment { get; private set; }
+        public IWebHostEnvironment WebHostEnvironment { get; private set; }
         public IConfiguration Configuration { get; }
 
         /// <summary>
