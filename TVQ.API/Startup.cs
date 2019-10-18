@@ -79,7 +79,7 @@ namespace Genometric.TVQ.API
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.AddDbContext<TVQContext>(
+            services.AddDbContextPool<TVQContext>(
                 options =>
                 {
                     options.UseSqlServer(
@@ -102,8 +102,7 @@ namespace Genometric.TVQ.API
                             RelationalEventId.QueryClientEvaluationWarning));
                     /// Check Client vs. Server evaluation: 
                     /// https://docs.microsoft.com/en-us/ef/core/querying/client-eval
-                },
-                ServiceLifetime.Singleton);
+                });
 
             return services;
         }
