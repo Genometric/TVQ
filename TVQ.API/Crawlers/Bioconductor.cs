@@ -1,5 +1,4 @@
-﻿using Genometric.TVQ.API.Infrastructure;
-using Genometric.TVQ.API.Model;
+﻿using Genometric.TVQ.API.Model;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -13,19 +12,16 @@ namespace Genometric.TVQ.API.Crawlers
         private readonly string _citationsFileName = "citations.json";
         private readonly string _statsFileName = "package_stats.tsv";
 
-        public Bioconductor(TVQContext dbContext, Repository repo) :
-            base(dbContext, repo)
+        public Bioconductor(Repository repo) : base(repo)
         { }
 
         public override async Task ScanAsync()
         {
-            await ReadCitationsFile().ConfigureAwait(false);
-            var records = GetDownloadStats();
-            await _dbContext.ToolDownloadRecords.AddRangeAsync(records).ConfigureAwait(false);
-            await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+            ReadCitationsFile();
+            GetDownloadStats();
         }
 
-        private async Task ReadCitationsFile()
+        private void ReadCitationsFile()
         {
             var citationsFileName = _sessionTempPath + Utilities.GetRandomString();
             _webClient.DownloadFileTaskAsync(_repo.GetURI() + _citationsFileName, citationsFileName).Wait();
@@ -42,18 +38,16 @@ namespace Genometric.TVQ.API.Crawlers
                         continue;
                     }
 
-                    await TryAddEntities(
+                    TryAddEntities(
                         new Tool() { Name = item.Key.Trim() },
-                        new Publication() { BibTeXEntry = item.Value }
-                        ).ConfigureAwait(false);
+                        new Publication() { BibTeXEntry = item.Value });
                 }
             }
 
-            await _dbContext.SaveChangesAsync().ConfigureAwait(false);
             File.Delete(citationsFileName);
         }
 
-        private List<ToolDownloadRecord> GetDownloadStats()
+        private void GetDownloadStats()
         {
             var statsFileName = _sessionTempPath + Utilities.GetRandomString();
             _webClient.DownloadFileTaskAsync(_repo.GetURI() + _statsFileName, statsFileName).Wait();
@@ -61,7 +55,6 @@ namespace Genometric.TVQ.API.Crawlers
             string line;
             using var reader = new StreamReader(statsFileName);
             reader.ReadLine();
-            var records = new List<ToolDownloadRecord>();
             while ((line = reader.ReadLine()) != null)
             {
                 var cols = line.Split('\t');
@@ -83,15 +76,13 @@ namespace Genometric.TVQ.API.Crawlers
                        month: DateTime.ParseExact(cols[2], "MMM", CultureInfo.CurrentCulture).Month,
                        day: 1);
 
-                    var downloadRecord = new ToolDownloadRecord()
+                    ToolDownloadRecords.Add(new ToolDownloadRecord()
                     {
                         Tool = tool,
                         ToolID = tool.ID,
                         Date = date,
                         Count = int.Parse(cols[3], CultureInfo.CurrentCulture)
-                    };
-
-                    records.Add(downloadRecord);
+                    });
                 }
                 catch (InvalidOperationException e)
                 {
@@ -106,8 +97,6 @@ namespace Genometric.TVQ.API.Crawlers
                     // TODO: log exception and continue, do NOT break the while loop.
                 }
             }
-
-            return records;
         }
     }
 }

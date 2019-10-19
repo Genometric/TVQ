@@ -17,17 +17,13 @@ namespace Genometric.TVQ.API.Crawlers
     {
         private List<Tool> _tools;
 
-        public ToolShed(
-            TVQContext dbContext, 
-            Repository repo) :
-            base(dbContext, repo)
+        public ToolShed(Repository repo) : base(repo)
         { }
 
         public override async Task ScanAsync()
         {
             await GetToolsAsync().ConfigureAwait(false);
             await GetPublicationsAsync().ConfigureAwait(false);
-            await _dbContext.Publications.AddRangeAsync(Publications).ConfigureAwait(false);
         }
 
         private async Task GetToolsAsync()
@@ -42,8 +38,9 @@ namespace Genometric.TVQ.API.Crawlers
 
             var tools = new List<Tool>(JsonConvert.DeserializeObject<List<Tool>>(content));
             _tools = new List<Tool>();
+            
             foreach (var tool in tools)
-                if (!await TryAddTool(tool).ConfigureAwait(false))
+                if (!TryAddTool(tool))
                     _tools.Add(tool);
         }
 

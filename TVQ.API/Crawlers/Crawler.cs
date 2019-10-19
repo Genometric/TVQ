@@ -1,6 +1,9 @@
 ﻿using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading.Tasks;
 using static Genometric.TVQ.API.Model.Repository;
 
@@ -9,10 +12,14 @@ namespace Genometric.TVQ.API.Crawlers
     public class Crawler
     {
         private readonly TVQContext _dbContext;
+        private readonly ILogger _logger;
 
-        public Crawler(TVQContext dbContext)
+        public Crawler(
+            TVQContext dbContext,
+            ILogger<Crawler> logger)
         {
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         public async Task CrawlAsync(Repository repo)
@@ -24,15 +31,15 @@ namespace Genometric.TVQ.API.Crawlers
                 switch (repo.Name)
                 {
                     case Repo.ToolShed:
-                        crawler = new ToolShed(_dbContext, repo);
+                        crawler = new ToolShed(repo);
                         break;
 
                     case Repo.BioTools:
-                        crawler = new BioTools(_dbContext, repo);
+                        crawler = new BioTools(repo);
                         break;
 
                     case Repo.Bioconductor:
-                        crawler = new Bioconductor(_dbContext, repo);
+                        crawler = new Bioconductor(repo);
                         break;
 
                     default:
@@ -40,7 +47,15 @@ namespace Genometric.TVQ.API.Crawlers
                         return;
                 }
 
+                crawler.Tools =
+                    new ConcurrentDictionary<string, Tool>(
+                        _dbContext.Tools.ToDictionary(
+                            x => x.Name, x => x));
+
                 await crawler.ScanAsync().ConfigureAwait(false);
+                await _dbContext.Tools.AddRangeAsync(crawler.Tools.Values.ToList()).ConfigureAwait(false);
+                await _dbContext.Publications.AddRangeAsync(crawler.Publications).ConfigureAwait(false);
+                await _dbContext.ToolDownloadRecords.AddRangeAsync(crawler.ToolDownloadRecords).ConfigureAwait(false);
                 await _dbContext.SaveChangesAsync().ConfigureAwait(false);
                 crawler.Dispose();
             }

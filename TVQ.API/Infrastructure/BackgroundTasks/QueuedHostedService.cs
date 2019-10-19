@@ -11,7 +11,8 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
         private readonly ILogger _logger;
         public IBackgroundTaskQueue TaskQueue { get; }
 
-        public QueuedHostedService(IBackgroundTaskQueue taskQueue,
+        public QueuedHostedService(
+            IBackgroundTaskQueue taskQueue,
             ILoggerFactory loggerFactory)
         {
             TaskQueue = taskQueue;
@@ -25,15 +26,15 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                var workItem = await TaskQueue.DequeueAsync(cancellationToken);
+                var workItem = await TaskQueue.DequeueAsync(cancellationToken).ConfigureAwait(false);
 
                 try
                 {
-                    await workItem(cancellationToken);
+                    await workItem(cancellationToken).ConfigureAwait(false);
                 }
-                catch (Exception ex)
+                catch (Exception e)
                 {
-                    _logger.LogError(ex,
+                    _logger.LogError(e,
                        $"Error occurred executing {nameof(workItem)}.");
                 }
             }

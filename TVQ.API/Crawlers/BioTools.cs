@@ -1,5 +1,4 @@
-﻿using Genometric.TVQ.API.Infrastructure;
-using Genometric.TVQ.API.Model;
+﻿using Genometric.TVQ.API.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -12,8 +11,7 @@ namespace Genometric.TVQ.API.Crawlers
 {
     public class BioTools : ToolRepoCrawler
     {
-        public BioTools(TVQContext dbContext, Repository repo) :
-            base(dbContext, repo)
+        public BioTools(Repository repo) : base(repo)
         { }
 
         public override async Task ScanAsync()
@@ -43,7 +41,8 @@ namespace Genometric.TVQ.API.Crawlers
                             entry.ExtractToFile(extractedFileName);
                             var tool = ExtractTool(extractedFileName);
                             var pubs = ExtractPublications(extractedFileName);
-                            await TryAddEntities(tool, pubs).ConfigureAwait(false);
+                            
+                            TryAddEntities(tool, pubs);
                             
                             File.Delete(extractedFileName);
                         }

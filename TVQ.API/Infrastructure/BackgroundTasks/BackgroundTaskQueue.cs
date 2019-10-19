@@ -25,7 +25,7 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
         public async Task<Func<CancellationToken, Task>> DequeueAsync(
             CancellationToken cancellationToken)
         {
-            await _signal.WaitAsync(cancellationToken);
+            await _signal.WaitAsync(cancellationToken).ConfigureAwait(false);
             _workItems.TryDequeue(out var workItem);
 
             return workItem;

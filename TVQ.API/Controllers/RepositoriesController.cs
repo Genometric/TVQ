@@ -5,7 +5,6 @@ using Genometric.TVQ.API.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,15 +18,18 @@ namespace Genometric.TVQ.API.Controllers
         private readonly TVQContext _context;
         private readonly IBackgroundTaskQueue _queue;
         private readonly ILogger<RepositoriesController> _logger;
+        private readonly Crawler _crawler;
 
         public RepositoriesController(
-            TVQContext context, 
+            TVQContext context,
+            Crawler crawler,
             IBackgroundTaskQueue queue,
             ILogger<RepositoriesController> logger)
         {
             _context = context;
             _queue = queue;
             _logger = logger;
+            _crawler = crawler;
         }
 
         // GET: api/v1/repositories
@@ -123,7 +125,7 @@ namespace Genometric.TVQ.API.Controllers
 
             _queue.QueueBackgroundWorkItem(async response =>
             {
-                await new Crawler(_context).CrawlAsync(repository);
+                await _crawler.CrawlAsync(repository).ConfigureAwait(false);
             });
 
             return Ok(repository);

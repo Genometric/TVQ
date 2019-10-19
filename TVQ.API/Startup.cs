@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Genometric.TVQ.API.Crawlers;
 using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Infrastructure.BackgroundTasks;
 using Microsoft.AspNetCore.Builder;
@@ -47,6 +48,7 @@ namespace Genometric.TVQ.API
             services.AddCustomDbContext(Configuration);
             services.AddHostedService<QueuedHostedService>();
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+            services.AddScoped<Crawler>();
 
             var container = new ContainerBuilder();
             container.Populate(services);
