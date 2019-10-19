@@ -49,6 +49,8 @@ namespace Genometric.TVQ.API
             services.AddHostedService<QueuedHostedService>();
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
             services.AddScoped<Crawler>();
+            services.AddHostedService<QueueCrawling>();
+            services.AddSingleton<IBackgroundCrawlingQueue, BackgroundCrawlingQueue>();
 
             var container = new ContainerBuilder();
             container.Populate(services);

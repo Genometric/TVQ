@@ -16,20 +16,17 @@ namespace Genometric.TVQ.API.Controllers
     public class RepositoriesController : ControllerBase
     {
         private readonly TVQContext _context;
-        private readonly IBackgroundTaskQueue _queue;
+        private readonly IBackgroundCrawlingQueue _queue;
         private readonly ILogger<RepositoriesController> _logger;
-        private readonly Crawler _crawler;
 
         public RepositoriesController(
             TVQContext context,
-            Crawler crawler,
-            IBackgroundTaskQueue queue,
+            IBackgroundCrawlingQueue queue,
             ILogger<RepositoriesController> logger)
         {
             _context = context;
             _queue = queue;
             _logger = logger;
-            _crawler = crawler;
         }
 
         // GET: api/v1/repositories
@@ -123,10 +120,7 @@ namespace Genometric.TVQ.API.Controllers
             if (!DataItemExists(id))
                 return NotFound();
 
-            _queue.QueueBackgroundWorkItem(async response =>
-            {
-                await _crawler.CrawlAsync(repository).ConfigureAwait(false);
-            });
+            _queue.QueueBackgroundWorkItem(repository);
 
             return Ok(repository);
         }

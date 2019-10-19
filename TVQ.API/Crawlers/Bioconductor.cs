@@ -19,7 +19,7 @@ namespace Genometric.TVQ.API.Crawlers
         {
             ReadCitationsFile();
             GetDownloadStats();
-        }
+       }
 
         private void ReadCitationsFile()
         {

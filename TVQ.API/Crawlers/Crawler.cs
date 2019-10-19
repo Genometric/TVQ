@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using static Genometric.TVQ.API.Model.Repository;
 
@@ -22,7 +23,7 @@ namespace Genometric.TVQ.API.Crawlers
             _logger = logger;
         }
 
-        public async Task CrawlAsync(Repository repo)
+        public async Task CrawlAsync(Repository repo, CancellationToken cancellationToken)
         {
             // TODO: check if another async operation is ongoing, if so, wait for that to finish before running this. 
             try

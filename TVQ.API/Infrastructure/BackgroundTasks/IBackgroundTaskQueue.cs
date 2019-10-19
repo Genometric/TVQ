@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Genometric.TVQ.API.Model;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
