@@ -26,9 +26,12 @@ namespace Genometric.TVQ.API.Model
             }
         }
 
-        public virtual List<Tool> Tools { set; get; }
+        public virtual List<Tool> Tools { get; }
 
-        public Repository() { }
+        public Repository()
+        {
+            Tools = new List<Tool>();
+        }
 
         public Uri GetURI()
         {

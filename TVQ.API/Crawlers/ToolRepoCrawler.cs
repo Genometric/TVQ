@@ -52,10 +52,9 @@ namespace Genometric.TVQ.API.Crawlers
                 return false;
             }
 
-            tool.Repository = _repo;
-
             // TODO: handle failure of the following attempt. 
             Tools.TryAdd(tool.Name, tool);
+            _repo.Tools.Add(tool);
             return true;
         }
 
@@ -68,7 +67,7 @@ namespace Genometric.TVQ.API.Crawlers
         {
             foreach (var pub in pubs)
                 pub.Tool = tool;
-            tool.Publications = pubs;
+            tool.Publications.AddRange(pubs);
 
             // TODO: handle the failure of the following.
             TryAddTool(tool);

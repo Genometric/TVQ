@@ -48,20 +48,27 @@ namespace Genometric.TVQ.API.Crawlers
                         return;
                 }
 
+                if (!_dbContext.Repositories.Local.Any(e => e.ID == repo.ID))
+                    _dbContext.Attach(repo);
+
                 crawler.Tools =
                     new ConcurrentDictionary<string, Tool>(
-                        _dbContext.Tools.ToDictionary(
+                        repo.Tools.ToDictionary(
                             x => x.Name, x => x));
 
                 await crawler.ScanAsync().ConfigureAwait(false);
-                await _dbContext.Tools.AddRangeAsync(crawler.Tools.Values.ToList()).ConfigureAwait(false);
-                await _dbContext.Publications.AddRangeAsync(crawler.Publications).ConfigureAwait(false);
-                await _dbContext.ToolDownloadRecords.AddRangeAsync(crawler.ToolDownloadRecords).ConfigureAwait(false);
                 await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+
                 crawler.Dispose();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException e)
             {
+                // TODO log this.
+                throw;
+            }
+            catch(DbUpdateException e)
+            {
+                // TODO log this. 
                 throw;
             }
         }

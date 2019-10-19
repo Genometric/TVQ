@@ -30,8 +30,12 @@ namespace Genometric.TVQ.API.Model
 
         public virtual List<ToolDownloadRecord> Downloads { get; }
 
-        public virtual List<Publication> Publications { set; get; }
+        public virtual List<Publication> Publications { get; }
 
-        public Tool() { }
+        public Tool()
+        {
+            Downloads = new List<ToolDownloadRecord>();
+            Publications = new List<Publication>();
+        }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Genometric.TVQ.API.Infrastructure;
-using Genometric.TVQ.API.Model;
+﻿using Genometric.TVQ.API.Model;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -38,10 +37,13 @@ namespace Genometric.TVQ.API.Crawlers
 
             var tools = new List<Tool>(JsonConvert.DeserializeObject<List<Tool>>(content));
             _tools = new List<Tool>();
-            
+
             foreach (var tool in tools)
                 if (!TryAddTool(tool))
+                {
                     _tools.Add(tool);
+                    _repo.Tools.Add(tool);
+                }
         }
 
         private async Task GetPublicationsAsync()
@@ -159,7 +161,7 @@ namespace Genometric.TVQ.API.Crawlers
                             pubs.Add(pub);
                         }
                     }
-                    tool.Publications = pubs;
+                    tool.Publications.AddRange(pubs);
                 }
                 catch(System.Xml.XmlException e)
                 {
