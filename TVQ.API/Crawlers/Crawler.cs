@@ -2,7 +2,7 @@
 using Genometric.TVQ.API.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -65,6 +65,11 @@ namespace Genometric.TVQ.API.Crawlers
             catch(DbUpdateException e)
             {
                 // TODO log this. 
+                throw;
+            }
+            catch(Exception e)
+            {
+                // TODO log this.
                 throw;
             }
         }

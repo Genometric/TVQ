@@ -51,7 +51,7 @@ namespace TVQ.API.Controllers
         }
 
         // PUT: api/v1/Citations/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
+        // To protect from over-posting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCitation(int id, Citation citation)
@@ -83,7 +83,7 @@ namespace TVQ.API.Controllers
         }
 
         // POST: api/v1/Citations
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
+        // To protect from over-posting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPost]
         public async Task<ActionResult<Citation>> PostCitation(Citation citation)
@@ -115,13 +115,13 @@ namespace TVQ.API.Controllers
         public async Task<IActionResult> ScanToolsInRepo()
         {
             // THIS IS A TMP METHOD, IT WILL BE UPDATED TO ADHERE WITH 
-            // A RESFUL APPROACH.
+            // A RESFUL STANDARDS.
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             _queue.QueueBackgroundWorkItem(async response =>
             {
-                await new Scopus(_context).CrawlAsync();
+                await new Scopus(_context).CrawlAsync().ConfigureAwait(false);
             });
 
             return Ok();

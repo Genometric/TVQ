@@ -23,7 +23,7 @@ namespace TVQ.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Publication>>> GetPublications()
         {
-            return await _context.Publications.ToListAsync();
+            return await _context.Publications.ToListAsync().ConfigureAwait(false);
         }
 
         // GET: api/v1/Publications/5
@@ -41,7 +41,7 @@ namespace TVQ.API.Controllers
         }
 
         // PUT: api/v1/Publications/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
+        // To protect from over-posting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPublication(int id, Publication publication)
@@ -55,7 +55,7 @@ namespace TVQ.API.Controllers
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -73,13 +73,13 @@ namespace TVQ.API.Controllers
         }
 
         // POST: api/v1/Publications
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
+        // To protect from over-posting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPost]
         public async Task<ActionResult<Publication>> PostPublication(Publication publication)
         {
             _context.Publications.Add(publication);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return CreatedAtAction("GetPublication", new { id = publication.ID }, publication);
         }
@@ -95,7 +95,7 @@ namespace TVQ.API.Controllers
             }
 
             _context.Publications.Remove(publication);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return publication;
         }

@@ -31,14 +31,14 @@ namespace Genometric.TVQ.API.Controllers
 
         // GET: api/v1/repositories
         [HttpGet]
-        public IEnumerable<Repository> GetDatas()
+        public async Task<ActionResult<IEnumerable<Repository>>> GetRepos()
         {
-            return _context.Repositories;
+            return await _context.Repositories.ToListAsync().ConfigureAwait(false);
         }
 
         // GET: api/v1/repositories/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetDataItem([FromRoute] int id)
+        public async Task<IActionResult> GetRepo([FromRoute] int id)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -52,7 +52,7 @@ namespace Genometric.TVQ.API.Controllers
 
         // PUT: api/v1/repositories/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDataItem([FromRoute] int id, [FromBody] Repository dataItem)
+        public async Task<IActionResult> PutRepo([FromRoute] int id, [FromBody] Repository dataItem)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -64,11 +64,11 @@ namespace Genometric.TVQ.API.Controllers
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!DataItemExists(id))
+                if (!RepoExists(id))
                     return NotFound();
                 else
                     throw;
@@ -79,20 +79,20 @@ namespace Genometric.TVQ.API.Controllers
 
         // POST: api/v1/repositories
         [HttpPost]
-        public async Task<IActionResult> PostDataItem([FromBody] Repository dataItem)
+        public async Task<IActionResult> PostRepo([FromBody] Repository dataItem)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             _context.Repositories.Add(dataItem);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return CreatedAtAction("GetRequestItems", new { }, dataItem);
         }
 
         // DELETE: api/v1/repositories/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDataItem([FromRoute] int id)
+        public async Task<IActionResult> DeleteRepo([FromRoute] int id)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -102,7 +102,7 @@ namespace Genometric.TVQ.API.Controllers
                 return NotFound();
 
             _context.Repositories.Remove(dataItem);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return Ok(dataItem);
         }
@@ -117,7 +117,7 @@ namespace Genometric.TVQ.API.Controllers
             var repository = await _context.Repositories.FindAsync(id);
             if (repository == null)
                 return NotFound();
-            if (!DataItemExists(id))
+            if (!RepoExists(id))
                 return NotFound();
 
             _queue.QueueBackgroundWorkItem(repository);
@@ -125,7 +125,7 @@ namespace Genometric.TVQ.API.Controllers
             return Ok(repository);
         }
 
-        private bool DataItemExists(int id)
+        private bool RepoExists(int id)
         {
             return _context.Repositories.Any(e => e.ID == id);
         }

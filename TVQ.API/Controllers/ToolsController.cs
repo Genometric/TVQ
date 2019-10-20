@@ -22,9 +22,9 @@ namespace Genometric.TVQ.API.Controllers
 
         // GET: api/v1/tools
         [HttpGet]
-        public List<ToolDTO> GetDatas()
+        public List<ToolDTO> GetTools()
         {
-            // Exceptionally return List instead of IEnumerable
+            // As an exception, return List instead of IEnumerable
             // in this API, because the tools count can be more 
             // than the default maximum size of IEnumerable.
             var tools = from tool in _context.Tools
@@ -34,7 +34,7 @@ namespace Genometric.TVQ.API.Controllers
 
         // GET: api/v1/tools/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetDataItem([FromRoute] int id)
+        public async Task<IActionResult> GetTool([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
@@ -53,7 +53,7 @@ namespace Genometric.TVQ.API.Controllers
 
         // PUT: api/v1/tools/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDataItem([FromRoute] int id, [FromBody] Tool DataItem)
+        public async Task<IActionResult> PutTool([FromRoute] int id, [FromBody] Tool DataItem)
         {
             if (!ModelState.IsValid)
             {
@@ -69,11 +69,11 @@ namespace Genometric.TVQ.API.Controllers
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!DataItemExists(id))
+                if (!ToolExists(id))
                 {
                     return NotFound();
                 }
@@ -88,7 +88,7 @@ namespace Genometric.TVQ.API.Controllers
 
         // POST: api/v1/tools
         [HttpPost]
-        public async Task<IActionResult> PostDataItem([FromBody] Tool DataItem)
+        public async Task<IActionResult> PostTool([FromBody] Tool DataItem)
         {
             if (!ModelState.IsValid)
             {
@@ -96,14 +96,14 @@ namespace Genometric.TVQ.API.Controllers
             }
 
             _context.Tools.Add(DataItem);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return CreatedAtAction("GetRequestItems", new { }, DataItem);
         }
 
         // DELETE: api/v1/tools/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDataItem([FromRoute] int id)
+        public async Task<IActionResult> DeleteTool([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
@@ -117,12 +117,12 @@ namespace Genometric.TVQ.API.Controllers
             }
 
             _context.Tools.Remove(DataItem);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return Ok(DataItem);
         }
 
-        private bool DataItemExists(int id)
+        private bool ToolExists(int id)
         {
             return _context.Tools.Any(e => e.ID == id);
         }
