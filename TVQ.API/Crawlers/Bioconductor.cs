@@ -12,36 +12,28 @@ namespace Genometric.TVQ.API.Crawlers
         private readonly string _citationsFileName = "citations.json";
         private readonly string _statsFileName = "package_stats.tsv";
 
-        public Bioconductor(Repository repo) : base(repo)
+        public Bioconductor(Repository repo, List<Tool> tools) : base(repo, tools)
         { }
 
         public override async Task ScanAsync()
         {
             ReadCitationsFile();
             GetDownloadStats();
-       }
+        }
 
         private void ReadCitationsFile()
         {
-            var citationsFileName = _sessionTempPath + Utilities.GetRandomString();
-            _webClient.DownloadFileTaskAsync(_repo.GetURI() + _citationsFileName, citationsFileName).Wait();
+            var citationsFileName = SessionTempPath + Utilities.GetRandomString();
+            WebClient.DownloadFileTaskAsync(Repo.GetURI() + _citationsFileName, citationsFileName).Wait();
 
             using (var reader = new StreamReader(citationsFileName))
             {
                 string json = reader.ReadToEnd();
                 var items = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
                 foreach (var item in items)
-                {
-                    if (Tools.ContainsKey(item.Key.Trim()))
-                    {
-                        // TODO: log this.
-                        continue;
-                    }
-
                     TryAddEntities(
                         new Tool() { Name = item.Key.Trim() },
                         new Publication() { BibTeXEntry = item.Value });
-                }
             }
 
             File.Delete(citationsFileName);
@@ -49,8 +41,8 @@ namespace Genometric.TVQ.API.Crawlers
 
         private void GetDownloadStats()
         {
-            var statsFileName = _sessionTempPath + Utilities.GetRandomString();
-            _webClient.DownloadFileTaskAsync(_repo.GetURI() + _statsFileName, statsFileName).Wait();
+            var statsFileName = SessionTempPath + Utilities.GetRandomString();
+            WebClient.DownloadFileTaskAsync(Repo.GetURI() + _statsFileName, statsFileName).Wait();
 
             string line;
             using var reader = new StreamReader(statsFileName);
@@ -61,7 +53,7 @@ namespace Genometric.TVQ.API.Crawlers
                 if (cols[2] == "all")
                     continue;
 
-                if (!Tools.TryGetValue(cols[0], out Tool tool))
+                if (!ToolsDict.TryGetValue(cols[0], out Tool tool))
                 {
                     // TODO: log this.
                     // This mean the tool for which we have stats 

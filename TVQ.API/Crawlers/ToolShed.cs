@@ -12,11 +12,11 @@ using System.Xml.Linq;
 
 namespace Genometric.TVQ.API.Crawlers
 {
-    internal class ToolShed: ToolRepoCrawler
+    internal class ToolShed : ToolRepoCrawler
     {
         private List<Tool> _tools;
 
-        public ToolShed(Repository repo) : base(repo)
+        public ToolShed(Repository repo, List<Tool> tools) : base(repo, tools)
         { }
 
         public override async Task ScanAsync()
@@ -27,7 +27,7 @@ namespace Genometric.TVQ.API.Crawlers
 
         private async Task GetToolsAsync()
         {
-            HttpResponseMessage response = await _httpClient.GetAsync(_repo.URI);
+            HttpResponseMessage response = await HttpClient.GetAsync(Repo.URI);
             string content;
             if (response.IsSuccessStatusCode)
                 content = await response.Content.ReadAsStringAsync();
@@ -42,7 +42,7 @@ namespace Genometric.TVQ.API.Crawlers
                 if (!TryAddTool(tool))
                 {
                     _tools.Add(tool);
-                    _repo.Tools.Add(tool);
+                    Repo.Tools.Add(tool);
                 }
         }
 
@@ -89,17 +89,17 @@ namespace Genometric.TVQ.API.Crawlers
 
             await extractPublications.Completion;
 
-            Directory.Delete(_sessionTempPath, true);
+            Directory.Delete(SessionTempPath, true);
         }
 
         private Tool Downloader(Tool tool)
         {
-            _webClient.DownloadFileTaskAsync(
+            WebClient.DownloadFileTaskAsync(
                 address: new Uri(string.Format(
                     "https://toolshed.g2.bx.psu.edu/repos/{0}/{1}/archive/tip.zip",
                     tool.Owner,
                     tool.Name)),
-                fileName: _sessionTempPath + tool.ID);
+                fileName: SessionTempPath + tool.ID);
             return tool;
         }
 
@@ -108,14 +108,14 @@ namespace Genometric.TVQ.API.Crawlers
             /// To avoid `path traversal attacks` from malicious software, 
             /// there must be a trailing path separator at the end of the path. 
             string extractPath =
-                _sessionTempPath + tool.ID + "_" + new Random().Next(100000, 10000000) + "_" +
+                SessionTempPath + tool.ID + "_" + new Random().Next(100000, 10000000) + "_" +
                 Path.DirectorySeparatorChar;
             Directory.CreateDirectory(extractPath);
 
             var xmlFiles = new List<string>();
             try
             {
-                using (ZipArchive archive = ZipFile.OpenRead(_sessionTempPath + tool.ID))
+                using (ZipArchive archive = ZipFile.OpenRead(SessionTempPath + tool.ID))
                     foreach (ZipArchiveEntry entry in archive.Entries)
                         if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
                         {
@@ -163,7 +163,7 @@ namespace Genometric.TVQ.API.Crawlers
                     }
                     tool.Publications.AddRange(pubs);
                 }
-                catch(System.Xml.XmlException e)
+                catch (System.Xml.XmlException e)
                 {
                     /// This exception may happen if the XML 
                     /// file has multiple roots.

@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -11,34 +13,51 @@ namespace Genometric.TVQ.API.Crawlers
 {
     public abstract class ToolRepoCrawler : IDisposable
     {
-        public ConcurrentDictionary<string, Tool> Tools { internal set; get; }
+        protected ConcurrentDictionary<string, Tool> ToolsDict { get; }
+        public ReadOnlyCollection<Tool> Tools
+        {
+            get
+            {
+                return new ReadOnlyCollection<Tool>(ToolsDict.Values.ToList());
+            }
+        }
 
-        public ConcurrentBag<Publication> Publications { get; }
+        private ConcurrentBag<Publication> _publications;
+        public ReadOnlyCollection<Publication> Publications
+        {
+            get
+            {
+                return new ReadOnlyCollection<Publication>(_publications.ToList());
+            }
+        }
 
         public ConcurrentBag<ToolDownloadRecord> ToolDownloadRecords { get; }
 
-        protected string _sessionTempPath;
-        protected WebClient _webClient;
-        protected HttpClient _httpClient;
-        protected Repository _repo;
+        protected string SessionTempPath { get; }
+        protected WebClient WebClient { get; }
+        protected HttpClient HttpClient { get; }
+        protected Repository Repo { get; }
 
-        public ToolRepoCrawler(Repository repo)
+        public ToolRepoCrawler(Repository repo, List<Tool> tools)
         {
-            _repo = repo;
-            _webClient = new WebClient();
-            _httpClient = new HttpClient();
+            Repo = repo;
+            WebClient = new WebClient();
+            HttpClient = new HttpClient();
 
-            Tools = new ConcurrentDictionary<string, Tool>();
-            Publications = new ConcurrentBag<Publication>();
+            ToolsDict = new ConcurrentDictionary<string, Tool>(
+                        tools.ToDictionary(
+                            x => x.Name, x => x));
+
+            _publications = new ConcurrentBag<Publication>();
             ToolDownloadRecords = new ConcurrentBag<ToolDownloadRecord>();
 
-            _sessionTempPath = Path.GetFullPath(Path.GetTempPath()) +
+            SessionTempPath = Path.GetFullPath(Path.GetTempPath()) +
                 Utilities.GetRandomString() +
                 Path.DirectorySeparatorChar;
 
-            if (Directory.Exists(_sessionTempPath))
-                Directory.Delete(_sessionTempPath, true);
-            Directory.CreateDirectory(_sessionTempPath);
+            if (Directory.Exists(SessionTempPath))
+                Directory.Delete(SessionTempPath, true);
+            Directory.CreateDirectory(SessionTempPath);
         }
 
         public abstract Task ScanAsync();
@@ -46,15 +65,15 @@ namespace Genometric.TVQ.API.Crawlers
         protected bool TryAddTool(Tool tool)
         {
             tool.Name = tool.Name.Trim();
-            if (Tools.ContainsKey(tool.Name))
+            if (ToolsDict.ContainsKey(tool.Name))
             {
                 // TODO: log this
                 return false;
             }
 
             // TODO: handle failure of the following attempt. 
-            Tools.TryAdd(tool.Name, tool);
-            _repo.Tools.Add(tool);
+            ToolsDict.TryAdd(tool.Name, tool);
+            Repo.Tools.Add(tool);
             return true;
         }
 
@@ -70,9 +89,9 @@ namespace Genometric.TVQ.API.Crawlers
             tool.Publications.AddRange(pubs);
 
             // TODO: handle the failure of the following.
-            TryAddTool(tool);
-            foreach (var pub in pubs)
-                Publications.Add(pub);
+            if (TryAddTool(tool))
+                foreach (var pub in pubs)
+                    _publications.Add(pub);
         }
 
         public void Dispose()
@@ -83,7 +102,7 @@ namespace Genometric.TVQ.API.Crawlers
 
         protected virtual void Dispose(bool disposing)
         {
-            Directory.Delete(_sessionTempPath, true);
+            Directory.Delete(SessionTempPath, true);
         }
     }
 }

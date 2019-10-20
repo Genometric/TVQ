@@ -11,7 +11,7 @@ namespace Genometric.TVQ.API.Crawlers
 {
     public class BioTools : ToolRepoCrawler
     {
-        public BioTools(Repository repo) : base(repo)
+        public BioTools(Repository repo, List<Tool> tools) : base(repo, tools)
         { }
 
         public override async Task ScanAsync()
@@ -22,8 +22,8 @@ namespace Genometric.TVQ.API.Crawlers
 
         private string DownloadArchive()
         {
-            var archiveFileName = _sessionTempPath + Utilities.GetRandomString();
-            _webClient.DownloadFileTaskAsync(_repo.GetURI(), archiveFileName).Wait();
+            var archiveFileName = SessionTempPath + Utilities.GetRandomString();
+            WebClient.DownloadFileTaskAsync(Repo.GetURI(), archiveFileName).Wait();
             return archiveFileName;
         }
 
@@ -37,13 +37,13 @@ namespace Genometric.TVQ.API.Crawlers
                         if (entry.FullName.EndsWith(".json", StringComparison.OrdinalIgnoreCase) &&
                             !entry.FullName.EndsWith("oeb.json"))
                         {
-                            string extractedFileName = _sessionTempPath + Utilities.GetRandomString() + ".json";
+                            string extractedFileName = SessionTempPath + Utilities.GetRandomString() + ".json";
                             entry.ExtractToFile(extractedFileName);
                             var tool = ExtractTool(extractedFileName);
                             var pubs = ExtractPublications(extractedFileName);
-                            
+
                             TryAddEntities(tool, pubs);
-                            
+
                             File.Delete(extractedFileName);
                         }
                 }

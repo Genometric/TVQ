@@ -28,19 +28,20 @@ namespace Genometric.TVQ.API.Crawlers
             // TODO: check if another async operation is ongoing, if so, wait for that to finish before running this. 
             try
             {
+                var tools = repo.Tools.ToList();
                 ToolRepoCrawler crawler;
                 switch (repo.Name)
                 {
                     case Repo.ToolShed:
-                        crawler = new ToolShed(repo);
+                        crawler = new ToolShed(repo, tools);
                         break;
 
                     case Repo.BioTools:
-                        crawler = new BioTools(repo);
+                        crawler = new BioTools(repo, tools);
                         break;
 
                     case Repo.Bioconductor:
-                        crawler = new Bioconductor(repo);
+                        crawler = new Bioconductor(repo, tools);
                         break;
 
                     default:
@@ -50,11 +51,6 @@ namespace Genometric.TVQ.API.Crawlers
 
                 if (!_dbContext.Repositories.Local.Any(e => e.ID == repo.ID))
                     _dbContext.Attach(repo);
-
-                crawler.Tools =
-                    new ConcurrentDictionary<string, Tool>(
-                        repo.Tools.ToDictionary(
-                            x => x.Name, x => x));
 
                 await crawler.ScanAsync().ConfigureAwait(false);
                 await _dbContext.SaveChangesAsync().ConfigureAwait(false);
