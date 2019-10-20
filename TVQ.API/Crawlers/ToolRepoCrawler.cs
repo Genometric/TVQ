@@ -22,15 +22,6 @@ namespace Genometric.TVQ.API.Crawlers
             }
         }
 
-        private ConcurrentBag<Publication> _publications;
-        public ReadOnlyCollection<Publication> Publications
-        {
-            get
-            {
-                return new ReadOnlyCollection<Publication>(_publications.ToList());
-            }
-        }
-
         public ConcurrentBag<ToolDownloadRecord> ToolDownloadRecords { get; }
 
         protected string SessionTempPath { get; }
@@ -48,7 +39,6 @@ namespace Genometric.TVQ.API.Crawlers
                         tools.ToDictionary(
                             x => x.Name, x => x));
 
-            _publications = new ConcurrentBag<Publication>();
             ToolDownloadRecords = new ConcurrentBag<ToolDownloadRecord>();
 
             SessionTempPath = Path.GetFullPath(Path.GetTempPath()) +
@@ -89,9 +79,7 @@ namespace Genometric.TVQ.API.Crawlers
             tool.Publications.AddRange(pubs);
 
             // TODO: handle the failure of the following.
-            if (TryAddTool(tool))
-                foreach (var pub in pubs)
-                    _publications.Add(pub);
+            TryAddTool(tool);
         }
 
         public void Dispose()
