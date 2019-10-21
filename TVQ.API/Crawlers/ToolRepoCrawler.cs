@@ -75,8 +75,10 @@ namespace Genometric.TVQ.API.Crawlers
         protected void TryAddEntities(Tool tool, List<Publication> pubs)
         {
             foreach (var pub in pubs)
+            {
                 pub.Tool = tool;
-            tool.Publications.AddRange(pubs);
+                tool.Publications.Add(pub);
+            }
 
             // TODO: handle the failure of the following.
             TryAddTool(tool);

@@ -14,7 +14,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<int>(nullable: true),
-                    URI = table.Column<string>(nullable: false)
+                    URI = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -132,13 +132,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 name: "IX_ToolDownloadRecords_ToolID",
                 table: "ToolDownloadRecords",
                 column: "ToolID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Tools_Name",
-                table: "Tools",
-                column: "Name",
-                unique: true,
-                filter: "[Name] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tools_RepositoryID",

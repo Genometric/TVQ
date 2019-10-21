@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
     [DbContext(typeof(TVQContext))]
-    [Migration("20191019214610_InitialCreate")]
+    [Migration("20191021025643_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -99,7 +99,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("URI")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
@@ -127,7 +126,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Owner")
                         .HasColumnType("nvarchar(max)");
@@ -142,10 +141,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("[Name] IS NOT NULL");
 
                     b.HasIndex("RepositoryID");
 

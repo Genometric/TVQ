@@ -13,5 +13,7 @@ namespace Genometric.TVQ.API.Model
         public DateTime Date { set; get; }
 
         public virtual Tool Tool { set; get; }
+
+        public ToolDownloadRecord() { }
     }
 }

@@ -97,7 +97,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("URI")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
@@ -125,7 +124,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Owner")
                         .HasColumnType("nvarchar(max)");
@@ -140,10 +139,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("[Name] IS NOT NULL");
 
                     b.HasIndex("RepositoryID");
 

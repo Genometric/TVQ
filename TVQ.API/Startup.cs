@@ -86,7 +86,9 @@ namespace Genometric.TVQ.API
             services.AddDbContextPool<TVQContext>(
                 options =>
                 {
-                    options.UseSqlServer(
+                    options
+                    .UseLazyLoadingProxies(true)
+                    .UseSqlServer(
                         configuration.GetConnectionString("DefaultConnection"),
                         sqlServerOptionsAction: sqlOptions =>
                         {
@@ -106,6 +108,7 @@ namespace Genometric.TVQ.API
                             RelationalEventId.QueryClientEvaluationWarning));
                     /// Check Client vs. Server evaluation: 
                     /// https://docs.microsoft.com/en-us/ef/core/querying/client-eval
+                    /// 
                 });
 
             return services;

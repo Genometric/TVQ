@@ -161,7 +161,9 @@ namespace Genometric.TVQ.API.Crawlers
                             pubs.Add(pub);
                         }
                     }
-                    tool.Publications.AddRange(pubs);
+
+                    foreach (var pub in pubs)
+                        tool.Publications.Add(pub);
                 }
                 catch (System.Xml.XmlException e)
                 {
