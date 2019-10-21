@@ -26,11 +26,11 @@ namespace Genometric.TVQ.API.Model
 
         public int TimesDownloaded { set; get; }
 
-        public virtual Repository Repository { set; get; }
+        public Repository Repository { set; get; }
 
-        public virtual ICollection<ToolDownloadRecord> Downloads { set; get; }
+        public ICollection<ToolDownloadRecord> Downloads { set; get; }
 
-        public virtual ICollection<Publication> Publications { set; get; }
+        public ICollection<Publication> Publications { set; get; }
 
         public Tool()
         {

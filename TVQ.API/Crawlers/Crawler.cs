@@ -3,6 +3,7 @@ using Genometric.TVQ.API.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,6 +32,9 @@ namespace Genometric.TVQ.API.Crawlers
                 if (!_dbContext.Repositories.Local.Any(e => e.ID == repo.ID))
                     _dbContext.Attach(repo);
 
+                if (repo.Tools == null)
+                    repo.Tools = new List<Tool>();
+
                 var tools = repo.Tools.ToList();
 
                 ToolRepoCrawler crawler;
@@ -55,6 +59,7 @@ namespace Genometric.TVQ.API.Crawlers
 
                 await crawler.ScanAsync().ConfigureAwait(false);
                 await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+
                 crawler.Dispose();
             }
             catch (DbUpdateConcurrencyException e)

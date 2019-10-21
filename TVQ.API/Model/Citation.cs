@@ -16,7 +16,7 @@ namespace Genometric.TVQ.API.Model
 
         public InfoSource? Source { set; get; }
 
-        public virtual Publication Publication { set; get; }
+        public Publication Publication { set; get; }
 
         public Citation() { }
     }

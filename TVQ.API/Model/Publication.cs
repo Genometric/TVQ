@@ -26,9 +26,9 @@ namespace Genometric.TVQ.API.Model
 
         public string BibTeXEntry { set; get; }
 
-        public virtual ICollection<Citation> Citations { set; get; }
+        public ICollection<Citation> Citations { set; get; }
 
-        public virtual Tool Tool { set; get; }
+        public Tool Tool { set; get; }
 
         public Publication()
         { }

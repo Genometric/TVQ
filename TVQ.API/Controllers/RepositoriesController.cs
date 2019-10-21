@@ -33,7 +33,7 @@ namespace Genometric.TVQ.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Repository>>> GetRepos()
         {
-            return await _context.Repositories.ToListAsync().ConfigureAwait(false);
+            return await _context.Repositories.Include(repo => repo.Tools).ToListAsync().ConfigureAwait(false);
         }
 
         // GET: api/v1/repositories/5
@@ -114,10 +114,16 @@ namespace Genometric.TVQ.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var repository = await _context.Repositories.FindAsync(id);
+            var repository = await 
+                _context.Repositories
+                .Include(repo => repo.Tools)
+                    .ThenInclude(tool => tool.Downloads)
+                .Include(repo => repo.Tools)
+                    .ThenInclude(tool => tool.Publications)
+                .FirstAsync(x=>x.ID == id)
+                .ConfigureAwait(false);
+
             if (repository == null)
-                return NotFound();
-            if (!RepoExists(id))
                 return NotFound();
 
             _queue.QueueBackgroundWorkItem(repository);
