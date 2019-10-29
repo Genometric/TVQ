@@ -39,6 +39,8 @@ namespace Genometric.TVQ.API
                 ).SetCompatibilityVersion(
                 CompatibilityVersion.Version_3_0);
 
+
+            // TODO: can this be merged with the previous one?!
             services.AddMvc().AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
