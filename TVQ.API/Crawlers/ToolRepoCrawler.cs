@@ -29,15 +29,16 @@ namespace Genometric.TVQ.API.Crawlers
         protected HttpClient HttpClient { get; }
         protected Repository Repo { get; }
 
-        public ToolRepoCrawler(Repository repo, List<Tool> tools)
+        public ToolRepoCrawler(Repository repo)
         {
             Repo = repo;
             WebClient = new WebClient();
             HttpClient = new HttpClient();
 
-            ToolsDict = new ConcurrentDictionary<string, Tool>(
-                        tools.ToDictionary(
-                            x => x.Name, x => x));
+            if (Repo.Tools != null)
+                ToolsDict = new ConcurrentDictionary<string, Tool>(
+                            repo.Tools.ToDictionary(
+                                x => x.Name, x => x));
 
             ToolDownloadRecords = new ConcurrentBag<ToolDownloadRecord>();
 

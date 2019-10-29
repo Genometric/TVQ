@@ -41,15 +41,15 @@ namespace Genometric.TVQ.API.Crawlers
                 switch (repo.Name)
                 {
                     case Repo.ToolShed:
-                        crawler = new ToolShed(repo, tools);
+                        crawler = new ToolShed(repo);
                         break;
 
                     case Repo.BioTools:
-                        crawler = new BioTools(repo, tools);
+                        crawler = new BioTools(repo);
                         break;
 
                     case Repo.Bioconductor:
-                        crawler = new Bioconductor(repo, tools);
+                        crawler = new Bioconductor(repo);
                         break;
 
                     default:

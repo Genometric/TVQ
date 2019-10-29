@@ -16,7 +16,7 @@ namespace Genometric.TVQ.API.Crawlers
     {
         private List<Tool> _tools;
 
-        public ToolShed(Repository repo, List<Tool> tools) : base(repo, tools)
+        public ToolShed(Repository repo) : base(repo)
         { }
 
         public override async Task ScanAsync()
