@@ -7,9 +7,9 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
 
-namespace Genometric.TVQ.API.Crawlers
+namespace Genometric.TVQ.API.Crawlers.ToolRepos
 {
-    public class BioTools : ToolRepoCrawler
+    public class BioTools : BaseToolRepoCrawler
     {
         public BioTools(Repository repo) : base(repo)
         { }

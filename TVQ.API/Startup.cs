@@ -49,10 +49,12 @@ namespace Genometric.TVQ.API
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddCustomDbContext(Configuration);
             services.AddHostedService<QueuedHostedService>();
+            services.AddHostedService<QueueLiteratureCrawling>();
+            services.AddHostedService<QueueToolRepoCrawling>();
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
-            services.AddScoped<Crawler>();
-            services.AddHostedService<QueueCrawling>();
-            services.AddSingleton<IBackgroundCrawlingQueue, BackgroundCrawlingQueue>();
+            services.AddSingleton<IBackgroundToolRepoCrawlingQueue, BackgroundToolRepoCrawlingQueue>();
+            services.AddSingleton<IBackgroundLiteratureCrawlingQueue, BackgroundLiteratureCrawlingQueue>();
+            services.AddScoped<CrawlerService>();
 
             var container = new ContainerBuilder();
             container.Populate(services);

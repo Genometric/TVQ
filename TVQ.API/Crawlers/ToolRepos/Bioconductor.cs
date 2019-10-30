@@ -5,9 +5,9 @@ using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Genometric.TVQ.API.Crawlers
+namespace Genometric.TVQ.API.Crawlers.ToolRepos
 {
-    public class Bioconductor : ToolRepoCrawler
+    public class Bioconductor : BaseToolRepoCrawler
     {
         private readonly string _citationsFileName = "citations.json";
         private readonly string _statsFileName = "package_stats.tsv";

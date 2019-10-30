@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
 {
-    public class BackgroundCrawlingQueue : IBackgroundCrawlingQueue
+    public class BackgroundToolRepoCrawlingQueue : IBackgroundToolRepoCrawlingQueue
     {
         private readonly ConcurrentQueue<Repository> _repositoriesToScan =
             new ConcurrentQueue<Repository>();

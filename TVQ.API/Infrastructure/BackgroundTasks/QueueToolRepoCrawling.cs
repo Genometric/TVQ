@@ -3,23 +3,21 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
 {
-    public class QueueCrawling : BackgroundService
+    public class QueueToolRepoCrawling : BackgroundService
     {
-        private ILogger<QueueCrawling> _logger;
+        private ILogger<QueueToolRepoCrawling> _logger;
         private IServiceProvider Services { get; }
-        public IBackgroundCrawlingQueue CrawlingQueue { get; }
+        public IBackgroundToolRepoCrawlingQueue CrawlingQueue { get; }
 
-        public QueueCrawling(
-            IBackgroundCrawlingQueue crawlingQueue,
+        public QueueToolRepoCrawling(
+            IBackgroundToolRepoCrawlingQueue crawlingQueue,
             IServiceProvider services,
-            ILogger<QueueCrawling> logger)
+            ILogger<QueueToolRepoCrawling> logger)
         {
             Services = services;
             _logger = logger;
@@ -40,7 +38,7 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
                     {
                         var scopedProcessingService = scope
                             .ServiceProvider
-                            .GetRequiredService<Crawler>();
+                            .GetRequiredService<CrawlerService>();
 
                         await scopedProcessingService
                             .CrawlAsync(repository, cancellationToken)

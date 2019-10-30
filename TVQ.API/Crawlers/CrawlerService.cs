@@ -1,4 +1,6 @@
-﻿using Genometric.TVQ.API.Infrastructure;
+﻿using Genometric.TVQ.API.Crawlers.Literature;
+using Genometric.TVQ.API.Crawlers.ToolRepos;
+using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -11,14 +13,14 @@ using static Genometric.TVQ.API.Model.Repository;
 
 namespace Genometric.TVQ.API.Crawlers
 {
-    public class Crawler
+    public class CrawlerService
     {
         private readonly TVQContext _dbContext;
         private readonly ILogger _logger;
 
-        public Crawler(
+        public CrawlerService(
             TVQContext dbContext,
-            ILogger<Crawler> logger)
+            ILogger<CrawlerService> logger)
         {
             _dbContext = dbContext;
             _logger = logger;
@@ -37,7 +39,7 @@ namespace Genometric.TVQ.API.Crawlers
 
                 var tools = repo.Tools.ToList();
 
-                ToolRepoCrawler crawler;
+                BaseToolRepoCrawler crawler;
                 switch (repo.Name)
                 {
                     case Repo.ToolShed:
@@ -77,6 +79,15 @@ namespace Genometric.TVQ.API.Crawlers
                 // TODO log this.
                 throw;
             }
+        }
+
+        public async Task CrawlAsync(List<Publication> publications, CancellationToken cancellationToken)
+        {
+            _dbContext.AttachRange(publications);
+
+            using var scopusCrawler = new Scopus(publications);
+            await scopusCrawler.CrawlAsync().ConfigureAwait(false);
+            await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

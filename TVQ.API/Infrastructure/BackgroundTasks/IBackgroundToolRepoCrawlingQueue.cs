@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
 {
-    public interface IBackgroundCrawlingQueue
+    public interface IBackgroundToolRepoCrawlingQueue
     {
         void QueueBackgroundWorkItem(Repository repository);
 

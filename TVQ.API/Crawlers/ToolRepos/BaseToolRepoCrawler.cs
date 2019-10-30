@@ -1,17 +1,14 @@
 ﻿using Genometric.TVQ.API.Model;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Genometric.TVQ.API.Crawlers
+namespace Genometric.TVQ.API.Crawlers.ToolRepos
 {
-    public abstract class ToolRepoCrawler : IDisposable
+    public abstract class BaseToolRepoCrawler : BaseCrawler
     {
         protected ConcurrentDictionary<string, Tool> ToolsDict { get; }
         public ReadOnlyCollection<Tool> Tools
@@ -24,16 +21,12 @@ namespace Genometric.TVQ.API.Crawlers
 
         public ConcurrentBag<ToolDownloadRecord> ToolDownloadRecords { get; }
 
-        protected string SessionTempPath { get; }
-        protected WebClient WebClient { get; }
-        protected HttpClient HttpClient { get; }
+
         protected Repository Repo { get; }
 
-        public ToolRepoCrawler(Repository repo)
+        protected BaseToolRepoCrawler(Repository repo)
         {
             Repo = repo;
-            WebClient = new WebClient();
-            HttpClient = new HttpClient();
 
             if (Repo.Tools != null)
                 ToolsDict = new ConcurrentDictionary<string, Tool>(
@@ -41,10 +34,6 @@ namespace Genometric.TVQ.API.Crawlers
                                 x => x.Name, x => x));
 
             ToolDownloadRecords = new ConcurrentBag<ToolDownloadRecord>();
-
-            SessionTempPath = Path.GetFullPath(Path.GetTempPath()) +
-                Utilities.GetRandomString() +
-                Path.DirectorySeparatorChar;
 
             if (Directory.Exists(SessionTempPath))
                 Directory.Delete(SessionTempPath, true);
@@ -83,17 +72,6 @@ namespace Genometric.TVQ.API.Crawlers
 
             // TODO: handle the failure of the following.
             TryAddTool(tool);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            Directory.Delete(SessionTempPath, true);
         }
     }
 }

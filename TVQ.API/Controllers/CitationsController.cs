@@ -1,5 +1,4 @@
-﻿using Genometric.TVQ.API.Crawlers;
-using Genometric.TVQ.API.Infrastructure;
+﻿using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Infrastructure.BackgroundTasks;
 using Genometric.TVQ.API.Model;
 using Microsoft.AspNetCore.Mvc;
@@ -16,12 +15,12 @@ namespace TVQ.API.Controllers
     public class CitationsController : ControllerBase
     {
         private readonly TVQContext _context;
-        private readonly IBackgroundTaskQueue _queue;
+        private readonly IBackgroundLiteratureCrawlingQueue _queue;
         private readonly ILogger<CitationsController> _logger;
 
         public CitationsController(
             TVQContext context,
-            IBackgroundTaskQueue queue,
+            IBackgroundLiteratureCrawlingQueue queue,
             ILogger<CitationsController> logger)
         {
             _context = context;
@@ -119,10 +118,7 @@ namespace TVQ.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            _queue.QueueBackgroundWorkItem(async response =>
-            {
-                await new Scopus(_context).CrawlAsync().ConfigureAwait(false);
-            });
+            _queue.QueueBackgroundWorkItem(_context.Publications.ToList());
 
             return Ok();
         }

@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Xml.Linq;
 
-namespace Genometric.TVQ.API.Crawlers
+namespace Genometric.TVQ.API.Crawlers.ToolRepos
 {
-    internal class ToolShed : ToolRepoCrawler
+    internal class ToolShed : BaseToolRepoCrawler
     {
         private List<Tool> _tools;
 
