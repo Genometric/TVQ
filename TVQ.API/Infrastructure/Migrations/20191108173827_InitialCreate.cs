@@ -58,11 +58,19 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     PubMedID = table.Column<string>(nullable: true),
                     EID = table.Column<string>(nullable: true),
                     ScopusID = table.Column<string>(nullable: true),
+                    Type = table.Column<int>(nullable: false),
                     Title = table.Column<string>(nullable: true),
-                    Year = table.Column<string>(nullable: true),
+                    Year = table.Column<int>(nullable: true),
+                    Month = table.Column<int>(nullable: true),
                     CitedBy = table.Column<int>(nullable: false),
                     DOI = table.Column<string>(nullable: true),
-                    BibTeXEntry = table.Column<string>(nullable: true)
+                    BibTeXEntry = table.Column<string>(nullable: true),
+                    Journal = table.Column<string>(nullable: true),
+                    Volume = table.Column<int>(nullable: true),
+                    Number = table.Column<int>(nullable: true),
+                    Chapter = table.Column<string>(nullable: true),
+                    Pages = table.Column<string>(nullable: true),
+                    Publisher = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -97,6 +105,27 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Authors",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PublicationID = table.Column<int>(nullable: false),
+                    FirstName = table.Column<string>(nullable: true),
+                    LastName = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Authors", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Authors_Publications_PublicationID",
+                        column: x => x.PublicationID,
+                        principalTable: "Publications",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Citations",
                 columns: table => new
                 {
@@ -118,9 +147,39 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Keywords",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PublicationID = table.Column<int>(nullable: false),
+                    Label = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Keywords", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Keywords_Publications_PublicationID",
+                        column: x => x.PublicationID,
+                        principalTable: "Publications",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Authors_PublicationID",
+                table: "Authors",
+                column: "PublicationID");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Citations_PublicationID",
                 table: "Citations",
+                column: "PublicationID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Keywords_PublicationID",
+                table: "Keywords",
                 column: "PublicationID");
 
             migrationBuilder.CreateIndex(
@@ -149,7 +208,13 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Authors");
+
+            migrationBuilder.DropTable(
                 name: "Citations");
+
+            migrationBuilder.DropTable(
+                name: "Keywords");
 
             migrationBuilder.DropTable(
                 name: "ToolDownloadRecords");

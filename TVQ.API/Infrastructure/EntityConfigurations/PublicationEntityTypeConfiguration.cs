@@ -19,7 +19,9 @@ namespace Genometric.TVQ.API.Infrastructure.EntityConfigurations
             {
                 if (p.Name == nameof(Publication.ID) ||
                     p.Name == nameof(Publication.Tool) ||
-                    p.Name == nameof(Publication.Citations))
+                    p.Name == nameof(Publication.Citations) ||
+                    p.Name == nameof(Publication.Authors) ||
+                    p.Name == nameof(Publication.Keywords))
                     continue;
                 builder.Property(p.Name);
             }

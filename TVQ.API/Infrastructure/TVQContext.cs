@@ -17,6 +17,8 @@ namespace Genometric.TVQ.API.Infrastructure
         public DbSet<Repository> Repositories { set; get; }
         public DbSet<Publication> Publications { set; get; }
         public DbSet<Citation> Citations { set; get; }
+        public DbSet<Author> Authors { set; get; }
+        public DbSet<Keyword> Keywords { set; get; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -25,6 +27,8 @@ namespace Genometric.TVQ.API.Infrastructure
             builder.ApplyConfiguration(new RepositoryItemEntityTypeConfiguration());
             builder.ApplyConfiguration(new CitationEntityTypeConfiguration());
             builder.ApplyConfiguration(new ToolDownloadRecordEntityTypeConfiguration());
+            builder.ApplyConfiguration(new AuthorEntityTypeConfiguration());
+            builder.ApplyConfiguration(new KeywordEntityTypeConfiguration());
         }
     }
 }

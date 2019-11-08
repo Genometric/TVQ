@@ -1,10 +1,12 @@
-﻿using Genometric.TVQ.API.Model;
+﻿using Genometric.BibitemParser;
+using Genometric.TVQ.API.Model;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -14,39 +16,34 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 {
     internal class ToolShed : BaseToolRepoCrawler
     {
-        private List<Tool> _tools;
+        private int _maxParallelDownloads = 3;
+        private int _maxParallelActions = Environment.ProcessorCount * 3;
+        private int _boundedCapacity = Environment.ProcessorCount * 3;
 
         public ToolShed(Repository repo) : base(repo)
         { }
 
         public override async Task ScanAsync()
         {
-            await GetToolsAsync().ConfigureAwait(false);
-            await GetPublicationsAsync().ConfigureAwait(false);
+            var tools = await GetToolsAsync().ConfigureAwait(false);
+            if (tools != null)
+                await GetPublicationsAsync(tools).ConfigureAwait(false);
         }
 
-        private async Task GetToolsAsync()
+        private async Task<List<Tool>> GetToolsAsync()
         {
-            HttpResponseMessage response = await HttpClient.GetAsync(Repo.URI);
+            HttpResponseMessage response = await HttpClient.GetAsync(Repo.URI).ConfigureAwait(false);
             string content;
             if (response.IsSuccessStatusCode)
-                content = await response.Content.ReadAsStringAsync();
+                content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             else
                 /// TODO: replace with an exception.
-                return;
+                return null;
 
-            var tools = new List<Tool>(JsonConvert.DeserializeObject<List<Tool>>(content));
-            _tools = new List<Tool>();
-
-            foreach (var tool in tools)
-                if (!TryAddTool(tool))
-                {
-                    _tools.Add(tool);
-                    Repo.Tools.Add(tool);
-                }
+             return new List<Tool>(JsonConvert.DeserializeObject<List<Tool>>(content));
         }
 
-        private async Task GetPublicationsAsync()
+        private async Task GetPublicationsAsync(List<Tool> tools)
         {
             // This method is implemented using the Task Parallel Library (TPL).
             // Read the following page for more info on the flow: 
@@ -61,29 +58,29 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 new Func<Tool, Tool>(Downloader),
                 new ExecutionDataflowBlockOptions
                 {
-                    MaxDegreeOfParallelism = 3
+                    MaxDegreeOfParallelism = _maxParallelDownloads
                 });
 
             var extractXMLs = new TransformBlock<Tool, Tuple<Tool, string[]>>(
                 new Func<Tool, Tuple<Tool, string[]>>(WrapperExtractor),
                 new ExecutionDataflowBlockOptions
                 {
-                    BoundedCapacity = Environment.ProcessorCount * 3,
-                    MaxDegreeOfParallelism = Environment.ProcessorCount * 3
+                    BoundedCapacity = _boundedCapacity,
+                    MaxDegreeOfParallelism = _maxParallelActions
                 });
 
             var extractPublications = new ActionBlock<Tuple<Tool, string[]>>(
                 input => { ExtractPublications(input); },
                 new ExecutionDataflowBlockOptions
                 {
-                    BoundedCapacity = Environment.ProcessorCount * 3,
-                    MaxDegreeOfParallelism = Environment.ProcessorCount * 3
+                    BoundedCapacity = _boundedCapacity,
+                    MaxDegreeOfParallelism = _maxParallelActions
                 });
 
             downloader.LinkTo(extractXMLs, linkOptions);
             extractXMLs.LinkTo(extractPublications, linkOptions);
 
-            foreach (var tool in _tools)
+            foreach (var tool in tools)
                 downloader.Post(tool);
             downloader.Complete();
 
@@ -94,7 +91,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         private Tool Downloader(Tool tool)
         {
-            WebClient.DownloadFileTaskAsync(
+            /// Note: do not use base WebClient, because WebClient cannot 
+            /// download multiple files concurrently.
+            new WebClient().DownloadFileTaskAsync(
                 address: new Uri(string.Format(
                     "https://toolshed.g2.bx.psu.edu/repos/{0}/{1}/archive/tip.zip",
                     tool.Owner,
@@ -147,23 +146,22 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                     {
                         if (item.Attribute("type") != null)
                         {
-                            var pub = new Publication();
                             switch (item.Attribute("type").Value.Trim().ToLower())
                             {
                                 case "doi":
-                                    pub.DOI = item.Value;
+                                    pubs.Add(new Publication() { DOI = item.Value });
                                     break;
 
                                 case "bibtex":
-                                    pub.BibTeXEntry = item.Value;
+                                    var parser = new Parser<Publication, Author, Keyword>(new PublicationConstructor(), new AuthorConstructor(), new KeywordConstructor());
+                                    if (parser.TryParse(item.Value, out Publication pub))
+                                        pubs.Add(pub);
                                     break;
                             }
-                            pubs.Add(pub);
                         }
                     }
 
-                    foreach (var pub in pubs)
-                        tool.Publications.Add(pub);
+                    TryAddEntities(tool, pubs);
                 }
                 catch (System.Xml.XmlException e)
                 {

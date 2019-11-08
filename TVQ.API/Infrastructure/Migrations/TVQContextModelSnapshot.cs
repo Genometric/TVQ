@@ -19,6 +19,29 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("Genometric.TVQ.API.Model.Author", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PublicationID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("PublicationID");
+
+                    b.ToTable("Authors");
+                });
+
             modelBuilder.Entity("Genometric.TVQ.API.Model.Citation", b =>
                 {
                     b.Property<int>("ID")
@@ -45,6 +68,26 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.ToTable("Citations");
                 });
 
+            modelBuilder.Entity("Genometric.TVQ.API.Model.Keyword", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Label")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PublicationID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("PublicationID");
+
+                    b.ToTable("Keywords");
+                });
+
             modelBuilder.Entity("Genometric.TVQ.API.Model.Publication", b =>
                 {
                     b.Property<int>("ID")
@@ -53,6 +96,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("BibTeXEntry")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Chapter")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CitedBy")
@@ -64,7 +110,22 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<string>("EID")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Journal")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Month")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Number")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Pages")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PubMedID")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Publisher")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ScopusID")
@@ -76,8 +137,14 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<int>("ToolID")
                         .HasColumnType("int");
 
-                    b.Property<string>("Year")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Volume")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Year")
+                        .HasColumnType("int");
 
                     b.HasKey("ID");
 
@@ -173,10 +240,28 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.ToTable("ToolDownloadRecords");
                 });
 
+            modelBuilder.Entity("Genometric.TVQ.API.Model.Author", b =>
+                {
+                    b.HasOne("Genometric.TVQ.API.Model.Publication", "Publication")
+                        .WithMany("Authors")
+                        .HasForeignKey("PublicationID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Genometric.TVQ.API.Model.Citation", b =>
                 {
                     b.HasOne("Genometric.TVQ.API.Model.Publication", "Publication")
                         .WithMany("Citations")
+                        .HasForeignKey("PublicationID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Genometric.TVQ.API.Model.Keyword", b =>
+                {
+                    b.HasOne("Genometric.TVQ.API.Model.Publication", "Publication")
+                        .WithMany("Keywords")
                         .HasForeignKey("PublicationID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

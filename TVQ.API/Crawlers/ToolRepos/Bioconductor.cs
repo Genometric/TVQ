@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Genometric.TVQ.API.Crawlers.ToolRepos
@@ -24,7 +25,11 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         private void ReadCitationsFile()
         {
             var citationsFileName = SessionTempPath + Utilities.GetRandomString();
-            WebClient.DownloadFileTaskAsync(Repo.GetURI() + _citationsFileName, citationsFileName).Wait();
+
+            /// Use a new WebClient instance for downloads, because 
+            /// an instance of WebClient does not support concurrent
+            /// downloads. 
+            new WebClient().DownloadFileTaskAsync(Repo.GetURI() + _citationsFileName, citationsFileName).Wait();
 
             using (var reader = new StreamReader(citationsFileName))
             {

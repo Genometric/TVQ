@@ -57,12 +57,12 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             return true;
         }
 
-        protected void TryAddEntities(Tool tool, Publication pub)
+        protected bool TryAddEntities(Tool tool, Publication pub)
         {
-            TryAddEntities(tool, new List<Publication> { pub });
+            return TryAddEntities(tool, new List<Publication> { pub });
         }
 
-        protected void TryAddEntities(Tool tool, List<Publication> pubs)
+        protected bool TryAddEntities(Tool tool, List<Publication> pubs)
         {
             foreach (var pub in pubs)
             {
@@ -71,7 +71,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             }
 
             // TODO: handle the failure of the following.
-            TryAddTool(tool);
+            return TryAddTool(tool);
         }
     }
 }
