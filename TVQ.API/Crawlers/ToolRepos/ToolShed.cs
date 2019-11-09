@@ -80,17 +80,21 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             var extractXMLs = new TransformBlock<ToolInfo, ToolInfo>(
                 new Func<ToolInfo, ToolInfo>(WrapperExtractor), _xmlExtractExeOptions);
 
-            var extractPublications = new ActionBlock<ToolInfo>(
-                input => { ExtractPublications(input); }, _pubExtractExeOptions);
+            var extractPublications = new TransformBlock<ToolInfo, ToolInfo>(
+                new Func<ToolInfo, ToolInfo>(ExtractPublications), _pubExtractExeOptions);
+
+            var cleanup = new ActionBlock<ToolInfo>(
+                input => { Cleanup(input); });
 
             downloader.LinkTo(extractXMLs, linkOptions);
             extractXMLs.LinkTo(extractPublications, linkOptions);
+            extractPublications.LinkTo(cleanup, linkOptions);
 
             foreach (var tool in tools)
                 downloader.Post(new ToolInfo(tool, SessionTempPath));
             downloader.Complete();
 
-            await extractPublications.Completion.ConfigureAwait(false);
+            await cleanup.Completion.ConfigureAwait(false);
 
             Directory.Delete(SessionTempPath, true);
         }
@@ -156,10 +160,10 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             }
         }
 
-        private void ExtractPublications(ToolInfo info)
+        private ToolInfo ExtractPublications(ToolInfo info)
         {
             if (info == null)
-                return;
+                return null;
 
             foreach (var filename in info.XMLFiles)
             {
@@ -168,9 +172,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                     XElement toolDoc = XElement.Load(filename);
                     var pubs = new List<Publication>();
                     foreach (var item in toolDoc.Elements("citations").Descendants())
-                    {
                         if (item.Attribute("type") != null)
-                        {
                             switch (item.Attribute("type").Value.Trim().ToUpperInvariant())
                             {
                                 case "DOI":
@@ -183,8 +185,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                                         pubs.Add(pub);
                                     break;
                             }
-                        }
-                    }
 
                     TryAddEntities(info.Tool, pubs);
                 }
@@ -192,12 +192,18 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 {
                     /// This exception may happen if the XML 
                     /// file has multiple roots.
-                }
-                finally
-                {
-                    File.Delete(filename);
+                    return null;
                 }
             }
+
+            return info;
+        }
+
+        private void Cleanup(ToolInfo info)
+        {
+            if (info == null)
+                return;
+            Directory.Delete(info.StagingArea, true);
         }
     }
 }
