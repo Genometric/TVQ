@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -16,12 +15,33 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 {
     internal class ToolShed : BaseToolRepoCrawler
     {
-        private int _maxParallelDownloads = 3;
-        private int _maxParallelActions = Environment.ProcessorCount * 3;
-        private int _boundedCapacity = Environment.ProcessorCount * 3;
+        private readonly int _maxParallelDownloads = 3;
+        private readonly int _maxParallelActions = Environment.ProcessorCount * 3;
+        private readonly int _boundedCapacity = Environment.ProcessorCount * 3;
+
+        private readonly ExecutionDataflowBlockOptions _downloadExeOptions;
+        private readonly ExecutionDataflowBlockOptions _xmlExtractExeOptions;
+        private readonly ExecutionDataflowBlockOptions _pubExtractExeOptions;
 
         public ToolShed(Repository repo) : base(repo)
-        { }
+        {
+            _downloadExeOptions = new ExecutionDataflowBlockOptions
+            {
+                MaxDegreeOfParallelism = _maxParallelDownloads
+            };
+
+            _xmlExtractExeOptions = new ExecutionDataflowBlockOptions
+            {
+                BoundedCapacity = _boundedCapacity,
+                MaxDegreeOfParallelism = _maxParallelActions
+            };
+
+            _pubExtractExeOptions = new ExecutionDataflowBlockOptions
+            {
+                BoundedCapacity = _boundedCapacity,
+                MaxDegreeOfParallelism = _maxParallelActions
+            };
+        }
 
         public override async Task ScanAsync()
         {
@@ -43,100 +63,93 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
              return new List<Tool>(JsonConvert.DeserializeObject<List<Tool>>(content));
         }
 
+        /// <summary>
+        /// This method is implemented using the Task Parallel Library (TPL).
+        //. https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-parallel-library-tpl
+        /// </summary>
         private async Task GetPublicationsAsync(List<Tool> tools)
         {
-            // This method is implemented using the Task Parallel Library (TPL).
-            // Read the following page for more info on the flow: 
-            // https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-parallel-library-tpl
-
             var linkOptions = new DataflowLinkOptions
             {
                 PropagateCompletion = true
             };
 
-            var downloader = new TransformBlock<Tool, Tool>(
-                new Func<Tool, Tool>(Downloader),
-                new ExecutionDataflowBlockOptions
-                {
-                    MaxDegreeOfParallelism = _maxParallelDownloads
-                });
+            var downloader = new TransformBlock<ToolInfo, ToolInfo>(
+                new Func<ToolInfo, ToolInfo>(Downloader), _downloadExeOptions);
 
-            var extractXMLs = new TransformBlock<Tool, Tuple<Tool, string[]>>(
-                new Func<Tool, Tuple<Tool, string[]>>(WrapperExtractor),
-                new ExecutionDataflowBlockOptions
-                {
-                    BoundedCapacity = _boundedCapacity,
-                    MaxDegreeOfParallelism = _maxParallelActions
-                });
+            var extractXMLs = new TransformBlock<ToolInfo, ToolInfo>(
+                new Func<ToolInfo, ToolInfo>(WrapperExtractor), _xmlExtractExeOptions);
 
-            var extractPublications = new ActionBlock<Tuple<Tool, string[]>>(
-                input => { ExtractPublications(input); },
-                new ExecutionDataflowBlockOptions
-                {
-                    BoundedCapacity = _boundedCapacity,
-                    MaxDegreeOfParallelism = _maxParallelActions
-                });
+            var extractPublications = new ActionBlock<ToolInfo>(
+                input => { ExtractPublications(input); }, _pubExtractExeOptions);
 
             downloader.LinkTo(extractXMLs, linkOptions);
             extractXMLs.LinkTo(extractPublications, linkOptions);
 
             foreach (var tool in tools)
-                downloader.Post(tool);
+                downloader.Post(new ToolInfo(tool, SessionTempPath));
             downloader.Complete();
 
-            await extractPublications.Completion;
+            await extractPublications.Completion.ConfigureAwait(false);
 
             Directory.Delete(SessionTempPath, true);
         }
 
-        private Tool Downloader(Tool tool)
+        private ToolInfo Downloader(ToolInfo info)
         {
-            /// Note: do not use base WebClient, because WebClient cannot 
+            /// Note: do not use base WebClient, because it cannot 
             /// download multiple files concurrently.
             new WebClient().DownloadFileTaskAsync(
                 address: new Uri(string.Format(
                     "https://toolshed.g2.bx.psu.edu/repos/{0}/{1}/archive/tip.zip",
-                    tool.Owner,
-                    tool.Name)),
-                fileName: SessionTempPath + tool.ID);
-            return tool;
+                    info.Tool.Owner,
+                    info.Tool.Name)),
+                fileName: info.ArchiveFilename);
+            return info;
         }
 
-        private Tuple<Tool, string[]> WrapperExtractor(Tool tool)
+        private ToolInfo WrapperExtractor(ToolInfo info)
         {
-            /// To avoid `path traversal attacks` from malicious software, 
-            /// there must be a trailing path separator at the end of the path. 
-            string extractPath =
-                SessionTempPath + tool.ID + "_" + new Random().Next(100000, 10000000) + "_" +
-                Path.DirectorySeparatorChar;
-            Directory.CreateDirectory(extractPath);
-
-            var xmlFiles = new List<string>();
             try
             {
-                using (ZipArchive archive = ZipFile.OpenRead(SessionTempPath + tool.ID))
-                    foreach (ZipArchiveEntry entry in archive.Entries)
-                        if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
+                using ZipArchive archive = ZipFile.OpenRead(info.ArchiveFilename);
+                foreach (ZipArchiveEntry entry in archive.Entries)
+                    if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var extractedFileName = info.ArchiveExtractionPath + Path.GetFileName(entry.FullName);
+
+                        /// Surrounding the file extraction from archive in a
+                        /// try-catch block enables extracting XML files 
+                        /// independently; hence, if one file is broken/invalid
+                        /// the process can continue with other files that 
+                        /// may be valid.
+                        try
                         {
-                            var extractedFileName = extractPath + Path.GetFileName(entry.FullName);
                             entry.ExtractToFile(extractedFileName);
-                            xmlFiles.Add(extractedFileName);
+                            info.XMLFiles.Add(extractedFileName);
                         }
+                        catch (InvalidDataException e)
+                        {
+                            // This exception is thrown when the Zip archive cannot be read.
+                            // TODO: log this.
+                        }
+                    }
+                return info;
             }
             catch (InvalidDataException e)
             {
-                /// This exception is thrown when the Zip archive
-                /// cannot be read.
+                // This exception is thrown when the Zip archive cannot be read.
+                // TODO: log this.
+                return null;
             }
-
-            return new Tuple<Tool, string[]>(tool, xmlFiles.ToArray<string>());
         }
 
-        private void ExtractPublications(Tuple<Tool, string[]> input)
+        private void ExtractPublications(ToolInfo info)
         {
-            var tool = input.Item1;
-            var xmlFiles = input.Item2;
-            foreach (var filename in xmlFiles)
+            if (info == null)
+                return;
+
+            foreach (var filename in info.XMLFiles)
             {
                 try
                 {
@@ -161,7 +174,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                         }
                     }
 
-                    TryAddEntities(tool, pubs);
+                    TryAddEntities(info.Tool, pubs);
                 }
                 catch (System.Xml.XmlException e)
                 {
