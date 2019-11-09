@@ -30,11 +30,11 @@ namespace Genometric.TVQ.API.BuildingBlocks.WebHost
                     var retry = Policy.Handle<SqlException>()
                          .WaitAndRetry(new TimeSpan[]
                          {
-                             TimeSpan.FromSeconds(10),
-                             TimeSpan.FromSeconds(10),
-                             TimeSpan.FromSeconds(10),
-                             TimeSpan.FromSeconds(15),
-                             TimeSpan.FromSeconds(20),
+                             TimeSpan.FromSeconds(45),
+                             TimeSpan.FromSeconds(45),
+                             TimeSpan.FromSeconds(45),
+                             TimeSpan.FromSeconds(45),
+                             TimeSpan.FromSeconds(45)
                          });
 
                     /// if the sql server container is not created on run docker 
@@ -42,7 +42,7 @@ namespace Genometric.TVQ.API.BuildingBlocks.WebHost
                     /// exception. The retry options for DbContext only apply 
                     /// to transient exceptions.
                     /// Note that this is NOT applied when running some 
-                    /// orchestrators (let the orchestrator to recreate the 
+                    /// orchestrator (let the orchestrator to recreate the 
                     /// failing service)
                     retry.Execute(() => InvokeSeeder(seeder, context, services));
 

@@ -60,7 +60,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 /// TODO: replace with an exception.
                 return null;
 
-             return new List<Tool>(JsonConvert.DeserializeObject<List<Tool>>(content));
+            return new List<Tool>(JsonConvert.DeserializeObject<List<Tool>>(content));
         }
 
         /// <summary>
@@ -97,22 +97,34 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         private ToolInfo Downloader(ToolInfo info)
         {
-            /// Note: do not use base WebClient, because it cannot 
-            /// download multiple files concurrently.
-            new WebClient().DownloadFileTaskAsync(
-                address: new Uri(string.Format(
-                    "https://toolshed.g2.bx.psu.edu/repos/{0}/{1}/archive/tip.zip",
-                    info.Tool.Owner,
-                    info.Tool.Name)),
-                fileName: info.ArchiveFilename);
-            return info;
+            try
+            {
+                /// Note: do not use base WebClient, because it cannot 
+                /// download multiple files concurrently.
+                using var client = new WebClient();
+                client.DownloadFile(
+                    address: new Uri(
+                        $"https://toolshed.g2.bx.psu.edu/repos/" +
+                        $"{info.Tool.Owner}/{info.Tool.Name}/" +
+                        $"archive/tip.zip"),
+                    fileName: info.ArchiveFilename);
+                return info;
+            }
+            catch (WebException e)
+            {
+                // TODO: log this exception.
+                return null;
+            }
         }
 
         private ToolInfo WrapperExtractor(ToolInfo info)
         {
+            if (info == null)
+                return null;
+
             try
             {
-                using ZipArchive archive = ZipFile.OpenRead(info.ArchiveFilename);
+                using ZipArchive archive = ZipFile.Open(info.ArchiveFilename, ZipArchiveMode.Read);
                 foreach (ZipArchiveEntry entry in archive.Entries)
                     if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
                     {
@@ -159,13 +171,13 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                     {
                         if (item.Attribute("type") != null)
                         {
-                            switch (item.Attribute("type").Value.Trim().ToLower())
+                            switch (item.Attribute("type").Value.Trim().ToUpperInvariant())
                             {
-                                case "doi":
+                                case "DOI":
                                     pubs.Add(new Publication() { DOI = item.Value });
                                     break;
 
-                                case "bibtex":
+                                case "BIBTEX":
                                     var parser = new Parser<Publication, Author, Keyword>(new PublicationConstructor(), new AuthorConstructor(), new KeywordConstructor());
                                     if (parser.TryParse(item.Value, out Publication pub))
                                         pubs.Add(pub);
