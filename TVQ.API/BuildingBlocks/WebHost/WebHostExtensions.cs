@@ -30,9 +30,11 @@ namespace Genometric.TVQ.API.BuildingBlocks.WebHost
                     var retry = Policy.Handle<SqlException>()
                          .WaitAndRetry(new TimeSpan[]
                          {
-                             TimeSpan.FromSeconds(2),
-                             TimeSpan.FromSeconds(5),
-                             TimeSpan.FromSeconds(9),
+                             TimeSpan.FromSeconds(10),
+                             TimeSpan.FromSeconds(10),
+                             TimeSpan.FromSeconds(10),
+                             TimeSpan.FromSeconds(15),
+                             TimeSpan.FromSeconds(20),
                          });
 
                     /// if the sql server container is not created on run docker 
