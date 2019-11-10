@@ -1,5 +1,6 @@
 ﻿using Genometric.BibitemParser;
 using Genometric.TVQ.API.Model;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -23,8 +24,12 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         private readonly ExecutionDataflowBlockOptions _xmlExtractExeOptions;
         private readonly ExecutionDataflowBlockOptions _pubExtractExeOptions;
 
-        public ToolShed(Repository repo) : base(repo)
+        private readonly ILogger<CrawlerService> _logger;
+
+        public ToolShed(Repository repo, ILogger<CrawlerService> logger) : base(repo)
         {
+            _logger = logger;
+
             _downloadExeOptions = new ExecutionDataflowBlockOptions
             {
                 MaxDegreeOfParallelism = _maxParallelDownloads
@@ -52,7 +57,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         private async Task<List<Tool>> GetToolsAsync()
         {
-            HttpResponseMessage response = await HttpClient.GetAsync(Repo.URI).ConfigureAwait(false);
+            _logger.LogInformation("Getting tools list from ToolShed.");
+            HttpResponseMessage response = await HttpClient.GetAsync(new Uri(Repo.URI)).ConfigureAwait(false);
             string content;
             if (response.IsSuccessStatusCode)
                 content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -60,6 +66,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 /// TODO: replace with an exception.
                 return null;
 
+            _logger.LogInformation("Received tools from ToolShed, deserializing them.");
             return new List<Tool>(JsonConvert.DeserializeObject<List<Tool>>(content));
         }
 
@@ -103,6 +110,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         {
             try
             {
+                _logger.LogInformation($"Downloading archive of {info.Tool.Name}.");
                 /// Note: do not use base WebClient, because it cannot 
                 /// download multiple files concurrently.
                 using var client = new WebClient();
@@ -112,11 +120,12 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                         $"{info.Tool.Owner}/{info.Tool.Name}/" +
                         $"archive/tip.zip"),
                     fileName: info.ArchiveFilename);
+                _logger.LogInformation($"Successfully downloaded archive of {info.Tool.Name}.");
                 return info;
             }
             catch (WebException e)
             {
-                // TODO: log this exception.
+                _logger.LogInformation($"Failed downloading archive of {info.Tool.Name}: {e.Message}");
                 return null;
             }
         }
@@ -128,6 +137,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
             try
             {
+                _logger.LogInformation($"Extracting XML files from tool {info.Tool.Name} archive.");
                 using ZipArchive archive = ZipFile.Open(info.ArchiveFilename, ZipArchiveMode.Read);
                 foreach (ZipArchiveEntry entry in archive.Entries)
                     if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
@@ -141,21 +151,25 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                         /// may be valid.
                         try
                         {
+                            _logger.LogInformation($"Extracting XML file {entry.FullName} of tool {info.Tool.Name}.");
                             entry.ExtractToFile(extractedFileName);
+                            _logger.LogInformation($"Successfully extracted XML file {entry.FullName} of tool {info.Tool.Name}.");
                             info.XMLFiles.Add(extractedFileName);
                         }
                         catch (InvalidDataException e)
                         {
                             // This exception is thrown when the Zip archive cannot be read.
-                            // TODO: log this.
+                            _logger.LogInformation($"Failed extracting XML file {entry.FullName} of tool {info.Tool.Name}: {e.Message}");
                         }
                     }
+
+                _logger.LogInformation($"Extracted {info.XMLFiles.Count} XML files.");
                 return info;
             }
             catch (InvalidDataException e)
             {
                 // This exception is thrown when the Zip archive cannot be read.
-                // TODO: log this.
+                _logger.LogInformation($"Failed extracting XML files from tool {info.Tool.Name} archive: {e.Message}");
                 return null;
             }
         }
@@ -167,6 +181,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
             foreach (var filename in info.XMLFiles)
             {
+                _logger.LogInformation($"Extracting publication info from XML file {Path.GetFileNameWithoutExtension(filename)} of tool {info.Tool.Name}.");
                 try
                 {
                     XElement toolDoc = XElement.Load(filename);
@@ -186,12 +201,14 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                                     break;
                             }
 
+                    _logger.LogInformation($"Successfully extract publication info from XML file {Path.GetFileNameWithoutExtension(filename)} of tool {info.Tool.Name}.");
                     TryAddEntities(info.Tool, pubs);
                 }
                 catch (System.Xml.XmlException e)
                 {
                     /// This exception may happen if the XML 
                     /// file has multiple roots.
+                    _logger.LogInformation($"Failed extracting publication info from XML file {Path.GetFileNameWithoutExtension(filename)} of tool {info.Tool.Name}: {e.Message}");
                     return null;
                 }
             }
@@ -203,7 +220,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         {
             if (info == null)
                 return;
+            _logger.LogInformation($"Deleting temporary files of tool {info.Tool.Name}.");
             Directory.Delete(info.StagingArea, true);
+            _logger.LogInformation($"Deleted temporary files of tool {info.Tool.Name}.");
         }
     }
 }

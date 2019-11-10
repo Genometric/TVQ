@@ -44,6 +44,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected bool TryAddTool(Tool tool)
         {
+            if (tool == null)
+                return false;
+
             tool.Name = tool.Name.Trim();
             if (ToolsDict.ContainsKey(tool.Name))
             {
@@ -64,11 +67,15 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected bool TryAddEntities(Tool tool, List<Publication> pubs)
         {
-            foreach (var pub in pubs)
-            {
-                pub.Tool = tool;
-                tool.Publications.Add(pub);
-            }
+            if (tool == null)
+                return false;
+
+            if (pubs != null)
+                foreach (var pub in pubs)
+                {
+                    pub.Tool = tool;
+                    tool.Publications.Add(pub);
+                }
 
             // TODO: handle the failure of the following.
             return TryAddTool(tool);

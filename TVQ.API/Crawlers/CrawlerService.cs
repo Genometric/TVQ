@@ -16,7 +16,7 @@ namespace Genometric.TVQ.API.Crawlers
     public class CrawlerService
     {
         private readonly TVQContext _dbContext;
-        private readonly ILogger _logger;
+        private readonly ILogger<CrawlerService> _logger;
 
         public CrawlerService(
             TVQContext dbContext,
@@ -43,7 +43,7 @@ namespace Genometric.TVQ.API.Crawlers
                 switch (repo.Name)
                 {
                     case Repo.ToolShed:
-                        crawler = new ToolShed(repo);
+                        crawler = new ToolShed(repo, _logger);
                         break;
 
                     case Repo.BioTools:
