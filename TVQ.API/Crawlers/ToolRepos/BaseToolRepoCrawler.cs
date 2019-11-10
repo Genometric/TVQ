@@ -34,10 +34,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                                 x => x.Name, x => x));
 
             ToolDownloadRecords = new ConcurrentBag<ToolDownloadRecord>();
-
-            if (Directory.Exists(SessionTempPath))
-                Directory.Delete(SessionTempPath, true);
-            Directory.CreateDirectory(SessionTempPath);
         }
 
         public abstract Task ScanAsync();

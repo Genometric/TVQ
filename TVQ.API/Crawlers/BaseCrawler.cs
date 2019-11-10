@@ -24,9 +24,16 @@ namespace Genometric.TVQ.API.Crawlers
         {
             WebClient = new WebClient();
             HttpClient = new HttpClient();
-            SessionTempPath = Path.GetFullPath(Path.GetTempPath()) +
-                Utilities.GetRandomString() +
-                Path.DirectorySeparatorChar;
+
+            do
+            {
+                SessionTempPath =
+                    Path.GetFullPath(Path.GetTempPath()) +
+                    Utilities.GetRandomString(10) +
+                    Path.DirectorySeparatorChar;
+            }
+            while (Directory.Exists(SessionTempPath));
+            Directory.CreateDirectory(SessionTempPath);
         }
 
         public void Dispose()

@@ -34,21 +34,18 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         /// </summary>
         public List<string> XMLFiles { set; get; }
 
-        public ToolInfo(
-            Tool tool, string sessionPath,
-            bool createStagingArea = true)
+        public ToolInfo(Tool tool, string sessionPath)
         {
-            Tool = tool;
-            StagingArea =
-                sessionPath + Utilities.GetRandomString() +
-                Path.DirectorySeparatorChar;
-            if (createStagingArea)
+            do
             {
-                if (Directory.Exists(StagingArea))
-                    Directory.Delete(StagingArea, true);
-                Directory.CreateDirectory(StagingArea);
+                StagingArea =
+                    sessionPath + Utilities.GetRandomString(8) +
+                    Path.DirectorySeparatorChar;
             }
+            while (Directory.Exists(StagingArea));
+            Directory.CreateDirectory(StagingArea);
 
+            Tool = tool;
             ArchiveFilename = StagingArea + Utilities.GetRandomString(8);
 
             /// To avoid `path traversal attacks` from malicious software, 
