@@ -2,17 +2,17 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Polly;
 using System;
 using System.Data.SqlClient;
+using System.Threading;
 
 namespace Genometric.TVQ.API.BuildingBlocks.WebHost
 {
     public static class IWebHostExtensions
     {
         public static IWebHost MigrateDbContext<TContext>(
-            this IWebHost webHost, 
-            Action<TContext, IServiceProvider> seeder) 
+            this IWebHost webHost,
+            Action<TContext, IServiceProvider> seeder)
             where TContext : DbContext
         {
             using (var scope = webHost.Services.CreateScope())
@@ -23,39 +23,13 @@ namespace Genometric.TVQ.API.BuildingBlocks.WebHost
 
                 try
                 {
-                    logger.LogInformation(
-                        "Migrating database associated with context {DbContextName}", 
-                        typeof(TContext).Name);
-
-                    var retry = Policy.Handle<SqlException>()
-                         .WaitAndRetry(new TimeSpan[]
-                         {
-                             TimeSpan.FromSeconds(45),
-                             TimeSpan.FromSeconds(45),
-                             TimeSpan.FromSeconds(45),
-                             TimeSpan.FromSeconds(45),
-                             TimeSpan.FromSeconds(45)
-                         });
-
-                    /// if the sql server container is not created on run docker 
-                    /// compose this migration can't fail for network related 
-                    /// exception. The retry options for DbContext only apply 
-                    /// to transient exceptions.
-                    /// Note that this is NOT applied when running some 
-                    /// orchestrator (let the orchestrator to recreate the 
-                    /// failing service)
-                    retry.Execute(() => InvokeSeeder(seeder, context, services));
-
-                    logger.LogInformation(
-                        "Migrated database associated with context {DbContextName}",
-                        typeof(TContext).Name);
+                    InvokeSeeder(seeder, context, services);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, 
-                        "An error occurred while migrating the database used on " +
-                        "context {DbContextName}", 
-                        typeof(TContext).Name);
+                    logger.LogError(ex,
+                        $"An error occurred while migrating the database used on " +
+                        $"context {typeof(TContext).Name}");
                     throw;
                 }
             }
@@ -64,13 +38,32 @@ namespace Genometric.TVQ.API.BuildingBlocks.WebHost
         }
 
         private static void InvokeSeeder<TContext>(
-            Action<TContext, IServiceProvider> seeder, 
-            TContext context, 
+            Action<TContext, IServiceProvider> seeder,
+            TContext context,
             IServiceProvider services)
             where TContext : DbContext
         {
-            context.Database.Migrate();
-            seeder(context, services);
+            /// TODO: a better way of doing this is using Polly.
+            var logger = services.GetRequiredService<ILogger<TContext>>();
+            int retryAttempt = 1;
+            logger.LogInformation($"Migrating database associated with context {typeof(TContext).Name}.");
+            string error = "";
+            do
+            {
+                try
+                {
+                    context.Database.Migrate();
+                    seeder(context, services);
+                    logger.LogInformation($"Migrated database associated with context {typeof(TContext).Name}.");
+                }
+                catch(SqlException e)
+                {
+                    Thread.Sleep(Convert.ToInt32(Math.Pow(2, retryAttempt) * 1000));
+                    error = e.Message;
+                }
+            } while (retryAttempt++ < 8);
+
+            throw new Exception(error);
         }
     }
 }

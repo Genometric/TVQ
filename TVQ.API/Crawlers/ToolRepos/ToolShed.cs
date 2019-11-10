@@ -163,7 +163,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                         }
                     }
 
-                _logger.LogInformation($"Extracted {info.XMLFiles.Count} XML files.");
+                _logger.LogInformation($"Extracted {info.XMLFiles.Count} XML file(s) for tool {info.Tool.Name}.");
                 return info;
             }
             catch (InvalidDataException e)
