@@ -21,9 +21,14 @@ namespace TVQ.API.Controllers
 
         // GET: api/v1/Publications
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Publication>>> GetPublications()
+        public async Task<ActionResult<IEnumerable<PublicationDTO>>> GetPublications()
         {
-            return await _context.Publications.ToListAsync().ConfigureAwait(false);
+            // As an exception, return List instead of IEnumerable
+            // in this API, because the tools count can be more 
+            // than the default maximum size of IEnumerable.
+            var publications = from publication in _context.Publications
+                        select new PublicationDTO(publication);
+            return await publications.ToListAsync().ConfigureAwait(false);
         }
 
         // GET: api/v1/Publications/5
