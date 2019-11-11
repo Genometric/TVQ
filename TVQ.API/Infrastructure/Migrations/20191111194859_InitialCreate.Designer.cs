@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
     [DbContext(typeof(TVQContext))]
-    [Migration("20191108173827_InitialCreate")]
+    [Migration("20191111194859_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -103,7 +103,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<string>("Chapter")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CitedBy")
+                    b.Property<int?>("CitedBy")
                         .HasColumnType("int");
 
                     b.Property<string>("DOI")

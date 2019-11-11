@@ -184,7 +184,11 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
             foreach (var filename in info.XMLFiles)
             {
-                _logger.LogDebug($"Extracting publication info from XML file {Path.GetFileNameWithoutExtension(filename)} of tool {info.Tool.Name}.");
+                _logger.LogDebug(
+                    $"Extracting publication info from XML file " +
+                    $"{Path.GetFileNameWithoutExtension(filename)} " +
+                    $"of tool {info.Tool.Name}.");
+
                 try
                 {
                     XElement toolDoc = XElement.Load(filename);
@@ -195,9 +199,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                             {
                                 case "DOI":
                                     pubs.Add(new Publication() { DOI = item.Value });
-                                    /// Some tools have one bibitem that contains only DOI, and 
-                                    /// another bibitem that contains publication info. There should
-                                    /// be only one bibitem per publication contains both DOI and 
+                                    /// Some tools have one BibItem that contains only DOI, and 
+                                    /// another BibItem that contains publication info. There should
+                                    /// be only one BibItem per publication contains both DOI and 
                                     /// publication info. Therefore, for tools with two bibitems,
                                     /// we consider only the one containing DOI. 
                                     continue;
@@ -205,25 +209,40 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                                 case "BIBTEX":
                                     try
                                     {
-                                        var parser = new Parser<Publication, Author, Keyword>(new PublicationConstructor(), new AuthorConstructor(), new KeywordConstructor());
-                                        if (parser.TryParse(item.Value, out Publication pub))
+                                        var parser = new Parser<Publication, Author, Keyword>(
+                                            new PublicationConstructor(), 
+                                            new AuthorConstructor(), 
+                                            new KeywordConstructor());
+
+                                        if (parser.TryParse(item.Value, out Publication pub) &&
+                                            pub.Year != null)
                                             pubs.Add(pub);
                                     }
                                     catch (ArgumentException e)
                                     {
-                                        _logger.LogDebug($"Error extracting publication from XML file of tool {info.Tool.Name}:{e.Message}");
+                                        _logger.LogDebug(
+                                            $"Error extracting publication from XML file of tool " +
+                                            $"{info.Tool.Name}:{e.Message}");
                                     }
                                     break;
                             }
 
-                    _logger.LogDebug($"Successfully extract publication info from XML file {Path.GetFileNameWithoutExtension(filename)} of tool {info.Tool.Name}.");
+                    _logger.LogDebug(
+                        $"Successfully extract publication info from XML file " +
+                        $"{Path.GetFileNameWithoutExtension(filename)} " +
+                        $"of tool {info.Tool.Name}.");
+
                     TryAddEntities(info.Tool, pubs);
                 }
                 catch (System.Xml.XmlException e)
                 {
                     /// This exception may happen if the XML 
                     /// file has multiple roots.
-                    _logger.LogDebug($"Failed extracting publication info from XML file {Path.GetFileNameWithoutExtension(filename)} of tool {info.Tool.Name}: {e.Message}");
+                    _logger.LogDebug(
+                        $"Failed extracting publication info from XML file " +
+                        $"{Path.GetFileNameWithoutExtension(filename)}" +
+                        $" of tool {info.Tool.Name}: {e.Message}");
+
                     return null;
                 }
             }

@@ -101,7 +101,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<string>("Chapter")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CitedBy")
+                    b.Property<int?>("CitedBy")
                         .HasColumnType("int");
 
                     b.Property<string>("DOI")

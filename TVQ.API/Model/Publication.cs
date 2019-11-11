@@ -26,7 +26,7 @@ namespace Genometric.TVQ.API.Model
 
         public int? Month { set; get; }
 
-        public int CitedBy { set; get; }
+        public int? CitedBy { set; get; }
 
         public string DOI { set; get; }
 

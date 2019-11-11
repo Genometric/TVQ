@@ -62,7 +62,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     Title = table.Column<string>(nullable: true),
                     Year = table.Column<int>(nullable: true),
                     Month = table.Column<int>(nullable: true),
-                    CitedBy = table.Column<int>(nullable: false),
+                    CitedBy = table.Column<int>(nullable: true),
                     DOI = table.Column<string>(nullable: true),
                     BibTeXEntry = table.Column<string>(nullable: true),
                     Journal = table.Column<string>(nullable: true),
