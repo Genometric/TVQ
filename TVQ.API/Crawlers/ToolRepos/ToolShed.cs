@@ -142,7 +142,12 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 foreach (ZipArchiveEntry entry in archive.Entries)
                     if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
                     {
-                        var extractedFileName = info.ArchiveExtractionPath + Path.GetFileName(entry.FullName);
+                        /// A random string is appended to the filename to avoid filename 
+                        /// collision when extracting and storing files with common names
+                        /// in a common folder, which organized under different folders in 
+                        /// an archive.
+                        var extractedFileName = info.ArchiveExtractionPath +
+                            Path.GetFileNameWithoutExtension(entry.FullName) + Utilities.GetRandomString(8);
 
                         /// Surrounding the file extraction from archive in a
                         /// try-catch block enables extracting XML files 
@@ -192,12 +197,24 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                             {
                                 case "DOI":
                                     pubs.Add(new Publication() { DOI = item.Value });
-                                    break;
+                                    /// Some tools have one bibitem that contains only DOI, and 
+                                    /// another bibitem that contains publication info. There should
+                                    /// be only one bibitem per publication contains both DOI and 
+                                    /// publication info. Therefore, for tools with two bibitems,
+                                    /// we consider only the one containing DOI. 
+                                    continue;
 
                                 case "BIBTEX":
-                                    var parser = new Parser<Publication, Author, Keyword>(new PublicationConstructor(), new AuthorConstructor(), new KeywordConstructor());
-                                    if (parser.TryParse(item.Value, out Publication pub))
-                                        pubs.Add(pub);
+                                    try
+                                    {
+                                        var parser = new Parser<Publication, Author, Keyword>(new PublicationConstructor(), new AuthorConstructor(), new KeywordConstructor());
+                                        if (parser.TryParse(item.Value, out Publication pub))
+                                            pubs.Add(pub);
+                                    }
+                                    catch (ArgumentException e)
+                                    {
+                                        _logger.LogDebug($"Error extracting publication from XML file of tool {info.Tool.Name}:{e.Message}");
+                                    }
                                     break;
                             }
 
