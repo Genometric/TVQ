@@ -36,9 +36,17 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 string json = reader.ReadToEnd();
                 var items = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
                 foreach (var item in items)
-                    TryAddEntities(
-                        new Tool() { Name = item.Key.Trim() },
-                        new Publication() { BibTeXEntry = item.Value });
+                    try
+                    {
+                        if (TryParseBibitem(item.Value, out Publication pub))
+                            TryAddEntities(
+                            new Tool() { Name = item.Key.Trim() },
+                            pub);
+                    }
+                    catch(ArgumentException e)
+                    {
+
+                    }
             }
 
             File.Delete(citationsFileName);

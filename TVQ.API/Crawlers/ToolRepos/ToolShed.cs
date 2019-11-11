@@ -209,13 +209,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                                 case "BIBTEX":
                                     try
                                     {
-                                        var parser = new Parser<Publication, Author, Keyword>(
-                                            new PublicationConstructor(), 
-                                            new AuthorConstructor(), 
-                                            new KeywordConstructor());
-
-                                        if (parser.TryParse(item.Value, out Publication pub) &&
-                                            pub.Year != null)
+                                        if (TryParseBibitem(item.Value, out Publication pub))
                                             pubs.Add(pub);
                                     }
                                     catch (ArgumentException e)
