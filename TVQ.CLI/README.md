@@ -1,1 +1,0 @@
-TVQ.CLI is meant to be a quick experimental solution to obtain results faster. 
