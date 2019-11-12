@@ -18,7 +18,7 @@ namespace Genometric.TVQ.API.Infrastructure.EntityConfigurations
             foreach (var p in typeof(Author).GetProperties())
             {
                 if (p.Name == nameof(Author.ID) ||
-                    p.Name == nameof(Author.Publication))
+                    p.Name == nameof(Author.AuthorPublications))
                     continue;
                 builder.Property(p.Name);
             }

@@ -32,7 +32,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PublicationID")
+                    b.Property<int?>("PublicationID")
                         .HasColumnType("int");
 
                     b.HasKey("ID");
@@ -40,6 +40,21 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.HasIndex("PublicationID");
 
                     b.ToTable("Authors");
+                });
+
+            modelBuilder.Entity("Genometric.TVQ.API.Model.AuthorPublication", b =>
+                {
+                    b.Property<int>("PublicationID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AuthorID")
+                        .HasColumnType("int");
+
+                    b.HasKey("PublicationID", "AuthorID");
+
+                    b.HasIndex("AuthorID");
+
+                    b.ToTable("AuthorsPublications");
                 });
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.Citation", b =>
@@ -242,8 +257,21 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.Author", b =>
                 {
-                    b.HasOne("Genometric.TVQ.API.Model.Publication", "Publication")
+                    b.HasOne("Genometric.TVQ.API.Model.Publication", null)
                         .WithMany("Authors")
+                        .HasForeignKey("PublicationID");
+                });
+
+            modelBuilder.Entity("Genometric.TVQ.API.Model.AuthorPublication", b =>
+                {
+                    b.HasOne("Genometric.TVQ.API.Model.Author", "Author")
+                        .WithMany("AuthorPublications")
+                        .HasForeignKey("AuthorID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Genometric.TVQ.API.Model.Publication", "Publication")
+                        .WithMany("AuthorPublications")
                         .HasForeignKey("PublicationID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

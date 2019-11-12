@@ -29,6 +29,7 @@ namespace Genometric.TVQ.API.Infrastructure
             builder.ApplyConfiguration(new ToolDownloadRecordEntityTypeConfiguration());
             builder.ApplyConfiguration(new AuthorEntityTypeConfiguration());
             builder.ApplyConfiguration(new KeywordEntityTypeConfiguration());
+            builder.ApplyConfiguration(new AuthorPubEntityTypeConfiguration());
         }
     }
 }

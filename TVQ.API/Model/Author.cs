@@ -1,4 +1,5 @@
 ﻿using Genometric.BibitemParser.Interfaces;
+using System.Collections.Generic;
 
 namespace Genometric.TVQ.API.Model
 {
@@ -6,13 +7,11 @@ namespace Genometric.TVQ.API.Model
     {
         public int ID { set; get; }
 
-        public int PublicationID { set; get; }
-
         public string FirstName { get; }
 
         public string LastName { get; }
 
-        public Publication Publication { set; get; }
+        public ICollection<AuthorPublication> AuthorPublications { set; get; }
 
         public Author(string firstName, string lastName)
         {

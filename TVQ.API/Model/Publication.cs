@@ -52,6 +52,8 @@ namespace Genometric.TVQ.API.Model
 
         public ICollection<Keyword> Keywords { set; get; }
 
+        public ICollection<AuthorPublication> AuthorPublications { set; get; }
+
         public Publication() { }
 
         public Publication(

@@ -110,9 +110,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    PublicationID = table.Column<int>(nullable: false),
                     FirstName = table.Column<string>(nullable: true),
-                    LastName = table.Column<string>(nullable: true)
+                    LastName = table.Column<string>(nullable: true),
+                    PublicationID = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -122,7 +122,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         column: x => x.PublicationID,
                         principalTable: "Publications",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -167,10 +167,39 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "AuthorsPublications",
+                columns: table => new
+                {
+                    AuthorID = table.Column<int>(nullable: false),
+                    PublicationID = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuthorsPublications", x => new { x.PublicationID, x.AuthorID });
+                    table.ForeignKey(
+                        name: "FK_AuthorsPublications_Authors_AuthorID",
+                        column: x => x.AuthorID,
+                        principalTable: "Authors",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AuthorsPublications_Publications_PublicationID",
+                        column: x => x.PublicationID,
+                        principalTable: "Publications",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Authors_PublicationID",
                 table: "Authors",
                 column: "PublicationID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AuthorsPublications_AuthorID",
+                table: "AuthorsPublications",
+                column: "AuthorID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Citations_PublicationID",
@@ -208,7 +237,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Authors");
+                name: "AuthorsPublications");
 
             migrationBuilder.DropTable(
                 name: "Citations");
@@ -218,6 +247,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "ToolDownloadRecords");
+
+            migrationBuilder.DropTable(
+                name: "Authors");
 
             migrationBuilder.DropTable(
                 name: "Publications");

@@ -88,7 +88,17 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         {
             if (_bibitemParser.TryParse(bibitem, out publication) &&
                 publication.Year != null)
+            {
+                if (publication.Authors != null &&
+                    publication.Authors.Count > 0)
+                {
+                    publication.AuthorPublications = new List<AuthorPublication>();
+                    foreach (var author in publication.Authors)
+                        publication.AuthorPublications
+                            .Add(new AuthorPublication(author, publication));
+                }
                 return true;
+            }
             else
                 return false;
         }
