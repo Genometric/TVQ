@@ -160,24 +160,38 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 return false;
             }
 
-            publication.EID = ExtractFromResponse(response, "eid");
-            publication.ScopusID = ExtractFromResponse(response, "dc:identifier").Split(':')[1];
-
-            if (publication.Title == null)
-                publication.Title = ExtractFromResponse(response, "dc:title");
-
-            if (publication.Volume == null)
-                publication.Volume = Convert.ToInt32(ExtractFromResponse(response, "prism:volume"), CultureInfo.InvariantCulture);
-
-            if (publication.Pages == null)
-                publication.Pages = ExtractFromResponse(response, "prism:pageRange");
-
-            if (publication.Journal == null)
-                publication.Journal = ExtractFromResponse(response, "prism:publicationName");
-
-            if (publication.Year == null)
+            if (!TryExtractFromResponse(response, "eid", out string eid) ||
+                !TryExtractFromResponse(response, "dc:identifier", out string id))
             {
-                var date = DateTime.Parse(ExtractFromResponse(response, "prism:coverDate"), CultureInfo.InvariantCulture);
+                _logger.LogDebug($"Skipping publication {publication.ID} because cannot determine its Scopus ID or EID.");
+                return false;
+            }
+            else
+            {
+                publication.EID = eid;
+                publication.ScopusID = id.Split(':')[1];
+            }
+
+            if (publication.Title == null && 
+                TryExtractFromResponse(response, "dc:title", out string title))
+                publication.Title = title;
+
+            if (publication.Volume == null && 
+                TryExtractFromResponse(response, "prism:volume", out string volume))
+                publication.Volume = Convert.ToInt32(volume, CultureInfo.InvariantCulture);
+
+            if (publication.Pages == null && 
+                TryExtractFromResponse(response, "prism:pageRange", out string pageRange))
+                publication.Pages = pageRange;
+
+            if (publication.Journal == null && 
+                TryExtractFromResponse(response, "prism:publicationName", out string publicationName))
+                publication.Journal = publicationName;
+
+            if (publication.Year == null && 
+                TryExtractFromResponse(response, "prism:coverDate", out string coverDate))
+            {
+                var date = DateTime.Parse(coverDate, CultureInfo.InvariantCulture);
                 publication.Year = date.Year;
                 publication.Month = date.Month;
             }
@@ -185,14 +199,23 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             return true;
         }
 
-        private static string ExtractFromResponse(JArray response, string field)
+        private static bool TryExtractFromResponse(JArray response, string field, out string value)
         {
-            return response.Select(x => x[field]).First().ToString();
+            value = null;
+            var v = response.Select(x => x[field]);
+            if (v == null)
+                return false;
+            value = v.First().ToString();
+            return true;
         }
 
         private void GetCitations(Publication publication)
         {
-            if (publication == null || publication.Year == null)
+            if (publication == null)
+            {
+                return;
+            }
+            if (publication.Year == null)
             {
                 _logger.LogDebug($"Skipping publication {publication.ID} because cannot determine publication year.");
                 return;
