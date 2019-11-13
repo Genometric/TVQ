@@ -1,11 +1,12 @@
-﻿using Genometric.TVQ.API.Model;
+﻿using Genometric.BibitemParser;
+using Genometric.TVQ.API.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Web;
@@ -29,7 +30,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             get { return Environment.GetEnvironmentVariable("SCOPUS_API_KEY"); }
         }
 
-        private List<Publication> _publications;
+        private readonly List<Publication> _publications;
 
         public ConcurrentBag<Citation> Citations { get; }
 
@@ -67,7 +68,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
 
             foreach (var publication in _publications)
                 updateWithScopusInfo.Post(publication);
-            
+
             updateWithScopusInfo.Complete();
 
             await getCitations.Completion.ConfigureAwait(false);
@@ -78,90 +79,129 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             var uriBuilder = new UriBuilder("https://api.elsevier.com/content/search/scopus");
             var parameters = HttpUtility.ParseQueryString(string.Empty);
             parameters["apiKey"] = APIKey;
-            if (publication.DOI != null)
-            {
-                parameters["query"] = $"DOI(\"{publication.DOI}\")";
-            }
+            if (TryGetQuery(publication, out string query))
+                parameters["query"] = query;
             else
-            {
-                var type = new Regex(@".*@(?<type>.+){.*").Match(publication.BibTeXEntry).Groups["type"].Value.ToLower().Trim();
-                switch (type)
-                {
-                    case "misc":
-                    case "article":
-                    case "book":
-                    case "inproceedings":
-                        var title = new Regex(@".*title={(?<title>.+)}.*").Match(publication.BibTeXEntry).Groups["title"].Value;
-                        //var author = new Regex(@".*author={(?<author>.+)}.*").Match(publication.Citation).Groups["author"].Value;
-                        //var year = new Regex(@".*year={(?<year>.+)}.*").Match(publication.Citation).Groups["year"].Value;
-                        parameters["query"] = string.Format("TITLE(\"{0}\")", title);
-                        break;
-
-                    default:
-                        // not supported type at the moment.
-                        return null;
-                }
-            }
+                return null;
 
             uriBuilder.Query = parameters.ToString();
 
-            HttpResponseMessage response = HttpClient.GetAsync(uriBuilder.Uri).ConfigureAwait(false).GetAwaiter().GetResult(); //await _client.GetAsync(uriBuilder.Uri).ConfigureAwait(false);
+            using var response = new HttpClient().GetAsync(uriBuilder.Uri).ConfigureAwait(false).GetAwaiter().GetResult();
             if (!response.IsSuccessStatusCode)
             {
                 /// TODO: replace with an exception.
                 return null;
             }
 
-            var content = response.Content.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult(); //await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var obj = JObject.Parse(content);
+            var content = response.Content.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+            JToken obj = JObject.Parse(content);
 
             var entries = (JArray)obj["search-results"]["entry"];
 
-            if (entries.Count == 0)
-            {
-                // log error
+            if (TryUpdatePublication(publication, entries))
+                return publication;
+            else
                 return null;
+        }
+
+        private static bool TryGetQuery(Publication publication, out string query)
+        {
+            query = null;
+            if (publication.DOI != null)
+            {
+                query = $"DOI(\"{publication.DOI}\")";
             }
-            else if (entries.Count >= 1)
+            else
             {
-                // log error
-                return null;
+                //var type = new Regex(@".*@(?<type>.+){.*").Match(publication.BibTeXEntry).Groups["type"].Value.ToLower().Trim();
+                switch (publication.Type)
+                {
+                    case BibTexEntryType.Article:
+                    case BibTexEntryType.Book:
+                    case BibTexEntryType.Inproceedings:
+                    case BibTexEntryType.Misc:
+                        ///var title = new Regex(@".*title={(?<title>.+)}.*").Match(publication.BibTeXEntry).Groups["title"].Value;
+                        //var author = new Regex(@".*author={(?<author>.+)}.*").Match(publication.Citation).Groups["author"].Value;
+                        //var year = new Regex(@".*year={(?<year>.+)}.*").Match(publication.Citation).Groups["year"].Value;
+
+                        query = $"TITLE(\"{publication.Title}\")";
+                        break;
+
+                    default:
+                        // not supported type at the moment.
+                        return false;
+                }
             }
 
-            publication.EID = entries.Select(x => x["eid"]).First().ToString();
-            publication.ScopusID = entries.Select(x => x["dc:identifier"]).First().ToString().Split(':')[1];
-            return publication;
+            return true;
+        }
+
+        private static bool TryUpdatePublication(Publication publication, JArray response)
+        {
+            if (response.Any(x => ((JObject)x).ContainsKey("error")) ||
+                response.Count == 0 ||
+                response.Count > 1)
+            {
+                return false;
+            }
+
+            publication.EID = ExtractFromResponse(response, "eid");
+            publication.ScopusID = ExtractFromResponse(response, "dc:identifier").Split(':')[1];
+
+            if (publication.Title == null)
+                publication.Title = ExtractFromResponse(response, "dc:title");
+
+            if (publication.Volume == null)
+                publication.Volume = Convert.ToInt32(ExtractFromResponse(response, "prism:volume"), CultureInfo.InvariantCulture);
+
+            if (publication.Pages == null)
+                publication.Pages = ExtractFromResponse(response, "prism:pageRange");
+
+            if (publication.Journal == null)
+                publication.Journal = ExtractFromResponse(response, "prism:publicationName");
+
+            if (publication.Year == null)
+            {
+                var date = DateTime.Parse(ExtractFromResponse(response, "prism:coverDate"), CultureInfo.InvariantCulture);
+                publication.Year = date.Year;
+                publication.Month = date.Month;
+            }
+
+            return true;
+        }
+
+        private static string ExtractFromResponse(JArray response, string field)
+        {
+            return response.Select(x => x[field]).First().ToString();
         }
 
         private void GetCitations(Publication publication)
         {
-            if (publication == null)
+            if (publication == null || publication.Year == null)
                 return;
 
-            DateTime startDate = new DateTime(Convert.ToInt32(publication.Year), 01, 01);
+            DateTime startDate = new DateTime((int)publication.Year, publication.Month == null ? 01 : (int)publication.Month, 01);
             DateTime endDate = DateTime.Now;
 
             // The currently supported view by Scopus.
             string view = "STANDARD";
             string date = $"{startDate.Year}-{endDate.Year}";
-            var uriBuilder = new UriBuilder(CitationsOverviewAPI + publication.EID); //"2-s2.0-84860718683") ;
+            var uriBuilder = new UriBuilder(CitationsOverviewAPI + publication.EID);
             var parameters = HttpUtility.ParseQueryString(string.Empty);
             parameters["apiKey"] = APIKey;
             parameters["view"] = view;
             parameters["date"] = date;
-
-            /// EDI is like this: 2-s2.0-84860718683 and scopus ID is this part of it: 84860718683
-            parameters["scopus_id"] = publication.ScopusID; // "84860718683";
+            parameters["scopus_id"] = publication.ScopusID;
 
             uriBuilder.Query = parameters.ToString();
-            HttpClient.DefaultRequestHeaders.Add("X-ELS-APIKey", "APIKey");
-            HttpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-            HttpClient.DefaultRequestHeaders.Add("User-Agent", "TVQv1");
 
             try
             {
-                var tmpuri = uriBuilder.Uri;
-                HttpResponseMessage response = HttpClient.GetAsync(uriBuilder.Uri).ConfigureAwait(false).GetAwaiter().GetResult();
+                using var client = new HttpClient();
+                client.DefaultRequestHeaders.Add("X-ELS-APIKey", "APIKey");
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                client.DefaultRequestHeaders.Add("User-Agent", "TVQv1");
+                HttpResponseMessage response = client.GetAsync(uriBuilder.Uri).ConfigureAwait(false).GetAwaiter().GetResult();
                 if (!response.IsSuccessStatusCode)
                 {
                     /// TODO: replace with an exception.
@@ -169,29 +209,44 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 }
 
                 var content = response.Content.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-                var obj = JObject.Parse(content);
-                var columnHeading = (JArray)obj["abstract-citations-response"]["citeColumnTotalXML"]["citeCountHeader"]["columnHeading"];
-                var years = columnHeading.Select(c => (int)c["$"]).ToList();
-                var columnTotal = (JArray)obj["abstract-citations-response"]["citeColumnTotalXML"]["citeCountHeader"]["columnTotal"];
-                var citationCount = columnTotal.Select(c => (int)c["$"]).ToList();
-
-                for (int i = 0; i < years.Count; i++)
-                {
-                    Citations.Add(new Citation()
-                    {
-                        PublicationID = 0,
-                        Date = new DateTime(years[i], 01, 01),
-                        Count = citationCount[i],
-                        Source = Citation.InfoSource.Scopus
-                    });
-                }
+                TryUpdatePublicationCitation(publication, JObject.Parse(content));
             }
             catch (Exception e)
             {
+                // TODO: log this.
+            }
+        }
 
+        private bool TryUpdatePublicationCitation(Publication publication, JObject response)
+        {
+            var citeCountHeader = response["abstract-citations-response"]["citeColumnTotalXML"]["citeCountHeader"];
+            if (citeCountHeader["columnHeading"] is JArray)
+            {
+                var years = ((JArray)citeCountHeader["columnHeading"]).Select(c => (int)c["$"]).ToList();
+                var citationCount = ((JArray)citeCountHeader["columnTotal"]).Select(c => (int)c["$"]).ToList();
+
+                for (int i = 0; i < years.Count; i++)
+                    AddCitation(publication, new DateTime(years[i], 01, 01), citationCount[i]);
+            }
+            else
+            {
+                var years = (int)(JValue)citeCountHeader["columnHeading"];
+                var citationCount = (int)(JValue)citeCountHeader["columnTotal"];
+                AddCitation(publication, new DateTime(years, 01, 01), citationCount);
             }
 
-            throw new Exception();
+            return true;
+        }
+
+        private void AddCitation(Publication publication, DateTime date, int count)
+        {
+            Citations.Add(new Citation()
+            {
+                Date = date,
+                Count = count,
+                Source = Citation.InfoSource.Scopus,
+                Publication = publication
+            });
         }
     }
 }
