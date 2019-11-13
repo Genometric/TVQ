@@ -1,5 +1,6 @@
 ﻿using Genometric.BibitemParser;
 using Genometric.TVQ.API.Model;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
@@ -31,11 +32,13 @@ namespace Genometric.TVQ.API.Crawlers.Literature
         }
 
         private readonly List<Publication> _publications;
+        private readonly ILogger<CrawlerService> _logger;
 
         public ConcurrentBag<Citation> Citations { get; }
 
-        public Scopus(List<Publication> publications)
+        public Scopus(List<Publication> publications, ILogger<CrawlerService> logger)
         {
+            _logger = logger;
             _publications = publications;
             Citations = new ConcurrentBag<Citation>();
         }
@@ -76,6 +79,8 @@ namespace Genometric.TVQ.API.Crawlers.Literature
 
         private Publication UpdateWithScopusInfo(Publication publication)
         {
+            _logger.LogInformation($"Updating publication {publication.ID} info.");
+
             var uriBuilder = new UriBuilder("https://api.elsevier.com/content/search/scopus");
             var parameters = HttpUtility.ParseQueryString(string.Empty);
             parameters["apiKey"] = APIKey;
@@ -89,7 +94,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             using var response = new HttpClient().GetAsync(uriBuilder.Uri).ConfigureAwait(false).GetAwaiter().GetResult();
             if (!response.IsSuccessStatusCode)
             {
-                /// TODO: replace with an exception.
+                _logger.LogDebug($"Unsuccessful response for publication {publication.ID}: {response.StatusCode}; {response.ReasonPhrase}");
                 return null;
             }
 
@@ -104,7 +109,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 return null;
         }
 
-        private static bool TryGetQuery(Publication publication, out string query)
+        private bool TryGetQuery(Publication publication, out string query)
         {
             query = null;
             if (publication.DOI != null)
@@ -113,7 +118,6 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             }
             else
             {
-                //var type = new Regex(@".*@(?<type>.+){.*").Match(publication.BibTeXEntry).Groups["type"].Value.ToLower().Trim();
                 switch (publication.Type)
                 {
                     case BibTexEntryType.Article:
@@ -128,7 +132,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                         break;
 
                     default:
-                        // not supported type at the moment.
+                        _logger.LogDebug($"Skipping publication {publication.ID} because of unsupported type {publication.Type}.");
                         return false;
                 }
             }
@@ -136,12 +140,23 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             return true;
         }
 
-        private static bool TryUpdatePublication(Publication publication, JArray response)
+        private bool TryUpdatePublication(Publication publication, JArray response)
         {
-            if (response.Any(x => ((JObject)x).ContainsKey("error")) ||
-                response.Count == 0 ||
-                response.Count > 1)
+            if (response.Any(x => ((JObject)x).ContainsKey("error")))
             {
+                _logger.LogDebug($"Skipping publication {publication.ID} for the following error: {response}");
+                return false;
+            }
+
+            if (response.Count == 0)
+            {
+                _logger.LogDebug($"Skipping publication {publication.ID} because no record found on Scopus.");
+                return false;
+            }
+
+            if (response.Count > 1)
+            {
+                _logger.LogDebug($"Skipping publication {publication.ID} because more than one record found on Scopus.");
                 return false;
             }
 
@@ -178,7 +193,10 @@ namespace Genometric.TVQ.API.Crawlers.Literature
         private void GetCitations(Publication publication)
         {
             if (publication == null || publication.Year == null)
+            {
+                _logger.LogDebug($"Skipping publication {publication.ID} because cannot determine publication year.");
                 return;
+            }
 
             DateTime startDate = new DateTime((int)publication.Year, publication.Month == null ? 01 : (int)publication.Month, 01);
             DateTime endDate = DateTime.Now;
@@ -204,8 +222,8 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 HttpResponseMessage response = client.GetAsync(uriBuilder.Uri).ConfigureAwait(false).GetAwaiter().GetResult();
                 if (!response.IsSuccessStatusCode)
                 {
-                    /// TODO: replace with an exception.
-                    //return 0;
+                    _logger.LogDebug($"Skipping publication {publication.ID} for the following error getting citation information: {response.StatusCode}; {response.ReasonPhrase}");
+                    return;
                 }
 
                 var content = response.Content.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult();
@@ -213,7 +231,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             }
             catch (Exception e)
             {
-                // TODO: log this.
+                _logger.LogDebug($"Skipping publication {publication.ID} due to the following error: {e.Message}");
             }
         }
 
