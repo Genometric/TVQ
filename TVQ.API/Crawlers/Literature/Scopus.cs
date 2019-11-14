@@ -194,6 +194,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 var date = DateTime.Parse(coverDate, CultureInfo.InvariantCulture);
                 publication.Year = date.Year;
                 publication.Month = date.Month;
+                publication.Day = date.Day;
             }
 
             return true;
@@ -221,7 +222,11 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 return;
             }
 
-            DateTime startDate = new DateTime((int)publication.Year, publication.Month == null ? 01 : (int)publication.Month, 01);
+            DateTime startDate = new DateTime(
+                (int)publication.Year, 
+                publication.Month == null ? 01 : (int)publication.Month, 
+                publication.Day == null ? 01 : (int)publication.Day);
+
             DateTime endDate = DateTime.Now;
 
             // The currently supported view by Scopus.

@@ -122,6 +122,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<string>("DOI")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("Day")
+                        .HasColumnType("int");
+
                     b.Property<string>("EID")
                         .HasColumnType("nvarchar(max)");
 

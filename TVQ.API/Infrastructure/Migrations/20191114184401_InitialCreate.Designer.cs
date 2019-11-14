@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
     [DbContext(typeof(TVQContext))]
-    [Migration("20191112062502_InitialCreate")]
+    [Migration("20191114184401_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -123,6 +123,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
 
                     b.Property<string>("DOI")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Day")
+                        .HasColumnType("int");
 
                     b.Property<string>("EID")
                         .HasColumnType("nvarchar(max)");
