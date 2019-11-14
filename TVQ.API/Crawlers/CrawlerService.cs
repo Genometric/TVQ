@@ -86,7 +86,6 @@ namespace Genometric.TVQ.API.Crawlers
             try
             {
                 _dbContext.AttachRange(publications);
-
                 using var scopusCrawler = new Scopus(publications, _logger);
                 await scopusCrawler.CrawlAsync().ConfigureAwait(false);
                 await _dbContext.SaveChangesAsync().ConfigureAwait(false);

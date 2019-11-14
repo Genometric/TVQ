@@ -34,13 +34,10 @@ namespace Genometric.TVQ.API.Crawlers.Literature
         private readonly List<Publication> _publications;
         private readonly ILogger<CrawlerService> _logger;
 
-        public ConcurrentBag<Citation> Citations { get; }
-
         public Scopus(List<Publication> publications, ILogger<CrawlerService> logger)
         {
             _logger = logger;
             _publications = publications;
-            Citations = new ConcurrentBag<Citation>();
         }
 
         public async Task CrawlAsync()
@@ -172,23 +169,23 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 publication.ScopusID = id.Split(':')[1];
             }
 
-            if (publication.Title == null && 
+            if (publication.Title == null &&
                 TryExtractFromResponse(response, "dc:title", out string title))
                 publication.Title = title;
 
-            if (publication.Volume == null && 
+            if (publication.Volume == null &&
                 TryExtractFromResponse(response, "prism:volume", out string volume))
                 publication.Volume = Convert.ToInt32(volume, CultureInfo.InvariantCulture);
 
-            if (publication.Pages == null && 
+            if (publication.Pages == null &&
                 TryExtractFromResponse(response, "prism:pageRange", out string pageRange))
                 publication.Pages = pageRange;
 
-            if (publication.Journal == null && 
+            if (publication.Journal == null &&
                 TryExtractFromResponse(response, "prism:publicationName", out string publicationName))
                 publication.Journal = publicationName;
 
-            if (publication.Year == null && 
+            if (publication.Year == null &&
                 TryExtractFromResponse(response, "prism:coverDate", out string coverDate))
             {
                 var date = DateTime.Parse(coverDate, CultureInfo.InvariantCulture);
@@ -223,8 +220,8 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             }
 
             DateTime startDate = new DateTime(
-                (int)publication.Year, 
-                publication.Month == null ? 01 : (int)publication.Month, 
+                (int)publication.Year,
+                publication.Month == null ? 01 : (int)publication.Month,
                 publication.Day == null ? 01 : (int)publication.Day);
 
             DateTime endDate = DateTime.Now;
@@ -284,9 +281,12 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             return true;
         }
 
-        private void AddCitation(Publication publication, DateTime date, int count)
+        private static void AddCitation(Publication publication, DateTime date, int count)
         {
-            Citations.Add(new Citation()
+            if (publication.Citations == null)
+                publication.Citations = new List<Citation>();
+
+            publication.Citations.Add(new Citation()
             {
                 Date = date,
                 Count = count,
