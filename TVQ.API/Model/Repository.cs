@@ -28,6 +28,8 @@ namespace Genometric.TVQ.API.Model
 
         public ICollection<Tool> Tools { set; get; }
 
+        public Statistics Statistics { set; get; }
+
         public Repository() { }
 
         public Uri GetURI()
