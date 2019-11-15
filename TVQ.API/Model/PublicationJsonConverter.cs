@@ -57,6 +57,8 @@ namespace Genometric.TVQ.API.Model
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
+            if (value == null) return;
+
             JObject obj = new JObject();
             Type type = value.GetType();
 
