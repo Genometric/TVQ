@@ -91,7 +91,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             using var response = new HttpClient().GetAsync(uriBuilder.Uri).ConfigureAwait(false).GetAwaiter().GetResult();
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogDebug($"Unsuccessful response for publication {publication.ID}: {response.StatusCode}; {response.ReasonPhrase}");
+                _logger.LogDebug($"Unsuccessful response for publication {publication.ID}: {response.StatusCode}; {response.ReasonPhrase}; {response.Headers}");
                 return null;
             }
 
