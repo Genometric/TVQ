@@ -58,7 +58,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         private async Task<List<Tool>> GetToolsAsync()
         {
             _logger.LogDebug("Getting tools list from ToolShed.");
-            HttpResponseMessage response = await HttpClient.GetAsync(new Uri(Repo.URI)).ConfigureAwait(false);
+            using var client = new HttpClient();
+            HttpResponseMessage response = await client.GetAsync(new Uri(Repo.URI)).ConfigureAwait(false);
             string content;
             if (response.IsSuccessStatusCode)
                 content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);

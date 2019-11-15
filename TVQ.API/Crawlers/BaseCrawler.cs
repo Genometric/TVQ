@@ -10,20 +10,11 @@ namespace Genometric.TVQ.API.Crawlers
     {
         protected WebClient WebClient { get; }
 
-        /// <summary>
-        /// If used in multi-thread mode, make sure to use 
-        /// the thread-safe methods only, which are: CancelPendingRequests,
-        /// DeleteAsync, GetAsync, GetByteArrayAsync, GetStreamAsync,
-        /// GetStringAsync, PostAsync, PutAsync, and SendAsync.
-        /// </summary>
-        protected HttpClient HttpClient { get; }
-
         protected string SessionTempPath { get; }
 
         protected BaseCrawler()
         {
             WebClient = new WebClient();
-            HttpClient = new HttpClient();
 
             do
             {
