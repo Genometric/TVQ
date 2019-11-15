@@ -46,9 +46,9 @@ namespace TVQ.API.Controllers
 
             /// Instead of `Include(...).FirstOrDefaultAsync(...)` in the following,
             /// we could have used `FindAsync` which checks context before sending 
-            /// a query to the database. However, using `FindAsync` we cannot ask 
+            /// a query to the database. However, when using `FindAsync` we cannot ask 
             /// to include Publication info of a citation.
-            var citation = await 
+            var citation = await
                 _context.Citations
                 .Include(x => x.Publication)
                 .FirstOrDefaultAsync(x => x.ID == id).ConfigureAwait(false);
