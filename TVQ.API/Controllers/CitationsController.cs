@@ -32,13 +32,18 @@ namespace TVQ.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Citation>>> GetCitations()
         {
-            return await _context.Citations.ToListAsync().ConfigureAwait(false);
+            return Ok(await _context.Citations.ToListAsync().ConfigureAwait(false));
         }
 
         // GET: api/v1/Citations/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Citation>> GetCitation(int id)
+        public async Task<IActionResult> GetCitation(int id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var citation = await _context.Citations.FindAsync(id);
 
             if (citation == null)
@@ -46,7 +51,7 @@ namespace TVQ.API.Controllers
                 return NotFound();
             }
 
-            return citation;
+            return Ok(citation);
         }
 
         // PUT: api/v1/Citations/5

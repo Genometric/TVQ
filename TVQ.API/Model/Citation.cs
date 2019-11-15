@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 
 namespace Genometric.TVQ.API.Model
 {
+    [JsonConverter(typeof(CitationJsonConverter))]
     public class Citation
     {
         public enum InfoSource { Scopus };
