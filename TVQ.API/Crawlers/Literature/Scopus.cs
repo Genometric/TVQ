@@ -169,6 +169,10 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 publication.ScopusID = id.Split(':')[1];
             }
 
+            if (publication.DOI == null &&
+                TryExtractFromResponse(response, "prism:doi", out string doi))
+                publication.DOI = doi;
+
             if (publication.Title == null &&
                 TryExtractFromResponse(response, "dc:title", out string title))
                 publication.Title = title;
