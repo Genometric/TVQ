@@ -3,7 +3,6 @@ using Genometric.TVQ.API.Model;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -197,6 +196,10 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 publication.Month = date.Month;
                 publication.Day = date.Day;
             }
+
+            if (TryExtractFromResponse(response, "citedby-count", out string citedBy) &&
+                int.TryParse(citedBy, out int c))
+                publication.CitedBy = c;
 
             return true;
         }
