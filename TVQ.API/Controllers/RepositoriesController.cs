@@ -1,5 +1,4 @@
-﻿using Genometric.TVQ.API.Crawlers;
-using Genometric.TVQ.API.Infrastructure;
+﻿using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Infrastructure.BackgroundTasks;
 using Genometric.TVQ.API.Model;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +32,11 @@ namespace Genometric.TVQ.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Repository>>> GetRepos()
         {
-            return await _context.Repositories.Include(repo => repo.Tools).ToListAsync().ConfigureAwait(false);
+            return await
+                _context.Repositories
+                .Include(x => x.Tools)
+                .Include(x => x.Statistics)
+                .ToListAsync().ConfigureAwait(false);
         }
 
         // GET: api/v1/repositories/5

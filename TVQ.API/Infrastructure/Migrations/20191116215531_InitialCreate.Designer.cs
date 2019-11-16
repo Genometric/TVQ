@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
     [DbContext(typeof(TVQContext))]
-    [Migration("20191114184401_InitialCreate")]
+    [Migration("20191116215531_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -183,6 +183,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<int?>("Name")
                         .HasColumnType("int");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<string>("URI")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -190,6 +193,30 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("Repositories");
+                });
+
+            modelBuilder.Entity("Genometric.TVQ.API.Model.Statistics", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("RepositoryID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<double?>("TValue")
+                        .HasColumnType("float");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("RepositoryID")
+                        .IsUnique();
+
+                    b.ToTable("Statistics");
                 });
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.Tool", b =>
@@ -305,6 +332,15 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.HasOne("Genometric.TVQ.API.Model.Tool", "Tool")
                         .WithMany("Publications")
                         .HasForeignKey("ToolID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Genometric.TVQ.API.Model.Statistics", b =>
+                {
+                    b.HasOne("Genometric.TVQ.API.Model.Repository", "Repository")
+                        .WithOne("Statistics")
+                        .HasForeignKey("Genometric.TVQ.API.Model.Statistics", "RepositoryID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

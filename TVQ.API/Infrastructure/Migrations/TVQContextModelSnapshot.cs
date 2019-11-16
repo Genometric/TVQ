@@ -181,6 +181,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<int?>("Name")
                         .HasColumnType("int");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<string>("URI")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -198,6 +201,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int>("RepositoryID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<double?>("TValue")

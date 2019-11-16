@@ -13,12 +13,34 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    Status = table.Column<int>(nullable: false),
                     Name = table.Column<int>(nullable: true),
                     URI = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Repositories", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Statistics",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Status = table.Column<int>(nullable: false),
+                    RepositoryID = table.Column<int>(nullable: false),
+                    TValue = table.Column<double>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Statistics", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Statistics_Repositories_RepositoryID",
+                        column: x => x.RepositoryID,
+                        principalTable: "Repositories",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -218,6 +240,12 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 column: "ToolID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Statistics_RepositoryID",
+                table: "Statistics",
+                column: "RepositoryID",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ToolDownloadRecords_ToolID",
                 table: "ToolDownloadRecords",
                 column: "ToolID");
@@ -245,6 +273,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Keywords");
+
+            migrationBuilder.DropTable(
+                name: "Statistics");
 
             migrationBuilder.DropTable(
                 name: "ToolDownloadRecords");

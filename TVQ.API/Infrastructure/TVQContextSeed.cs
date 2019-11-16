@@ -45,23 +45,30 @@ namespace Genometric.TVQ.API.Infrastructure
             bool useCustomizationData,
             ILogger<TVQContextSeed> logger)
         {
+            var toolshed = new Repository()
+            {
+                Name = Repository.Repo.ToolShed,
+                URI = "https://toolshed.g2.bx.psu.edu/api/repositories"
+            };
+            toolshed.Statistics = new Statistics() { Repository = toolshed };
+
+            var biotools = new Repository()
+            {
+                Name = Repository.Repo.BioTools,
+                URI = "https://github.com/bio-tools/content/archive/master.zip"
+            };
+            biotools.Statistics = new Statistics() { Repository = biotools };
+
+            var bioconductor = new Repository()
+            {
+                Name = Repository.Repo.Bioconductor,
+                URI = "https://github.com/Genometric/ToolVisibilityQuantifier/raw/master/data/bioconductor/"
+            };
+            bioconductor.Statistics = new Statistics() { Repository = bioconductor };
+
             return new List<Repository>()
             {
-                new Repository()
-                {
-                    Name = Repository.Repo.ToolShed,
-                    URI = "https://toolshed.g2.bx.psu.edu/api/repositories"
-                },
-                new Repository()
-                {
-                    Name = Repository.Repo.BioTools,
-                    URI = "https://github.com/bio-tools/content/archive/master.zip"
-                },
-                new Repository()
-                {
-                    Name = Repository.Repo.Bioconductor,
-                    URI = "https://github.com/Genometric/ToolVisibilityQuantifier/raw/master/data/bioconductor/"
-                }
+                toolshed, biotools, bioconductor
             };
         }
 
