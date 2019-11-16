@@ -1,6 +1,6 @@
 ﻿namespace Genometric.TVQ.API.Model
 {
-    public enum State { Ready=0, Scheduled=1, Updating=2 };
+    public enum State { Ready=0, Update=1, Scheduled=2, Updating=3 };
 
     public abstract class BaseModel
     {
