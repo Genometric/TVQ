@@ -10,7 +10,7 @@ namespace Genometric.TVQ.API.Analysis
         /// <param name="x">First population.</param>
         /// <param name="y">Second population.</param>
         /// <returns></returns>
-        public static double TTest(List<double> x, List<double> y)
+        public static double TTest(List<int> x, List<int> y)
         {
             // TODO
             return 0.0;
