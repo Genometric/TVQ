@@ -16,16 +16,22 @@ namespace Genometric.TVQ.API.Controllers
     {
         private readonly TVQContext _context;
         private readonly IBackgroundToolRepoCrawlingQueue _queue;
+        private readonly IBackgroundAnalysisTaskQueue _analysisQueue;
         private readonly ILogger<RepositoriesController> _logger;
+        private readonly IBackgroundTaskQueue _taskQueue;
 
         public RepositoriesController(
             TVQContext context,
             IBackgroundToolRepoCrawlingQueue queue,
+            IBackgroundAnalysisTaskQueue analysisQueue,
+            IBackgroundTaskQueue taskQueue,
             ILogger<RepositoriesController> logger)
         {
             _context = context;
             _queue = queue;
+            _analysisQueue = analysisQueue;
             _logger = logger;
+            _taskQueue = taskQueue;
         }
 
         // GET: api/v1/repositories
@@ -130,6 +136,29 @@ namespace Genometric.TVQ.API.Controllers
                 return NotFound();
 
             _queue.QueueBackgroundWorkItem(repository);
+
+            return Ok(repository);
+        }
+
+        [HttpGet("{id}/analysis")]
+        public async Task<IActionResult> RunAnalysis([FromRoute] int id)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var repository = await
+                _context.Repositories
+                .Include(repo => repo.Tools)
+                    .ThenInclude(tool => tool.Downloads)
+                .Include(repo => repo.Tools)
+                    .ThenInclude(tool => tool.Publications)
+                .FirstAsync(x => x.ID == id)
+                .ConfigureAwait(false);
+
+            if (repository == null)
+                return NotFound();
+
+            _analysisQueue.QueueBackgroundWorkItem(repository);
 
             return Ok(repository);
         }

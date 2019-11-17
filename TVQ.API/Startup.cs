@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Genometric.TVQ.API.Analysis;
 using Genometric.TVQ.API.Crawlers;
 using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Infrastructure.BackgroundTasks;
@@ -51,10 +52,13 @@ namespace Genometric.TVQ.API
             services.AddHostedService<QueuedHostedService>();
             services.AddHostedService<QueueLiteratureCrawling>();
             services.AddHostedService<QueueToolRepoCrawling>();
+            services.AddHostedService<QueuedAnalysis>();
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
             services.AddSingleton<IBackgroundToolRepoCrawlingQueue, BackgroundToolRepoCrawlingQueue>();
             services.AddSingleton<IBackgroundLiteratureCrawlingQueue, BackgroundLiteratureCrawlingQueue>();
+            services.AddSingleton<IBackgroundAnalysisTaskQueue, BackgroundAnalysisQueue>();
             services.AddScoped<CrawlerService>();
+            services.AddScoped<AnalysisService>();
 
             var container = new ContainerBuilder();
             container.Populate(services);
