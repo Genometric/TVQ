@@ -32,14 +32,14 @@ namespace Genometric.TVQ.API.Analysis
 
         private void EvaluateCitationImpact(Repository repository)
         {
-            var citations = new Dictionary<int, int[]>();
+            var citations = new Dictionary<int, double[]>();
             foreach (var tool in repository.Tools)
             {
                 var toolAddedToRepoDate = DateTime.Now;
                 foreach (var pub in tool.Publications)
                 {
                     if (!citations.ContainsKey(tool.ID))
-                        citations.Add(tool.ID, new int[2]);
+                        citations.Add(tool.ID, new double[2]);
 
                     if (pub.Citations != null)
                         foreach (var citation in pub.Citations)
