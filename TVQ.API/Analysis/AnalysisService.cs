@@ -1,7 +1,6 @@
 ﻿using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Model;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -34,8 +33,6 @@ namespace Genometric.TVQ.API.Analysis
         {
             var citations = new Dictionary<int, double[]>();
             foreach (var tool in repository.Tools)
-            {
-                var toolAddedToRepoDate = DateTime.Now;
                 foreach (var pub in tool.Publications)
                 {
                     if (!citations.ContainsKey(tool.ID))
@@ -43,12 +40,11 @@ namespace Genometric.TVQ.API.Analysis
 
                     if (pub.Citations != null)
                         foreach (var citation in pub.Citations)
-                            if (citation.Date < toolAddedToRepoDate)
+                            if (citation.Date < tool.DateAddedToRepository)
                                 citations[tool.ID][0]++;
                             else
                                 citations[tool.ID][1]++;
                 }
-            }
 
             repository.Statistics.TValue =
                 InferentialStatistics.TTest(

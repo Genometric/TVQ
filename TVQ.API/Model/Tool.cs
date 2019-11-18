@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace Genometric.TVQ.API.Model
@@ -25,6 +26,8 @@ namespace Genometric.TVQ.API.Model
         public string Description { set; get; }
 
         public int TimesDownloaded { set; get; }
+
+        public DateTime DateAddedToRepository { set; get; }
 
         public Repository Repository { set; get; }
 
