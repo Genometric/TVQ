@@ -22,9 +22,10 @@ namespace Genometric.TVQ.API.Model
                 {"homepage_url", nameof(Tool.Homepage)},
                 {"owner", nameof(Tool.Owner)},
                 {"id", nameof(Tool.IDinRepo)},
-                {"biotoolsID", nameof(Tool.IDinRepo) },
+                {"biotoolsID", nameof(Tool.IDinRepo)},
                 {"remote_repository_url", nameof(Tool.CodeRepo)},
-                {"description", nameof(Tool.Description)}
+                {"description", nameof(Tool.Description)},
+                {"create_time", nameof(Tool.DateAddedToRepository)}
             };
         }
 
