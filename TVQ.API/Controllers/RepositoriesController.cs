@@ -153,6 +153,7 @@ namespace Genometric.TVQ.API.Controllers
                 .Include(repo => repo.Tools)
                     .ThenInclude(tool => tool.Publications)
                         .ThenInclude(x => x.Citations)
+                .Include(repo => repo.Statistics)
                 .FirstAsync(x => x.ID == id)
                 .ConfigureAwait(false);
 
