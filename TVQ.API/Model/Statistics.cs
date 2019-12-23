@@ -8,6 +8,8 @@
 
         public Repository Repository { set; get; }
 
-        public double? TValue { set; get; }
+        public double? TScore { set; get; }
+
+        public double? PValue { set; get; }
     }
 }

@@ -13,10 +13,13 @@ namespace Genometric.TVQ.API.Analysis
         /// <param name="x">First population.</param>
         /// <param name="y">Second population.</param>
         /// <returns>p-value</returns>
-        public static double TTest(List<double> x, List<double> y)
+        public static bool TryComputeTTest(List<double> x, List<double> y, out double tScore, out double pValue)
         {
+            tScore = double.NaN;
+            pValue = double.NaN;
+
             if (x == null || y == null)
-                return double.NaN;
+                return false;
 
             var aMean = Statistics.Mean(x);
             var aVari = Statistics.Variance(x);
@@ -35,7 +38,11 @@ namespace Genometric.TVQ.API.Analysis
                     (Math.Pow(bVari, 2) / (Math.Pow(y.Count, 2) * (y.Count - 1)))));
 
             var distribution = new StudentT(0.0, 1.0, df);
-            return 2.0D * distribution.CumulativeDistribution(t);
+
+            tScore = 2.0D * distribution.CumulativeDistribution(t);
+            pValue = 2.0D * (1 - distribution.CumulativeDistribution(Math.Abs(tScore)));
+
+            return true;
         }
     }
 }

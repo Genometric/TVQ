@@ -49,10 +49,15 @@ namespace Genometric.TVQ.API.Analysis
                                 citations[tool.ID][1]++;
                 }
 
-            repository.Statistics.TValue =
-                InferentialStatistics.TTest(
-                    citations.Values.Select(x => x[0]).ToList(),
-                    citations.Values.Select(x => x[1]).ToList());
+            if (InferentialStatistics.TryComputeTTest(
+                citations.Values.Select(x => x[0]).ToList(),
+                citations.Values.Select(x => x[1]).ToList(),
+                out double tScore,
+                out double pValue))
+            {
+                repository.Statistics.TScore = tScore;
+                repository.Statistics.PValue = pValue;
+            }
         }
     }
 }

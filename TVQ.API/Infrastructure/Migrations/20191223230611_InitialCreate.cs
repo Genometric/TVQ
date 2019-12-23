@@ -30,7 +30,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Status = table.Column<int>(nullable: false),
                     RepositoryID = table.Column<int>(nullable: false),
-                    TValue = table.Column<double>(nullable: true)
+                    TScore = table.Column<double>(nullable: true),
+                    PValue = table.Column<double>(nullable: true)
                 },
                 constraints: table =>
                 {

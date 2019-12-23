@@ -200,13 +200,16 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<double?>("PValue")
+                        .HasColumnType("float");
+
                     b.Property<int>("RepositoryID")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<double?>("TValue")
+                    b.Property<double?>("TScore")
                         .HasColumnType("float");
 
                     b.HasKey("ID");

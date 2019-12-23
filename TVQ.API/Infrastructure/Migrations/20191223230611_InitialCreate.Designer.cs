@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
     [DbContext(typeof(TVQContext))]
-    [Migration("20191118010134_InitialCreate")]
+    [Migration("20191223230611_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -202,13 +202,16 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<double?>("PValue")
+                        .HasColumnType("float");
+
                     b.Property<int>("RepositoryID")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<double?>("TValue")
+                    b.Property<double?>("TScore")
                         .HasColumnType("float");
 
                     b.HasKey("ID");
