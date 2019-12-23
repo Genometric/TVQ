@@ -44,9 +44,14 @@ namespace Genometric.TVQ.API.Analysis
                     if (pub.Citations != null)
                         foreach (var citation in pub.Citations)
                             if (citation.Date < tool.DateAddedToRepository)
-                                citations[tool.ID][0]++;
+                            {
+                                citations[tool.ID][0] += citation.Count;
+                                citations[tool.ID][1] += citation.Count;
+                            }
                             else
-                                citations[tool.ID][1]++;
+                            {
+                                citations[tool.ID][1] += citation.Count;
+                            }
                 }
 
             if (InferentialStatistics.TryComputeTTest(
