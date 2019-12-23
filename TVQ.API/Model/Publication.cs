@@ -36,7 +36,7 @@ namespace Genometric.TVQ.API.Model
 
         public string Journal { set; get; }
 
-        public int? Volume { set; get; }
+        public string Volume { set; get; }
 
         public int? Number { set; get; }
 
@@ -70,7 +70,7 @@ namespace Genometric.TVQ.API.Model
             string doi = default,
             string bibTeXEntry = default,
             string journal = default,
-            int? volume = default,
+            string volume = default,
             int? number = default,
             string chapter = default,
             string pages = default,

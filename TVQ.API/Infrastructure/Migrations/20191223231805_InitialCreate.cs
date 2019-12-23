@@ -91,7 +91,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     DOI = table.Column<string>(nullable: true),
                     BibTeXEntry = table.Column<string>(nullable: true),
                     Journal = table.Column<string>(nullable: true),
-                    Volume = table.Column<int>(nullable: true),
+                    Volume = table.Column<string>(nullable: true),
                     Number = table.Column<int>(nullable: true),
                     Chapter = table.Column<string>(nullable: true),
                     Pages = table.Column<string>(nullable: true),

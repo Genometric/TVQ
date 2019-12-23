@@ -178,7 +178,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
 
             if (publication.Volume == null &&
                 TryExtractFromResponse(response, "prism:volume", out string volume))
-                publication.Volume = Convert.ToInt32(volume, CultureInfo.InvariantCulture);
+                publication.Volume = volume;
 
             if (publication.Pages == null &&
                 TryExtractFromResponse(response, "prism:pageRange", out string pageRange))

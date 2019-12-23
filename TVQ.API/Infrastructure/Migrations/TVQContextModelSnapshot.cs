@@ -158,8 +158,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Volume")
-                        .HasColumnType("int");
+                    b.Property<string>("Volume")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("Year")
                         .HasColumnType("int");

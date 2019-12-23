@@ -15,7 +15,7 @@ namespace Genometric.TVQ.API.Model
             int? month, 
             int? day,
             string journal, 
-            int? volume, 
+            string volume, 
             int? number, 
             string chapter, 
             string pages, 
