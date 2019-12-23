@@ -25,6 +25,9 @@ namespace Genometric.TVQ.API.Analysis
         {
             if (repository == null) return;
 
+            if (!_dbContext.Repositories.Local.Any(e => e.ID == repository.ID))
+                _dbContext.Attach(repository);
+
             EvaluateCitationImpact(repository);
             await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
