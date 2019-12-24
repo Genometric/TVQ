@@ -208,7 +208,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
         {
             value = null;
             var v = response.Select(x => x[field]);
-            if (v == null)
+            if (v == null || v.First() == null)
                 return false;
             value = v.First().ToString();
             return true;
