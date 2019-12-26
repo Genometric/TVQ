@@ -165,6 +165,57 @@ namespace Genometric.TVQ.API.Controllers
             return Ok(repository);
         }
 
+        // THIS IS ENDPOINT IS FOR TESTING PURPOSES.
+        [HttpGet("{id}/downloadstats")]
+        public async Task<IActionResult> DownloadStats([FromRoute] int id)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var repository = await
+                _context.Repositories
+                .Include(repo => repo.Tools)
+                    .ThenInclude(tool => tool.Downloads)
+                .Include(repo => repo.Tools)
+                    .ThenInclude(tool => tool.Publications)
+                        .ThenInclude(x => x.Citations)
+                .Include(repo => repo.Statistics)
+                .FirstAsync(x => x.ID == id)
+                .ConfigureAwait(false);
+
+            if (repository == null)
+                return NotFound();
+
+            var citations = new Dictionary<int, double[]>();
+            foreach (var tool in repository.Tools)
+                foreach (var pub in tool.Publications)
+                {
+                    if (!citations.ContainsKey(tool.ID))
+                        citations.Add(tool.ID, new double[2]);
+
+                    if (pub.Citations != null)
+                        foreach (var citation in pub.Citations)
+                            if (citation.Date < tool.DateAddedToRepository)
+                            {
+                                citations[tool.ID][0] += citation.Count;
+                                citations[tool.ID][1] += citation.Count;
+                            }
+                            else
+                            {
+                                citations[tool.ID][1] += citation.Count;
+                            }
+                }
+
+            var stream = new System.IO.MemoryStream();
+            var writer = new System.IO.StreamWriter(stream);
+            foreach (var item in citations)
+                writer.Write($"{item.Value[0]}\t{item.Value[1]}");
+
+            var contentType = "APPLICATION/octet-stream";
+            var fileName = "TVQStats.csv";
+            return File(stream, contentType, fileName);
+        }
+
         private bool RepoExists(int id)
         {
             return _context.Repositories.Any(e => e.ID == id);
