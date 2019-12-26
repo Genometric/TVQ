@@ -54,15 +54,18 @@ namespace Genometric.TVQ.API.Analysis
                             }
                 }
 
-            if (InferentialStatistics.TryComputeTTest(
+            var sigDiff = InferentialStatistics.ComputeTTest(
                 citations.Values.Select(x => x[0]).ToList(),
                 citations.Values.Select(x => x[1]).ToList(),
+                0.05,
+                out double df,
                 out double tScore,
-                out double pValue))
-            {
-                repository.Statistics.TScore = tScore;
-                repository.Statistics.PValue = pValue;
-            }
+                out double pValue,
+                out double criticalValue);
+
+            repository.Statistics.TScore = tScore;
+            repository.Statistics.PValue = pValue;
+
         }
     }
 }
