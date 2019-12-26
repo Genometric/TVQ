@@ -11,5 +11,11 @@
         public double? TScore { set; get; }
 
         public double? PValue { set; get; }
+
+        public double? DegreeOfFreedom { set; get; }
+
+        public double? CriticalValue { set; get; }
+
+        public bool? MeansSignificantlyDifferent { set; get; }
     }
 }

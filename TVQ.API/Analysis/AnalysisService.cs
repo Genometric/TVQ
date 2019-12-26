@@ -65,7 +65,9 @@ namespace Genometric.TVQ.API.Analysis
 
             repository.Statistics.TScore = tScore;
             repository.Statistics.PValue = pValue;
-
+            repository.Statistics.DegreeOfFreedom = df;
+            repository.Statistics.CriticalValue = criticalValue;
+            repository.Statistics.MeansSignificantlyDifferent = sigDiff;
         }
     }
 }
