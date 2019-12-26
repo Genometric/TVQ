@@ -200,6 +200,15 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<double?>("CriticalValue")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("DegreeOfFreedom")
+                        .HasColumnType("float");
+
+                    b.Property<bool?>("MeansSignificantlyDifferent")
+                        .HasColumnType("bit");
+
                     b.Property<double?>("PValue")
                         .HasColumnType("float");
 

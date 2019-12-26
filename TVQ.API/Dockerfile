@@ -9,6 +9,7 @@ WORKDIR /app
 COPY *.sln .
 COPY docker-compose* .
 COPY TVQ.API/*.csproj ./TVQ.API/
+COPY UnitTests/*.csproj ./UnitTests/
 RUN dotnet restore TVQ.sln
 
 # copy everything else and build app

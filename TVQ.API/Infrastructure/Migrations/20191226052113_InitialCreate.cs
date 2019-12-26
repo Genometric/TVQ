@@ -31,7 +31,10 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     Status = table.Column<int>(nullable: false),
                     RepositoryID = table.Column<int>(nullable: false),
                     TScore = table.Column<double>(nullable: true),
-                    PValue = table.Column<double>(nullable: true)
+                    PValue = table.Column<double>(nullable: true),
+                    DegreeOfFreedom = table.Column<double>(nullable: true),
+                    CriticalValue = table.Column<double>(nullable: true),
+                    MeansSignificantlyDifferent = table.Column<bool>(nullable: true)
                 },
                 constraints: table =>
                 {
