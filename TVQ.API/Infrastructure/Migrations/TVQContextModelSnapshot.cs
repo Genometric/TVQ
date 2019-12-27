@@ -239,7 +239,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<string>("CodeRepo")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("DateAddedToRepository")
+                    b.Property<DateTime?>("DateAddedToRepository")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")

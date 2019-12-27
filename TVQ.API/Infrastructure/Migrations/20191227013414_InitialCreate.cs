@@ -62,7 +62,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     UserID = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     TimesDownloaded = table.Column<int>(nullable: false),
-                    DateAddedToRepository = table.Column<DateTime>(nullable: false)
+                    DateAddedToRepository = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
                 {

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
     [DbContext(typeof(TVQContext))]
-    [Migration("20191226052113_InitialCreate")]
+    [Migration("20191227013414_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -241,7 +241,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<string>("CodeRepo")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("DateAddedToRepository")
+                    b.Property<DateTime?>("DateAddedToRepository")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")

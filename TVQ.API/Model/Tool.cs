@@ -27,7 +27,7 @@ namespace Genometric.TVQ.API.Model
 
         public int TimesDownloaded { set; get; }
 
-        public DateTime DateAddedToRepository { set; get; }
+        public DateTime? DateAddedToRepository { set; get; }
 
         public Repository Repository { set; get; }
 
