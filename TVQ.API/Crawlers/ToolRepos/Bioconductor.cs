@@ -13,7 +13,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         private readonly string _citationsFileName = "citations.json";
         private readonly string _statsFileName = "package_stats.tsv";
 
-        public Bioconductor(Repository repo) : base(repo)
+        public Bioconductor(Repository repo, List<Tool> tools) : base(repo, tools)
         { }
 
         public override async Task ScanAsync()

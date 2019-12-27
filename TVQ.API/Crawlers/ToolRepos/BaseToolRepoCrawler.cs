@@ -26,14 +26,13 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected Repository Repo { get; }
 
-        protected BaseToolRepoCrawler(Repository repo)
+        protected BaseToolRepoCrawler(Repository repo, List<Tool> tools)
         {
             Repo = repo;
-
-            if (Repo.Tools != null)
+            if (tools != null)
                 ToolsDict = new ConcurrentDictionary<string, Tool>(
-                            repo.Tools.ToDictionary(
-                                x => x.Name, x => x));
+                            tools.ToDictionary(
+                                x => FormatToolName(x.Name), x => x));
 
             ToolDownloadRecords = new ConcurrentBag<ToolDownloadRecord>();
 
@@ -43,6 +42,11 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 new KeywordConstructor());
         }
 
+        private string FormatToolName(string name)
+        {
+            return name.Trim().ToUpperInvariant();
+        }
+
         public abstract Task ScanAsync();
 
         protected bool TryAddTool(Tool tool)
@@ -50,17 +54,17 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             if (tool == null)
                 return false;
 
-            tool.Name = tool.Name.Trim();
-            if (ToolsDict.ContainsKey(tool.Name))
+            if (ToolsDict.TryAdd(FormatToolName(tool.Name), tool))
             {
-                // TODO: log this
+                tool.Name = tool.Name.Trim();
+                Repo.Tools.Add(tool);
+                return true;
+            }
+            else
+            {
+                // TODO: handle failure of the following attempt.
                 return false;
             }
-
-            // TODO: handle failure of the following attempt. 
-            ToolsDict.TryAdd(tool.Name, tool);
-            Repo.Tools.Add(tool);
-            return true;
         }
 
         protected bool TryAddEntities(Tool tool, Publication pub)

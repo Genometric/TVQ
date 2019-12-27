@@ -37,21 +37,21 @@ namespace Genometric.TVQ.API.Crawlers
                 if (repo.Tools == null)
                     repo.Tools = new List<Tool>();
 
-                var tools = repo.Tools.ToList();
+                var tools = _dbContext.Tools.ToList();
 
                 BaseToolRepoCrawler crawler;
                 switch (repo.Name)
                 {
                     case Repo.ToolShed:
-                        crawler = new ToolShed(repo, _logger);
+                        crawler = new ToolShed(repo, tools, _logger);
                         break;
 
                     case Repo.BioTools:
-                        crawler = new BioTools(repo);
+                        crawler = new BioTools(repo, tools);
                         break;
 
                     case Repo.Bioconductor:
-                        crawler = new Bioconductor(repo);
+                        crawler = new Bioconductor(repo, tools);
                         break;
 
                     default:
@@ -69,12 +69,12 @@ namespace Genometric.TVQ.API.Crawlers
                 // TODO log this.
                 throw;
             }
-            catch(DbUpdateException e)
+            catch (DbUpdateException e)
             {
                 // TODO log this. 
                 throw;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 // TODO log this.
                 throw;
@@ -90,7 +90,7 @@ namespace Genometric.TVQ.API.Crawlers
                 await scopusCrawler.CrawlAsync().ConfigureAwait(false);
                 await _dbContext.SaveChangesAsync().ConfigureAwait(false);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
 
             }

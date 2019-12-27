@@ -26,7 +26,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         private readonly ILogger<CrawlerService> _logger;
 
-        public ToolShed(Repository repo, ILogger<CrawlerService> logger) : base(repo)
+        public ToolShed(Repository repo, List<Tool> tools, ILogger<CrawlerService> logger) : base(repo, tools)
         {
             _logger = logger;
 
