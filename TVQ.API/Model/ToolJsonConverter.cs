@@ -25,7 +25,8 @@ namespace Genometric.TVQ.API.Model
                 {"biotoolsID", nameof(Tool.IDinRepo)},
                 {"remote_repository_url", nameof(Tool.CodeRepo)},
                 {"description", nameof(Tool.Description)},
-                {"create_time", nameof(Tool.DateAddedToRepository)}
+                {"create_time", nameof(Tool.DateAddedToRepository)},
+                {"additionDate", nameof(Tool.DateAddedToRepository)} // for bio.tools
             };
         }
 
