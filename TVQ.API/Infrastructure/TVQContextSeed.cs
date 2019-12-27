@@ -62,7 +62,7 @@ namespace Genometric.TVQ.API.Infrastructure
             var bioconductor = new Repository()
             {
                 Name = Repository.Repo.Bioconductor,
-                URI = "https://github.com/Genometric/ToolVisibilityQuantifier/raw/master/data/bioconductor/"
+                URI = "https://github.com/Genometric/TVQ/raw/master/data/bioconductor/"
             };
             bioconductor.Statistics = new Statistics() { Repository = bioconductor };
 
