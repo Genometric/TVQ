@@ -87,7 +87,18 @@ namespace Genometric.TVQ.API.Crawlers.Literature
 
             uriBuilder.Query = parameters.ToString();
 
-            using var response = new HttpClient().GetAsync(uriBuilder.Uri).ConfigureAwait(false).GetAwaiter().GetResult();
+            HttpResponseMessage response = null;
+            try
+            {
+                using var client = new HttpClient();
+                response = client.GetAsync(uriBuilder.Uri).ConfigureAwait(false).GetAwaiter().GetResult();
+            }
+            catch(HttpRequestException e)
+            {
+                // TODO: log this exception.
+                return null;
+            }
+
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogDebug($"Unsuccessful response for publication {publication.ID}: {response.StatusCode}; {response.ReasonPhrase}; {response.Headers}");
