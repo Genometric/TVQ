@@ -209,10 +209,11 @@ namespace Genometric.TVQ.API.Controllers
             var stream = new System.IO.MemoryStream();
             var writer = new System.IO.StreamWriter(stream);
             foreach (var item in citations)
-                writer.Write($"{item.Value[0]}\t{item.Value[1]}");
+                writer.WriteLine($"{item.Value[0]}\t{item.Value[1]}");
 
             var contentType = "APPLICATION/octet-stream";
             var fileName = "TVQStats.csv";
+            stream.Seek(0, System.IO.SeekOrigin.Begin);
             return File(stream, contentType, fileName);
         }
 
