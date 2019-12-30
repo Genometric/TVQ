@@ -63,7 +63,7 @@ namespace Genometric.TVQ.API.Model
                 if (prop.CanRead)
                 {
                     object propVal = prop.GetValue(value, null);
-                    if (prop.Name == nameof(Repository.Tools))
+                    if (prop.Name == nameof(Repository.ToolAssociations))
                         continue;
                     if (propVal != null)
                         obj.Add(prop.Name, JToken.FromObject(propVal, serializer));

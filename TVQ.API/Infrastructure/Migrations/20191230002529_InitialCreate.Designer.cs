@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
     [DbContext(typeof(TVQContext))]
-    [Migration("20191227013414_InitialCreate")]
+    [Migration("20191230002529_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -241,16 +241,10 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<string>("CodeRepo")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("DateAddedToRepository")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Homepage")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("IDinRepo")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -259,22 +253,11 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<string>("Owner")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RepositoryID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TimesDownloaded")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserID")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("ID");
 
                     b.HasIndex("Name")
                         .IsUnique()
                         .HasFilter("[Name] IS NOT NULL");
-
-                    b.HasIndex("RepositoryID");
 
                     b.ToTable("Tools");
                 });
@@ -295,11 +278,50 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<int>("ToolID")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ToolRepoAssociationID")
+                        .HasColumnType("int");
+
                     b.HasKey("ID");
 
                     b.HasIndex("ToolID");
 
+                    b.HasIndex("ToolRepoAssociationID");
+
                     b.ToTable("ToolDownloadRecords");
+                });
+
+            modelBuilder.Entity("Genometric.TVQ.API.Model.ToolRepoAssociation", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime?>("DateAddedToRepository")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("IDinRepo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RepositoryID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TimesDownloaded")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ToolID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserID")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("RepositoryID");
+
+                    b.HasIndex("ToolID");
+
+                    b.ToTable("ToolRepoAssociations");
                 });
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.Author", b =>
@@ -360,19 +382,29 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Genometric.TVQ.API.Model.Tool", b =>
-                {
-                    b.HasOne("Genometric.TVQ.API.Model.Repository", "Repository")
-                        .WithMany("Tools")
-                        .HasForeignKey("RepositoryID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Genometric.TVQ.API.Model.ToolDownloadRecord", b =>
                 {
                     b.HasOne("Genometric.TVQ.API.Model.Tool", "Tool")
+                        .WithMany()
+                        .HasForeignKey("ToolID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Genometric.TVQ.API.Model.ToolRepoAssociation", null)
                         .WithMany("Downloads")
+                        .HasForeignKey("ToolRepoAssociationID");
+                });
+
+            modelBuilder.Entity("Genometric.TVQ.API.Model.ToolRepoAssociation", b =>
+                {
+                    b.HasOne("Genometric.TVQ.API.Model.Repository", "Repository")
+                        .WithMany("ToolAssociations")
+                        .HasForeignKey("RepositoryID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Genometric.TVQ.API.Model.Tool", "Tool")
+                        .WithMany("RepoAssociations")
                         .HasForeignKey("ToolID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

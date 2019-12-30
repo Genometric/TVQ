@@ -40,10 +40,10 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                     {
                         if (TryParseBibitem(item.Value, out Publication pub))
                             TryAddEntities(
-                            new Tool() { Name = item.Key.Trim() },
-                            pub);
+                                new Tool() { Name = item.Key.Trim() },
+                                pub);
                     }
-                    catch(ArgumentException e)
+                    catch (ArgumentException e)
                     {
 
                     }

@@ -35,7 +35,9 @@ namespace Genometric.TVQ.API.Analysis
         private void EvaluateCitationImpact(Repository repository)
         {
             var citations = new Dictionary<int, double[]>();
-            foreach (var tool in repository.Tools)
+            foreach (var association in repository.ToolAssociations)
+            {
+                var tool = association.Tool;
                 foreach (var pub in tool.Publications)
                 {
                     if (!citations.ContainsKey(tool.ID))
@@ -43,7 +45,7 @@ namespace Genometric.TVQ.API.Analysis
 
                     if (pub.Citations != null)
                         foreach (var citation in pub.Citations)
-                            if (citation.Date < tool.DateAddedToRepository)
+                            if (citation.Date < association.DateAddedToRepository)
                             {
                                 citations[tool.ID][0] += citation.Count;
                                 citations[tool.ID][1] += citation.Count;
@@ -53,6 +55,7 @@ namespace Genometric.TVQ.API.Analysis
                                 citations[tool.ID][1] += citation.Count;
                             }
                 }
+            }
 
             var sigDiff = InferentialStatistics.ComputeTTest(
                 citations.Values.Select(x => x[0]).ToList(),

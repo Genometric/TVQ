@@ -6,7 +6,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 {
     internal class ToolInfo
     {
-        public Tool Tool { get; }
+        public ToolRepoAssociation ToolRepoAssociation { get; }
 
         /// <summary>
         /// Gets a path to a temporary folder
@@ -34,7 +34,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         /// </summary>
         public List<string> XMLFiles { set; get; }
 
-        public ToolInfo(Tool tool, string sessionPath)
+        public ToolInfo(ToolRepoAssociation toolRepoAssociation, string sessionPath)
         {
             do
             {
@@ -45,7 +45,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             while (Directory.Exists(StagingArea));
             Directory.CreateDirectory(StagingArea);
 
-            Tool = tool;
+            ToolRepoAssociation = toolRepoAssociation;
             ArchiveFilename = StagingArea + Utilities.GetRandomString(8);
 
             /// To avoid `path traversal attacks` from malicious software, 

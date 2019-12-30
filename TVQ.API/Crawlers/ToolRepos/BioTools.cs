@@ -54,10 +54,10 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             }
         }
 
-        private Tool ExtractTool(string fileName)
+        private ToolRepoAssociation ExtractTool(string fileName)
         {
             using (StreamReader r = new StreamReader(fileName))
-                return JsonConvert.DeserializeObject<Tool>(r.ReadToEnd());
+                return RepoTool.DeserializeTool(r.ReadToEnd());
         }
 
         private List<Publication> ExtractPublications(string toolFileName)

@@ -19,14 +19,14 @@ namespace Genometric.TVQ.API.Model
         {
             get
             {
-                if (Tools != null)
-                    return Tools.Count;
+                if (ToolAssociations != null)
+                    return ToolAssociations.Count;
                 else
                     return 0;
             }
         }
 
-        public ICollection<Tool> Tools { set; get; }
+        public ICollection<ToolRepoAssociation> ToolAssociations { set; get; }
 
         public Statistics Statistics { set; get; }
 

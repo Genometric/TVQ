@@ -13,6 +13,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         private readonly Parser<Publication, Author, Keyword> _bibitemParser;
 
         protected ConcurrentDictionary<string, Tool> ToolsDict { get; }
+
+        protected ConcurrentDictionary<string, ToolRepoAssociation> ToolRepoAssociationsDict { get; }
+
         public ReadOnlyCollection<Tool> Tools
         {
             get
@@ -34,6 +37,12 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                             tools.ToDictionary(
                                 x => FormatToolName(x.Name), x => x));
 
+            if (Repo != null)
+                ToolRepoAssociationsDict =
+                    new ConcurrentDictionary<string, ToolRepoAssociation>(
+                        repo.ToolAssociations.ToDictionary(
+                            x => FormatToolRepoAssociationName(x), x => x));
+
             ToolDownloadRecords = new ConcurrentBag<ToolDownloadRecord>();
 
             _bibitemParser = new Parser<Publication, Author, Keyword>(
@@ -42,50 +51,67 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 new KeywordConstructor());
         }
 
-        private string FormatToolName(string name)
+        private static string FormatToolName(string name)
         {
             return name.Trim().ToUpperInvariant();
         }
 
+        private static string FormatToolRepoAssociationName(ToolRepoAssociation association)
+        {
+            return association.Repository + "::" + FormatToolName(association.Tool.Name);
+        }
+
         public abstract Task ScanAsync();
 
-        protected bool TryAddTool(Tool tool)
+        protected bool TryAddToolRepoAssociations(ToolRepoAssociation association)
         {
-            if (tool == null)
+            if (association == null)
                 return false;
 
-            if (ToolsDict.TryAdd(FormatToolName(tool.Name), tool))
+            if (ToolRepoAssociationsDict.TryAdd(FormatToolRepoAssociationName(association), association))
             {
-                tool.Name = tool.Name.Trim();
-                Repo.Tools.Add(tool);
+                var toolName = association.Tool.Name = FormatToolName(association.Tool.Name);
+                if (!ToolsDict.TryAdd(toolName, association.Tool))
+                    association.Tool = ToolsDict[toolName];
+                Repo.ToolAssociations.Add(association);
                 return true;
             }
             else
             {
-                // TODO: handle failure of the following attempt.
+                // TODO: log this as the association already exists. 
                 return false;
             }
         }
 
         protected bool TryAddEntities(Tool tool, Publication pub)
         {
-            return TryAddEntities(tool, new List<Publication> { pub });
+            return TryAddEntities(new ToolRepoAssociation() { Tool = tool }, pub);
         }
 
         protected bool TryAddEntities(Tool tool, List<Publication> pubs)
         {
-            if (tool == null)
+            return TryAddEntities(new ToolRepoAssociation() { Tool = tool }, pubs);
+        }
+
+        protected bool TryAddEntities(ToolRepoAssociation association, Publication pub)
+        {
+            return TryAddEntities(association, new List<Publication> { pub });
+        }
+
+        protected bool TryAddEntities(ToolRepoAssociation association, List<Publication> pubs)
+        {
+            if (association == null)
                 return false;
 
             if (pubs != null)
                 foreach (var pub in pubs)
                 {
-                    pub.Tool = tool;
-                    tool.Publications.Add(pub);
+                    pub.Tool = association.Tool;
+                    association.Tool.Publications.Add(pub);
                 }
 
             // TODO: handle the failure of the following.
-            return TryAddTool(tool);
+            return TryAddToolRepoAssociations(association);
         }
 
         protected bool TryParseBibitem(string bibitem, out Publication publication)

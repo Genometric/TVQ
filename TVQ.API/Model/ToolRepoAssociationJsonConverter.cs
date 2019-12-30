@@ -7,20 +7,20 @@ using System.Reflection;
 
 namespace Genometric.TVQ.API.Model
 {
-    public class ToolJsonConverter : JsonConverter
+    public class ToolRepoAssociationJsonConverter : JsonConverter
     {
         private readonly Dictionary<string, string> _propertyMappings;
 
-        public ToolJsonConverter()
+        public ToolRepoAssociationJsonConverter()
         {
             _propertyMappings = new Dictionary<string, string>
             {
-                {"name", nameof(Tool.Name)},
-                {"homepage", nameof(Tool.Homepage)},
-                {"homepage_url", nameof(Tool.Homepage)},
-                {"owner", nameof(Tool.Owner)},
-                {"remote_repository_url", nameof(Tool.CodeRepo)},
-                {"description", nameof(Tool.Description)}
+                {"times_downloaded", nameof(ToolRepoAssociation.TimesDownloaded)},
+                {"user_id", nameof(ToolRepoAssociation.UserID)},
+                {"id", nameof(ToolRepoAssociation.IDinRepo)},
+                {"biotoolsID", nameof(ToolRepoAssociation.IDinRepo)},
+                {"create_time", nameof(ToolRepoAssociation.DateAddedToRepository)},
+                {"additionDate", nameof(ToolRepoAssociation.DateAddedToRepository)} // for bio.tools
             };
         }
 
@@ -55,7 +55,10 @@ namespace Genometric.TVQ.API.Model
             return instance;
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(
+            JsonWriter writer,
+            object value,
+            JsonSerializer serializer)
         {
             JObject obj = new JObject();
             Type type = value.GetType();

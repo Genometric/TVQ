@@ -34,8 +34,8 @@ namespace Genometric.TVQ.API.Crawlers
                 if (!_dbContext.Repositories.Local.Any(e => e.ID == repo.ID))
                     _dbContext.Attach(repo);
 
-                if (repo.Tools == null)
-                    repo.Tools = new List<Tool>();
+                if (repo.ToolAssociations == null)
+                    repo.ToolAssociations = new List<ToolRepoAssociation>();
 
                 var tools = _dbContext.Tools.ToList();
 

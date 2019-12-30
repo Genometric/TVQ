@@ -25,6 +25,7 @@ namespace Genometric.TVQ.API.Infrastructure
             builder.ApplyConfiguration(new ToolEntityTypeConfiguration());
             builder.ApplyConfiguration(new PublicationEntityTypeConfiguration());
             builder.ApplyConfiguration(new RepositoryItemEntityTypeConfiguration());
+            builder.ApplyConfiguration(new ToolRepoAssociationETC());
             builder.ApplyConfiguration(new CitationEntityTypeConfiguration());
             builder.ApplyConfiguration(new ToolDownloadRecordEntityTypeConfiguration());
             builder.ApplyConfiguration(new AuthorEntityTypeConfiguration());
@@ -32,5 +33,7 @@ namespace Genometric.TVQ.API.Infrastructure
             builder.ApplyConfiguration(new AuthorPubEntityTypeConfiguration());
             builder.ApplyConfiguration(new StatisticsEntityTypeConfiguration());
         }
+
+        public DbSet<Genometric.TVQ.API.Model.ToolRepoAssociation> ToolRepoAssociation { get; set; }
     }
 }

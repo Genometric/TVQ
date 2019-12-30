@@ -20,7 +20,7 @@ namespace Genometric.TVQ.API.Infrastructure.EntityConfigurations
             {
                 if (p.Name == nameof(Repository.ID) ||
                     p.Name == nameof(Repository.URI) ||
-                    p.Name == nameof(Repository.Tools) ||
+                    p.Name == nameof(Repository.ToolAssociations) ||
                     p.Name == nameof(Repository.ToolsCount) ||
                     p.Name == nameof(Repository.Statistics))
                     continue;

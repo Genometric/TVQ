@@ -40,7 +40,8 @@ namespace Genometric.TVQ.API.Controllers
         {
             return await
                 _context.Repositories
-                .Include(x => x.Tools)
+                .Include(x => x.ToolAssociations)
+                    .ThenInclude(x => x.Tool)
                 .Include(x => x.Statistics)
                 .ToListAsync().ConfigureAwait(false);
         }
@@ -123,14 +124,7 @@ namespace Genometric.TVQ.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var repository = await 
-                _context.Repositories
-                .Include(repo => repo.Tools)
-                    .ThenInclude(tool => tool.Downloads)
-                .Include(repo => repo.Tools)
-                    .ThenInclude(tool => tool.Publications)
-                .FirstAsync(x=>x.ID == id)
-                .ConfigureAwait(false);
+            var repository = QueryRepo(id);
 
             if (repository == null)
                 return NotFound();
@@ -146,16 +140,7 @@ namespace Genometric.TVQ.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var repository = await
-                _context.Repositories
-                .Include(repo => repo.Tools)
-                    .ThenInclude(tool => tool.Downloads)
-                .Include(repo => repo.Tools)
-                    .ThenInclude(tool => tool.Publications)
-                        .ThenInclude(x => x.Citations)
-                .Include(repo => repo.Statistics)
-                .FirstAsync(x => x.ID == id)
-                .ConfigureAwait(false);
+            var repository = QueryRepo(id, true);
 
             if (repository == null)
                 return NotFound();
@@ -172,22 +157,15 @@ namespace Genometric.TVQ.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var repository = await
-                _context.Repositories
-                .Include(repo => repo.Tools)
-                    .ThenInclude(tool => tool.Downloads)
-                .Include(repo => repo.Tools)
-                    .ThenInclude(tool => tool.Publications)
-                        .ThenInclude(x => x.Citations)
-                .Include(repo => repo.Statistics)
-                .FirstAsync(x => x.ID == id)
-                .ConfigureAwait(false);
+            var repository = QueryRepo(id, true);
 
             if (repository == null)
                 return NotFound();
 
             var citations = new Dictionary<int, double[]>();
-            foreach (var tool in repository.Tools)
+            foreach (var association in repository.ToolAssociations)
+            {
+                var tool = association.Tool;
                 foreach (var pub in tool.Publications)
                 {
                     if (!citations.ContainsKey(tool.ID))
@@ -195,7 +173,7 @@ namespace Genometric.TVQ.API.Controllers
 
                     if (pub.Citations != null)
                         foreach (var citation in pub.Citations)
-                            if (citation.Date < tool.DateAddedToRepository)
+                            if (citation.Date < association.DateAddedToRepository)
                             {
                                 citations[tool.ID][0] += citation.Count;
                                 citations[tool.ID][1] += citation.Count;
@@ -205,6 +183,7 @@ namespace Genometric.TVQ.API.Controllers
                                 citations[tool.ID][1] += citation.Count;
                             }
                 }
+            }
 
             var stream = new System.IO.MemoryStream();
             var writer = new System.IO.StreamWriter(stream);
@@ -215,6 +194,38 @@ namespace Genometric.TVQ.API.Controllers
             var fileName = "TVQStats.csv";
             stream.Seek(0, System.IO.SeekOrigin.Begin);
             return File(stream, contentType, fileName);
+        }
+
+        private Repository QueryRepo(int id, bool includeCitations = false)
+        {
+            if (includeCitations)
+            {
+                return
+                    _context.Repositories
+                    .Include(repo => repo.ToolAssociations)
+                        .ThenInclude(x => x.Tool)
+                    .Include(repo => repo.ToolAssociations)
+                        .ThenInclude(x => x.Downloads)
+                    .Include(repo => repo.ToolAssociations)
+                        .ThenInclude(x => x.Tool)
+                            .ThenInclude(x => x.Publications)
+                                .ThenInclude(x => x.Citations)
+                    .Include(repo => repo.Statistics)
+                    .First(x => x.ID == id);
+            }
+            else
+            {
+                return
+                    _context.Repositories
+                    .Include(repo => repo.ToolAssociations)
+                        .ThenInclude(x => x.Tool)
+                    .Include(repo => repo.ToolAssociations)
+                        .ThenInclude(x => x.Downloads)
+                    .Include(repo => repo.ToolAssociations)
+                        .ThenInclude(x => x.Tool)
+                            .ThenInclude(x => x.Publications)
+                    .First(x => x.ID == id);
+            }
         }
 
         private bool RepoExists(int id)

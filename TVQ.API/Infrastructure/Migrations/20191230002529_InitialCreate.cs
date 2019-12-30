@@ -23,6 +23,23 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Tools",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(nullable: true),
+                    Homepage = table.Column<string>(nullable: true),
+                    CodeRepo = table.Column<string>(nullable: true),
+                    Owner = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tools", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Statistics",
                 columns: table => new
                 {
@@ -41,34 +58,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     table.PrimaryKey("PK_Statistics", x => x.ID);
                     table.ForeignKey(
                         name: "FK_Statistics_Repositories_RepositoryID",
-                        column: x => x.RepositoryID,
-                        principalTable: "Repositories",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Tools",
-                columns: table => new
-                {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    RepositoryID = table.Column<int>(nullable: false),
-                    IDinRepo = table.Column<string>(nullable: true),
-                    Name = table.Column<string>(nullable: true),
-                    Homepage = table.Column<string>(nullable: true),
-                    CodeRepo = table.Column<string>(nullable: true),
-                    Owner = table.Column<string>(nullable: true),
-                    UserID = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
-                    TimesDownloaded = table.Column<int>(nullable: false),
-                    DateAddedToRepository = table.Column<DateTime>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Tools", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_Tools_Repositories_RepositoryID",
                         column: x => x.RepositoryID,
                         principalTable: "Repositories",
                         principalColumn: "ID",
@@ -112,20 +101,29 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ToolDownloadRecords",
+                name: "ToolRepoAssociations",
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    IDinRepo = table.Column<string>(nullable: true),
                     ToolID = table.Column<int>(nullable: false),
-                    Count = table.Column<int>(nullable: false),
-                    Date = table.Column<DateTime>(nullable: false)
+                    RepositoryID = table.Column<int>(nullable: false),
+                    UserID = table.Column<string>(nullable: true),
+                    TimesDownloaded = table.Column<int>(nullable: true),
+                    DateAddedToRepository = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ToolDownloadRecords", x => x.ID);
+                    table.PrimaryKey("PK_ToolRepoAssociations", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_ToolDownloadRecords_Tools_ToolID",
+                        name: "FK_ToolRepoAssociations_Repositories_RepositoryID",
+                        column: x => x.RepositoryID,
+                        principalTable: "Repositories",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ToolRepoAssociations_Tools_ToolID",
                         column: x => x.ToolID,
                         principalTable: "Tools",
                         principalColumn: "ID",
@@ -196,6 +194,34 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ToolDownloadRecords",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ToolID = table.Column<int>(nullable: false),
+                    Count = table.Column<int>(nullable: false),
+                    Date = table.Column<DateTime>(nullable: false),
+                    ToolRepoAssociationID = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ToolDownloadRecords", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_ToolDownloadRecords_Tools_ToolID",
+                        column: x => x.ToolID,
+                        principalTable: "Tools",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ToolDownloadRecords_ToolRepoAssociations_ToolRepoAssociationID",
+                        column: x => x.ToolRepoAssociationID,
+                        principalTable: "ToolRepoAssociations",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AuthorsPublications",
                 columns: table => new
                 {
@@ -256,16 +282,26 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 column: "ToolID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ToolDownloadRecords_ToolRepoAssociationID",
+                table: "ToolDownloadRecords",
+                column: "ToolRepoAssociationID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ToolRepoAssociations_RepositoryID",
+                table: "ToolRepoAssociations",
+                column: "RepositoryID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ToolRepoAssociations_ToolID",
+                table: "ToolRepoAssociations",
+                column: "ToolID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Tools_Name",
                 table: "Tools",
                 column: "Name",
                 unique: true,
                 filter: "[Name] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Tools_RepositoryID",
-                table: "Tools",
-                column: "RepositoryID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -289,13 +325,16 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 name: "Authors");
 
             migrationBuilder.DropTable(
+                name: "ToolRepoAssociations");
+
+            migrationBuilder.DropTable(
                 name: "Publications");
 
             migrationBuilder.DropTable(
-                name: "Tools");
+                name: "Repositories");
 
             migrationBuilder.DropTable(
-                name: "Repositories");
+                name: "Tools");
         }
     }
 }
