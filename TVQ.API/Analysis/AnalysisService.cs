@@ -32,7 +32,42 @@ namespace Genometric.TVQ.API.Analysis
             await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        private void GetPrePostCitationCountPerYear(Repository repository, out List<double> pre, out List<double> post)
+        public static Dictionary<int, List<CitationChange>> GetPrePostCitationCountNormalizedYear(Repository repository)
+        {
+            var changes = new Dictionary<int, List<CitationChange>>();
+            foreach (var association in repository.ToolAssociations)
+            {
+                var tool = association.Tool;
+                foreach (var pub in tool.Publications)
+                    if (pub.Citations != null && pub.Year >= 2000)
+                        foreach (var citation in pub.Citations)
+                        {
+                            if (!changes.ContainsKey(tool.ID))
+                                changes.Add(tool.ID, new List<CitationChange>());
+
+                            changes[tool.ID].Add(
+                                new CitationChange(
+                                    (citation.Date - association.DateAddedToRepository).Value.Days,
+                                    citation.Count));
+                        }
+
+            }
+            return changes;
+        }
+
+        public static void ExtractPrePostCitationChanges(Dictionary<int, List<CitationChange>> changes, out List<double> pre, out List<double> post)
+        {
+            pre = new List<double>();
+            post = new List<double>();
+            foreach (var tool in changes)
+                foreach (var change in tool.Value)
+                    if (change.DaysOffset > 0)
+                        post.Add(change.Count);
+                    else
+                        pre.Add(change.Count);
+        }
+
+        public static void GetPrePostCitationCountPerYear(Repository repository, out List<double> pre, out List<double> post)
         {
             pre = new List<double>();
             post = new List<double>();
@@ -55,7 +90,7 @@ namespace Genometric.TVQ.API.Analysis
             }
         }
 
-        private void GetSumOfPrePostCitationsCount(Repository repository, out List<double> pre, out List<double> post)
+        public static void GetSumOfPrePostCitationsCount(Repository repository, out List<double> pre, out List<double> post)
         {
             var citations = new Dictionary<int, double[]>();
             foreach (var association in repository.ToolAssociations)
@@ -84,9 +119,10 @@ namespace Genometric.TVQ.API.Analysis
             post = citations.Values.Select(x => x[1]).ToList();
         }
 
-        private void EvaluateCitationImpact(Repository repository)
+        private static void EvaluateCitationImpact(Repository repository)
         {
-            GetPrePostCitationCountPerYear(repository, out List<double> pre, out List<double> post);
+            var changes = GetPrePostCitationCountNormalizedYear(repository);
+            ExtractPrePostCitationChanges(changes, out List<double> pre, out List<double> post);
 
             var sigDiff = InferentialStatistics.ComputeTTest(
                 pre, post,

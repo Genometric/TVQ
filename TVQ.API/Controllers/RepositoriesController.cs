@@ -1,4 +1,5 @@
-﻿using Genometric.TVQ.API.Infrastructure;
+﻿using Genometric.TVQ.API.Analysis;
+using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Infrastructure.BackgroundTasks;
 using Genometric.TVQ.API.Model;
 using Microsoft.AspNetCore.Mvc;
@@ -189,6 +190,30 @@ namespace Genometric.TVQ.API.Controllers
             var writer = new System.IO.StreamWriter(stream);
             foreach (var item in citations)
                 writer.WriteLine($"{item.Value[0]}\t{item.Value[1]}");
+
+            var contentType = "APPLICATION/octet-stream";
+            var fileName = "TVQStats.csv";
+            stream.Seek(0, System.IO.SeekOrigin.Begin);
+            return File(stream, contentType, fileName);
+        }
+
+        [HttpGet("{id}/downloadstats2")]
+        public async Task<IActionResult> DownloadStats2([FromRoute] int id)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var repository = QueryRepo(id, true);
+
+            if (repository == null)
+                return NotFound();
+
+            var changes = AnalysisService.GetPrePostCitationCountNormalizedYear(repository);
+            var stream = new System.IO.MemoryStream();
+            var writer = new System.IO.StreamWriter(stream);
+            foreach (var tool in changes)
+                foreach (var change in tool.Value)
+                    writer.WriteLine($"{tool.Key}\t{change.DaysOffset}\t{change.Count}");
 
             var contentType = "APPLICATION/octet-stream";
             var fileName = "TVQStats.csv";
