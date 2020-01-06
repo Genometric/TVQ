@@ -41,7 +41,11 @@ namespace Genometric.TVQ.API.Controllers
                 return BadRequest(ModelState);
             }
 
-            var DataItem = await _context.Tools.FindAsync(id);
+            var DataItem = await _context.Tools
+                .Include(x => x.Publications)
+                .Include(x => x.RepoAssociations)
+                .FirstAsync(x => x.ID == id)
+                .ConfigureAwait(false);
 
             if (DataItem == null)
             {
