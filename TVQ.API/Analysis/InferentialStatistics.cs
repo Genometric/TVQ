@@ -14,7 +14,7 @@ namespace Genometric.TVQ.API.Analysis
         /// <param name="y">Second population.</param>
         /// <returns>If means of <paramref name="x"/> and <paramref name="y"/>
         /// are significantly different.</returns>
-        public static bool ComputeTTest(
+        public static bool? ComputeTTest(
             List<double> x,
             List<double> y,
             double significanceLevel,
@@ -23,6 +23,13 @@ namespace Genometric.TVQ.API.Analysis
             out double pValue,
             out double criticalValue)
         {
+            df = double.NaN;
+            tScore = double.NaN;
+            pValue = double.NaN;
+            criticalValue = double.NaN;
+            if (x.Count == 0 || y.Count == 0)
+                return null;
+
             var aMean = Statistics.Mean(x);
             var aVari = Statistics.Variance(x);
 

@@ -32,7 +32,30 @@ namespace Genometric.TVQ.API.Analysis
             await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        private void EvaluateCitationImpact(Repository repository)
+        private void GetPrePostCitationCountPerYear(Repository repository, out List<double> pre, out List<double> post)
+        {
+            pre = new List<double>();
+            post = new List<double>();
+            double count;
+            foreach (var association in repository.ToolAssociations)
+            {
+                var tool = association.Tool;
+                foreach (var pub in tool.Publications)
+                {
+                    if (pub.Citations != null)
+                        foreach (var citation in pub.Citations)
+                        {
+                            count = citation.Count / 12;
+                            if (citation.Date < association.DateAddedToRepository)
+                                pre.Add(count);
+                            else
+                                post.Add(count);
+                        }
+                }
+            }
+        }
+
+        private void GetSumOfPrePostCitationsCount(Repository repository, out List<double> pre, out List<double> post)
         {
             var citations = new Dictionary<int, double[]>();
             foreach (var association in repository.ToolAssociations)
@@ -57,9 +80,16 @@ namespace Genometric.TVQ.API.Analysis
                 }
             }
 
+            pre = citations.Values.Select(x => x[0]).ToList();
+            post = citations.Values.Select(x => x[1]).ToList();
+        }
+
+        private void EvaluateCitationImpact(Repository repository)
+        {
+            GetPrePostCitationCountPerYear(repository, out List<double> pre, out List<double> post);
+
             var sigDiff = InferentialStatistics.ComputeTTest(
-                citations.Values.Select(x => x[0]).ToList(),
-                citations.Values.Select(x => x[1]).ToList(),
+                pre, post,
                 0.05,
                 out double df,
                 out double tScore,
