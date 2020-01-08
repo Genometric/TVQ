@@ -16,6 +16,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected ConcurrentDictionary<string, ToolRepoAssociation> ToolRepoAssociationsDict { get; }
 
+        protected Dictionary<string, Category> Categories { get; }
+
         public ReadOnlyCollection<Tool> Tools
         {
             get
@@ -29,7 +31,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected Repository Repo { get; }
 
-        protected BaseToolRepoCrawler(Repository repo, List<Tool> tools)
+        protected BaseToolRepoCrawler(Repository repo, List<Tool> tools, List<Category> categories)
         {
             Repo = repo;
             if (tools != null)
@@ -42,6 +44,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                     new ConcurrentDictionary<string, ToolRepoAssociation>(
                         repo.ToolAssociations.ToDictionary(
                             x => FormatToolRepoAssociationName(x), x => x));
+
+            Categories = new Dictionary<string, Category>();
+            UpdateCategories(categories);
 
             ToolDownloadRecords = new ConcurrentBag<ToolDownloadRecord>();
 
@@ -85,33 +90,43 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected bool TryAddEntities(Tool tool, Publication pub)
         {
-            return TryAddEntities(new ToolRepoAssociation() { Tool = tool }, pub);
+            return TryAddEntities(new ToolRepoAssociation() { Tool = tool }, new List<Publication> { pub }, new List<string>());
         }
 
-        protected bool TryAddEntities(Tool tool, List<Publication> pubs)
+        protected bool TryAddEntities(ToolRepoAssociation association, List<Publication> pubs, List<string> categoryIDs = null)
         {
-            return TryAddEntities(new ToolRepoAssociation() { Tool = tool }, pubs);
+            if (categoryIDs == null)
+                categoryIDs = new List<string>();
+
+            return TryAddEntities(
+                new ToolInfo(association, SessionTempPath)
+                {
+                    Publications = pubs,
+                    CategoryIDs = categoryIDs
+                });
         }
 
-        protected bool TryAddEntities(ToolRepoAssociation association, Publication pub)
+        protected bool TryAddEntities(ToolInfo info)
         {
-            return TryAddEntities(association, new List<Publication> { pub });
-        }
-
-        protected bool TryAddEntities(ToolRepoAssociation association, List<Publication> pubs)
-        {
-            if (association == null)
+            if (info == null)
                 return false;
 
-            if (pubs != null)
-                foreach (var pub in pubs)
+            if (info.Publications != null)
+                foreach (var pub in info.Publications)
                 {
-                    pub.Tool = association.Tool;
-                    association.Tool.Publications.Add(pub);
+                    pub.Tool = info.ToolRepoAssociation.Tool;
+                    info.ToolRepoAssociation.Tool.Publications.Add(pub);
                 }
 
-            // TODO: handle the failure of the following.
-            return TryAddToolRepoAssociations(association);
+            foreach (var categoryID in info.CategoryIDs)
+                if (Categories.TryGetValue(categoryID, out Category category))
+                    info.ToolRepoAssociation.Tool.CategoryAssociations
+                        .Add(new ToolCategoryAssociation()
+                        {
+                            Category = category
+                        });
+
+            return TryAddToolRepoAssociations(info.ToolRepoAssociation);
         }
 
         protected bool TryParseBibitem(string bibitem, out Publication publication)
@@ -131,6 +146,13 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             }
             else
                 return false;
+        }
+
+        public void UpdateCategories(List<Category> categories)
+        {
+            if (categories != null)
+                foreach (var category in categories)
+                    Categories.TryAdd(category.ToolShedID, category);
         }
     }
 }

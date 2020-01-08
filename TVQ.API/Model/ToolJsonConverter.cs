@@ -15,7 +15,7 @@ namespace Genometric.TVQ.API.Model
         {
             _propertyMappings = new Dictionary<string, string>
             {
-                {"name", nameof(Tool.Name)},
+                {"name", nameof(Category.Name)},
                 {"homepage", nameof(Tool.Homepage)},
                 {"homepage_url", nameof(Tool.Homepage)},
                 {"owner", nameof(Tool.Owner)},

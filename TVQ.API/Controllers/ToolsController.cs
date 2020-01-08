@@ -44,6 +44,8 @@ namespace Genometric.TVQ.API.Controllers
             var DataItem = await _context.Tools
                 .Include(x => x.Publications)
                 .Include(x => x.RepoAssociations)
+                .Include(x => x.CategoryAssociations)
+                    .ThenInclude(x => x.Category)
                 .FirstAsync(x => x.ID == id)
                 .ConfigureAwait(false);
 

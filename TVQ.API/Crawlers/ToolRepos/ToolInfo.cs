@@ -4,9 +4,13 @@ using System.IO;
 
 namespace Genometric.TVQ.API.Crawlers.ToolRepos
 {
-    internal class ToolInfo
+    public class ToolInfo
     {
         public ToolRepoAssociation ToolRepoAssociation { get; }
+
+        public List<Publication> Publications { set; get; }
+
+        public List<string> CategoryIDs { set; get; }
 
         /// <summary>
         /// Gets a path to a temporary folder
@@ -58,6 +62,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             /// An archive downloaded from ToolShed generally
             /// encompasses less than 5 XML files. 
             XMLFiles = new List<string>(capacity: 5);
+
+            CategoryIDs = new List<string>();
         }
     }
 }

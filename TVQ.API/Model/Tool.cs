@@ -22,10 +22,13 @@ namespace Genometric.TVQ.API.Model
 
         public ICollection<Publication> Publications { set; get; }
 
+        public ICollection<ToolCategoryAssociation> CategoryAssociations { set; get; }
+
         public Tool()
         {
             RepoAssociations = new List<ToolRepoAssociation>();
             Publications = new List<Publication>();
+            CategoryAssociations = new List<ToolCategoryAssociation>();
         }
     }
 }

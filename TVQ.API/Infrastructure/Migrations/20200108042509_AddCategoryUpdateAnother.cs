@@ -3,10 +3,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class AddCategoryUpdateAnother : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Categories",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ToolShedID = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categories", x => x.ID);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Repositories",
                 columns: table => new
@@ -98,6 +113,32 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         principalTable: "Tools",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ToolCategoryAssociation",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ToolID = table.Column<int>(nullable: true),
+                    CategoryID = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ToolCategoryAssociation", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_ToolCategoryAssociation_Categories_CategoryID",
+                        column: x => x.CategoryID,
+                        principalTable: "Categories",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ToolCategoryAssociation_Tools_ToolID",
+                        column: x => x.ToolID,
+                        principalTable: "Tools",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -256,6 +297,13 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 column: "AuthorID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Categories_Name",
+                table: "Categories",
+                column: "Name",
+                unique: true,
+                filter: "[Name] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Citations_PublicationID",
                 table: "Citations",
                 column: "PublicationID");
@@ -275,6 +323,16 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 table: "Statistics",
                 column: "RepositoryID",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ToolCategoryAssociation_CategoryID",
+                table: "ToolCategoryAssociation",
+                column: "CategoryID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ToolCategoryAssociation_ToolID",
+                table: "ToolCategoryAssociation",
+                column: "ToolID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ToolDownloadRecords_ToolID",
@@ -319,10 +377,16 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 name: "Statistics");
 
             migrationBuilder.DropTable(
+                name: "ToolCategoryAssociation");
+
+            migrationBuilder.DropTable(
                 name: "ToolDownloadRecords");
 
             migrationBuilder.DropTable(
                 name: "Authors");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "ToolRepoAssociations");

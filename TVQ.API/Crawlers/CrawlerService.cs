@@ -39,19 +39,21 @@ namespace Genometric.TVQ.API.Crawlers
 
                 var tools = _dbContext.Tools.ToList();
 
+                var categories = _dbContext.Categories.ToList();
+
                 BaseToolRepoCrawler crawler;
                 switch (repo.Name)
                 {
                     case Repo.ToolShed:
-                        crawler = new ToolShed(repo, tools, _logger);
+                        crawler = new ToolShed(repo, tools, categories, _logger);
                         break;
 
                     case Repo.BioTools:
-                        crawler = new BioTools(repo, tools);
+                        crawler = new BioTools(repo, tools, categories);
                         break;
 
                     case Repo.Bioconductor:
-                        crawler = new Bioconductor(repo, tools);
+                        crawler = new Bioconductor(repo, tools, categories);
                         break;
 
                     default:

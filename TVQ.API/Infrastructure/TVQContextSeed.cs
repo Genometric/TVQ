@@ -48,7 +48,7 @@ namespace Genometric.TVQ.API.Infrastructure
             var toolshed = new Repository()
             {
                 Name = Repository.Repo.ToolShed,
-                URI = "https://toolshed.g2.bx.psu.edu/api/repositories"
+                URI = "https://toolshed.g2.bx.psu.edu/api/"
             };
             toolshed.Statistics = new Statistics() { Repository = toolshed };
 

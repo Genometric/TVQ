@@ -16,6 +16,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 {
     internal class ToolShed : BaseToolRepoCrawler
     {
+        private const string _repositoriesEndpoint = "repositories";
+        private const string _categoriesEndpoint = "categories";
+
         private readonly int _maxParallelDownloads = 3;
         private readonly int _maxParallelActions = Environment.ProcessorCount * 3;
         private readonly int _boundedCapacity = Environment.ProcessorCount * 3;
@@ -26,7 +29,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         private readonly ILogger<CrawlerService> _logger;
 
-        public ToolShed(Repository repo, List<Tool> tools, ILogger<CrawlerService> logger) : base(repo, tools)
+        public ToolShed(Repository repo, List<Tool> tools, List<Category> categories, ILogger<CrawlerService> logger) : base(repo, tools, categories)
         {
             _logger = logger;
 
@@ -50,16 +53,33 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         public override async Task ScanAsync()
         {
+            UpdateCategories();
             var tools = await GetToolsAsync().ConfigureAwait(false);
             if (tools != null)
                 await GetPublicationsAsync(tools).ConfigureAwait(false);
         }
 
-        private async Task<List<ToolRepoAssociation>> GetToolsAsync()
+        private void UpdateCategories()
+        {
+            _logger.LogDebug("Getting Categories list from ToolShed.");
+            using var client = new HttpClient();
+            HttpResponseMessage response = client.GetAsync(new Uri(Repo.URI + _categoriesEndpoint)).GetAwaiter().GetResult();
+            string content;
+            if (response.IsSuccessStatusCode)
+                content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            else
+                /// TODO: replace with an exception.
+                return;
+
+            _logger.LogDebug("Received Categories from ToolShed, deserializing them.");
+            UpdateCategories(new List<Category>(JsonConvert.DeserializeObject<List<Category>>(content)));
+        }
+
+        private async Task<List<ToolInfo>> GetToolsAsync()
         {
             _logger.LogDebug("Getting tools list from ToolShed.");
             using var client = new HttpClient();
-            HttpResponseMessage response = await client.GetAsync(new Uri(Repo.URI)).ConfigureAwait(false);
+            HttpResponseMessage response = await client.GetAsync(new Uri(Repo.URI + _repositoriesEndpoint)).ConfigureAwait(false);
             string content;
             if (response.IsSuccessStatusCode)
                 content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -68,14 +88,14 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 return null;
 
             _logger.LogDebug("Received tools from ToolShed, deserializing them.");
-            return RepoTool.DeserializeTools(content);
+            return RepoTool.DeserializeTools(content, SessionTempPath);
         }
 
         /// <summary>
         /// This method is implemented using the Task Parallel Library (TPL).
         //. https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-parallel-library-tpl
         /// </summary>
-        private async Task GetPublicationsAsync(List<ToolRepoAssociation> toolRepoAssociations)
+        private async Task GetPublicationsAsync(List<ToolInfo> ToolsInfo)
         {
             var linkOptions = new DataflowLinkOptions
             {
@@ -98,8 +118,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             extractXMLs.LinkTo(extractPublications, linkOptions);
             extractPublications.LinkTo(cleanup, linkOptions);
 
-            foreach (var association in toolRepoAssociations)
-                downloader.Post(new ToolInfo(association, SessionTempPath));
+            foreach (var info in ToolsInfo)
+                downloader.Post(info);
             downloader.Complete();
 
             await cleanup.Completion.ConfigureAwait(false);
@@ -195,6 +215,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                     XElement toolDoc = XElement.Load(filename);
                     var pubs = new List<Publication>();
                     foreach (var item in toolDoc.Elements("citations").Descendants())
+                    {
                         if (item.Attribute("type") != null)
                             switch (item.Attribute("type").Value.Trim().ToUpperInvariant())
                             {
@@ -221,13 +242,15 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                                     }
                                     break;
                             }
+                    }
 
                     _logger.LogDebug(
                         $"Successfully extract publication info from XML file " +
                         $"{Path.GetFileNameWithoutExtension(filename)} " +
                         $"of tool {info.ToolRepoAssociation.Tool.Name}.");
 
-                    TryAddEntities(info.ToolRepoAssociation, pubs);
+                    info.Publications = pubs;
+                    TryAddEntities(info);
                 }
                 catch (System.Xml.XmlException e)
                 {

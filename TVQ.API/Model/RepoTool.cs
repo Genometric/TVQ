@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Genometric.TVQ.API.Crawlers.ToolRepos;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
@@ -34,6 +35,10 @@ namespace Genometric.TVQ.API.Model
 
         public int? TimesDownloaded { set; get; }
 
+        public List<string> CategoryIDs { set; get; }
+
+        public List<Category> Categories { set; get; }
+
         public DateTime? DateAddedToRepository { set; get; }
 
         public static ToolRepoAssociation DeserializeTool(string json)
@@ -42,13 +47,18 @@ namespace Genometric.TVQ.API.Model
             return new ToolRepoAssociation(repoTool);
         }
 
-        public static List<ToolRepoAssociation> DeserializeTools(string json)
+        public static List<ToolInfo> DeserializeTools(string json, string sessionPath)
         {
             var repoTools = new List<RepoTool>(JsonConvert.DeserializeObject<List<RepoTool>>(json));
-            var associations = new List<ToolRepoAssociation>(repoTools.Count);
+            var infos = new List<ToolInfo>(repoTools.Count);
             foreach (var repoTool in repoTools)
-                associations.Add(new ToolRepoAssociation(repoTool));
-            return associations;
+                infos.Add(
+                    new ToolInfo(new ToolRepoAssociation(repoTool), sessionPath)
+                    {
+                        CategoryIDs = repoTool.CategoryIDs
+                    });
+
+            return infos;
         }
     }
 }

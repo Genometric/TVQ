@@ -19,6 +19,7 @@ namespace Genometric.TVQ.API.Infrastructure
         public DbSet<Citation> Citations { set; get; }
         public DbSet<Author> Authors { set; get; }
         public DbSet<Keyword> Keywords { set; get; }
+        public DbSet<Category> Categories { set; get; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -32,6 +33,7 @@ namespace Genometric.TVQ.API.Infrastructure
             builder.ApplyConfiguration(new KeywordEntityTypeConfiguration());
             builder.ApplyConfiguration(new AuthorPubEntityTypeConfiguration());
             builder.ApplyConfiguration(new StatisticsEntityTypeConfiguration());
+            builder.ApplyConfiguration(new CategoryETC());
         }
 
         public DbSet<Genometric.TVQ.API.Model.ToolRepoAssociation> ToolRepoAssociation { get; set; }

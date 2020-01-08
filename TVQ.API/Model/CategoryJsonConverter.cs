@@ -7,27 +7,17 @@ using System.Reflection;
 
 namespace Genometric.TVQ.API.Model
 {
-    public class RepoToolJsonConverter : JsonConverter
+    public class CategoryJsonConverter : JsonConverter
     {
         private readonly Dictionary<string, string> _propertyMappings;
 
-        public RepoToolJsonConverter()
+        public CategoryJsonConverter()
         {
             _propertyMappings = new Dictionary<string, string>
             {
-                {"times_downloaded", nameof(RepoTool.TimesDownloaded)},
-                {"user_id", nameof(RepoTool.UserID)},
-                {"name", nameof(RepoTool.Name)},
-                {"homepage", nameof(RepoTool.Homepage)},
-                {"homepage_url", nameof(RepoTool.Homepage)},
-                {"owner", nameof(RepoTool.Owner)},
-                {"id", nameof(RepoTool.IDinRepo)},
-                {"biotoolsID", nameof(RepoTool.IDinRepo)},
-                {"remote_repository_url", nameof(RepoTool.CodeRepo)},
-                {"description", nameof(RepoTool.Description)},
-                {"category_ids", nameof(RepoTool.CategoryIDs)},
-                {"create_time", nameof(RepoTool.DateAddedToRepository)},
-                {"additionDate", nameof(RepoTool.DateAddedToRepository)} // for bio.tools
+                {"name", nameof(Category.Name)},
+                {"id", nameof(Category.ToolShedID)},
+                {"description", nameof(Category.Description)}
             };
         }
 
@@ -57,7 +47,6 @@ namespace Genometric.TVQ.API.Model
                 prop?.SetValue(
                     instance,
                     jsonProperty.Value.ToObject(prop.PropertyType, serializer));
-
             }
 
             return instance;
@@ -80,4 +69,3 @@ namespace Genometric.TVQ.API.Model
         }
     }
 }
-
