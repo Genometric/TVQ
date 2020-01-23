@@ -5,6 +5,7 @@ using Genometric.TVQ.API.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -219,6 +220,55 @@ namespace Genometric.TVQ.API.Controllers
             var fileName = "TVQStats.csv";
             stream.Seek(0, System.IO.SeekOrigin.Begin);
             return File(stream, contentType, fileName);
+        }
+
+        // THIS IS AN EXPERIMENTAL ENDPOINT.
+        [HttpGet("{id}/createtime_dist_year")]
+        public async Task<IActionResult> CreateTimeDistYear([FromRoute] int id)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var repository = QueryRepo(id);
+            var dist = new Dictionary<int, int>();
+            foreach (var association in repository.ToolAssociations)
+            {
+                var year = ((DateTime)association.DateAddedToRepository).Year;
+                if (dist.ContainsKey(year))
+                    dist[year]++;
+                else
+                    dist.Add(year, 1);
+            }
+
+            var distributions = (from record in dist
+                                 select new int[] { record.Key, record.Value }).ToArray();
+
+            return Ok(distributions);
+        }
+
+        // THIS IS AN EXPERIMENTAL ENDPOINT.
+        [HttpGet("{id}/createtime_dist_month")]
+        public async Task<IActionResult> CreateTimeDistMonth([FromRoute] int id)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var repository = QueryRepo(id);
+            var dist = new Dictionary<string, int>();
+            foreach (var association in repository.ToolAssociations)
+            {
+                var date = ((DateTime)association.DateAddedToRepository);
+                var key = $"{date.Year}-{date.Month}";
+                if (dist.ContainsKey(key))
+                    dist[key]++;
+                else
+                    dist.Add(key, 1);
+            }
+
+            var distributions = (from record in dist
+                                 select new string[] { record.Key, record.Value.ToString() }).ToArray();
+
+            return Ok(distributions);
         }
 
         private Repository QueryRepo(int id, bool includeCitations = false)
