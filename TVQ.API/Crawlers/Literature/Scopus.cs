@@ -93,7 +93,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 using var client = new HttpClient();
                 response = client.GetAsync(uriBuilder.Uri).ConfigureAwait(false).GetAwaiter().GetResult();
             }
-            catch(HttpRequestException e)
+            catch (HttpRequestException e)
             {
                 // TODO: log this exception.
                 return null;
@@ -101,7 +101,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogDebug($"Unsuccessful response for publication {publication.ID}: {response.StatusCode}; {response.ReasonPhrase}; {response.Headers}");
+                LogSkippedPublications(publication, $" {response.StatusCode}; {response.ReasonPhrase}; {response.Headers}");
                 return null;
             }
 
@@ -135,11 +135,16 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                         //var author = new Regex(@".*author={(?<author>.+)}.*").Match(publication.Citation).Groups["author"].Value;
                         //var year = new Regex(@".*year={(?<year>.+)}.*").Match(publication.Citation).Groups["year"].Value;
 
+                        if (string.IsNullOrWhiteSpace(publication.Title))
+                        {
+                            LogSkippedPublications(publication, "missing title");
+                            return false;
+                        }
                         query = $"TITLE(\"{publication.Title}\")";
                         break;
 
                     default:
-                        _logger.LogDebug($"Skipping publication {publication.ID} because of unsupported type {publication.Type}.");
+                        LogSkippedPublications(publication, $"unsupported type {publication.Type}");
                         return false;
                 }
             }
@@ -151,26 +156,26 @@ namespace Genometric.TVQ.API.Crawlers.Literature
         {
             if (response.Any(x => ((JObject)x).ContainsKey("error")))
             {
-                _logger.LogDebug($"Skipping publication {publication.ID} for the following error: {response}");
+                LogSkippedPublications(publication, response.ToString());
                 return false;
             }
 
             if (response.Count == 0)
             {
-                _logger.LogDebug($"Skipping publication {publication.ID} because no record found on Scopus.");
+                LogSkippedPublications(publication, "no record found");
                 return false;
             }
 
             if (response.Count > 1)
             {
-                _logger.LogDebug($"Skipping publication {publication.ID} because more than one record found on Scopus.");
+                LogSkippedPublications(publication, "more than one record found");
                 return false;
             }
 
             if (!TryExtractFromResponse(response, "eid", out string eid) ||
                 !TryExtractFromResponse(response, "dc:identifier", out string id))
             {
-                _logger.LogDebug($"Skipping publication {publication.ID} because cannot determine its Scopus ID or EID.");
+                LogSkippedPublications(publication, "cannot determine Scopus ID or EID");
                 return false;
             }
             else
@@ -233,7 +238,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             }
             if (publication.Year == null)
             {
-                _logger.LogDebug($"Skipping publication {publication.ID} because cannot determine publication year.");
+                LogSkippedPublications(publication, "cannot determine publication year");
                 return;
             }
 
@@ -265,7 +270,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 HttpResponseMessage response = client.GetAsync(uriBuilder.Uri).ConfigureAwait(false).GetAwaiter().GetResult();
                 if (!response.IsSuccessStatusCode)
                 {
-                    _logger.LogDebug($"Skipping publication {publication.ID} for the following error getting citation information: {response.StatusCode}; {response.ReasonPhrase}");
+                    LogSkippedPublications(publication, $"{response.StatusCode}; {response.ReasonPhrase}");
                     return;
                 }
 
@@ -274,7 +279,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             }
             catch (Exception e)
             {
-                _logger.LogDebug($"Skipping publication {publication.ID} due to the following error: {e.Message}");
+                LogSkippedPublications(publication, e.Message);
             }
         }
 
@@ -311,6 +316,11 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 Source = Citation.InfoSource.Scopus,
                 Publication = publication
             });
+        }
+
+        private void LogSkippedPublications(Publication publication, string reason)
+        {
+            _logger.LogDebug($"Skipping publication {publication.ID}: {reason}");
         }
     }
 }
