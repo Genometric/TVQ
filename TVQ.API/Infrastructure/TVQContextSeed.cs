@@ -24,26 +24,28 @@ namespace Genometric.TVQ.API.Infrastructure
 
             await policy.ExecuteAsync(async () =>
             {
-                var useCustomizationData = settings.Value.UseCustomizationData;
-                var contentRootPath = env.ContentRootPath;
-
+                bool saveRequired = false;
                 if (!context.Repositories.Any())
                 {
-                    await context.Repositories.AddRangeAsync(
-                        GetPreconfiguredRepositories(
-                            contentRootPath,
-                            useCustomizationData,
-                            logger)).ConfigureAwait(false);
-
-                    await context.SaveChangesAsync().ConfigureAwait(false);
+                    await context.Repositories.AddRangeAsync(GetPreconfiguredRepositories())
+                                              .ConfigureAwait(false);
+                    saveRequired = true;
                 }
+
+                if(!context.Services.Any())
+                {
+                    await context.Services.AddRangeAsync(GetPreconfiguredServices())
+                                          .ConfigureAwait(false);
+                    saveRequired = true;
+                }
+
+                if(saveRequired)
+                    await context.SaveChangesAsync().ConfigureAwait(false);
+
             }).ConfigureAwait(false);
         }
 
-        private IEnumerable<Repository> GetPreconfiguredRepositories(
-            string contentRootPath,
-            bool useCustomizationData,
-            ILogger<TVQContextSeed> logger)
+        private static IEnumerable<Repository> GetPreconfiguredRepositories()
         {
             var toolshed = new Repository()
             {
@@ -72,7 +74,7 @@ namespace Genometric.TVQ.API.Infrastructure
             };
         }
 
-        private IEnumerable<Service> GetPreconfiguredServices()
+        private static IEnumerable<Service> GetPreconfiguredServices()
         {
             return new List<Service>()
             {
@@ -81,7 +83,7 @@ namespace Genometric.TVQ.API.Infrastructure
             };
         }
 
-        private AsyncRetryPolicy CreatePolicy(
+        private static AsyncRetryPolicy CreatePolicy(
             ILogger<TVQContextSeed> logger, 
             string prefix, 
             int retries = 3)
