@@ -160,7 +160,11 @@ namespace Genometric.TVQ.API.Crawlers.Literature
         {
             if (response.Any(x => ((JObject)x).ContainsKey("error")))
             {
-                LogSkippedPublications(publication, response.ToString());
+                LogSkippedPublications(
+                    publication,
+                    response
+                    .First(x => ((JObject)x).ContainsKey("error"))
+                    .Last().Value<JProperty>().Value.ToString());
                 return false;
             }
 
