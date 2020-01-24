@@ -123,6 +123,10 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             {
                 query = $"DOI(\"{publication.DOI}\")";
             }
+            else if (publication.PubMedID != null)
+            {
+                query = $"PMID(\"{publication.PubMedID}\")";
+            }
             else
             {
                 switch (publication.Type)
@@ -212,6 +216,10 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 publication.Month = date.Month;
                 publication.Day = date.Day;
             }
+
+            if (publication.PubMedID == null &&
+                TryExtractFromResponse(response, "pubmed-id", out string pmid))
+                publication.PubMedID = pmid;
 
             if (TryExtractFromResponse(response, "citedby-count", out string citedBy) &&
                 int.TryParse(citedBy, out int c))
