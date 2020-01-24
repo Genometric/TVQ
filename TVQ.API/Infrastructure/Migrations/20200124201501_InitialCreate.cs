@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
-    public partial class AddCategoryUpdateAnother : Migration
+    public partial class InitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -23,18 +23,44 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "LiteratureCrawlingJobs",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Status = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LiteratureCrawlingJobs", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Repositories",
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Status = table.Column<int>(nullable: false),
                     Name = table.Column<int>(nullable: true),
                     URI = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Repositories", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Services",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<int>(nullable: false),
+                    MaxDegreeOfParallelism = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Services", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -55,12 +81,31 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Statistics",
+                name: "RepoCrawlingJobs",
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Status = table.Column<int>(nullable: false),
+                    RepositoryID = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RepoCrawlingJobs", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_RepoCrawlingJobs_Repositories_RepositoryID",
+                        column: x => x.RepositoryID,
+                        principalTable: "Repositories",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Statistics",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     RepositoryID = table.Column<int>(nullable: false),
                     TScore = table.Column<double>(nullable: true),
                     PValue = table.Column<double>(nullable: true),
@@ -102,11 +147,18 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     Number = table.Column<int>(nullable: true),
                     Chapter = table.Column<string>(nullable: true),
                     Pages = table.Column<string>(nullable: true),
-                    Publisher = table.Column<string>(nullable: true)
+                    Publisher = table.Column<string>(nullable: true),
+                    LiteratureCrawlingJobID = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Publications", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Publications_LiteratureCrawlingJobs_LiteratureCrawlingJobID",
+                        column: x => x.LiteratureCrawlingJobID,
+                        principalTable: "LiteratureCrawlingJobs",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Publications_Tools_ToolID",
                         column: x => x.ToolID,
@@ -314,9 +366,25 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 column: "PublicationID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Publications_LiteratureCrawlingJobID",
+                table: "Publications",
+                column: "LiteratureCrawlingJobID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Publications_ToolID",
                 table: "Publications",
                 column: "ToolID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RepoCrawlingJobs_RepositoryID",
+                table: "RepoCrawlingJobs",
+                column: "RepositoryID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Services_Name",
+                table: "Services",
+                column: "Name",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Statistics_RepositoryID",
@@ -374,6 +442,12 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 name: "Keywords");
 
             migrationBuilder.DropTable(
+                name: "RepoCrawlingJobs");
+
+            migrationBuilder.DropTable(
+                name: "Services");
+
+            migrationBuilder.DropTable(
                 name: "Statistics");
 
             migrationBuilder.DropTable(
@@ -396,6 +470,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Repositories");
+
+            migrationBuilder.DropTable(
+                name: "LiteratureCrawlingJobs");
 
             migrationBuilder.DropTable(
                 name: "Tools");

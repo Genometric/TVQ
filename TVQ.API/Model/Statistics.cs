@@ -1,6 +1,6 @@
 ﻿namespace Genometric.TVQ.API.Model
 {
-    public class Statistics : BaseModel
+    public class Statistics
     {
         public int ID { set; get; }
 

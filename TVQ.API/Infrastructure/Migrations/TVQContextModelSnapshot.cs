@@ -128,6 +128,21 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.ToTable("Keywords");
                 });
 
+            modelBuilder.Entity("Genometric.TVQ.API.Model.LiteratureCrawlingJob", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("LiteratureCrawlingJobs");
+                });
+
             modelBuilder.Entity("Genometric.TVQ.API.Model.Publication", b =>
                 {
                     b.Property<int>("ID")
@@ -155,6 +170,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
 
                     b.Property<string>("Journal")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("LiteratureCrawlingJobID")
+                        .HasColumnType("int");
 
                     b.Property<int?>("Month")
                         .HasColumnType("int");
@@ -191,9 +209,31 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
 
                     b.HasKey("ID");
 
+                    b.HasIndex("LiteratureCrawlingJobID");
+
                     b.HasIndex("ToolID");
 
                     b.ToTable("Publications");
+                });
+
+            modelBuilder.Entity("Genometric.TVQ.API.Model.RepoCrawlingJob", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int?>("RepositoryID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("RepositoryID");
+
+                    b.ToTable("RepoCrawlingJobs");
                 });
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.Repository", b =>
@@ -206,9 +246,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<int?>("Name")
                         .HasColumnType("int");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
                     b.Property<string>("URI")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -216,6 +253,27 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("Repositories");
+                });
+
+            modelBuilder.Entity("Genometric.TVQ.API.Model.Service", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("MaxDegreeOfParallelism")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Name")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Services");
                 });
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.Statistics", b =>
@@ -238,9 +296,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .HasColumnType("float");
 
                     b.Property<int>("RepositoryID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<double?>("TScore")
@@ -411,11 +466,22 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.Publication", b =>
                 {
+                    b.HasOne("Genometric.TVQ.API.Model.LiteratureCrawlingJob", null)
+                        .WithMany("Publications")
+                        .HasForeignKey("LiteratureCrawlingJobID");
+
                     b.HasOne("Genometric.TVQ.API.Model.Tool", "Tool")
                         .WithMany("Publications")
                         .HasForeignKey("ToolID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Genometric.TVQ.API.Model.RepoCrawlingJob", b =>
+                {
+                    b.HasOne("Genometric.TVQ.API.Model.Repository", "Repository")
+                        .WithMany()
+                        .HasForeignKey("RepositoryID");
                 });
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.Statistics", b =>

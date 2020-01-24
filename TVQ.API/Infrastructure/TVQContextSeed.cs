@@ -33,11 +33,11 @@ namespace Genometric.TVQ.API.Infrastructure
                         GetPreconfiguredRepositories(
                             contentRootPath,
                             useCustomizationData,
-                            logger));
+                            logger)).ConfigureAwait(false);
 
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                 }
-            });
+            }).ConfigureAwait(false);
         }
 
         private IEnumerable<Repository> GetPreconfiguredRepositories(
@@ -69,6 +69,15 @@ namespace Genometric.TVQ.API.Infrastructure
             return new List<Repository>()
             {
                 toolshed, biotools, bioconductor
+            };
+        }
+
+        private IEnumerable<Service> GetPreconfiguredServices()
+        {
+            return new List<Service>()
+            {
+                new Service(){ Name = Service.Type.LiteratureCrawler },
+                new Service(){ Name = Service.Type.ToolRepoCrawler }
             };
         }
 
