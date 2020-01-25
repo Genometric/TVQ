@@ -1,8 +1,10 @@
 ﻿using Genometric.TVQ.API.Crawlers;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,12 +15,15 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
         private ILogger<QueueLiteratureCrawling> _logger;
         private IServiceProvider Services { get; }
         public IBackgroundLiteratureCrawlingQueue CrawlingQueue { get; }
+        private TVQContext Context { get; }
 
         public QueueLiteratureCrawling(
+            TVQContext context,
             IBackgroundLiteratureCrawlingQueue crawlingQueue,
             IServiceProvider services,
             ILogger<QueueLiteratureCrawling> logger)
         {
+            Context = context;
             Services = services;
             _logger = logger;
             CrawlingQueue = crawlingQueue;
@@ -26,29 +31,43 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Queued Hosted Service is starting.");
+            _logger.LogInformation("LiteratureCrawling hosted service is starting.");
+
+            var unfinishedJobs = Context.LiteratureCrawlingJobs.Include(x => x.Publications)
+                .Where(x => x.Status == Model.State.Queued ||
+                            x.Status == Model.State.Running);
+
+            foreach (var job in unfinishedJobs)
+            {
+                CrawlingQueue.QueueBackgroundWorkItem(job);
+                _logger.LogInformation($"The unfinished literature crawling job {job.ID} is re-queued.");
+            }
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                var publications = await CrawlingQueue.DequeueAsync(stoppingToken).ConfigureAwait(false);
+                var job = await CrawlingQueue.DequeueAsync(stoppingToken).ConfigureAwait(false);
 
+                IServiceScope scope = null;
                 try
                 {
-                    using (var scope = Services.CreateScope())
-                    {
-                        var scopedProcessingService = scope
-                            .ServiceProvider
-                            .GetRequiredService<CrawlerService>();
+                    scope = Services.CreateScope();
+                    var scopedProcessingService = scope
+                        .ServiceProvider
+                        .GetRequiredService<CrawlerService>();
 
-                        await scopedProcessingService
-                            .CrawlAsync(publications, stoppingToken)
-                            .ConfigureAwait(false);
-                    }
+                    await scopedProcessingService
+                        .CrawlAsync(job, stoppingToken)
+                        .ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {
                     _logger.LogError(e,
-                       $"Error occurred executing {nameof(publications)}.");
+                       $"Error occurred executing {nameof(job)}.");
+                }
+                finally
+                {
+                    if (scope != null)
+                        scope.Dispose();
                 }
             }
 

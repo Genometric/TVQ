@@ -88,13 +88,16 @@ namespace Genometric.TVQ.API.Crawlers
             }
         }
 
-        public async Task CrawlAsync(List<Publication> publications, CancellationToken cancellationToken)
+        public async Task CrawlAsync(LiteratureCrawlingJob job, CancellationToken cancellationToken)
         {
             try
             {
-                _dbContext.AttachRange(publications);
-                using var scopusCrawler = new Scopus(publications, _logger);
+                _dbContext.AttachRange(job);
+                job.Status = State.Running;
+                _dbContext.SaveChanges();
+                using var scopusCrawler = new Scopus(job.Publications, _logger);
                 await scopusCrawler.CrawlAsync().ConfigureAwait(false);
+                job.Status = State.Completed;
                 await _dbContext.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (Exception e)

@@ -1,7 +1,6 @@
 ﻿using Genometric.TVQ.API.Model;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,24 +8,24 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
 {
     public class BackgroundLiteratureCrawlingQueue : IBackgroundLiteratureCrawlingQueue
     {
-        private readonly ConcurrentQueue<List<Publication>> _publicationsToScan =
-            new ConcurrentQueue<List<Publication>>();
+        private readonly ConcurrentQueue<LiteratureCrawlingJob> _jobs =
+            new ConcurrentQueue<LiteratureCrawlingJob>();
         private readonly SemaphoreSlim _signal =
             new SemaphoreSlim(0);
 
-        public void QueueBackgroundWorkItem(List<Publication> publications)
+        public void QueueBackgroundWorkItem(LiteratureCrawlingJob job)
         {
-            if (publications == null)
-                throw new ArgumentNullException(nameof(publications));
+            if (job == null)
+                throw new ArgumentNullException(nameof(job));
 
-            _publicationsToScan.Enqueue(publications);
+            _jobs.Enqueue(job);
             _signal.Release();
         }
 
-        public async Task<List<Publication>> DequeueAsync(CancellationToken cancellationToken)
+        public async Task<LiteratureCrawlingJob> DequeueAsync(CancellationToken cancellationToken)
         {
             await _signal.WaitAsync(cancellationToken).ConfigureAwait(false);
-            _publicationsToScan.TryDequeue(out var repository);
+            _jobs.TryDequeue(out var repository);
 
             return repository;
         }

@@ -121,20 +121,6 @@ namespace TVQ.API.Controllers
             return citation;
         }
 
-        // GET: api/v1/citations/scan/
-        [HttpGet("scan")]
-        public async Task<IActionResult> ScanToolsInRepo()
-        {
-            // THIS IS A TMP METHOD, IT WILL BE UPDATED TO ADHERE WITH 
-            // A RESFUL STANDARDS.
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            _queue.QueueBackgroundWorkItem(_context.Publications.ToList());
-
-            return Ok();
-        }
-
         private bool CitationExists(int id)
         {
             return _context.Citations.Any(e => e.ID == id);

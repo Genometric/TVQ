@@ -50,15 +50,26 @@ namespace Genometric.TVQ.API.Controllers
         // POST: api/v1/RepoCrawlingJobs
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
+        /// <summary>
+        /// Example: 
+        /// {
+        ///     "Repository":
+        ///     {
+        ///         "id" : "3"
+        ///     }
+        /// }
+        /// </summary>
+        /// <param name="job"></param>
+        /// <returns></returns>
         [HttpPost]
-        public async Task<ActionResult<RepoCrawlingJob>> PostRepoCrawlingJob(RepoCrawlingJob repoCrawlingJob)
+        public async Task<ActionResult<RepoCrawlingJob>> PostRepoCrawlingJob(RepoCrawlingJob job)
         {
-            if (repoCrawlingJob == null)
+            if (job == null)
                 return BadRequest();
-            if (repoCrawlingJob.Repository == null)
+            if (job.Repository == null)
                 return BadRequest("missing repository ID.");
             
-            var repository = _context.Repositories.Find(repoCrawlingJob.Repository.ID);
+            var repository = _context.Repositories.Find(job.Repository.ID);
             if (repository == null)
                 return BadRequest("invalid repository ID.");
 
@@ -67,14 +78,14 @@ namespace Genometric.TVQ.API.Controllers
                      && x.Repository.ID == repository.ID))
                 return BadRequest($"The repository {repository.ID} is already set to be crawled.");
 
-            repoCrawlingJob.Repository = repository;
-            repoCrawlingJob.Status = default;
+            job.Repository = repository;
+            job.Status = default;
 
-            _context.RepoCrawlingJobs.Add(repoCrawlingJob);
+            _context.RepoCrawlingJobs.Add(job);
             await _context.SaveChangesAsync().ConfigureAwait(false);
-            _queue.QueueBackgroundWorkItem(repoCrawlingJob);
+            _queue.QueueBackgroundWorkItem(job);
 
-            return CreatedAtAction("GetRepoCrawlingJob", new { id = repoCrawlingJob.ID }, repoCrawlingJob);
+            return CreatedAtAction("GetRepoCrawlingJob", new { id = job.ID }, job);
         }
 
         // DELETE: api/v1/RepoCrawlingJobs/5

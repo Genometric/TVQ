@@ -7,8 +7,8 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
 {
     public interface IBackgroundLiteratureCrawlingQueue
     {
-        void QueueBackgroundWorkItem(List<Publication> publications);
+        void QueueBackgroundWorkItem(LiteratureCrawlingJob job);
 
-        Task<List<Publication>> DequeueAsync(CancellationToken cancellationToken);
+        Task<LiteratureCrawlingJob> DequeueAsync(CancellationToken cancellationToken);
     }
 }

@@ -15,6 +15,7 @@ namespace Genometric.TVQ.API.Model
         {
             _propertyMappings = new Dictionary<string, string>
             {
+                {"id", nameof(Publication.ID)},
                 {"title", nameof(Publication.Title)},
                 {"year", nameof(Publication.Year)},
                 {"CitedBy", nameof(Publication.CitedBy)},

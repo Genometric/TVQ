@@ -28,7 +28,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Status = table.Column<int>(nullable: false)
+                    Status = table.Column<int>(nullable: false),
+                    ScanAllPublications = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
