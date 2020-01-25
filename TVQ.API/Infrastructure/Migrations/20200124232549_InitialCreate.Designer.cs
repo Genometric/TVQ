@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
     [DbContext(typeof(TVQContext))]
-    [Migration("20200124201501_InitialCreate")]
+    [Migration("20200124232549_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -234,6 +234,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.HasKey("ID");
 
                     b.HasIndex("RepositoryID");
+
+                    b.HasIndex("Status");
 
                     b.ToTable("RepoCrawlingJobs");
                 });

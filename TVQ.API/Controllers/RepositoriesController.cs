@@ -17,20 +17,17 @@ namespace Genometric.TVQ.API.Controllers
     public class RepositoriesController : ControllerBase
     {
         private readonly TVQContext _context;
-        private readonly IBackgroundToolRepoCrawlingQueue _queue;
         private readonly IBackgroundAnalysisTaskQueue _analysisQueue;
         private readonly ILogger<RepositoriesController> _logger;
         private readonly IBackgroundTaskQueue _taskQueue;
 
         public RepositoriesController(
             TVQContext context,
-            IBackgroundToolRepoCrawlingQueue queue,
             IBackgroundAnalysisTaskQueue analysisQueue,
             IBackgroundTaskQueue taskQueue,
             ILogger<RepositoriesController> logger)
         {
             _context = context;
-            _queue = queue;
             _analysisQueue = analysisQueue;
             _logger = logger;
             _taskQueue = taskQueue;
@@ -64,15 +61,15 @@ namespace Genometric.TVQ.API.Controllers
 
         // PUT: api/v1/repositories/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRepo([FromRoute] int id, [FromBody] Repository dataItem)
+        public async Task<IActionResult> PutRepo([FromRoute] int id, [FromBody] Repository repository)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (id != dataItem.ID)
+            if (id != repository.ID)
                 return BadRequest();
 
-            _context.Entry(dataItem).State = EntityState.Modified;
+            _context.Entry(repository).State = EntityState.Modified;
 
             try
             {
@@ -86,20 +83,20 @@ namespace Genometric.TVQ.API.Controllers
                     throw;
             }
 
-            return NoContent();
+            return Ok(repository);
         }
 
         // POST: api/v1/repositories
         [HttpPost]
-        public async Task<IActionResult> PostRepo([FromBody] Repository dataItem)
+        public async Task<IActionResult> PostRepo([FromBody] Repository repository)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            _context.Repositories.Add(dataItem);
+            _context.Repositories.Add(repository);
             await _context.SaveChangesAsync().ConfigureAwait(false);
 
-            return CreatedAtAction("GetRequestItems", new { }, dataItem);
+            return CreatedAtAction("GetRequestItems", new { }, repository);
         }
 
         // DELETE: api/v1/repositories/5
@@ -117,23 +114,6 @@ namespace Genometric.TVQ.API.Controllers
             await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return Ok(dataItem);
-        }
-
-        // GET: api/v1/repositories/scan/1
-        [HttpGet("{id}/scan")]
-        public async Task<IActionResult> ScanToolsInRepo([FromRoute] int id)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var repository = QueryRepo(id);
-
-            if (repository == null)
-                return NotFound();
-
-            _queue.QueueBackgroundWorkItem(repository);
-
-            return Ok(repository);
         }
 
         [HttpGet("{id}/analysis")]

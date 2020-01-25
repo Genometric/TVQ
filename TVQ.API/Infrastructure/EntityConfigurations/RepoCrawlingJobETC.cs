@@ -19,6 +19,8 @@ namespace Genometric.TVQ.API.Infrastructure.EntityConfigurations
                     continue;
                 builder.Property(p.Name);
             }
+
+            builder.HasIndex(x => x.Status);
         }
     }
 }

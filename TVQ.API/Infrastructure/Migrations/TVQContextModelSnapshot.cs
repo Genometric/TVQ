@@ -233,6 +233,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
 
                     b.HasIndex("RepositoryID");
 
+                    b.HasIndex("Status");
+
                     b.ToTable("RepoCrawlingJobs");
                 });
 

@@ -36,14 +36,31 @@ namespace Genometric.TVQ.API.Controllers
             return service;
         }
 
-        // POST: api/Services
+        // PUT: api/v1/Services/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPost]
-        public async Task<ActionResult<Service>> PostService(Service service)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutService([FromRoute] int id, [FromBody] Service service)
         {
-            _context.Services.Add(service);
-            await _context.SaveChangesAsync().ConfigureAwait(false);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (id != service.ID)
+                return BadRequest();
+
+            _context.Entry(service).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync().ConfigureAwait(false);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ServiceExists(id))
+                    return NotFound();
+                else
+                    throw;
+            }
 
             return CreatedAtAction("GetService", new { id = service.ID }, service);
         }

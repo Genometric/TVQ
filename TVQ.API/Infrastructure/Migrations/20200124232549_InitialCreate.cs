@@ -381,6 +381,11 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 column: "RepositoryID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RepoCrawlingJobs_Status",
+                table: "RepoCrawlingJobs",
+                column: "Status");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Services_Name",
                 table: "Services",
                 column: "Name",

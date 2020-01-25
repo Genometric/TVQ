@@ -26,11 +26,14 @@ namespace Genometric.TVQ.API.Crawlers
             _logger = logger;
         }
 
-        public async Task CrawlAsync(Repository repo, CancellationToken cancellationToken)
+        public async Task CrawlAsync(RepoCrawlingJob job, CancellationToken cancellationToken)
         {
             // TODO: check if another async operation is ongoing, if so, wait for that to finish before running this. 
             try
             {
+                var repo = job.Repository;
+                if (!_dbContext.RepoCrawlingJobs.Local.Any(e => e.ID == job.ID))
+                    _dbContext.Attach(job);
                 if (!_dbContext.Repositories.Local.Any(e => e.ID == repo.ID))
                     _dbContext.Attach(repo);
 
@@ -38,7 +41,6 @@ namespace Genometric.TVQ.API.Crawlers
                     repo.ToolAssociations = new List<ToolRepoAssociation>();
 
                 var tools = _dbContext.Tools.ToList();
-
                 var categories = _dbContext.Categories.ToList();
 
                 BaseToolRepoCrawler crawler;
@@ -61,7 +63,10 @@ namespace Genometric.TVQ.API.Crawlers
                         return;
                 }
 
+                job.Status = State.Running;
+                _dbContext.SaveChanges();
                 await crawler.ScanAsync().ConfigureAwait(false);
+                job.Status = State.Completed;
                 await _dbContext.SaveChangesAsync().ConfigureAwait(false);
 
                 crawler.Dispose();

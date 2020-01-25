@@ -6,8 +6,8 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
 {
     public interface IBackgroundToolRepoCrawlingQueue
     {
-        void QueueBackgroundWorkItem(Repository repository);
+        void QueueBackgroundWorkItem(RepoCrawlingJob job);
 
-        Task<Repository> DequeueAsync(CancellationToken cancellationToken);
+        Task<RepoCrawlingJob> DequeueAsync(CancellationToken cancellationToken);
     }
 }
