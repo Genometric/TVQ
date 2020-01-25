@@ -8,26 +8,26 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
 {
     public class BackgroundAnalysisQueue : IBackgroundAnalysisTaskQueue
     {
-        private readonly ConcurrentQueue<Repository> _repositoriesToScan = 
-            new ConcurrentQueue<Repository>();
+        private readonly ConcurrentQueue<AnalysisJob> _jobs = 
+            new ConcurrentQueue<AnalysisJob>();
         private readonly SemaphoreSlim _signal =
             new SemaphoreSlim(0);
 
-        public void QueueBackgroundWorkItem(Repository repository)
+        public void QueueBackgroundWorkItem(AnalysisJob job)
         {
-            if (repository == null)
-                throw new ArgumentNullException(nameof(repository));
+            if (job == null)
+                throw new ArgumentNullException(nameof(job));
 
-            _repositoriesToScan.Enqueue(repository);
+            _jobs.Enqueue(job);
             _signal.Release();
         }
 
-        public async Task<Repository> DequeueAsync(CancellationToken cancellationToken)
+        public async Task<AnalysisJob> DequeueAsync(CancellationToken cancellationToken)
         {
             await _signal.WaitAsync(cancellationToken).ConfigureAwait(false);
-            _repositoriesToScan.TryDequeue(out var repository);
+            _jobs.TryDequeue(out var job);
 
-            return repository;
+            return job;
         }
     }
 }

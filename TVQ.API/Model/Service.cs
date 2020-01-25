@@ -15,7 +15,7 @@ namespace Genometric.TVQ.API.Model
     /// </summary>
     public class Service
     {
-        public enum Type { ToolRepoCrawler, LiteratureCrawler };
+        public enum Type { ToolRepoCrawler, LiteratureCrawler, Analysis };
 
         public int ID { set; get; }
 

@@ -21,14 +21,18 @@ namespace Genometric.TVQ.API.Analysis
             _logger = logger;
         }
 
-        public async Task UpdateStatsAsync(Repository repository, CancellationToken cancellationToken)
+        public async Task UpdateStatsAsync(AnalysisJob job, CancellationToken cancellationToken)
         {
-            if (repository == null) return;
+            if (job == null)
+                return;
 
+            var repository = job.Repository;
             if (!_dbContext.Repositories.Local.Any(e => e.ID == repository.ID))
                 _dbContext.Attach(repository);
 
+            job.Status = State.Running;
             EvaluateCitationImpact(repository);
+            job.Status = State.Completed;
             await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 

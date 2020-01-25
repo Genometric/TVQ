@@ -24,6 +24,7 @@ namespace Genometric.TVQ.API.Infrastructure
         public DbSet<ToolRepoAssociation> ToolRepoAssociation { get; set; }
         public DbSet<RepoCrawlingJob> RepoCrawlingJobs { set; get; }
         public DbSet<LiteratureCrawlingJob> LiteratureCrawlingJobs { set; get; }
+        public DbSet<AnalysisJob> AnalysisJobs { set; get; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -41,6 +42,7 @@ namespace Genometric.TVQ.API.Infrastructure
             builder.ApplyConfiguration(new ServiceETC());
             builder.ApplyConfiguration(new RepoCrawlingJobETC());
             builder.ApplyConfiguration(new LiteratureCrawlingJobETC());
+            builder.ApplyConfiguration(new AnalysisJobETC());
         }
     }
 }

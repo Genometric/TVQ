@@ -19,6 +19,26 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("Genometric.TVQ.API.Model.AnalysisJob", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int?>("RepositoryID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("RepositoryID");
+
+                    b.ToTable("AnalysisJobs");
+                });
+
             modelBuilder.Entity("Genometric.TVQ.API.Model.Author", b =>
                 {
                     b.Property<int>("ID")
@@ -427,6 +447,13 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.HasIndex("ToolID");
 
                     b.ToTable("ToolRepoAssociations");
+                });
+
+            modelBuilder.Entity("Genometric.TVQ.API.Model.AnalysisJob", b =>
+                {
+                    b.HasOne("Genometric.TVQ.API.Model.Repository", "Repository")
+                        .WithMany()
+                        .HasForeignKey("RepositoryID");
                 });
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.Author", b =>

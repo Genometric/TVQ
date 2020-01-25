@@ -116,22 +116,6 @@ namespace Genometric.TVQ.API.Controllers
             return Ok(dataItem);
         }
 
-        [HttpGet("{id}/analysis")]
-        public async Task<IActionResult> RunAnalysis([FromRoute] int id)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var repository = QueryRepo(id, true);
-
-            if (repository == null)
-                return NotFound();
-
-            _analysisQueue.QueueBackgroundWorkItem(repository);
-
-            return Ok(repository);
-        }
-
         // THIS IS ENDPOINT IS FOR TESTING PURPOSES.
         [HttpGet("{id}/downloadstats")]
         public async Task<IActionResult> DownloadStats([FromRoute] int id)

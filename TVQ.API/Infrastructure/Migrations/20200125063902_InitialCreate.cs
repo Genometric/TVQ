@@ -82,6 +82,26 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AnalysisJobs",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Status = table.Column<int>(nullable: false),
+                    RepositoryID = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AnalysisJobs", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_AnalysisJobs_Repositories_RepositoryID",
+                        column: x => x.RepositoryID,
+                        principalTable: "Repositories",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RepoCrawlingJobs",
                 columns: table => new
                 {
@@ -340,6 +360,11 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_AnalysisJobs_RepositoryID",
+                table: "AnalysisJobs",
+                column: "RepositoryID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Authors_PublicationID",
                 table: "Authors",
                 column: "PublicationID");
@@ -438,6 +463,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AnalysisJobs");
+
             migrationBuilder.DropTable(
                 name: "AuthorsPublications");
 

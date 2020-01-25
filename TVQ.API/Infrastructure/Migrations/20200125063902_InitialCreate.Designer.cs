@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
     [DbContext(typeof(TVQContext))]
-    [Migration("20200125012157_InitialCreate")]
+    [Migration("20200125063902_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,6 +20,26 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "3.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("Genometric.TVQ.API.Model.AnalysisJob", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int?>("RepositoryID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("RepositoryID");
+
+                    b.ToTable("AnalysisJobs");
+                });
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.Author", b =>
                 {
@@ -429,6 +449,13 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.HasIndex("ToolID");
 
                     b.ToTable("ToolRepoAssociations");
+                });
+
+            modelBuilder.Entity("Genometric.TVQ.API.Model.AnalysisJob", b =>
+                {
+                    b.HasOne("Genometric.TVQ.API.Model.Repository", "Repository")
+                        .WithMany()
+                        .HasForeignKey("RepositoryID");
                 });
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.Author", b =>

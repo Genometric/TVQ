@@ -76,11 +76,11 @@ namespace Genometric.TVQ.API.Infrastructure
 
         private static IEnumerable<Service> GetPreconfiguredServices()
         {
-            return new List<Service>()
-            {
-                new Service(){ Name = Service.Type.LiteratureCrawler },
-                new Service(){ Name = Service.Type.ToolRepoCrawler }
-            };
+            var services = new List<Service>();
+            foreach (var type in (Service.Type[])Enum.GetValues(typeof(Service.Type)))
+                services.Add(new Service() { Name = type });
+
+            return services;
         }
 
         private static AsyncRetryPolicy CreatePolicy(
