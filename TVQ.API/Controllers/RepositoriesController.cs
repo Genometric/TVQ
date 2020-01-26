@@ -90,23 +90,6 @@ namespace Genometric.TVQ.API.Controllers
             return CreatedAtAction("GetRequestItems", new { }, repository);
         }
 
-        // DELETE: api/v1/repositories/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRepo([FromRoute] int id)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var dataItem = await _context.Repositories.FindAsync(id);
-            if (dataItem == null)
-                return NotFound();
-
-            _context.Repositories.Remove(dataItem);
-            await _context.SaveChangesAsync().ConfigureAwait(false);
-
-            return Ok(dataItem);
-        }
-
         private bool RepoExists(int id)
         {
             return _context.Repositories.Any(e => e.ID == id);
