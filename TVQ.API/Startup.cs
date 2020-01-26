@@ -4,6 +4,7 @@ using Genometric.TVQ.API.Analysis;
 using Genometric.TVQ.API.Crawlers;
 using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Infrastructure.BackgroundTasks;
+using Genometric.TVQ.API.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -49,14 +50,12 @@ namespace Genometric.TVQ.API
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddCustomDbContext(Configuration);
-            services.AddHostedService<QueuedHostedService>();
             services.AddHostedService<QueueLiteratureCrawling>();
             services.AddHostedService<QueueToolRepoCrawling>();
             services.AddHostedService<QueuedAnalysis>();
-            services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
-            services.AddSingleton<IBackgroundToolRepoCrawlingQueue, BackgroundToolRepoCrawlingQueue>();
-            services.AddSingleton<IBackgroundLiteratureCrawlingQueue, BackgroundLiteratureCrawlingQueue>();
-            services.AddSingleton<IBackgroundAnalysisTaskQueue, BackgroundAnalysisQueue>();
+            services.AddSingleton<IBaseBackgroundTaskQueue<AnalysisJob>, BaseBackgroundTaskQueue<AnalysisJob>>();
+            services.AddSingleton<IBaseBackgroundTaskQueue<RepoCrawlingJob>, BaseBackgroundTaskQueue<RepoCrawlingJob>>();
+            services.AddSingleton<IBaseBackgroundTaskQueue<LiteratureCrawlingJob>, BaseBackgroundTaskQueue<LiteratureCrawlingJob>>();
             services.AddScoped<CrawlerService>();
             services.AddScoped<AnalysisService>();
 

@@ -14,11 +14,11 @@ namespace Genometric.TVQ.API.Controllers
     public class LiteratureCrawlingJobsController : ControllerBase
     {
         private readonly TVQContext _context;
-        private IBackgroundLiteratureCrawlingQueue Queue { get; }
+        private IBaseBackgroundTaskQueue<LiteratureCrawlingJob> Queue { get; }
 
         public LiteratureCrawlingJobsController(
             TVQContext context,
-            IBackgroundLiteratureCrawlingQueue queue)
+            IBaseBackgroundTaskQueue<LiteratureCrawlingJob> queue)
         {
             _context = context;
             Queue = queue;
@@ -109,7 +109,7 @@ namespace Genometric.TVQ.API.Controllers
 
             _context.LiteratureCrawlingJobs.Add(job);
             await _context.SaveChangesAsync().ConfigureAwait(false);
-            Queue.QueueBackgroundWorkItem(job);
+            Queue.Enqueue(job);
             return CreatedAtAction("GetLiteratureCrawlingJob", new { id = job.ID }, job);
         }
 

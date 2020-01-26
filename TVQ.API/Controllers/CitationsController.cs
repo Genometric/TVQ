@@ -15,12 +15,12 @@ namespace TVQ.API.Controllers
     public class CitationsController : ControllerBase
     {
         private readonly TVQContext _context;
-        private readonly IBackgroundLiteratureCrawlingQueue _queue;
+        private readonly IBaseBackgroundTaskQueue<LiteratureCrawlingJob> _queue;
         private readonly ILogger<CitationsController> _logger;
 
         public CitationsController(
             TVQContext context,
-            IBackgroundLiteratureCrawlingQueue queue,
+            IBaseBackgroundTaskQueue<LiteratureCrawlingJob> queue,
             ILogger<CitationsController> logger)
         {
             _context = context;

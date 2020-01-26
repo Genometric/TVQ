@@ -1,4 +1,5 @@
 ﻿using Genometric.TVQ.API.Analysis;
+using Genometric.TVQ.API.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -15,11 +16,11 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
         private TVQContext Context { get; }
         private ILogger<QueuedAnalysis> _logger;
         private IServiceProvider Services { get; }
-        public IBackgroundAnalysisTaskQueue AnalysisQueue { get; }
+        public IBaseBackgroundTaskQueue<AnalysisJob> AnalysisQueue { get; }
 
         public QueuedAnalysis(
             TVQContext context,
-            IBackgroundAnalysisTaskQueue analysisQueue,
+            IBaseBackgroundTaskQueue<AnalysisJob> analysisQueue,
             IServiceProvider services,
             ILogger<QueuedAnalysis> logger)
         {
@@ -39,7 +40,7 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
 
             foreach (var job in unfinishedJobs)
             {
-                AnalysisQueue.QueueBackgroundWorkItem(job);
+                AnalysisQueue.Enqueue(job);
                 _logger.LogInformation($"The unfinished literature crawling job {job.ID} is re-queued.");
             }
 

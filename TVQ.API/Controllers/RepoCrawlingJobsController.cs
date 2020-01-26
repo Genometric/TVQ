@@ -15,12 +15,12 @@ namespace Genometric.TVQ.API.Controllers
     public class RepoCrawlingJobsController : ControllerBase
     {
         private readonly TVQContext _context;
-        private readonly IBackgroundToolRepoCrawlingQueue _queue;
+        private readonly IBaseBackgroundTaskQueue<RepoCrawlingJob> _queue;
         private readonly ILogger<RepoCrawlingJobsController> _logger;
 
         public RepoCrawlingJobsController(
             TVQContext context,
-            IBackgroundToolRepoCrawlingQueue queue,
+            IBaseBackgroundTaskQueue<RepoCrawlingJob> queue,
             ILogger<RepoCrawlingJobsController> logger)
         {
             _context = context;
@@ -83,7 +83,7 @@ namespace Genometric.TVQ.API.Controllers
 
             _context.RepoCrawlingJobs.Add(job);
             await _context.SaveChangesAsync().ConfigureAwait(false);
-            _queue.QueueBackgroundWorkItem(job);
+            _queue.Enqueue(job);
 
             return CreatedAtAction("GetRepoCrawlingJob", new { id = job.ID }, job);
         }

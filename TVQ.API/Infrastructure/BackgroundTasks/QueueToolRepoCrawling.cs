@@ -1,4 +1,5 @@
 ﻿using Genometric.TVQ.API.Crawlers;
+using Genometric.TVQ.API.Model;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -14,11 +15,11 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
         private ILogger<QueueToolRepoCrawling> _logger;
         private TVQContext Context { get; }
         private IServiceProvider Services { get; }
-        public IBackgroundToolRepoCrawlingQueue CrawlingQueue { get; }
+        public IBaseBackgroundTaskQueue<RepoCrawlingJob> CrawlingQueue { get; }
 
         public QueueToolRepoCrawling(
             TVQContext context,
-            IBackgroundToolRepoCrawlingQueue crawlingQueue,
+            IBaseBackgroundTaskQueue<RepoCrawlingJob> crawlingQueue,
             IServiceProvider services,
             ILogger<QueueToolRepoCrawling> logger)
         {
@@ -38,7 +39,7 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
 
             foreach (var job in unfinishedJobs)
             {
-                CrawlingQueue.QueueBackgroundWorkItem(job);
+                CrawlingQueue.Enqueue(job);
                 _logger.LogInformation($"The unfinished tool repository crawling job {job.ID} is re-queued.");
             }
 

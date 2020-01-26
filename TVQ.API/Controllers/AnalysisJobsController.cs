@@ -14,11 +14,11 @@ namespace Genometric.TVQ.API.Controllers
     public class AnalysisJobsController : ControllerBase
     {
         private readonly TVQContext _context;
-        private IBackgroundAnalysisTaskQueue AnalysisQueue { get; }
+        private IBaseBackgroundTaskQueue<AnalysisJob> AnalysisQueue { get; }
 
         public AnalysisJobsController(
             TVQContext context,
-            IBackgroundAnalysisTaskQueue analysisQueue)
+            IBaseBackgroundTaskQueue<AnalysisJob> analysisQueue)
         {
             _context = context;
             AnalysisQueue = analysisQueue;
@@ -66,13 +66,8 @@ namespace Genometric.TVQ.API.Controllers
 
             _context.AnalysisJobs.Add(job);
             await _context.SaveChangesAsync().ConfigureAwait(false);
-            AnalysisQueue.QueueBackgroundWorkItem(job);
+            AnalysisQueue.Enqueue(job);
             return CreatedAtAction("GetAnalysisJob", new { id = job.ID }, job);
-        }
-
-        private bool AnalysisJobExists(int id)
-        {
-            return _context.AnalysisJobs.Any(e => e.ID == id);
         }
     }
 }
