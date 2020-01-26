@@ -17,18 +17,15 @@ namespace Genometric.TVQ.API.Controllers
     public class RepositoriesController : ControllerBase
     {
         private readonly TVQContext _context;
-        private readonly IBackgroundAnalysisTaskQueue _analysisQueue;
         private readonly ILogger<RepositoriesController> _logger;
         private readonly IBackgroundTaskQueue _taskQueue;
 
         public RepositoriesController(
             TVQContext context,
-            IBackgroundAnalysisTaskQueue analysisQueue,
             IBackgroundTaskQueue taskQueue,
             ILogger<RepositoriesController> logger)
         {
             _context = context;
-            _analysisQueue = analysisQueue;
             _logger = logger;
             _taskQueue = taskQueue;
         }

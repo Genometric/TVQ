@@ -25,6 +25,7 @@ namespace Genometric.TVQ.API.Infrastructure
         public DbSet<RepoCrawlingJob> RepoCrawlingJobs { set; get; }
         public DbSet<LiteratureCrawlingJob> LiteratureCrawlingJobs { set; get; }
         public DbSet<AnalysisJob> AnalysisJobs { set; get; }
+        public DbSet<Statistics> Statistics { set; get; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
