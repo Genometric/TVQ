@@ -23,13 +23,6 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
                  queue)
         { }
 
-        protected override IQueryable<AnalysisJob> GetPendingJobs()
-        {
-            return Context.AnalysisJobs.Include(x => x.Repository)
-                                       .Where(x => x.Status == State.Queued ||
-                                                   x.Status == State.Running);
-        }
-
         protected override AnalysisJob AugmentJob(AnalysisJob job)
         {
             return Context.AnalysisJobs

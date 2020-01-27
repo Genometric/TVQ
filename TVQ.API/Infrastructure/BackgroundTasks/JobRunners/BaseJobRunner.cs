@@ -1,4 +1,5 @@
 ﻿using Genometric.TVQ.API.Model;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -12,6 +13,7 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
     public abstract class BaseJobRunner<T> : BackgroundService
         where T : BaseJob
     {
+        protected DbSet<T> DbSet { get; }
         protected TVQContext Context { get; }
         protected IServiceProvider Services { get; }
         protected ILogger<BaseJobRunner<T>> Logger { get; }
@@ -21,16 +23,14 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
             TVQContext context,
             IServiceProvider services,
             ILogger<BaseJobRunner<T>> logger,
-            IBaseBackgroundTaskQueue<T> queue
-            )
+            IBaseBackgroundTaskQueue<T> queue)
         {
             Context = context;
             Services = services;
             Logger = logger;
             Queue = queue;
+            DbSet = context.Set<T>();
         }
-
-        protected abstract IQueryable<T> GetPendingJobs();
 
         protected abstract T AugmentJob(T job);
 
@@ -38,9 +38,9 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            Logger.LogInformation($"{nameof(T)} job runner is starting.");
+            Logger.LogInformation($"{typeof(T)} job runner is starting.");
 
-            foreach (var job in GetPendingJobs())
+            foreach (var job in DbSet.Where(x => x.Status == State.Queued || x.Status == State.Running))
             {
                 Queue.Enqueue(job);
                 Logger.LogInformation($"The unfinished job {job.ID} of type {nameof(T)} is re-queued.");

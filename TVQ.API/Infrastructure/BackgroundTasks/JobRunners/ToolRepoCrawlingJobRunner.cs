@@ -3,7 +3,6 @@ using Genometric.TVQ.API.Model;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,12 +20,6 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
                  logger,
                  queue)
         { }
-
-        protected override IQueryable<RepoCrawlingJob> GetPendingJobs()
-        {
-            return Context.RepoCrawlingJobs.Where(x => x.Status == State.Queued ||
-                                                       x.Status == State.Running);
-        }
 
         protected override RepoCrawlingJob AugmentJob(RepoCrawlingJob job)
         {
