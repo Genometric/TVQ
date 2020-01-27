@@ -50,9 +50,9 @@ namespace Genometric.TVQ.API
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddCustomDbContext(Configuration);
-            services.AddHostedService<QueueLiteratureCrawling>();
-            services.AddHostedService<QueueToolRepoCrawling>();
-            services.AddHostedService<QueuedAnalysis>();
+            services.AddHostedService<LiteratureCrawlingJobRunner>();
+            services.AddHostedService<ToolRepoCrawlingJobRunner>();
+            services.AddHostedService<AnalysisJobRunner>();
             services.AddSingleton<IBaseBackgroundTaskQueue<AnalysisJob>, BaseBackgroundTaskQueue<AnalysisJob>>();
             services.AddSingleton<IBaseBackgroundTaskQueue<RepoCrawlingJob>, BaseBackgroundTaskQueue<RepoCrawlingJob>>();
             services.AddSingleton<IBaseBackgroundTaskQueue<LiteratureCrawlingJob>, BaseBackgroundTaskQueue<LiteratureCrawlingJob>>();
