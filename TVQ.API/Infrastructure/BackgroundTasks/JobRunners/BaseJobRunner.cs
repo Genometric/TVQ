@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Genometric.TVQ.API.Model;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
 {
     public abstract class BaseJobRunner<T> : BackgroundService
+        where T : BaseJob
     {
         protected TVQContext Context { get; }
         protected IServiceProvider Services { get; }
@@ -38,10 +40,10 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
         {
             Logger.LogInformation($"{nameof(T)} job runner is starting.");
 
-            foreach(var job in GetPendingJobs())
+            foreach (var job in GetPendingJobs())
             {
                 Queue.Enqueue(job);
-                Logger.LogInformation($"The unfinished job of type {nameof(T)} is re-queued.");
+                Logger.LogInformation($"The unfinished job {job.ID} of type {nameof(T)} is re-queued.");
             }
 
             while (!cancellationToken.IsCancellationRequested)
@@ -49,7 +51,7 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
                 IServiceScope scope = null;
                 var dequeuedJob = await Queue.DequeueAsync(cancellationToken).ConfigureAwait(false);
                 var job = AugmentJob(dequeuedJob);
-                
+
                 try
                 {
                     scope = Services.CreateScope();
@@ -58,7 +60,7 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
                 catch (Exception e)
                 {
                     Logger.LogError(e,
-                       $"Error occurred executing {nameof(job)}.");
+                       $"Error occurred executing job {job.ID} of type {nameof(job)}.");
                 }
                 finally
                 {
