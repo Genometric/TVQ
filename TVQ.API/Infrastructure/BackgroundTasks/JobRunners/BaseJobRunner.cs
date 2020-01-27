@@ -56,21 +56,16 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
                 try
                 {
                     scope = Services.CreateScope();
-                    job.Status = State.Running;
                     await Context.SaveChangesAsync().ConfigureAwait(false);
                     await RunJobAsync(scope, job, cancellationToken).ConfigureAwait(false);
-                    job.Status = State.Completed;
                 }
                 catch (Exception e)
                 {
                     var msg = $"Error occurred executing job {job.ID} of type {nameof(job)}: {e.Message}";
-                    job.Status = State.Failed;
-                    job.Message = msg;
                     Logger.LogError(e, msg);
                 }
                 finally
                 {
-                    await Context.SaveChangesAsync().ConfigureAwait(false);
                     if (scope != null)
                         scope.Dispose();
                 }
