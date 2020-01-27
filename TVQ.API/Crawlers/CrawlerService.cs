@@ -63,12 +63,8 @@ namespace Genometric.TVQ.API.Crawlers
                         return;
                 }
 
-                job.Status = State.Running;
-                _dbContext.SaveChanges();
                 await crawler.ScanAsync().ConfigureAwait(false);
-                job.Status = State.Completed;
                 await _dbContext.SaveChangesAsync().ConfigureAwait(false);
-
                 crawler.Dispose();
             }
             catch (DbUpdateConcurrencyException e)
@@ -92,12 +88,8 @@ namespace Genometric.TVQ.API.Crawlers
         {
             try
             {
-                _dbContext.AttachRange(job);
-                job.Status = State.Running;
-                _dbContext.SaveChanges();
                 using var scopusCrawler = new Scopus(job.Publications, _logger);
                 await scopusCrawler.CrawlAsync().ConfigureAwait(false);
-                job.Status = State.Completed;
                 await _dbContext.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (Exception e)

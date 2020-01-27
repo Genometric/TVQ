@@ -29,6 +29,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Status = table.Column<int>(nullable: false),
+                    Message = table.Column<string>(nullable: true),
                     ScanAllPublications = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
@@ -88,6 +89,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Status = table.Column<int>(nullable: false),
+                    Message = table.Column<string>(nullable: true),
                     RepositoryID = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
@@ -108,6 +110,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Status = table.Column<int>(nullable: false),
+                    Message = table.Column<string>(nullable: true),
                     RepositoryID = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
