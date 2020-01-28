@@ -56,7 +56,7 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
                 {
                     scope = Services.CreateScope();
                     var servcie = scope.ServiceProvider.GetRequiredService<TService>();
-                    await servcie.ExecuteAsync(job, cancellationToken).ConfigureAwait(false);
+                    await servcie.StartAsync(job, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {

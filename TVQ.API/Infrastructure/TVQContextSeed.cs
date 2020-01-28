@@ -12,11 +12,11 @@ using System.Threading.Tasks;
 
 namespace Genometric.TVQ.API.Infrastructure
 {
-    public class TVQContextSeed
+    public sealed class TVQContextSeed
     {
-        public async Task SeedAsync(
+        public static async Task SeedAsync(
             TVQContext context,
-            IHostingEnvironment env,
+            IWebHostEnvironment env,
             IOptions<TVQSettings> settings,
             ILogger<TVQContextSeed> logger)
         {

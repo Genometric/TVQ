@@ -17,7 +17,7 @@ namespace Genometric.TVQ.API.Analysis
             base(context, logger)
         { }
 
-        protected override async Task RunAsync(AnalysisJob job, CancellationToken cancellationToken)
+        protected override async Task ExecuteAsync(AnalysisJob job, CancellationToken cancellationToken)
         {
             if (job == null)
                 return;

@@ -22,9 +22,9 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners
             Logger = logger;
         }
 
-        protected abstract Task RunAsync(T job, CancellationToken cancellationToken);
+        protected abstract Task ExecuteAsync(T job, CancellationToken cancellationToken);
 
-        public async Task ExecuteAsync(T job, CancellationToken cancellationToken)
+        public async Task StartAsync(T job, CancellationToken cancellationToken)
         {
             var dbSet = Context.Set<T>();
             if (!dbSet.Local.Any(e => e.ID == job.ID))
@@ -35,7 +35,7 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners
 
             try
             {
-                await RunAsync(job, cancellationToken).ConfigureAwait(false);
+                await ExecuteAsync(job, cancellationToken).ConfigureAwait(false);
                 job.Status = State.Completed;
             }
             catch (DbUpdateConcurrencyException e)

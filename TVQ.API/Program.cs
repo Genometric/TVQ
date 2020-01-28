@@ -12,7 +12,7 @@ using System.IO;
 
 namespace Genometric.TVQ.API
 {
-    public class Program
+    public sealed class Program
     {
         public const string AppName = "TVQ";
         public const string APIPrefix = "api/v1/";
@@ -28,24 +28,22 @@ namespace Genometric.TVQ.API
                 var host = BuildWebHost(configuration, args);
                 host.MigrateDbContext<TVQContext>((context, services) =>
                 {
-                    var env = services.GetService<IHostingEnvironment>();
+                    var env = services.GetService<IWebHostEnvironment>();
                     var settings = services.GetService<IOptions<TVQSettings>>();
                     var logger = services.GetService<ILogger<TVQContextSeed>>();
 
-                    new TVQContextSeed()
-                        .SeedAsync(context, env, settings, logger)
-                        .Wait();
+                    TVQContextSeed.SeedAsync(context, env, settings, logger).Wait();
                 });
 
                 Log.Information("Starting web host ({ApplicationContext})...", AppName);
                 host.Run();
-                //return 0;
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
             {
                 Log.Fatal(ex, "Program terminated unexpectedly ({ApplicationContext})!", AppName);
-                //return 1;
             }
+#pragma warning restore CA1031 // Do not catch general exception types
             finally
             {
                 Log.CloseAndFlush();
@@ -58,7 +56,6 @@ namespace Genometric.TVQ.API
             .UseStartup<Startup>()
             .UseContentRoot(Directory.GetCurrentDirectory())
             .UseConfiguration(configuration)
-            //.UseSerilog()
             .Build();
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>

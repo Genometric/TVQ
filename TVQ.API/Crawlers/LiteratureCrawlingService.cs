@@ -16,7 +16,7 @@ namespace Genometric.TVQ.API.Crawlers
             base(context, logger)
         { }
 
-        protected override async Task RunAsync(
+        protected override async Task ExecuteAsync(
             LiteratureCrawlingJob job,
             CancellationToken cancellationToken)
         {
