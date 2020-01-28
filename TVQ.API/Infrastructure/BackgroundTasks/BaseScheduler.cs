@@ -1,6 +1,5 @@
 ﻿using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -15,33 +14,37 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
         where TService : BaseService<TJob>
         where TJob : BaseJob
     {
-        protected DbSet<TJob> DbSet { get; }
-        protected TVQContext Context { get; }
         protected IServiceProvider Services { get; }
+        protected IServiceScopeFactory ScopeFactory { get; }
         protected ILogger<BaseScheduler<TService, TJob>> Logger { get; }
         protected IBaseBackgroundTaskQueue<TJob> Queue { get; }
 
         public BaseScheduler(
-            TVQContext context,
             IServiceProvider services,
+            IServiceScopeFactory scopeFactory,
             ILogger<BaseScheduler<TService, TJob>> logger,
             IBaseBackgroundTaskQueue<TJob> queue)
         {
-            Context = context;
             Services = services;
+            ScopeFactory = scopeFactory;
             Logger = logger;
             Queue = queue;
-            DbSet = context.Set<TJob>();
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             Logger.LogInformation($"{typeof(TJob)} job runner is starting.");
 
-            foreach (var job in DbSet.Where(x => x.Status == State.Queued || x.Status == State.Running))
+            using (var scope = ScopeFactory.CreateScope())
             {
-                Queue.Enqueue(job);
-                Logger.LogInformation($"The unfinished job {job.ID} of type {nameof(TJob)} is re-queued.");
+                var context = scope.ServiceProvider.GetRequiredService<TVQContext>();
+                foreach (var job in context.Set<TJob>()
+                                           .Where(x => x.Status == State.Queued ||
+                                                       x.Status == State.Running))
+                {
+                    Queue.Enqueue(job);
+                    Logger.LogInformation($"The unfinished job {job.ID} of type {nameof(TJob)} is re-queued.");
+                }
             }
 
             while (!cancellationToken.IsCancellationRequested)

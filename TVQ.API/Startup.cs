@@ -1,6 +1,4 @@
-﻿using Autofac;
-using Autofac.Extensions.DependencyInjection;
-using Genometric.TVQ.API.Analysis;
+﻿using Genometric.TVQ.API.Analysis;
 using Genometric.TVQ.API.Crawlers;
 using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Infrastructure.BackgroundTasks;
@@ -34,13 +32,12 @@ namespace Genometric.TVQ.API
         /// This method gets called by the runtime. Use this method to add 
         /// services to the container.
         /// </summary>
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc(
                 options => options.EnableEndpointRouting = false
                 ).SetCompatibilityVersion(
                 CompatibilityVersion.Version_3_0);
-
 
             // TODO: can this be merged with the previous one?!
             services.AddMvc().AddNewtonsoftJson(options =>
@@ -59,10 +56,6 @@ namespace Genometric.TVQ.API
             services.AddScoped<RepoCrawlingService>();
             services.AddScoped<LiteratureCrawlingService>();
             services.AddScoped<AnalysisService>();
-
-            var container = new ContainerBuilder();
-            container.Populate(services);
-            return new AutofacServiceProvider(container.Build());
         }
 
         /// <summary>
