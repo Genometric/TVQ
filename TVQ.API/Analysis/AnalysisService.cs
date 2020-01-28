@@ -1,5 +1,7 @@
 ﻿using Genometric.TVQ.API.Infrastructure;
+using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,32 +10,44 @@ using System.Threading.Tasks;
 
 namespace Genometric.TVQ.API.Analysis
 {
-    public class AnalysisService
+    public class AnalysisService : BaseService<AnalysisJob>
     {
-        private readonly TVQContext _dbContext;
-        private readonly ILogger<AnalysisService> _logger;
-
         public AnalysisService(
-            TVQContext dbContext,
-            ILogger<AnalysisService> logger)
-        {
-            _dbContext = dbContext;
-            _logger = logger;
-        }
+            TVQContext context,
+            ILogger<AnalysisService> logger) :
+            base(context, logger)
+        { }
 
-        public async Task UpdateStatsAsync(AnalysisJob job, CancellationToken cancellationToken)
+        protected override async Task RunAsync(AnalysisJob job, CancellationToken cancellationToken)
         {
             if (job == null)
                 return;
 
+            /// TODO: the following should be broken down into multiple 
+            /// separate LINQ queries to avoid the Cartesian explosion problem.
+            job = Context.AnalysisJobs.Include(x => x.Repository)
+                                        .ThenInclude(x => x.ToolAssociations)
+                                            .ThenInclude(x => x.Tool)
+                                      .Include(x => x.Repository)
+                                        .ThenInclude(x => x.ToolAssociations)
+                                            .ThenInclude(x => x.Downloads)
+                                      .Include(x => x.Repository)
+                                        .ThenInclude(x => x.ToolAssociations)
+                                            .ThenInclude(x => x.Tool)
+                                                .ThenInclude(x => x.Publications)
+                                                    .ThenInclude(x => x.Citations)
+                                      .Include(x => x.Repository)
+                                        .ThenInclude(x => x.Statistics)
+                                      .First(x => x.ID == job.ID);
+
             var repository = job.Repository;
-            if (!_dbContext.Repositories.Local.Any(e => e.ID == repository.ID))
-                _dbContext.Attach(repository);
+            if (!Context.Repositories.Local.Any(e => e.ID == repository.ID))
+                Context.Attach(repository);
 
             job.Status = State.Running;
             EvaluateCitationImpact(repository);
             job.Status = State.Completed;
-            await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+            await Context.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public static Dictionary<int, List<CitationChange>> GetPrePostCitationCountNormalizedYear(Repository repository)

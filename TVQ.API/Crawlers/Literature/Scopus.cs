@@ -1,4 +1,5 @@
 ﻿using Genometric.BibitemParser;
+using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -31,9 +32,9 @@ namespace Genometric.TVQ.API.Crawlers.Literature
         }
 
         private readonly List<Publication> _publications;
-        private readonly ILogger<CrawlerService> _logger;
+        private readonly ILogger<BaseService<LiteratureCrawlingJob>> _logger;
 
-        public Scopus(List<Publication> publications, ILogger<CrawlerService> logger)
+        public Scopus(List<Publication> publications, ILogger<BaseService<LiteratureCrawlingJob>> logger)
         {
             _logger = logger;
             _publications = publications;

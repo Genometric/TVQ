@@ -1,4 +1,4 @@
-﻿using Genometric.BibitemParser;
+﻿using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -27,9 +27,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         private readonly ExecutionDataflowBlockOptions _xmlExtractExeOptions;
         private readonly ExecutionDataflowBlockOptions _pubExtractExeOptions;
 
-        private readonly ILogger<CrawlerService> _logger;
+        private readonly ILogger<BaseService<RepoCrawlingJob>> _logger;
 
-        public ToolShed(Repository repo, List<Tool> tools, List<Category> categories, ILogger<CrawlerService> logger) : base(repo, tools, categories)
+        public ToolShed(Repository repo, List<Tool> tools, List<Category> categories, ILogger<BaseService<RepoCrawlingJob>> logger) : base(repo, tools, categories)
         {
             _logger = logger;
 

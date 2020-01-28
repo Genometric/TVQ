@@ -1,4 +1,5 @@
-﻿using Genometric.TVQ.API.Model;
+﻿using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
+using Genometric.TVQ.API.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,54 +11,49 @@ using System.Threading.Tasks;
 
 namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
 {
-    public abstract class BaseJobRunner<T> : BackgroundService
-        where T : BaseJob
+    public class BaseScheduler<TService, TJob> : BackgroundService
+        where TService : BaseService<TJob>
+        where TJob : BaseJob
     {
-        protected DbSet<T> DbSet { get; }
+        protected DbSet<TJob> DbSet { get; }
         protected TVQContext Context { get; }
         protected IServiceProvider Services { get; }
-        protected ILogger<BaseJobRunner<T>> Logger { get; }
-        protected IBaseBackgroundTaskQueue<T> Queue { get; }
+        protected ILogger<BaseScheduler<TService, TJob>> Logger { get; }
+        protected IBaseBackgroundTaskQueue<TJob> Queue { get; }
 
-        protected BaseJobRunner(
+        public BaseScheduler(
             TVQContext context,
             IServiceProvider services,
-            ILogger<BaseJobRunner<T>> logger,
-            IBaseBackgroundTaskQueue<T> queue)
+            ILogger<BaseScheduler<TService, TJob>> logger,
+            IBaseBackgroundTaskQueue<TJob> queue)
         {
             Context = context;
             Services = services;
             Logger = logger;
             Queue = queue;
-            DbSet = context.Set<T>();
+            DbSet = context.Set<TJob>();
         }
-
-        protected abstract T AugmentJob(T job);
-
-        protected abstract Task RunJobAsync(IServiceScope scope, T job, CancellationToken cancellationToken);
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            Logger.LogInformation($"{typeof(T)} job runner is starting.");
+            Logger.LogInformation($"{typeof(TJob)} job runner is starting.");
 
             foreach (var job in DbSet.Where(x => x.Status == State.Queued || x.Status == State.Running))
             {
                 Queue.Enqueue(job);
-                Logger.LogInformation($"The unfinished job {job.ID} of type {nameof(T)} is re-queued.");
+                Logger.LogInformation($"The unfinished job {job.ID} of type {nameof(TJob)} is re-queued.");
             }
 
             while (!cancellationToken.IsCancellationRequested)
             {
                 IServiceScope scope = null;
-                var dequeuedJob = await Queue.DequeueAsync(cancellationToken).ConfigureAwait(false);
-                var job = AugmentJob(dequeuedJob);
-                Context.Attach(job);
+                var job = await Queue.DequeueAsync(cancellationToken).ConfigureAwait(false);
 
                 try
                 {
                     scope = Services.CreateScope();
-                    await Context.SaveChangesAsync().ConfigureAwait(false);
-                    await RunJobAsync(scope, job, cancellationToken).ConfigureAwait(false);
+                    var servcie = scope.ServiceProvider.GetRequiredService<TService>();
+                    await servcie.ExecuteAsync(job, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {
@@ -71,7 +67,7 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
                 }
             }
 
-            Logger.LogInformation($"{nameof(T)} job runner is stopping.");
+            Logger.LogInformation($"{typeof(TJob)} job runner is stopping.");
         }
     }
 }

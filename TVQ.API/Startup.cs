@@ -50,13 +50,14 @@ namespace Genometric.TVQ.API
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddCustomDbContext(Configuration);
-            services.AddHostedService<LiteratureCrawlingJobRunner>();
-            services.AddHostedService<ToolRepoCrawlingJobRunner>();
-            services.AddHostedService<AnalysisJobRunner>();
+            services.AddHostedService<BaseScheduler<LiteratureCrawlingService, LiteratureCrawlingJob>>();
+            services.AddHostedService<BaseScheduler<RepoCrawlingService, RepoCrawlingJob>>();
+            services.AddHostedService<BaseScheduler<AnalysisService, AnalysisJob>>();
             services.AddSingleton<IBaseBackgroundTaskQueue<AnalysisJob>, BaseBackgroundTaskQueue<AnalysisJob>>();
             services.AddSingleton<IBaseBackgroundTaskQueue<RepoCrawlingJob>, BaseBackgroundTaskQueue<RepoCrawlingJob>>();
             services.AddSingleton<IBaseBackgroundTaskQueue<LiteratureCrawlingJob>, BaseBackgroundTaskQueue<LiteratureCrawlingJob>>();
-            services.AddScoped<CrawlerService>();
+            services.AddScoped<RepoCrawlingService>();
+            services.AddScoped<LiteratureCrawlingService>();
             services.AddScoped<AnalysisService>();
 
             var container = new ContainerBuilder();
