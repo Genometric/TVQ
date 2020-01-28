@@ -26,9 +26,9 @@ namespace Genometric.TVQ.API.Model
             }
         }
 
-        public ICollection<ToolRepoAssociation> ToolAssociations { set; get; }
+        public virtual ICollection<ToolRepoAssociation> ToolAssociations { set; get; }
 
-        public Statistics Statistics { set; get; }
+        public virtual Statistics Statistics { set; get; }
 
         public Repository() { }
 

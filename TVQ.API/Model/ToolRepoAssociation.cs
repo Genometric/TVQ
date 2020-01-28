@@ -19,13 +19,13 @@ namespace Genometric.TVQ.API.Model
 
         public int? TimesDownloaded { set; get; }
 
-        public ICollection<ToolDownloadRecord> Downloads { set; get; }
+        public virtual ICollection<ToolDownloadRecord> Downloads { set; get; }
 
         public DateTime? DateAddedToRepository { set; get; }
 
-        public Tool Tool { set; get; }
+        public virtual Tool Tool { set; get; }
 
-        public Repository Repository { set; get; }
+        public virtual Repository Repository { set; get; }
 
         public ToolRepoAssociation()
         {

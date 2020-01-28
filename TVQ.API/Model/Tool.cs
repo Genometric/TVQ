@@ -18,11 +18,11 @@ namespace Genometric.TVQ.API.Model
 
         public string Description { set; get; }
 
-        public ICollection<ToolRepoAssociation> RepoAssociations { set; get; }
+        public virtual ICollection<ToolRepoAssociation> RepoAssociations { set; get; }
 
-        public ICollection<Publication> Publications { set; get; }
+        public virtual ICollection<Publication> Publications { set; get; }
 
-        public ICollection<ToolCategoryAssociation> CategoryAssociations { set; get; }
+        public virtual ICollection<ToolCategoryAssociation> CategoryAssociations { set; get; }
 
         public Tool()
         {

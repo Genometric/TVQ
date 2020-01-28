@@ -6,7 +6,7 @@
 
         public int RepositoryID { set; get; }
 
-        public Repository Repository { set; get; }
+        public virtual Repository Repository { set; get; }
 
         public double? TScore { set; get; }
 

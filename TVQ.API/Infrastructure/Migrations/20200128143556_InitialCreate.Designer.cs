@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
     [DbContext(typeof(TVQContext))]
-    [Migration("20200128134711_InitialCreate")]
+    [Migration("20200128143556_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -383,10 +383,10 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("CategoryID")
+                    b.Property<int>("CategoryID")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ToolID")
+                    b.Property<int>("ToolID")
                         .HasColumnType("int");
 
                     b.HasKey("ID");
@@ -542,11 +542,15 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     b.HasOne("Genometric.TVQ.API.Model.Category", "Category")
                         .WithMany("ToolAssociations")
-                        .HasForeignKey("CategoryID");
+                        .HasForeignKey("CategoryID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Genometric.TVQ.API.Model.Tool", "Tool")
                         .WithMany("CategoryAssociations")
-                        .HasForeignKey("ToolID");
+                        .HasForeignKey("ToolID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.ToolDownloadRecord", b =>

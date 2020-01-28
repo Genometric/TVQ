@@ -46,15 +46,15 @@ namespace Genometric.TVQ.API.Model
 
         public string Publisher { set; get; }
 
-        public Tool Tool { set; get; }
+        public virtual Tool Tool { set; get; }
 
-        public ICollection<Citation> Citations { set; get; }
+        public virtual ICollection<Citation> Citations { set; get; }
 
-        public ICollection<Author> Authors { set; get; }
+        public virtual ICollection<Author> Authors { set; get; }
 
-        public ICollection<Keyword> Keywords { set; get; }
+        public virtual ICollection<Keyword> Keywords { set; get; }
 
-        public ICollection<AuthorPublication> AuthorPublications { set; get; }
+        public virtual ICollection<AuthorPublication> AuthorPublications { set; get; }
 
         public Publication() { }
 

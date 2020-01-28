@@ -2,6 +2,6 @@
 {
     public class AnalysisJob : BaseJob
     {
-        public Repository Repository { set; get; }
+        public virtual Repository Repository { set; get; }
     }
 }

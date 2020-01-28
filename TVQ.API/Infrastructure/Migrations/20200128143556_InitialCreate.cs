@@ -197,8 +197,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ToolID = table.Column<int>(nullable: true),
-                    CategoryID = table.Column<int>(nullable: true)
+                    ToolID = table.Column<int>(nullable: false),
+                    CategoryID = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -208,13 +208,13 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         column: x => x.CategoryID,
                         principalTable: "Categories",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ToolCategoryAssociation_Tools_ToolID",
                         column: x => x.ToolID,
                         principalTable: "Tools",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(

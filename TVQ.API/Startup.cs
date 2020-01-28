@@ -95,7 +95,7 @@ namespace Genometric.TVQ.API
                 options =>
                 {
                     options
-                    //.UseLazyLoadingProxies(true)
+                    .UseLazyLoadingProxies(true)
                     .UseSqlServer(
                         configuration.GetConnectionString("DefaultConnection"),
                         sqlServerOptionsAction: sqlOptions =>

@@ -10,7 +10,7 @@ namespace Genometric.TVQ.API.Model
 
         public string Label { get; }
 
-        public Publication Publication { set; get; }
+        public virtual Publication Publication { set; get; }
 
         public Keyword(string label)
         {

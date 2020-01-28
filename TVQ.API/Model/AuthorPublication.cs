@@ -3,10 +3,10 @@
     public class AuthorPublication
     {
         public int AuthorID { set; get; }
-        public Author Author { set; get; }
+        public virtual Author Author { set; get; }
 
         public int PublicationID { set; get; }
-        public Publication Publication { set; get; }
+        public virtual Publication Publication { set; get; }
 
         // This parameterless constructor is required by EF.
         public AuthorPublication() { }

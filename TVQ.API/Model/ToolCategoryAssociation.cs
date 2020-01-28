@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Genometric.TVQ.API.Model
+﻿namespace Genometric.TVQ.API.Model
 {
     public class ToolCategoryAssociation
     {
         public int ID { set; get; }
-        public Tool Tool { set; get; }
-        public Category Category { set; get; }
+
+        public int ToolID { set; get; }
+        public virtual Tool Tool { set; get; }
+
+        public int CategoryID { set; get; }
+        public virtual Category Category { set; get; }
     }
 }
