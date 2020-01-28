@@ -1,4 +1,5 @@
-﻿using Genometric.TVQ.API.Infrastructure;
+﻿using Genometric.TVQ.API;
+using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace TVQ.API.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route(Program.APIPrefix + "[controller]")]
     [ApiController]
     public class PublicationsController : ControllerBase
     {

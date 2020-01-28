@@ -14,8 +14,9 @@ namespace Genometric.TVQ.API
 {
     public class Program
     {
+        public const string AppName = "TVQ";
+        public const string APIPrefix = "api/v1/";
         public static readonly string Namespace = typeof(Program).Namespace;
-        public static readonly string AppName = "TVQ";
 
         public static void Main(string[] args)
         {
