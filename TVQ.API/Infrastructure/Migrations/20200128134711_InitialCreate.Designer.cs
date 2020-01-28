@@ -10,14 +10,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
     [DbContext(typeof(TVQContext))]
-    [Migration("20200127003328_InitialCreate")]
+    [Migration("20200128134711_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.0.0")
+                .HasAnnotation("ProductVersion", "3.1.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -257,7 +257,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<string>("Message")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("RepositoryID")
+                    b.Property<int>("RepositoryID")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
@@ -524,7 +524,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     b.HasOne("Genometric.TVQ.API.Model.Repository", "Repository")
                         .WithMany()
-                        .HasForeignKey("RepositoryID");
+                        .HasForeignKey("RepositoryID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.Statistics", b =>

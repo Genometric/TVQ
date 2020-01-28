@@ -111,7 +111,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Status = table.Column<int>(nullable: false),
                     Message = table.Column<string>(nullable: true),
-                    RepositoryID = table.Column<int>(nullable: true)
+                    RepositoryID = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -121,7 +121,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         column: x => x.RepositoryID,
                         principalTable: "Repositories",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(

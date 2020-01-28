@@ -23,6 +23,8 @@ namespace Genometric.TVQ.API.Crawlers
             RepoCrawlingJob job, 
             CancellationToken cancellationToken)
         {
+            Context.Entry(job).Reference(x => x.Repository).Load();
+
             var repo = job.Repository;
             if (repo.ToolAssociations == null)
                 repo.ToolAssociations = new List<ToolRepoAssociation>();
