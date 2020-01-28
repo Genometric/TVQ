@@ -26,10 +26,7 @@ namespace Genometric.TVQ.API.Analysis
             if (!Context.Repositories.Local.Any(e => e.ID == repository.ID))
                 Context.Attach(repository);
 
-            job.Status = State.Running;
             EvaluateCitationImpact(repository);
-            job.Status = State.Completed;
-            await Context.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public static Dictionary<int, List<CitationChange>> GetPrePostCitationCountNormalizedYear(Repository repository)
