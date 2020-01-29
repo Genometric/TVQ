@@ -3,6 +3,7 @@ using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,10 +21,12 @@ namespace Genometric.TVQ.API.Crawlers
             LiteratureCrawlingJob job,
             CancellationToken cancellationToken)
         {
+            if(job.ScanAllPublications)
+                job.Publications = Context.Publications.ToList();
+            
             Context.Entry(job).Collection(x => x.Publications).Load();
             using var scopusCrawler = new Scopus(job.Publications, Logger);
             await scopusCrawler.CrawlAsync().ConfigureAwait(false);
-            await Context.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }
