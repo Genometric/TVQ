@@ -14,18 +14,15 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
         where TService : BaseService<TJob>
         where TJob : BaseJob
     {
-        protected IServiceProvider Services { get; }
         protected IServiceScopeFactory ScopeFactory { get; }
         protected ILogger<BaseScheduler<TService, TJob>> Logger { get; }
         protected IBaseBackgroundTaskQueue<TJob> Queue { get; }
 
         public BaseScheduler(
-            IServiceProvider services,
             IServiceScopeFactory scopeFactory,
             ILogger<BaseScheduler<TService, TJob>> logger,
             IBaseBackgroundTaskQueue<TJob> queue)
         {
-            Services = services;
             ScopeFactory = scopeFactory;
             Logger = logger;
             Queue = queue;
@@ -35,33 +32,37 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
         {
             Logger.LogInformation($"{typeof(TJob)} job runner is starting.");
 
-            using (var scope = ScopeFactory.CreateScope())
+            /// Two separate scopes (i.e., one for reading un-finished jobs,
+            /// and one for running queued jobs) are created intentionally,
+            /// so that creating a separate scope per job execution could be easier.
+            IServiceScope scope = ScopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<TVQContext>();
+            foreach (var job in context.Set<TJob>()
+                                       .Where(x => x.Status == State.Queued ||
+                                                   x.Status == State.Running))
             {
-                var context = scope.ServiceProvider.GetRequiredService<TVQContext>();
-                foreach (var job in context.Set<TJob>()
-                                           .Where(x => x.Status == State.Queued ||
-                                                       x.Status == State.Running))
-                {
-                    Queue.Enqueue(job);
-                    Logger.LogInformation($"The unfinished job {job.ID} of type {nameof(TJob)} is re-queued.");
-                }
+                Queue.Enqueue(job.ID);
+                Logger.LogInformation($"The unfinished job {job.ID} of type {nameof(TJob)} is re-queued.");
             }
+            scope.Dispose();
+            context = null;
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                IServiceScope scope = null;
-                var job = await Queue.DequeueAsync(cancellationToken).ConfigureAwait(false);
-
+                var id = await Queue.DequeueAsync(cancellationToken).ConfigureAwait(false);
+                
                 try
                 {
-                    scope = Services.CreateScope();
-                    var servcie = scope.ServiceProvider.GetRequiredService<TService>();
-                    await servcie.StartAsync(job, cancellationToken).ConfigureAwait(false);
+                    scope = ScopeFactory.CreateScope();
+                    context = scope.ServiceProvider.GetRequiredService<TVQContext>();
+                    var service = scope.ServiceProvider.GetRequiredService<TService>();
+                    var job = context.Set<TJob>().Find(id);
+                    await service.StartAsync(job, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {
-                    var msg = $"Error occurred executing job {job.ID} of type {nameof(job)}: {e.Message}";
-                    Logger.LogError(e, msg);
+                    var message = $"Error occurred executing job {id} of type {nameof(id)}: {e.Message}";
+                    Logger.LogError(e, message);
                 }
                 finally
                 {

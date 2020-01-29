@@ -5,8 +5,8 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
 {
     public interface IBaseBackgroundTaskQueue<T>
     {
-        void Enqueue(T job);
+        void Enqueue(int id);
 
-        Task<T> DequeueAsync(CancellationToken cancellationToken);
+        Task<int> DequeueAsync(CancellationToken cancellationToken);
     }
 }

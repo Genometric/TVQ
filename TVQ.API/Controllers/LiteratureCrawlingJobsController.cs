@@ -109,7 +109,7 @@ namespace Genometric.TVQ.API.Controllers
 
             _context.LiteratureCrawlingJobs.Add(job);
             await _context.SaveChangesAsync().ConfigureAwait(false);
-            Queue.Enqueue(job);
+            Queue.Enqueue(job.ID);
             return CreatedAtAction("GetLiteratureCrawlingJob", new { id = job.ID }, job);
         }
 

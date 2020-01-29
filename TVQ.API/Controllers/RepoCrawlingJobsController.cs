@@ -83,7 +83,7 @@ namespace Genometric.TVQ.API.Controllers
 
             _context.RepoCrawlingJobs.Add(job);
             await _context.SaveChangesAsync().ConfigureAwait(false);
-            _queue.Enqueue(job);
+            _queue.Enqueue(job.ID);
 
             return CreatedAtAction("GetRepoCrawlingJob", new { id = job.ID }, job);
         }

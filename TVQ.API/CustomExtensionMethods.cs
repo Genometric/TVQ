@@ -13,7 +13,7 @@ namespace Genometric.TVQ.API
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.AddDbContextPool<TVQContext>(
+            services.AddDbContext<TVQContext>(
                 options =>
                 {
                     options

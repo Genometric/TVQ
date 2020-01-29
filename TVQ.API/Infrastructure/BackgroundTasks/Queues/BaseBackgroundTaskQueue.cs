@@ -8,28 +8,25 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks
     public class BaseBackgroundTaskQueue<T> : IBaseBackgroundTaskQueue<T>, IDisposable
     {
         private readonly SemaphoreSlim _signal;
-        private readonly ConcurrentQueue<T> _jobs;
+        private readonly ConcurrentQueue<int> _jobs;
 
         public BaseBackgroundTaskQueue()
         {
             _signal = new SemaphoreSlim(0);
-            _jobs = new ConcurrentQueue<T>();
+            _jobs = new ConcurrentQueue<int>();
         }
 
-        public void Enqueue(T job)
+        public void Enqueue(int id)
         {
-            if (job == null)
-                throw new ArgumentNullException(nameof(job));
-
-            _jobs.Enqueue(job);
+            _jobs.Enqueue(id);
             _signal.Release();
         }
 
-        public async Task<T> DequeueAsync(CancellationToken cancellationToken)
+        public async Task<int> DequeueAsync(CancellationToken cancellationToken)
         {
             await _signal.WaitAsync(cancellationToken).ConfigureAwait(false);
-            _jobs.TryDequeue(out var job);
-            return job;
+            _jobs.TryDequeue(out int id);
+            return id;
         }
 
         public void Dispose()

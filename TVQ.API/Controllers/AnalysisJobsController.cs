@@ -66,7 +66,7 @@ namespace Genometric.TVQ.API.Controllers
 
             _context.AnalysisJobs.Add(job);
             await _context.SaveChangesAsync().ConfigureAwait(false);
-            AnalysisQueue.Enqueue(job);
+            AnalysisQueue.Enqueue(job.ID);
             return CreatedAtAction("GetAnalysisJob", new { id = job.ID }, job);
         }
     }

@@ -28,7 +28,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         public ConcurrentBag<ToolDownloadRecord> ToolDownloadRecords { get; }
 
-
         protected Repository Repo { get; }
 
         protected BaseToolRepoCrawler(Repository repo, List<Tool> tools, List<Category> categories)
@@ -61,9 +60,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             return name.Trim().ToUpperInvariant();
         }
 
-        private static string FormatToolRepoAssociationName(ToolRepoAssociation association)
+        private string FormatToolRepoAssociationName(ToolRepoAssociation association)
         {
-            return association.Repository + "::" + FormatToolName(association.Tool.Name);
+            return Repo.Name + "::" + FormatToolName(association.Tool.Name);
         }
 
         public abstract Task ScanAsync();
