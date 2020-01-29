@@ -1,6 +1,7 @@
 ﻿using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,23 @@ namespace Genometric.TVQ.API.Analysis
         {
             if (job == null)
                 return;
+
+            /// TODO: the following should be broken down into multiple 	
+            /// separate LINQ queries to avoid the Cartesian explosion problem.	
+            job = Context.AnalysisJobs.Include(x => x.Repository)
+                                        .ThenInclude(x => x.ToolAssociations)
+                                            .ThenInclude(x => x.Tool)
+                                      .Include(x => x.Repository)
+                                        .ThenInclude(x => x.ToolAssociations)
+                                            .ThenInclude(x => x.Downloads)
+                                      .Include(x => x.Repository)
+                                        .ThenInclude(x => x.ToolAssociations)
+                                            .ThenInclude(x => x.Tool)
+                                                .ThenInclude(x => x.Publications)
+                                                    .ThenInclude(x => x.Citations)
+                                      .Include(x => x.Repository)
+                                        .ThenInclude(x => x.Statistics)
+                                      .First(x => x.ID == job.ID);
 
             var repository = job.Repository;
             if (!Context.Repositories.Local.Any(e => e.ID == repository.ID))

@@ -17,7 +17,9 @@ namespace Genometric.TVQ.API
                 options =>
                 {
                     options
-                    .UseLazyLoadingProxies(true)
+                    /// There are some issues with lazy loading, in particular in 
+                    /// controllers that query an entity of given ID. 
+                    .UseLazyLoadingProxies(false)
                     .UseSqlServer(
                         configuration.GetConnectionString("DefaultConnection"),
                         sqlServerOptionsAction: sqlOptions =>

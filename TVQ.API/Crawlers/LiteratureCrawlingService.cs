@@ -20,6 +20,7 @@ namespace Genometric.TVQ.API.Crawlers
             LiteratureCrawlingJob job,
             CancellationToken cancellationToken)
         {
+            Context.Entry(job).Collection(x => x.Publications).Load();
             using var scopusCrawler = new Scopus(job.Publications, Logger);
             await scopusCrawler.CrawlAsync().ConfigureAwait(false);
             await Context.SaveChangesAsync().ConfigureAwait(false);
