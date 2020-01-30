@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 
 namespace Genometric.TVQ.API.Model
@@ -21,6 +22,14 @@ namespace Genometric.TVQ.API.Model
                     Enumerable.Repeat(alphanumChars,
                     length)
                     .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        public static string SafeFilename(string filename)
+        {
+            var invalidFileNameChars = Path.GetInvalidFileNameChars().ToList();
+            invalidFileNameChars.Add(' ');
+
+            return new string(filename.Select(ch => invalidFileNameChars.Contains(ch) ? '_' : ch).ToArray());
         }
     }
 }

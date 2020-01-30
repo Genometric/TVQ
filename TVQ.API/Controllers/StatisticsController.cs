@@ -3,8 +3,11 @@ using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -149,15 +152,21 @@ namespace Genometric.TVQ.API.Controllers
 
         private FileStreamResult BeforeAfterCitationCountPerToolNormalizedPerYearPerCategory(Repository repository)
         {
-            var stream = new System.IO.MemoryStream();
-            var writer = new System.IO.StreamWriter(stream);
-            
+            var tempPath =
+                Path.GetFullPath(Path.GetTempPath()) +
+                Utilities.GetRandomString(10) +
+                Path.DirectorySeparatorChar;
+
+            Directory.CreateDirectory(tempPath);
+
+            var fileNames = new List<string>();
+
             // This method is certainly very sub-optimal; it should be re-implemented. 
             foreach (var category in _context.Categories.ToList())
             {
                 var tools = new List<int>();
                 // This is a very slow query with multiple joins, should be improved.
-                var toolRepoAssociations = 
+                var toolRepoAssociations =
                     _context.ToolRepoAssociation.Where(x => x.RepositoryID == repository.ID)
                                                 .Include(x => x.Tool)
                                                 .ThenInclude(x => x.CategoryAssociations)
@@ -173,15 +182,24 @@ namespace Genometric.TVQ.API.Controllers
                         }
 
                 var changes = _analysisService.GetPrePostCitationCountNormalizedYear(repository, new HashSet<int>(tools));
-                foreach (var tool in changes)
-                    foreach (var change in tool.Value)
-                        writer.WriteLine($"{category.Name}\t{tool.Key}\t{change.DaysOffset}\t{change.Count}");
+
+                var filename = tempPath + Utilities.SafeFilename(category.Name + ".csv");
+                using (var writer = new StreamWriter(filename))
+                    foreach (var tool in changes)
+                        foreach (var change in tool.Value)
+                            writer.WriteLine($"{category.Name}\t{tool.Key}\t{change.DaysOffset}\t{change.Count}");
             }
 
-            var contentType = "APPLICATION/octet-stream";
-            var fileName = "TVQStats.csv";
-            stream.Seek(0, System.IO.SeekOrigin.Begin);
-            return File(stream, contentType, fileName);
+            var zipFileTempPath = Path.GetFullPath(Path.GetTempPath()) + Utilities.GetRandomString(10) + Path.DirectorySeparatorChar;
+            Directory.CreateDirectory(zipFileTempPath);
+            var zipFilename = $"TVQStats.zip";
+            ZipFile.CreateFromDirectory(tempPath, zipFileTempPath + zipFilename);
+
+            var contentType = "application/zip";
+            IFileProvider provider = new PhysicalFileProvider(zipFileTempPath);
+            IFileInfo fileInfo = provider.GetFileInfo(zipFilename);
+
+            return File(fileInfo.CreateReadStream(), contentType, zipFilename);
         }
 
         private FileStreamResult CreateTimeDistributionPerYear(Repository repository)
