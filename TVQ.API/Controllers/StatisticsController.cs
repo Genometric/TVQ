@@ -15,19 +15,28 @@ namespace Genometric.TVQ.API.Controllers
     [ApiController]
     public class StatisticsController : ControllerBase
     {
+        // ----------------------------------------------------
+        // All the methods of this controller are experimental. 
+        // ----------------------------------------------------
+
         private readonly TVQContext _context;
+        private readonly AnalysisService _analysisService;
 
         private enum ReportTypes
         {
             BeforeAfterCitationCountPerTool,
             BeforeAfterCitationCountPerToolNormalizedPerYear,
+            BeforeAfterCitationCountPerToolNormalizedPerYearPerCategory,
             CreateTimeDistributionPerYear,
             CreateTimeDistributionPerMonth
         };
 
-        public StatisticsController(TVQContext context)
+        public StatisticsController(
+            TVQContext context,
+            AnalysisService analysisService)
         {
             _context = context;
+            _analysisService = analysisService;
         }
 
         // GET: api/v1/Statistics
@@ -49,7 +58,7 @@ namespace Genometric.TVQ.API.Controllers
             return statistics;
         }
 
-        // GET: api/v1/Statistics/5/Downloads
+        // GET: api/v1/Statistics/1/downloads?type=BeforeAfterCitationCountPerTool
         [HttpGet("{id}/downloads")]
         public async Task<IActionResult> Downloads([FromRoute] int id, [FromQuery] string type)
         {
@@ -76,6 +85,8 @@ namespace Genometric.TVQ.API.Controllers
                     return BeforeAfterCitationCountPerTool(repository);
                 case ReportTypes.BeforeAfterCitationCountPerToolNormalizedPerYear:
                     return BeforeAfterCitationCountPerToolNormalizedPerYear(repository);
+                case ReportTypes.BeforeAfterCitationCountPerToolNormalizedPerYearPerCategory:
+                    return BeforeAfterCitationCountPerToolNormalizedPerYearPerCategory(repository);
                 case ReportTypes.CreateTimeDistributionPerYear:
                     return CreateTimeDistributionPerYear(repository);
                 case ReportTypes.CreateTimeDistributionPerMonth:
@@ -123,12 +134,49 @@ namespace Genometric.TVQ.API.Controllers
 
         private FileStreamResult BeforeAfterCitationCountPerToolNormalizedPerYear(Repository repository)
         {
-            var changes = AnalysisService.GetPrePostCitationCountNormalizedYear(repository);
+            var changes = _analysisService.GetPrePostCitationCountNormalizedYear(repository);
             var stream = new System.IO.MemoryStream();
             var writer = new System.IO.StreamWriter(stream);
             foreach (var tool in changes)
                 foreach (var change in tool.Value)
                     writer.WriteLine($"{tool.Key}\t{change.DaysOffset}\t{change.Count}");
+
+            var contentType = "APPLICATION/octet-stream";
+            var fileName = "TVQStats.csv";
+            stream.Seek(0, System.IO.SeekOrigin.Begin);
+            return File(stream, contentType, fileName);
+        }
+
+        private FileStreamResult BeforeAfterCitationCountPerToolNormalizedPerYearPerCategory(Repository repository)
+        {
+            var stream = new System.IO.MemoryStream();
+            var writer = new System.IO.StreamWriter(stream);
+            
+            // This method is certainly very sub-optimal; it should be re-implemented. 
+            foreach (var category in _context.Categories.ToList())
+            {
+                var tools = new List<int>();
+                // This is a very slow query with multiple joins, should be improved.
+                var toolRepoAssociations = 
+                    _context.ToolRepoAssociation.Where(x => x.RepositoryID == repository.ID)
+                                                .Include(x => x.Tool)
+                                                .ThenInclude(x => x.CategoryAssociations)
+                                                .ThenInclude(x => x.Category)
+                                                .ToList();
+
+                foreach (var x in toolRepoAssociations)
+                    foreach (var y in x.Tool.CategoryAssociations)
+                        if (y.Category.ID == category.ID)
+                        {
+                            tools.Add(x.Tool.ID);
+                            break;
+                        }
+
+                var changes = _analysisService.GetPrePostCitationCountNormalizedYear(repository, new HashSet<int>(tools));
+                foreach (var tool in changes)
+                    foreach (var change in tool.Value)
+                        writer.WriteLine($"{category.Name}\t{tool.Key}\t{change.DaysOffset}\t{change.Count}");
+            }
 
             var contentType = "APPLICATION/octet-stream";
             var fileName = "TVQStats.csv";

@@ -12,6 +12,20 @@ namespace Genometric.TVQ.API.Analysis
 {
     public class AnalysisService : BaseService<AnalysisJob>
     {
+        // -------------------------------------------------
+        // All the methods of this service are experimental, 
+        // possibly with poor performance. All would benefit 
+        // from a re-implementation.
+        // -------------------------------------------------
+
+        /// <summary>
+        /// There are many articles that cite very old "related"
+        /// works, which can bias the statistics. As a patch, 
+        /// we set a earliest date for citations, and any reference
+        /// earlier than that will be ignored. 
+        /// </summary>
+        private int _earliestCitationYear = 2000;
+
         public AnalysisService(
             TVQContext context,
             ILogger<AnalysisService> logger) :
@@ -47,14 +61,24 @@ namespace Genometric.TVQ.API.Analysis
             EvaluateCitationImpact(repository);
         }
 
-        public static Dictionary<int, List<CitationChange>> GetPrePostCitationCountNormalizedYear(Repository repository)
+        public Dictionary<int, List<CitationChange>> GetPrePostCitationCountNormalizedYear(
+            Repository repository,
+            HashSet<int> toolsToInclude = null)
         {
             var changes = new Dictionary<int, List<CitationChange>>();
+            if (repository == null)
+                return changes;
             foreach (var association in repository.ToolAssociations)
             {
                 var tool = association.Tool;
+                if (toolsToInclude != null &&
+                    !toolsToInclude.Contains(tool.ID))
+                    continue;
+                Context.Entry(tool).Collection(x => x.Publications).Load();
                 foreach (var pub in tool.Publications)
-                    if (pub.Citations != null && pub.Year >= 2000)
+                    if (pub.Citations != null && pub.Year >= _earliestCitationYear)
+                    {
+                        Context.Entry(pub).Collection(x => x.Citations).Load();
                         foreach (var citation in pub.Citations)
                         {
                             if (!changes.ContainsKey(tool.ID))
@@ -65,6 +89,7 @@ namespace Genometric.TVQ.API.Analysis
                                     (citation.Date - association.DateAddedToRepository).Value.Days,
                                     citation.Count));
                         }
+                    }
 
             }
             return changes;
@@ -134,7 +159,7 @@ namespace Genometric.TVQ.API.Analysis
             post = citations.Values.Select(x => x[1]).ToList();
         }
 
-        private static void EvaluateCitationImpact(Repository repository)
+        private void EvaluateCitationImpact(Repository repository)
         {
             var changes = GetPrePostCitationCountNormalizedYear(repository);
             ExtractPrePostCitationChanges(changes, out List<double> pre, out List<double> post);
