@@ -1,14 +1,14 @@
 ﻿namespace Genometric.TVQ.API.Analysis
 {
-    public struct CitationChange
+    public class CitationChange
     {
-        public int DaysOffset { get; }
-        public double Count { get; }
+        public double DaysOffset { set; get; }
+        public double CitationCount { set; get; }
 
-        public CitationChange(int daysOffset, double count)
+        public CitationChange(double daysOffset, double count)
         {
             DaysOffset = daysOffset;
-            Count = count;
+            CitationCount = count;
         }
     }
 }

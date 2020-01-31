@@ -124,29 +124,29 @@ namespace Genometric.TVQ.API.Controllers
                 }
             }
 
-            var stream = new System.IO.MemoryStream();
-            var writer = new System.IO.StreamWriter(stream);
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
             foreach (var item in citations)
                 writer.WriteLine($"{item.Value[0]}\t{item.Value[1]}");
 
             var contentType = "APPLICATION/octet-stream";
             var fileName = "TVQStats.csv";
-            stream.Seek(0, System.IO.SeekOrigin.Begin);
+            stream.Seek(0, SeekOrigin.Begin);
             return File(stream, contentType, fileName);
         }
 
         private FileStreamResult BeforeAfterCitationCountPerToolNormalizedPerYear(Repository repository)
         {
             var changes = _analysisService.GetPrePostCitationCountNormalizedYear(repository);
-            var stream = new System.IO.MemoryStream();
-            var writer = new System.IO.StreamWriter(stream);
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
             foreach (var tool in changes)
                 foreach (var change in tool.Value)
-                    writer.WriteLine($"{tool.Key}\t{change.DaysOffset}\t{change.Count}");
+                    writer.WriteLine($"{tool.Key}\t{change.DaysOffset}\t{change.CitationCount}");
 
             var contentType = "APPLICATION/octet-stream";
             var fileName = "TVQStats.csv";
-            stream.Seek(0, System.IO.SeekOrigin.Begin);
+            stream.Seek(0, SeekOrigin.Begin);
             return File(stream, contentType, fileName);
         }
 
@@ -187,7 +187,7 @@ namespace Genometric.TVQ.API.Controllers
                 using (var writer = new StreamWriter(filename))
                     foreach (var tool in changes)
                         foreach (var change in tool.Value)
-                            writer.WriteLine($"{category.Name}\t{tool.Key}\t{change.DaysOffset}\t{change.Count}");
+                            writer.WriteLine($"{category.Name}\t{tool.Key}\t{change.DaysOffset}\t{change.CitationCount}");
             }
 
             var zipFileTempPath = Path.GetFullPath(Path.GetTempPath()) + Utilities.GetRandomString(10) + Path.DirectorySeparatorChar;
@@ -214,14 +214,14 @@ namespace Genometric.TVQ.API.Controllers
                     dist.Add(year, 1);
             }
 
-            var stream = new System.IO.MemoryStream();
-            var writer = new System.IO.StreamWriter(stream);
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
             foreach (var d in dist)
                 writer.WriteLine($"{d.Key}\t{d.Value}");
 
             var contentType = "APPLICATION/octet-stream";
             var fileName = "TVQStats.csv";
-            stream.Seek(0, System.IO.SeekOrigin.Begin);
+            stream.Seek(0, SeekOrigin.Begin);
             return File(stream, contentType, fileName);
         }
 
@@ -238,14 +238,14 @@ namespace Genometric.TVQ.API.Controllers
                     dist.Add(key, 1);
             }
 
-            var stream = new System.IO.MemoryStream();
-            var writer = new System.IO.StreamWriter(stream);
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
             foreach (var d in dist)
                 writer.WriteLine($"{d.Key}\t{d.Value}");
 
             var contentType = "APPLICATION/octet-stream";
             var fileName = "TVQStats.csv";
-            stream.Seek(0, System.IO.SeekOrigin.Begin);
+            stream.Seek(0, SeekOrigin.Begin);
             return File(stream, contentType, fileName);
         }
 

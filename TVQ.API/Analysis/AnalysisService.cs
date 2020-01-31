@@ -3,6 +3,7 @@ using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -65,6 +66,10 @@ namespace Genometric.TVQ.API.Analysis
             Repository repository,
             HashSet<int> toolsToInclude = null)
         {
+            int minCitationCount = int.MaxValue;
+            int maxCitationCount = 0;
+            int minBeforeDays = 0;
+            int maxAfterDays = 0;
             var changes = new Dictionary<int, List<CitationChange>>();
             if (repository == null)
                 return changes;
@@ -84,13 +89,31 @@ namespace Genometric.TVQ.API.Analysis
                             if (!changes.ContainsKey(tool.ID))
                                 changes.Add(tool.ID, new List<CitationChange>());
 
-                            changes[tool.ID].Add(
-                                new CitationChange(
-                                    (citation.Date - association.DateAddedToRepository).Value.Days,
-                                    citation.Count));
+                            var daysOffset = (citation.Date - association.DateAddedToRepository).Value.Days;
+                            minBeforeDays = Math.Min(minBeforeDays, daysOffset);
+                            maxAfterDays = Math.Max(maxAfterDays, daysOffset);
+
+                            changes[tool.ID].Add(new CitationChange(daysOffset, citation.Count));
+
+                            minCitationCount = Math.Min(minCitationCount, citation.Count);
+                            maxCitationCount = Math.Max(maxCitationCount, citation.Count);
                         }
                     }
+            }
 
+            // TODO: improve the following normalization, the iteration may not be optimal.
+            var toolIDs = changes.Keys.ToList();
+            foreach (var id in toolIDs)
+            {
+                var tool = changes[id];
+                for (int i = 0; i < tool.Count; i++)
+                {
+                    tool[i].CitationCount = (tool[i].CitationCount - minCitationCount) / (maxCitationCount - minCitationCount);
+                    if (tool[i].DaysOffset < 0)
+                        tool[i].DaysOffset = (-1) - ((tool[i].DaysOffset - minBeforeDays) / minBeforeDays);
+                    else
+                        tool[i].DaysOffset = tool[i].DaysOffset / maxAfterDays;
+                }
             }
             return changes;
         }
@@ -102,9 +125,9 @@ namespace Genometric.TVQ.API.Analysis
             foreach (var tool in changes)
                 foreach (var change in tool.Value)
                     if (change.DaysOffset > 0)
-                        post.Add(change.Count);
+                        post.Add(change.CitationCount);
                     else
-                        pre.Add(change.Count);
+                        pre.Add(change.CitationCount);
         }
 
         public static void GetPrePostCitationCountPerYear(Repository repository, out List<double> pre, out List<double> post)
