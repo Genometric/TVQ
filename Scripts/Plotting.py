@@ -60,8 +60,10 @@ def plot(root, filename):
     plt.title(filename_without_extension)
 
     # plt.show()
+
     image_file = os.path.join(root, filename_without_extension + '.png')
-    os.remove(image_file)
+    if os.path.isfile(image_file):
+        os.remove(image_file)
     plt.savefig(image_file)
     plt.close()
 

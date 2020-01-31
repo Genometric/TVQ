@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -31,7 +32,8 @@ namespace Genometric.TVQ.API.Controllers
             BeforeAfterCitationCountPerToolNormalizedPerYear,
             BeforeAfterCitationCountPerToolNormalizedPerYearPerCategory,
             CreateTimeDistributionPerYear,
-            CreateTimeDistributionPerMonth
+            CreateTimeDistributionPerMonth,
+            ToolDistributionAmongRepositories
         };
 
         public StatisticsController(
@@ -94,6 +96,8 @@ namespace Genometric.TVQ.API.Controllers
                     return CreateTimeDistributionPerYear(repository);
                 case ReportTypes.CreateTimeDistributionPerMonth:
                     return CreateTimeDistributionPerMonth(repository);
+                case ReportTypes.ToolDistributionAmongRepositories:
+                    return Ok(await ToolDistributionAmongRepositories().ConfigureAwait(false));
             }
 
             return BadRequest();
@@ -142,7 +146,7 @@ namespace Genometric.TVQ.API.Controllers
             var writer = new StreamWriter(stream);
             foreach (var tool in changes)
                 foreach (var change in tool.Value)
-                    writer.WriteLine($"{tool.Key}\t{change.DaysOffset}\t{change.CitationCount}");
+                    writer.WriteLine($"All_Categories\t{tool.Key}\t{change.DaysOffset}\t{change.CitationCount}");
 
             var contentType = "APPLICATION/octet-stream";
             var fileName = "TVQStats.csv";
@@ -247,6 +251,50 @@ namespace Genometric.TVQ.API.Controllers
             var fileName = "TVQStats.csv";
             stream.Seek(0, SeekOrigin.Begin);
             return File(stream, contentType, fileName);
+        }
+
+        private async Task<IEnumerable<ToolRepoDistribution>> ToolDistributionAmongRepositories()
+        {
+            var distributions = new Dictionary<string, ToolRepoDistribution>();
+            var tools = await _context.Tools.Include(x => x.RepoAssociations)
+                                            .ThenInclude(x => x.Repository)
+                                            .ToListAsync()
+                                            .ConfigureAwait(false);
+
+            static string HashID(ToolRepoAssociation association) =>
+                association.RepositoryID.ToString(CultureInfo.InvariantCulture) + ";";
+
+            static string HashIDs(IEnumerable<ToolRepoAssociation> associations)
+            {
+                var builder = new StringBuilder();
+                foreach (var association in associations)
+                    builder.Append(HashID(association));
+                return builder.ToString();
+            }
+
+            void AddOrUpdate(IEnumerable<ToolRepoAssociation> associations)
+            {
+                if (distributions.TryGetValue(HashIDs(associations), out ToolRepoDistribution dist))
+                    dist.Count++;
+                else
+                {
+                    var item = new ToolRepoDistribution();
+                    item.Add(associations.Select(x => x.Repository));
+                    item.Count = 1;
+                    distributions.Add(HashIDs(associations), item);
+                }
+            }
+
+            foreach (var tool in tools)
+            {
+                foreach (var association in tool.RepoAssociations)
+                    AddOrUpdate(new ToolRepoAssociation[] { association });
+
+                if (tool.RepoAssociations.Count > 1)
+                    AddOrUpdate(tool.RepoAssociations);
+            }
+
+            return distributions.Values;
         }
 
         private Repository QueryRepo(int id, bool includeCitations = false)
