@@ -10,6 +10,8 @@ namespace Genometric.TVQ.API.Model
     {
         public int Count { set; get; }
 
+        public double Percentage { set; get; }
+
         public List<Repository> Repositories { private set; get; }
 
         private HashSet<int> RepositoriesID { set; get; }

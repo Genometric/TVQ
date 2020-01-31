@@ -294,6 +294,9 @@ namespace Genometric.TVQ.API.Controllers
                     AddOrUpdate(tool.RepoAssociations);
             }
 
+            foreach (var dist in distributions)
+                dist.Value.Percentage = dist.Value.Count / (double)tools.Count;
+
             return distributions.Values;
         }
 
