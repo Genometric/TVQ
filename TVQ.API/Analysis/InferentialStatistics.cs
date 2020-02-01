@@ -7,6 +7,21 @@ namespace Genometric.TVQ.API.Analysis
 {
     public static class InferentialStatistics
     {
+        public static double GetPValue(double tScore, double df)
+        {
+            return 2.0D * (1 - StudentT.CDF(0.0, 1.0, df, Math.Abs(tScore)));
+        }
+
+        public static double GetCriticalValue(double significanceLevel, double df)
+        {
+            return StudentT.InvCDF(0.0, 1.0, df, 1.0 - significanceLevel / 2.0);
+        }
+
+        public static bool IsSignificant(double tScore, double criticalValue)
+        {
+            return tScore > criticalValue;
+        }
+
         /// <summary>
         /// Computes Welch's t-test.
         /// </summary>
@@ -45,9 +60,31 @@ namespace Genometric.TVQ.API.Analysis
                 ((Math.Pow(aVari, 2) / (Math.Pow(x.Count, 2) * (x.Count - 1))) +
                 (Math.Pow(bVari, 2) / (Math.Pow(y.Count, 2) * (y.Count - 1)))));
 
-            pValue = 2.0D * (1 - StudentT.CDF(0.0, 1.0, df, Math.Abs(tScore)));
-            criticalValue = StudentT.InvCDF(0.0, 1.0, df, 1.0 - significanceLevel / 2.0);
-            return tScore > criticalValue;
+            pValue = GetPValue(tScore, df);
+            criticalValue = GetCriticalValue(significanceLevel, df);
+            return IsSignificant(tScore, criticalValue);
+        }
+
+
+        /// <summary>
+        /// Paired t-test. 
+        /// </summary>
+        public static bool? ComputeTTest(
+            List<double> deltas,
+            double significanceLevel,
+            out double df,
+            out double tScore,
+            out double pValue,
+            out double criticalValue)
+        {
+            var mean = Statistics.Mean(deltas);
+            var stdv = Statistics.StandardDeviation(deltas);
+            tScore = mean / (stdv / Math.Sqrt(deltas.Count));
+
+            df = deltas.Count - 1;
+            pValue = GetPValue(tScore, df);
+            criticalValue = GetCriticalValue(significanceLevel, df);
+            return IsSignificant(tScore, criticalValue);
         }
     }
 }

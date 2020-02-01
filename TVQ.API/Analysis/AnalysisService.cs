@@ -66,10 +66,10 @@ namespace Genometric.TVQ.API.Analysis
             Repository repository,
             HashSet<int> toolsToInclude = null)
         {
-            int minCitationCount = int.MaxValue;
-            int maxCitationCount = 0;
-            int minBeforeDays = 0;
-            int maxAfterDays = 0;
+            double minCitationCount = int.MaxValue;
+            double maxCitationCount = 0;
+            double minBeforeDays = 0;
+            double maxAfterDays = 0;
             var changes = new Dictionary<int, List<CitationChange>>();
             if (repository == null)
                 return changes;
@@ -95,14 +95,35 @@ namespace Genometric.TVQ.API.Analysis
 
                             changes[tool.ID].Add(new CitationChange(daysOffset, citation.Count));
 
-                            minCitationCount = Math.Min(minCitationCount, citation.Count);
-                            maxCitationCount = Math.Max(maxCitationCount, citation.Count);
+                            // minCitationCount = Math.Min(minCitationCount, citation.Count);
+                            // maxCitationCount = Math.Max(maxCitationCount, citation.Count);
                         }
                     }
             }
 
             // TODO: improve the following normalization, the iteration may not be optimal.
+
+            // First normalize citation count w.r.t to date. 
             var toolIDs = changes.Keys.ToList();
+
+            minCitationCount = int.MaxValue;
+            maxCitationCount = 0;
+            foreach (var id in toolIDs)
+            {
+                var tool = changes[id];
+                for (int i = 0; i < tool.Count; i++)
+                {
+                    if (tool[i].DaysOffset < 0)
+                        tool[i].CitationCount /= minBeforeDays;
+                    else
+                        tool[i].CitationCount /= maxAfterDays;
+
+                    minCitationCount = Math.Min(minCitationCount, tool[i].CitationCount);
+                    maxCitationCount = Math.Max(maxCitationCount, tool[i].CitationCount);
+                }
+            }
+
+            // Second, normalize citation count and date to using min-max normalization. 
             foreach (var id in toolIDs)
             {
                 var tool = changes[id];
@@ -128,6 +149,45 @@ namespace Genometric.TVQ.API.Analysis
                         post.Add(change.CitationCount);
                     else
                         pre.Add(change.CitationCount);
+        }
+
+        public List<double> GetDeltaPrePostCitationChanges(Repository repository)
+        {
+            var changes = GetPrePostCitationCountNormalizedYear(repository);
+            double sumPre, sumPost, countPre, countPost;
+            var deltas = new List<double>();
+            if (changes == null)
+                return deltas;
+
+            foreach (var tool in changes)
+            {
+                sumPre = sumPost = countPre = countPost = 0;
+                foreach (var change in tool.Value)
+                {
+                    if (change.DaysOffset < 0)
+                    {
+                        sumPre += change.CitationCount;
+                        countPre += 1;
+                    }
+                    else
+                    {
+                        sumPost += change.CitationCount;
+                        countPost += 1;
+                    }
+                }
+
+                var averagePre = sumPre / countPre;
+                var averagePost = sumPost / countPost;
+
+                if (double.IsNaN(averagePre) || double.IsInfinity(averagePre))
+                    averagePre = 0;
+                if (double.IsNaN(averagePost) || double.IsInfinity(averagePost))
+                    averagePost = 0;
+
+                deltas.Add(Math.Abs(averagePost - averagePre));
+            }
+
+            return deltas;
         }
 
         public static void GetPrePostCitationCountPerYear(Repository repository, out List<double> pre, out List<double> post)
@@ -184,11 +244,10 @@ namespace Genometric.TVQ.API.Analysis
 
         private void EvaluateCitationImpact(Repository repository)
         {
-            var changes = GetPrePostCitationCountNormalizedYear(repository);
-            ExtractPrePostCitationChanges(changes, out List<double> pre, out List<double> post);
-
+            // This method is for paired difference test
+            var deltas = GetDeltaPrePostCitationChanges(repository);
             var sigDiff = InferentialStatistics.ComputeTTest(
-                pre, post,
+                deltas,
                 0.05,
                 out double df,
                 out double tScore,
