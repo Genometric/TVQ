@@ -34,7 +34,8 @@ namespace Genometric.TVQ.API.Controllers
             CreateTimeDistributionPerYear,
             CreateTimeDistributionPerMonth,
             ToolDistributionAmongRepositories,
-            NormalizedBeforeAfterVector
+            NormalizedBeforeAfterVector,
+            Overview
         };
 
         public StatisticsController(
@@ -101,6 +102,8 @@ namespace Genometric.TVQ.API.Controllers
                     return Ok(await ToolDistributionAmongRepositories().ConfigureAwait(false));
                 case ReportTypes.NormalizedBeforeAfterVector:
                     return NormalizedBeforeAfterVector(repository);
+                case ReportTypes.Overview:
+                    return await Overview(repository).ConfigureAwait(false);
             }
 
             return BadRequest();
@@ -328,6 +331,41 @@ namespace Genometric.TVQ.API.Controllers
             IFileInfo fileInfo = provider.GetFileInfo("TVQStats.csv");
 
             return File(fileInfo.CreateReadStream(), contentType, "TVQStats.csv");
+        }
+
+        private async Task<IActionResult> Overview(Repository repository)
+        {
+            var overview = new Overview();
+
+            overview.RepositoryCount = _context.Repositories.Count();
+            overview.ToolsCount = _context.Tools.Count();
+
+            var repo = _context.Repositories.Include(x => x.ToolAssociations)
+                                .ThenInclude(x => x.Tool)
+                                .ThenInclude(x => x.Publications)
+                                .First(x => x.ID == repository.ID);
+
+            overview.ToolRepoAssociationsCount = repo.ToolAssociations.Count;
+
+            foreach (var association in repo.ToolAssociations)
+            {
+                switch (association.Tool.Publications.Count)
+                {
+                    case 0:
+                        overview.ToolsWithNoPublications += 1;
+                        break;
+
+                    case 1:
+                        overview.ToolsWithOnePublication += 1;
+                        break;
+
+                    default:
+                        overview.ToolsWithMoreThanOnePublications += 1;
+                        break;
+                }
+            }
+
+            return Ok(overview);
         }
 
         private Repository QueryRepo(int id, bool includeCitations = false)
