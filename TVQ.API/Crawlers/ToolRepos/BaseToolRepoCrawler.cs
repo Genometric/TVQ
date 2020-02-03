@@ -75,7 +75,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected bool TryAddToolRepoAssociations(ToolRepoAssociation association)
         {
-            if (association == null)
+            if (association == null ||
+                association.Tool == null ||
+                association.Tool.Name == null)
                 return false;
 
             if (ToolRepoAssociationsDict.TryAdd(FormatToolRepoAssociationName(association), association))

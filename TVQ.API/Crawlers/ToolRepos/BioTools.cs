@@ -42,7 +42,10 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                             var tool = ExtractTool(extractedFileName);
                             var pubs = ExtractPublications(extractedFileName);
 
-                            TryAddEntities(tool, pubs);
+                            if (!TryAddEntities(tool, pubs))
+                            {
+                                // TODO: log why this tool will not be added to db.
+                            }
 
                             File.Delete(extractedFileName);
                         }
@@ -51,6 +54,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             catch (Exception e)
             {
                 // TODO: log the exception.
+                // TODO: if this exception has occurred, the caller job's status should be set to failed.
             }
         }
 
