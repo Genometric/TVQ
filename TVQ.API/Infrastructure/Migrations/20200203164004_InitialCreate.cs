@@ -276,6 +276,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PublicationID = table.Column<int>(nullable: false),
                     Count = table.Column<int>(nullable: false),
+                    AccumulatedCount = table.Column<int>(nullable: false),
                     Date = table.Column<DateTime>(nullable: false),
                     Source = table.Column<int>(nullable: true)
                 },

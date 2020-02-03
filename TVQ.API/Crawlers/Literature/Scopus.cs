@@ -314,6 +314,8 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 AddCitation(publication, new DateTime(years, 01, 01), citationCount);
             }
 
+            ComputeAccumulatedCitationCounts(publication);
+
             return true;
         }
 
@@ -329,6 +331,17 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 Source = Citation.InfoSource.Scopus,
                 Publication = publication
             });
+        }
+
+        private static void ComputeAccumulatedCitationCounts(Publication publication)
+        {
+            var citationsPerYear = new SortedList<DateTime, int>();
+            foreach (var citation in publication.Citations)
+                citationsPerYear.Add(citation.Date, citation.Count);
+
+            var dates = citationsPerYear.Keys;
+            for (int i = 1; i < dates.Count; i++)
+                citationsPerYear[dates[i]] += citationsPerYear[dates[i - 1]];
         }
 
         private void LogSkippedPublications(Publication publication, string reason)

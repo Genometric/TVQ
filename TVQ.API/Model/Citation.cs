@@ -14,6 +14,8 @@ namespace Genometric.TVQ.API.Model
 
         public int Count { set; get; }
 
+        public int AccumulatedCount { set; get; }
+
         public DateTime Date { set; get; }
 
         public InfoSource? Source { set; get; }

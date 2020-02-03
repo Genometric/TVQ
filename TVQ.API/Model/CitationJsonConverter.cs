@@ -19,6 +19,7 @@ namespace Genometric.TVQ.API.Model
                 {"id", nameof(Citation.ID) },
                 {"publication_id", nameof(Citation.PublicationID) },
                 {"count", nameof(Citation.Count) },
+                {"accumulated_count", nameof(Citation.AccumulatedCount) },
                 {"date", nameof(Citation.Date) },
                 {"source", nameof(Citation.Source) },
                 {"publication", nameof(Citation.Publication) }
