@@ -33,7 +33,8 @@ namespace Genometric.TVQ.API.Controllers
             BeforeAfterCitationCountPerToolNormalizedPerYearPerCategory,
             CreateTimeDistributionPerYear,
             CreateTimeDistributionPerMonth,
-            ToolDistributionAmongRepositories
+            ToolDistributionAmongRepositories,
+            NormalizedBeforeAfterVector
         };
 
         public StatisticsController(
@@ -98,6 +99,8 @@ namespace Genometric.TVQ.API.Controllers
                     return CreateTimeDistributionPerMonth(repository);
                 case ReportTypes.ToolDistributionAmongRepositories:
                     return Ok(await ToolDistributionAmongRepositories().ConfigureAwait(false));
+                case ReportTypes.NormalizedBeforeAfterVector:
+                    return NormalizedBeforeAfterVector(repository);
             }
 
             return BadRequest();
@@ -298,6 +301,33 @@ namespace Genometric.TVQ.API.Controllers
                 dist.Value.Percentage = dist.Value.Count / (double)tools.Count;
 
             return distributions.Values;
+        }
+
+        private FileStreamResult NormalizedBeforeAfterVector(Repository repository)
+        {
+            var tempPath = Path.GetFullPath(Path.GetTempPath()) + Utilities.GetRandomString(10) + Path.DirectorySeparatorChar;
+            Directory.CreateDirectory(tempPath);
+            var filename = tempPath + Utilities.SafeFilename("TVQStats.csv");
+
+            var changes = _analysisService.GetPrePostCitationChangeVector(repository);
+            using (var writer = new StreamWriter(filename))
+            {
+                foreach (var change in changes)
+                    writer.WriteLine(
+                        $"All_Categories\t" +
+                        $"{change.DaysOffset}\t" +
+                        $"{change.LowerQuartile}\t" +
+                        $"{change.Median}\t" +
+                        $"{change.UpperQuartile}\t" +
+                        $"{change.Max}\t" +
+                        $"{change.Min}");
+            }
+
+            var contentType = "application/csv";
+            IFileProvider provider = new PhysicalFileProvider(tempPath);
+            IFileInfo fileInfo = provider.GetFileInfo("TVQStats.csv");
+
+            return File(fileInfo.CreateReadStream(), contentType, "TVQStats.csv");
         }
 
         private Repository QueryRepo(int id, bool includeCitations = false)

@@ -64,12 +64,15 @@ namespace Genometric.TVQ.API.Analysis
 
         public Dictionary<int, List<CitationChange>> GetPrePostCitationCountNormalizedYear(
             Repository repository,
-            HashSet<int> toolsToInclude = null)
+            HashSet<int> toolsToInclude = null,
+            bool normalizeCount = true)
         {
             double minCitationCount = int.MaxValue;
             double maxCitationCount = 0;
             double minBeforeDays = 0;
             double maxAfterDays = 0;
+            double minBeforeYears = 0;
+            double maxAfterYears = 0;
             var changes = new Dictionary<int, List<CitationChange>>();
             if (repository == null)
                 return changes;
@@ -90,10 +93,17 @@ namespace Genometric.TVQ.API.Analysis
                                 changes.Add(tool.ID, new List<CitationChange>());
 
                             var daysOffset = (citation.Date - association.DateAddedToRepository).Value.Days;
+                            var yearsOffset = citation.Date.Year - association.DateAddedToRepository.Value.Year;
                             minBeforeDays = Math.Min(minBeforeDays, daysOffset);
-                            maxAfterDays = Math.Max(maxAfterDays, daysOffset);
+                            minBeforeYears = Math.Min(minBeforeYears, yearsOffset);
 
-                            changes[tool.ID].Add(new CitationChange(daysOffset, citation.Count));
+                            maxAfterDays = Math.Max(maxAfterDays, daysOffset);
+                            maxAfterYears = Math.Max(maxAfterYears, yearsOffset);
+
+                            changes[tool.ID].Add(new CitationChange(daysOffset, citation.Count)
+                            {
+                                YearsOffset = yearsOffset
+                            });
 
                             // minCitationCount = Math.Min(minCitationCount, citation.Count);
                             // maxCitationCount = Math.Max(maxCitationCount, citation.Count);
@@ -101,7 +111,6 @@ namespace Genometric.TVQ.API.Analysis
                     }
             }
 
-            // TODO: improve the following normalization, the iteration may not be optimal.
 
             // First normalize citation count w.r.t to date. 
             var toolIDs = changes.Keys.ToList();
@@ -113,8 +122,8 @@ namespace Genometric.TVQ.API.Analysis
                 var tool = changes[id];
                 for (int i = 0; i < tool.Count; i++)
                 {
-                    if (tool[i].DaysOffset < 0)
-                        tool[i].CitationCount /= minBeforeDays;
+                    if (tool[i].DaysOffset <= 0)
+                        tool[i].CitationCount /= Math.Abs(minBeforeDays);
                     else
                         tool[i].CitationCount /= maxAfterDays;
 
@@ -123,17 +132,25 @@ namespace Genometric.TVQ.API.Analysis
                 }
             }
 
+
             // Second, normalize citation count and date to using min-max normalization. 
             foreach (var id in toolIDs)
             {
                 var tool = changes[id];
                 for (int i = 0; i < tool.Count; i++)
                 {
-                    tool[i].CitationCount = (tool[i].CitationCount - minCitationCount) / (maxCitationCount - minCitationCount);
+                    if (normalizeCount)
+                        tool[i].CitationCount = (tool[i].CitationCount - minCitationCount) / (maxCitationCount - minCitationCount);
                     if (tool[i].DaysOffset < 0)
+                    {
                         tool[i].DaysOffset = (-1) - ((tool[i].DaysOffset - minBeforeDays) / minBeforeDays);
+                        tool[i].YearsOffset = (-1) - ((tool[i].YearsOffset - minBeforeYears) / minBeforeYears);
+                    }
                     else
+                    {
                         tool[i].DaysOffset = tool[i].DaysOffset / maxAfterDays;
+                        tool[i].YearsOffset = tool[i].YearsOffset / maxAfterYears;
+                    }
                 }
             }
             return changes;
@@ -240,6 +257,61 @@ namespace Genometric.TVQ.API.Analysis
 
             pre = citations.Values.Select(x => x[0]).ToList();
             post = citations.Values.Select(x => x[1]).ToList();
+        }
+
+        public IEnumerable<CitationChange> GetPrePostCitationChangeVector(Repository repository)
+        {
+            var rtv = new SortedDictionary<double, CitationChange>();
+            var tools = GetPrePostCitationCountNormalizedYear(repository, normalizeCount: false);
+
+            double offset;
+            foreach (var tool in tools)
+            {
+                foreach (var change in tool.Value)
+                {
+                    if (change.CitationCount == 0)
+                        continue;
+
+
+                    var binCount = 20;
+                    double end = 1.0, start = -1.0;
+                    var range = end - start;
+                    var length = range / binCount;
+                    var binNumber = Math.Floor((change.DaysOffset + 1) / length);
+                    offset = (binNumber * length) - 1;
+
+
+                    // offset = Math.Round(change.DaysOffset * 10.0) / 10.0;
+
+                    if (rtv.ContainsKey(offset))
+                    {
+                        rtv[offset].AddCitationCount(change.CitationCount);
+                    }
+                    else
+                    {
+                        var c = new CitationChange();
+                        c.AddCitationCount(change.CitationCount);
+                        c.YearsOffset = change.YearsOffset;
+                        c.DaysOffset = offset;
+                        c.CitationCount = change.CitationCount;
+                        rtv.Add(offset, c);
+                    }
+                }
+            }
+
+            double minCitationCount = int.MaxValue;
+            double maxCitationCount = 0;
+            foreach (var item in rtv)
+            {
+                item.Value.RemoveOutliers();
+                minCitationCount = Math.Min(minCitationCount, item.Value.Min);
+                maxCitationCount = Math.Max(maxCitationCount, item.Value.Max);
+            }
+
+            foreach (var item in rtv)
+                item.Value.MinMaxNormalize(minCitationCount, maxCitationCount);
+
+            return rtv.Values;
         }
 
         private void EvaluateCitationImpact(Repository repository)
