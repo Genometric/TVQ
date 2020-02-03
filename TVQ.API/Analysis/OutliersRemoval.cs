@@ -38,6 +38,5 @@ namespace Genometric.TVQ.API.Analysis
 
             return new SortedSet<double>();
         }
-
     }
 }

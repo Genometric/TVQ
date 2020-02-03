@@ -1,5 +1,6 @@
 ﻿using Genometric.BibitemParser;
 using Genometric.TVQ.API.Model;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -55,14 +56,19 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 new KeywordConstructor());
         }
 
-        private static string FormatToolName(string name)
+        protected static string FormatToolName(string name)
         {
             return name.Trim().ToUpperInvariant();
         }
 
+        private string FormatToolRepoAssociationName(Tool tool)
+        {
+            return Repo.Name + "::" + FormatToolName(tool.Name); ;
+        }
+
         private string FormatToolRepoAssociationName(ToolRepoAssociation association)
         {
-            return Repo.Name + "::" + FormatToolName(association.Tool.Name);
+            return FormatToolRepoAssociationName(association.Tool);
         }
 
         public abstract Task ScanAsync();
@@ -126,6 +132,15 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                         });
 
             return TryAddToolRepoAssociations(info.ToolRepoAssociation);
+        }
+
+        protected void UpdateAssociation(Tool tool, DateTime dateAddedToRepository)
+        {
+            if (tool != null &&
+                ToolRepoAssociationsDict.TryGetValue(
+                FormatToolRepoAssociationName(tool),
+                out ToolRepoAssociation association))
+                association.DateAddedToRepository = dateAddedToRepository;
         }
 
         protected bool TryParseBibitem(string bibitem, out Publication publication)

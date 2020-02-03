@@ -12,6 +12,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
     {
         private readonly string _citationsFileName = "citations.json";
         private readonly string _statsFileName = "package_stats.tsv";
+        private readonly string _dateAddedFileName = "first_appearance.csv";
 
         public Bioconductor(Repository repo, List<Tool> tools, List<Category> categories) : base(repo, tools, categories)
         { }
@@ -20,6 +21,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         {
             ReadCitationsFile();
             GetDownloadStats();
+            GetAddedDate();
         }
 
         private void ReadCitationsFile()
@@ -96,6 +98,36 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 catch (FormatException e)
                 {
                     // TODO: log exception and continue, do NOT break the while loop.
+                }
+                catch (Exception e)
+                {
+                    // TODO: log exception and continue, do NOT break the while loop.
+                }
+            }
+        }
+
+        private void GetAddedDate()
+        {
+            var dateAddedFileName = SessionTempPath + Utilities.GetRandomString();
+            WebClient.DownloadFileTaskAsync(Repo.GetURI() + _dateAddedFileName, dateAddedFileName).Wait();
+
+            string line;
+            using var reader = new StreamReader(dateAddedFileName);
+            reader.ReadLine();
+            while ((line = reader.ReadLine()) != null)
+            {
+                var cols = line.Split(',');
+                if (!ToolsDict.TryGetValue(FormatToolName(cols[1]), out Tool tool))
+                {
+                    // TODO: log this.
+                    // This mean the tool for which we have added date 
+                    // is not recognized.
+                    continue;
+                }
+
+                try
+                {
+                    UpdateAssociation(tool, DateTime.Parse(cols[3], CultureInfo.CurrentCulture));
                 }
                 catch (Exception e)
                 {
