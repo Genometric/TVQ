@@ -335,13 +335,16 @@ namespace Genometric.TVQ.API.Crawlers.Literature
 
         private static void ComputeAccumulatedCitationCounts(Publication publication)
         {
-            var citationsPerYear = new SortedList<DateTime, int>();
+            var accumulatedCitationsCount = new SortedList<DateTime, int>();
             foreach (var citation in publication.Citations)
-                citationsPerYear.Add(citation.Date, citation.Count);
+                accumulatedCitationsCount.Add(citation.Date, citation.Count);
 
-            var dates = citationsPerYear.Keys;
+            var dates = accumulatedCitationsCount.Keys;
             for (int i = 1; i < dates.Count; i++)
-                citationsPerYear[dates[i]] += citationsPerYear[dates[i - 1]];
+                accumulatedCitationsCount[dates[i]] += accumulatedCitationsCount[dates[i - 1]];
+
+            foreach(var citation in publication.Citations)
+                citation.AccumulatedCount = accumulatedCitationsCount[citation.Date];
         }
 
         private void LogSkippedPublications(Publication publication, string reason)
