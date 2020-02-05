@@ -21,6 +21,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="illustration_plot.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="line_plot.py">
       <SubType>Code</SubType>
     </Compile>
