@@ -57,6 +57,11 @@ namespace Genometric.TVQ.API.Analysis
             Citations.Add(count);
         }
 
+        public void AddCitationCount(List<double> counts)
+        {
+            Citations.UnionWith(counts);
+        }
+
         public void RemoveOutliers()
         {
             Citations = OutliersRemoval.Remove(Citations);

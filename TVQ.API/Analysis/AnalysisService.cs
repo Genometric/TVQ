@@ -1,6 +1,7 @@
 ﻿using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
+using MathNet.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -261,57 +262,110 @@ namespace Genometric.TVQ.API.Analysis
 
         public IEnumerable<CitationChange> GetPrePostCitationChangeVector(Repository repository)
         {
-            var rtv = new SortedDictionary<double, CitationChange>();
-            var tools = GetPrePostCitationCountNormalizedYear(repository, normalizeCount: false);
+            double minCitationCount = int.MaxValue;
+            double maxCitationCount = 0;
+            double minBeforeDays = 0;
+            double maxAfterDays = 0;
+            double minBeforeYears = 0;
+            double maxAfterYears = 0;
 
-            double offset;
-            foreach (var tool in tools)
+            // 1st int is tool ID, 1st double is days, and 2nd double is citation count.
+            var changes = new Dictionary<int, SortedDictionary<double, double>>();
+            foreach (var association in repository.ToolAssociations)
             {
-                foreach (var change in tool.Value)
+                var tool = association.Tool;
+                Context.Entry(tool).Collection(x => x.Publications).Load();
+                foreach (var pub in tool.Publications)
+                    if (pub.Citations != null && pub.Year >= _earliestCitationYear)
+                    {
+                        Context.Entry(pub).Collection(x => x.Citations).Load();
+                        if (pub.Citations.Count == 0 ||
+                            (pub.Citations.Count == 1 && pub.Citations.First().Count == 0))
+                            continue;
+
+                        foreach (var citation in pub.Citations)
+                        {
+                            if (!changes.ContainsKey(tool.ID))
+                                changes.Add(tool.ID, new SortedDictionary<double, double>());
+
+                            var daysOffset = (citation.Date - association.DateAddedToRepository).Value.Days;
+                            // This can be true when multiple publications per tool exist.
+                            if (changes[tool.ID].ContainsKey(daysOffset))
+                                changes[tool.ID][daysOffset] += citation.AccumulatedCount;
+                            else
+                                changes[tool.ID].Add(daysOffset,
+                                    citation.AccumulatedCount);
+                        }
+                    }
+            }
+
+            // Normalize citation counts and date.
+            var tools = changes.Keys.ToList();
+            foreach (var toolID in tools)
+            {
+                var citations = changes[toolID];
+                foreach (var day in citations.Keys)
                 {
-                    if (change.CitationCount == 0)
-                        continue;
+                    minBeforeDays = Math.Min(minBeforeDays, day);
+                    maxAfterDays = Math.Max(maxAfterDays, day);
+                }
 
+                // Normalize citation count.
+                var delta = maxAfterDays - minBeforeDays;
+                var days = citations.Keys.ToList();
+                foreach (var day in days)
+                    citations[day] /= delta;
 
-                    var binCount = 20;
-                    double end = 1.0, start = -1.0;
-                    var range = end - start;
-                    var length = range / binCount;
-                    var binNumber = Math.Floor((change.DaysOffset + 1) / length);
-                    offset = (binNumber * length) - 1;
-
-
-                    // offset = Math.Round(change.DaysOffset * 10.0) / 10.0;
-
-                    if (rtv.ContainsKey(offset))
-                    {
-                        rtv[offset].AddCitationCount(change.CitationCount);
-                    }
+                // Min-Max normalize date.
+                foreach (var day in days)
+                {
+                    var count = citations[day];
+                    var normalizedDate = 0.0;
+                    if (day <= 0)
+                        normalizedDate = (-1) * ((day - maxAfterDays) / (minBeforeDays - maxAfterDays));
                     else
-                    {
-                        var c = new CitationChange();
-                        c.AddCitationCount(change.CitationCount);
-                        c.YearsOffset = change.YearsOffset;
-                        c.DaysOffset = offset;
-                        c.CitationCount = change.CitationCount;
-                        rtv.Add(offset, c);
-                    }
+                        normalizedDate = (day - minBeforeDays) / (maxAfterDays - minBeforeDays);
+                    citations.Add(normalizedDate, count);
+                    citations.Remove(day);
                 }
             }
 
-            double minCitationCount = int.MaxValue;
-            double maxCitationCount = 0;
-            foreach (var item in rtv)
+            var interpolatedCitations = new SortedDictionary<double, List<double>>();
+
+            // Calculate in-betweens
+            // First determine data points on x axis (i.e., days offset):
+            var x = Generate.LinearSpaced(21, -1.0, 1.0);
+            foreach (var item in x)
+                interpolatedCitations.Add(item, new List<double>());
+
+            foreach (var tool in changes)
             {
-                item.Value.RemoveOutliers();
-                minCitationCount = Math.Min(minCitationCount, item.Value.Min);
-                maxCitationCount = Math.Max(maxCitationCount, item.Value.Max);
+                // data samples to interpolate over
+                var spline = Interpolate.Linear(tool.Value.Keys, tool.Value.Values);
+
+                foreach (var item in x)
+                {
+                    var c = spline.Interpolate(item);
+                    if (c < 0)
+                    {
+                        // todo: find a better alternative.
+                        continue;
+                    }
+                    interpolatedCitations[item].Add(c);
+                }
             }
 
-            foreach (var item in rtv)
-                item.Value.MinMaxNormalize(minCitationCount, maxCitationCount);
+            var rtv = new List<CitationChange>();
+            foreach (var item in interpolatedCitations)
+            {
+                var c = new CitationChange();
+                c.AddCitationCount(item.Value);
+                c.DaysOffset = item.Key;
+                c.RemoveOutliers();
+                rtv.Add(c);
+            }
 
-            return rtv.Values;
+            return rtv;
         }
 
         private void EvaluateCitationImpact(Repository repository)
