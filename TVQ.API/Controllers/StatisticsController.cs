@@ -34,6 +34,7 @@ namespace Genometric.TVQ.API.Controllers
             CreateTimeDistributionPerYear,
             CreateTimeDistributionPerMonth,
             ToolDistributionAmongRepositories,
+            ToolDistributionAmongCategoriesPerYear,
             NormalizedBeforeAfterVector,
             Overview
         };
@@ -100,6 +101,8 @@ namespace Genometric.TVQ.API.Controllers
                     return CreateTimeDistributionPerMonth(repository);
                 case ReportTypes.ToolDistributionAmongRepositories:
                     return Ok(await ToolDistributionAmongRepositories().ConfigureAwait(false));
+                case ReportTypes.ToolDistributionAmongCategoriesPerYear:
+                    return await ToolDistributionAmongCategoriesPerYear(repository).ConfigureAwait(false);
                 case ReportTypes.NormalizedBeforeAfterVector:
                     return NormalizedBeforeAfterVector(repository);
                 case ReportTypes.Overview:
@@ -304,6 +307,103 @@ namespace Genometric.TVQ.API.Controllers
                 dist.Value.Percentage = dist.Value.Count / (double)tools.Count;
 
             return distributions.Values;
+        }
+
+        private async Task<IActionResult> ToolDistributionAmongCategoriesPerYear(Repository repository)
+        {
+            var distributions = new SortedDictionary<int, SortedDictionary<string, double>>();
+
+            var associations = await _context.ToolRepoAssociation.Include(x => x.Tool)
+                                                                 .ThenInclude(x => x.CategoryAssociations)
+                                                                 .ThenInclude(x => x.Category)
+                                                                 .Where(x => x.RepositoryID == repository.ID)
+                                                                 .ToListAsync()
+                                                                 .ConfigureAwait(false);
+
+            string unspecifiedCategory = "Unspecified";
+            var categoriesName = new SortedSet<string>
+            {
+                unspecifiedCategory
+            };
+
+            foreach (var association in associations)
+            {
+                var date = association.DateAddedToRepository.Value.Year;
+                if (!distributions.ContainsKey(date))
+                    distributions.Add(date, new SortedDictionary<string, double>());
+
+                if (association.Tool.CategoryAssociations.Count == 0)
+                {
+                    if (!distributions[date].ContainsKey(unspecifiedCategory))
+                        distributions[date].Add(unspecifiedCategory, 0.0);
+                    distributions[date][unspecifiedCategory]++;
+                }
+                else
+                {
+                    foreach (var categoryAssociation in association.Tool.CategoryAssociations)
+                    {
+                        var categoryName = categoryAssociation.Category.Name;
+                        if (!distributions[date].ContainsKey(categoryName))
+                            distributions[date].Add(categoryName, 0.0);
+
+                        distributions[date][categoryName]++;
+
+                        if (!categoriesName.Contains(categoryName))
+                            categoriesName.Add(categoryName);
+                    }
+                }
+            }
+
+            var dates = distributions.Keys.ToList();
+            for (int i = 1; i < dates.Count; i++)
+            {
+                foreach (var category in categoriesName)
+                {
+                    var accumulatedToDate = 0.0;
+                    if (distributions[dates[i - 1]].ContainsKey(category))
+                        accumulatedToDate = distributions[dates[i - 1]][category];
+
+                    if (!distributions[dates[i]].ContainsKey(category))
+                        distributions[dates[i]].Add(category, accumulatedToDate);
+                    else
+                        distributions[dates[i]][category] += accumulatedToDate;
+                }
+            }
+
+            var tempPath = Path.GetFullPath(Path.GetTempPath()) + Utilities.GetRandomString(10) + Path.DirectorySeparatorChar;
+            Directory.CreateDirectory(tempPath);
+            var filename = tempPath + Utilities.SafeFilename("TVQStats.csv");
+
+
+
+            using (var writer = new StreamWriter(filename))
+            {
+                var headerBuilder = new StringBuilder();
+                headerBuilder.Append("Year\t");
+                foreach (var name in categoriesName)
+                    headerBuilder.Append(name + "\t");
+                writer.WriteLine(headerBuilder.ToString());
+
+                foreach (var year in distributions)
+                {
+                    var builder = new StringBuilder();
+                    builder.Append(year.Key + "\t");
+                    foreach(var name in categoriesName)
+                    {
+                        if (year.Value.ContainsKey(name))
+                            builder.Append(year.Value[name] + "\t");
+                        else
+                            builder.Append("0\t");
+                    }
+                    writer.WriteLine(builder.ToString());
+                }
+            }
+
+            var contentType = "application/csv";
+            IFileProvider provider = new PhysicalFileProvider(tempPath);
+            IFileInfo fileInfo = provider.GetFileInfo("TVQStats.csv");
+
+            return File(fileInfo.CreateReadStream(), contentType, "TVQStats.csv");
         }
 
         private FileStreamResult NormalizedBeforeAfterVector(Repository repository)
