@@ -262,13 +262,6 @@ namespace Genometric.TVQ.API.Analysis
 
         public IEnumerable<CitationChange> GetPrePostCitationChangeVector(Repository repository)
         {
-            double minCitationCount = int.MaxValue;
-            double maxCitationCount = 0;
-            double minBeforeDays = 0;
-            double maxAfterDays = 0;
-            double minBeforeYears = 0;
-            double maxAfterYears = 0;
-
             // 1st int is tool ID, 1st double is days, and 2nd double is citation count.
             var changes = new Dictionary<int, SortedDictionary<double, double>>();
             foreach (var association in repository.ToolAssociations)
@@ -304,6 +297,8 @@ namespace Genometric.TVQ.API.Analysis
             foreach (var toolID in tools)
             {
                 var citations = changes[toolID];
+                double minBeforeDays = 0;
+                double maxAfterDays = 0;
                 foreach (var day in citations.Keys)
                 {
                     minBeforeDays = Math.Min(minBeforeDays, day);
@@ -317,6 +312,7 @@ namespace Genometric.TVQ.API.Analysis
                     citations[day] /= delta;
 
                 // Min-Max normalize date.
+                var normalizedDates = new SortedDictionary<double, double>();
                 foreach (var day in days)
                 {
                     var count = citations[day];
@@ -325,9 +321,11 @@ namespace Genometric.TVQ.API.Analysis
                         normalizedDate = (-1) * ((day - maxAfterDays) / (minBeforeDays - maxAfterDays));
                     else
                         normalizedDate = (day - minBeforeDays) / (maxAfterDays - minBeforeDays);
-                    citations.Add(normalizedDate, count);
-                    citations.Remove(day);
+
+                    normalizedDates.Add(normalizedDate, count);
                 }
+
+                changes[toolID] = normalizedDates;
             }
 
             var interpolatedCitations = new SortedDictionary<double, List<double>>();
