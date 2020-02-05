@@ -374,27 +374,25 @@ namespace Genometric.TVQ.API.Controllers
             Directory.CreateDirectory(tempPath);
             var filename = tempPath + Utilities.SafeFilename("TVQStats.csv");
 
-
-
             using (var writer = new StreamWriter(filename))
             {
                 var headerBuilder = new StringBuilder();
-                headerBuilder.Append("Year\t");
-                foreach (var name in categoriesName)
-                    headerBuilder.Append(name + "\t");
+                headerBuilder.Append("Category\t");
+                foreach (var year in distributions)
+                    headerBuilder.Append(year.Key + "\t");
                 writer.WriteLine(headerBuilder.ToString());
 
-                foreach (var year in distributions)
+                foreach (var name in categoriesName)
                 {
                     var builder = new StringBuilder();
-                    builder.Append(year.Key + "\t");
-                    foreach(var name in categoriesName)
-                    {
+                    builder.Append(name + "\t");
+
+                    foreach (var year in distributions)
                         if (year.Value.ContainsKey(name))
                             builder.Append(year.Value[name] + "\t");
                         else
-                            builder.Append("0\t");
-                    }
+                            builder.Append("0.0\t");
+
                     writer.WriteLine(builder.ToString());
                 }
             }
