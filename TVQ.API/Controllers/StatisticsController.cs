@@ -34,6 +34,7 @@ namespace Genometric.TVQ.API.Controllers
             CreateTimeDistributionPerYear,
             CreateTimeDistributionPerMonth,
             ToolDistributionAmongRepositories,
+            ToolDistributionAmongCategories,
             ToolDistributionAmongCategoriesPerYear,
             NormalizedBeforeAfterVector,
             Overview
@@ -101,6 +102,8 @@ namespace Genometric.TVQ.API.Controllers
                     return CreateTimeDistributionPerMonth(repository);
                 case ReportTypes.ToolDistributionAmongRepositories:
                     return Ok(await ToolDistributionAmongRepositories().ConfigureAwait(false));
+                case ReportTypes.ToolDistributionAmongCategories:
+                    return Ok(await ToolDistributionAmongCategories().ConfigureAwait(false));
                 case ReportTypes.ToolDistributionAmongCategoriesPerYear:
                     return await ToolDistributionAmongCategoriesPerYear(repository).ConfigureAwait(false);
                 case ReportTypes.NormalizedBeforeAfterVector:
@@ -301,6 +304,53 @@ namespace Genometric.TVQ.API.Controllers
 
                 if (tool.RepoAssociations.Count > 1)
                     AddOrUpdate(tool.RepoAssociations);
+            }
+
+            foreach (var dist in distributions)
+                dist.Value.Percentage = dist.Value.Count / (double)tools.Count;
+
+            return distributions.Values;
+        }
+
+        private async Task<IEnumerable<ToolCategoryDistribution>> ToolDistributionAmongCategories()
+        {
+            var distributions = new Dictionary<string, ToolCategoryDistribution>();
+            var tools = await _context.Tools.Include(x => x.CategoryAssociations)
+                                            .ThenInclude(x => x.Category)
+                                            .ToListAsync()
+                                            .ConfigureAwait(false);
+
+            static string HashID(ToolCategoryAssociation association) =>
+                association.CategoryID.ToString(CultureInfo.InvariantCulture) + ";";
+
+            static string HashIDs(IEnumerable<ToolCategoryAssociation> associations)
+            {
+                var builder = new StringBuilder();
+                foreach (var association in associations)
+                    builder.Append(HashID(association));
+                return builder.ToString();
+            }
+
+            void AddOrUpdate(IEnumerable<ToolCategoryAssociation> associations)
+            {
+                if (distributions.TryGetValue(HashIDs(associations), out ToolCategoryDistribution dist))
+                    dist.Count++;
+                else
+                {
+                    var item = new ToolCategoryDistribution();
+                    item.Add(associations.Select(x => x.Category));
+                    item.Count = 1;
+                    distributions.Add(HashIDs(associations), item);
+                }
+            }
+
+            foreach (var tool in tools)
+            {
+                foreach (var association in tool.CategoryAssociations)
+                    AddOrUpdate(new ToolCategoryAssociation[] { association });
+
+                if (tool.RepoAssociations.Count > 1)
+                    AddOrUpdate(tool.CategoryAssociations);
             }
 
             foreach (var dist in distributions)
