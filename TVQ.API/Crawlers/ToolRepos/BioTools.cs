@@ -1,6 +1,4 @@
 ﻿using Genometric.TVQ.API.Model;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,7 +20,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         public override async Task ScanAsync()
         {
             var archiveFileName = DownloadArchive();
-            await TraverseArchive(archiveFileName).ConfigureAwait(false);
+            TraverseArchive(archiveFileName);
         }
 
         private string DownloadArchive()
@@ -32,60 +30,55 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             return archiveFileName;
         }
 
-        private async Task TraverseArchive(string archiveFileName)
+        private void TraverseArchive(string archiveFileName)
         {
             try
             {
-                using (ZipArchive archive = ZipFile.OpenRead(archiveFileName))
-                {
-                    foreach (ZipArchiveEntry entry in archive.Entries)
-                        if (entry.FullName.EndsWith(".json", StringComparison.OrdinalIgnoreCase) &&
-                            !entry.FullName.EndsWith("oeb.json"))
+                using ZipArchive archive = ZipFile.OpenRead(archiveFileName);
+                foreach (ZipArchiveEntry entry in archive.Entries)
+                    if (entry.FullName.EndsWith(".json", StringComparison.OrdinalIgnoreCase) &&
+                        !entry.FullName.EndsWith("oeb.json", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ToolRepoAssociation toolRepoAssociation = null;
+                        List<ToolPublicationAssociation> toolPubAssociations = null;
+
+                        string extractedFileName = SessionTempPath + Utilities.GetRandomString() + ".json";
+                        try
                         {
-                            string extractedFileName = SessionTempPath + Utilities.GetRandomString() + ".json";
                             entry.ExtractToFile(extractedFileName);
-                            var tool = ExtractTool(extractedFileName);
-                            var pubs = ExtractPublications(extractedFileName);
-
-                            if (!TryAddEntities(tool, pubs))
+                            using var reader = new StreamReader(extractedFileName);
+                            if (!RepoTool.TryDeserialize(reader.ReadToEnd(),
+                                                             out toolRepoAssociation,
+                                                             out toolPubAssociations))
                             {
-                                // TODO: log why this tool will not be added to db.
+                                // TODO: log this.
+                                continue;
                             }
-
+                        }
+                        catch (IOException e)
+                        {
+                            // TODO: log this.
+                        }
+                        finally
+                        {
                             File.Delete(extractedFileName);
                         }
-                }
+
+                        if (!TryAddEntities(toolRepoAssociation, toolPubAssociations))
+                        {
+                            // TODO: log why this tool will not be added to db.
+                        }
+                    }
             }
             catch (Exception e)
             {
                 // TODO: log the exception.
                 // TODO: if this exception has occurred, the caller job's status should be set to failed.
             }
-        }
-
-        private ToolRepoAssociation ExtractTool(string fileName)
-        {
-            using (StreamReader r = new StreamReader(fileName))
-                return RepoTool.DeserializeTool(r.ReadToEnd());
-        }
-
-        private List<Publication> ExtractPublications(string toolFileName)
-        {
-            var pubs = new List<Publication>();
-            using (StreamReader r = new StreamReader(toolFileName))
+            finally
             {
-                dynamic array = JsonConvert.DeserializeObject(r.ReadToEnd());
-                foreach (JProperty jProperty in array)
-                {
-                    if (jProperty.Name == "publication")
-                    {
-                        foreach (JObject jPub in jProperty.Value)
-                            pubs.Add(JsonConvert.DeserializeObject<Publication>(jPub.ToString()));
-                        break;
-                    }
-                }
+                File.Delete(archiveFileName);
             }
-            return pubs;
         }
     }
 }

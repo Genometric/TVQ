@@ -236,14 +236,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 new List<string>());
         }
 
-        protected bool TryAddEntities(ToolRepoAssociation toolRepoAssociation, List<Publication> publications)
-        {
-            var toolPubAssociations = new List<ToolPublicationAssociation>();
-            foreach (var pub in publications)
-                toolPubAssociations.Add(new ToolPublicationAssociation() { Publication = pub });
-            return TryAddEntities(toolRepoAssociation, toolPubAssociations);
-        }
-
         protected bool TryAddEntities(
             ToolRepoAssociation toolRepoAssociation,
             List<ToolPublicationAssociation> toolPublicationAssociation,

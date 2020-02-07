@@ -35,16 +35,42 @@ namespace Genometric.TVQ.API.Model
 
         public int? TimesDownloaded { set; get; }
 
+#pragma warning disable CA2227 // Collection properties should be read only
         public List<string> CategoryIDs { set; get; }
+#pragma warning restore CA2227 // Collection properties should be read only
 
+#pragma warning disable CA2227 // Collection properties should be read only
         public List<Category> Categories { set; get; }
+#pragma warning restore CA2227 // Collection properties should be read only
 
         public DateTime? DateAddedToRepository { set; get; }
 
-        public static ToolRepoAssociation DeserializeTool(string json)
+#pragma warning disable CA2227 // Collection properties should be read only
+        public List<Publication> Publications { set;  get; }
+#pragma warning restore CA2227 // Collection properties should be read only
+
+        public static bool TryDeserialize(
+            string json,
+            out ToolRepoAssociation toolRepoAssociation,
+            out List<ToolPublicationAssociation> toolPubAssociations)
         {
+            // Deserialize the JSON object to a helper type. 
             var repoTool = JsonConvert.DeserializeObject<RepoTool>(json);
-            return new ToolRepoAssociation(repoTool);
+
+            // Convert the helper type to TVQ's model. 
+            toolRepoAssociation = new ToolRepoAssociation(repoTool);
+            if (repoTool.Publications != null && repoTool.Publications.Count > 0)
+            {
+                toolPubAssociations = new List<ToolPublicationAssociation>();
+                foreach (var pub in repoTool.Publications)
+                    toolPubAssociations.Add(new ToolPublicationAssociation() { Publication = pub });
+            }
+            else
+            {
+                toolPubAssociations = null;
+            }
+
+            return true;
         }
 
         public static List<ToolInfo> DeserializeTools(string json, string sessionPath)

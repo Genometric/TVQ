@@ -27,7 +27,15 @@ namespace Genometric.TVQ.API.Model
                 {"description", nameof(RepoTool.Description)},
                 {"category_ids", nameof(RepoTool.CategoryIDs)},
                 {"create_time", nameof(RepoTool.DateAddedToRepository)},
-                {"additionDate", nameof(RepoTool.DateAddedToRepository)} // for bio.tools
+                {"additionDate", nameof(RepoTool.DateAddedToRepository)}, // for bio.tools
+                {"publication", nameof(RepoTool.Publications) }
+
+                /// Why not reading Bio.Tools Publication.Metadata?
+                /// A JSON object from Bio.Tools contains a field named "metadata" for 
+                /// each publication. This field (at the time of writing this) is not 
+                /// set for every publication. Hence, it can be more reliable to 
+                /// capture only DOI and/or PubMedID and query details of each 
+                /// publication from Scopus. 
             };
         }
 
@@ -57,7 +65,6 @@ namespace Genometric.TVQ.API.Model
                 prop?.SetValue(
                     instance,
                     jsonProperty.Value.ToObject(prop.PropertyType, serializer));
-
             }
 
             return instance;
