@@ -29,7 +29,13 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         private readonly ILogger<BaseService<RepoCrawlingJob>> _logger;
 
-        public ToolShed(Repository repo, List<Tool> tools, List<Category> categories, ILogger<BaseService<RepoCrawlingJob>> logger) : base(repo, tools, categories)
+        public ToolShed(
+            Repository repo,
+            List<Tool> tools,
+            List<Publication> publications,
+            List<Category> categories,
+            ILogger<BaseService<RepoCrawlingJob>> logger) :
+            base(repo, tools, publications, categories)
         {
             _logger = logger;
 
@@ -213,14 +219,21 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 try
                 {
                     XElement toolDoc = XElement.Load(filename);
-                    var pubs = new List<Publication>();
+                    var pubAssociations = new List<ToolPublicationAssociation>();
                     foreach (var item in toolDoc.Elements("citations").Descendants())
                     {
                         if (item.Attribute("type") != null)
                             switch (item.Attribute("type").Value.Trim().ToUpperInvariant())
                             {
                                 case "DOI":
-                                    pubs.Add(new Publication() { DOI = item.Value });
+                                    pubAssociations.Add(
+                                        new ToolPublicationAssociation()
+                                        {
+                                            Publication = new Publication()
+                                            {
+                                                DOI = item.Value
+                                            }
+                                        });
                                     /// Some tools have one BibItem that contains only DOI, and 
                                     /// another BibItem that contains publication info. There should
                                     /// be only one BibItem per publication contains both DOI and 
@@ -232,7 +245,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                                     try
                                     {
                                         if (TryParseBibitem(item.Value, out Publication pub))
-                                            pubs.Add(pub);
+                                            pubAssociations.Add(
+                                                new ToolPublicationAssociation() { Publication = pub });
                                     }
                                     catch (ArgumentException e)
                                     {
@@ -249,7 +263,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                         $"{Path.GetFileNameWithoutExtension(filename)} " +
                         $"of tool {info.ToolRepoAssociation.Tool.Name}.");
 
-                    info.Publications = pubs;
+                    info.ToolPubAssociations = pubAssociations;
                     TryAddEntities(info);
                 }
                 catch (System.Xml.XmlException e)

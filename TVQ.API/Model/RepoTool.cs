@@ -53,7 +53,7 @@ namespace Genometric.TVQ.API.Model
             var infos = new List<ToolInfo>(repoTools.Count);
             foreach (var repoTool in repoTools)
                 infos.Add(
-                    new ToolInfo(new ToolRepoAssociation(repoTool), sessionPath)
+                    new ToolInfo(new ToolRepoAssociation(repoTool), null, sessionPath)
                     {
                         CategoryIDs = repoTool.CategoryIDs
                     });

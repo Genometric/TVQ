@@ -121,13 +121,13 @@ namespace Genometric.TVQ.API.Controllers
             foreach (var association in repository.ToolAssociations)
             {
                 var tool = association.Tool;
-                foreach (var pub in tool.Publications)
+                foreach (var pub in tool.PublicationAssociations)
                 {
                     if (!citations.ContainsKey(tool.ID))
                         citations.Add(tool.ID, new double[2]);
 
-                    if (pub.Citations != null)
-                        foreach (var citation in pub.Citations)
+                    if (pub.Publication.Citations != null)
+                        foreach (var citation in pub.Publication.Citations)
                             if (citation.Date < association.DateAddedToRepository)
                             {
                                 citations[tool.ID][0] += citation.Count;
@@ -490,14 +490,14 @@ namespace Genometric.TVQ.API.Controllers
 
             var repo = _context.Repositories.Include(x => x.ToolAssociations)
                                 .ThenInclude(x => x.Tool)
-                                .ThenInclude(x => x.Publications)
+                                .ThenInclude(x => x.PublicationAssociations)
                                 .First(x => x.ID == repository.ID);
 
             overview.ToolRepoAssociationsCount = repo.ToolAssociations.Count;
 
             foreach (var association in repo.ToolAssociations)
             {
-                switch (association.Tool.Publications.Count)
+                switch (association.Tool.PublicationAssociations.Count)
                 {
                     case 0:
                         overview.ToolsWithNoPublications += 1;
@@ -528,8 +528,8 @@ namespace Genometric.TVQ.API.Controllers
                         .ThenInclude(x => x.Downloads)
                     .Include(repo => repo.ToolAssociations)
                         .ThenInclude(x => x.Tool)
-                            .ThenInclude(x => x.Publications)
-                                .ThenInclude(x => x.Citations)
+                            .ThenInclude(x => x.PublicationAssociations)
+                                .ThenInclude(x => x.Publication.Citations)
                     .Include(repo => repo.Statistics)
                     .First(x => x.ID == id);
             }
@@ -543,7 +543,7 @@ namespace Genometric.TVQ.API.Controllers
                         .ThenInclude(x => x.Downloads)
                     .Include(repo => repo.ToolAssociations)
                         .ThenInclude(x => x.Tool)
-                            .ThenInclude(x => x.Publications)
+                            .ThenInclude(x => x.PublicationAssociations)
                     .First(x => x.ID == id);
             }
         }

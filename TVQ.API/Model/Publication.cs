@@ -10,8 +10,6 @@ namespace Genometric.TVQ.API.Model
     {
         public int ID { set; get; }
 
-        public int ToolID { set; get; }
-
         public string PubMedID { set; get; }
 
         public string EID { set; get; }
@@ -46,8 +44,6 @@ namespace Genometric.TVQ.API.Model
 
         public string Publisher { set; get; }
 
-        public virtual Tool Tool { set; get; }
-
         public virtual ICollection<Citation> Citations { set; get; }
 
         public virtual ICollection<Author> Authors { set; get; }
@@ -55,6 +51,8 @@ namespace Genometric.TVQ.API.Model
         public virtual ICollection<Keyword> Keywords { set; get; }
 
         public virtual ICollection<AuthorPublication> AuthorPublications { set; get; }
+
+        public virtual ICollection<ToolPublicationAssociation> ToolAssociations { set; get; }
 
         public Publication() { }
 
@@ -75,10 +73,10 @@ namespace Genometric.TVQ.API.Model
             string chapter = default,
             string pages = default,
             string publisher = default,
-            Tool tool = default,
             ICollection<Citation> citations = default,
             List<Author> authors = default,
-            List<Keyword> keywords = default)
+            List<Keyword> keywords = default,
+            ICollection<ToolPublicationAssociation> toolAssociations = default)
         {
             PubMedID = pubMedID;
             EID = eID;
@@ -96,10 +94,10 @@ namespace Genometric.TVQ.API.Model
             Chapter = chapter;
             Pages = pages;
             Publisher = publisher;
-            Tool = tool;
             Citations = citations;
             Authors = authors;
             Keywords = keywords;
+            ToolAssociations = toolAssociations;
         }
     }
 }

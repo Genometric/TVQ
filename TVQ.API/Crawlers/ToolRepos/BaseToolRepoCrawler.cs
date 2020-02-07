@@ -17,6 +17,10 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected ConcurrentDictionary<string, ToolRepoAssociation> ToolRepoAssociationsDict { get; }
 
+        protected ConcurrentDictionary<string, Publication> PublicationsDict { get; }
+
+        protected ConcurrentDictionary<string, ToolPublicationAssociation> ToolPubAssociationsDict { get; }
+
         protected Dictionary<string, Category> Categories { get; }
 
         public ReadOnlyCollection<Tool> Tools
@@ -31,19 +35,44 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected Repository Repo { get; }
 
-        protected BaseToolRepoCrawler(Repository repo, List<Tool> tools, List<Category> categories)
+        protected BaseToolRepoCrawler(
+            Repository repo,
+            List<Tool> tools,
+            List<Publication> publications,
+            List<Category> categories)
         {
             Repo = repo;
             if (tools != null)
                 ToolsDict = new ConcurrentDictionary<string, Tool>(
                             tools.ToDictionary(
-                                x => FormatToolName(x.Name), x => x));
+                                x => FormatToolName(x.Name),
+                                x => x));
 
             if (Repo != null)
                 ToolRepoAssociationsDict =
                     new ConcurrentDictionary<string, ToolRepoAssociation>(
                         repo.ToolAssociations.ToDictionary(
-                            x => FormatToolRepoAssociationName(x), x => x));
+                            x => FormatToolRepoAssociationName(x),
+                            x => x));
+
+            if (publications != null)
+            {
+                PublicationsDict =
+                    new ConcurrentDictionary<string, Publication>(
+                        publications.ToDictionary(
+                            x => GetPublicationHashkey(x),
+                            x => x));
+
+                ToolPubAssociationsDict =
+                    new ConcurrentDictionary<string, ToolPublicationAssociation>();
+
+                foreach (var publication in publications)
+                    foreach (var association in publication.ToolAssociations)
+                        ToolPubAssociationsDict.TryAdd(
+                            GetToolPubAssociationHashKey(association.Tool, association),
+                            association);
+            }
+
 
             Categories = new Dictionary<string, Category>();
             UpdateCategories(categories);
@@ -71,9 +100,65 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             return FormatToolRepoAssociationName(association.Tool);
         }
 
+        private string GetPublicationHashkey(Publication publication)
+        {
+            return publication.DOI != null ? publication.DOI : publication.Title;
+        }
+
+        private string GetToolPubAssociationHashKey(Tool tool, ToolPublicationAssociation association)
+        {
+            // The reason that the "Tool" property of association is not used here, is 
+            // because that property is only set if it can be set; e.g., if checking the 
+            // related dictionaries, it turns out that the given association already 
+            // exists, then it will not be added to the tool.
+            return FormatToolName(tool.Name)
+                   + "::"
+                   + GetPublicationHashkey(association.Publication);
+        }
+
         public abstract Task ScanAsync();
 
-        protected bool TryAddToolRepoAssociations(ToolRepoAssociation association)
+        private void AddToolPubAssociations(Tool tool, List<ToolPublicationAssociation> associations)
+        {
+            if (associations == null || associations.Count == 0)
+                return;
+
+            foreach (var association in associations)
+            {
+                var pubHashKey = GetPublicationHashkey(association.Publication);
+                
+                // Does a publication (according to the publication hash key) as the 
+                // given one has already been defined?
+                // If no, then keep the parsed publication and add it to the dictionary.
+                if (!PublicationsDict.TryAdd(pubHashKey, association.Publication))
+                {
+                    // Yes, then replaced the parsed publication with the one that already exists.
+                    /// Note:
+                    /// -----
+                    /// Alternative to this is to merge the information in two citations. 
+                    /// However, since the one already in PublicationsDict may have more complete
+                    /// information because it may have been updated by the info from Scopus, this
+                    /// approach is used. Also, merging two publications (fill the missing info
+                    /// from each other) is not trivial.
+                    association.Publication = PublicationsDict[pubHashKey];
+                }
+
+                if (ToolPubAssociationsDict.TryAdd(GetToolPubAssociationHashKey(tool, association),
+                                                   association))
+                {
+                    // The tool-publication association does not exist, and can be added.
+                    association.Tool = tool;
+                    tool.PublicationAssociations.Add(association);
+                }
+                else
+                {
+                    // This association already exists.
+                    continue;
+                }
+            }
+        }
+
+        private bool TryAddToolRepoAssociations(ToolRepoAssociation association)
         {
             if (association == null ||
                 association.Tool == null ||
@@ -97,18 +182,39 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected bool TryAddEntities(Tool tool, Publication pub)
         {
-            return TryAddEntities(new ToolRepoAssociation() { Tool = tool }, new List<Publication> { pub }, new List<string>());
+            var toolPubAssociations = new List<ToolPublicationAssociation>
+            {
+                new ToolPublicationAssociation { Publication = pub }
+            };
+
+            return TryAddEntities(
+                new ToolRepoAssociation() { Tool = tool },
+                toolPubAssociations,
+                new List<string>());
         }
 
-        protected bool TryAddEntities(ToolRepoAssociation association, List<Publication> pubs, List<string> categoryIDs = null)
+        protected bool TryAddEntities(ToolRepoAssociation toolRepoAssociation, List<Publication> publications)
+        {
+            var toolPubAssociations = new List<ToolPublicationAssociation>();
+            foreach (var pub in publications)
+                toolPubAssociations.Add(new ToolPublicationAssociation() { Publication = pub });
+            return TryAddEntities(toolRepoAssociation, toolPubAssociations);
+        }
+
+        protected bool TryAddEntities(
+            ToolRepoAssociation toolRepoAssociation,
+            List<ToolPublicationAssociation> toolPublicationAssociation,
+            List<string> categoryIDs = null)
         {
             if (categoryIDs == null)
                 categoryIDs = new List<string>();
 
             return TryAddEntities(
-                new ToolInfo(association, SessionTempPath)
+                new ToolInfo(
+                    toolRepoAssociation,
+                    toolPublicationAssociation,
+                    SessionTempPath)
                 {
-                    Publications = pubs,
                     CategoryIDs = categoryIDs
                 });
         }
@@ -118,13 +224,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             if (info == null)
                 return false;
 
-            if (info.Publications != null)
-                foreach (var pub in info.Publications)
-                {
-                    pub.Tool = info.ToolRepoAssociation.Tool;
-                    info.ToolRepoAssociation.Tool.Publications.Add(pub);
-                }
-
             foreach (var categoryID in info.CategoryIDs)
                 if (Categories.TryGetValue(categoryID, out Category category))
                     info.ToolRepoAssociation.Tool.CategoryAssociations
@@ -133,6 +232,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                             Category = category
                         });
 
+            AddToolPubAssociations(info.ToolRepoAssociation.Tool, info.ToolPubAssociations);
             return TryAddToolRepoAssociations(info.ToolRepoAssociation);
         }
 

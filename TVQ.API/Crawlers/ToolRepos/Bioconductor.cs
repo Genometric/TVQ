@@ -14,7 +14,12 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         private readonly string _statsFileName = "package_stats.tsv";
         private readonly string _dateAddedFileName = "first_appearance.csv";
 
-        public Bioconductor(Repository repo, List<Tool> tools, List<Category> categories) : base(repo, tools, categories)
+        public Bioconductor(
+            Repository repo,
+            List<Tool> tools,
+            List<Publication> publications,
+            List<Category> categories) :
+            base(repo, tools, publications, categories)
         { }
 
         public override async Task ScanAsync()

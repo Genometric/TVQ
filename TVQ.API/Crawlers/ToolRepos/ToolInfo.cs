@@ -8,7 +8,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
     {
         public ToolRepoAssociation ToolRepoAssociation { get; }
 
-        public List<Publication> Publications { set; get; }
+        public List<ToolPublicationAssociation> ToolPubAssociations { set; get; }
 
         public List<string> CategoryIDs { set; get; }
 
@@ -38,7 +38,10 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         /// </summary>
         public List<string> XMLFiles { set; get; }
 
-        public ToolInfo(ToolRepoAssociation toolRepoAssociation, string sessionPath)
+        public ToolInfo(
+            ToolRepoAssociation toolRepoAssociation,
+            List<ToolPublicationAssociation> toolPublicationAssociations,
+            string sessionPath)
         {
             do
             {
@@ -50,6 +53,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             Directory.CreateDirectory(StagingArea);
 
             ToolRepoAssociation = toolRepoAssociation;
+            ToolPubAssociations = toolPublicationAssociations;
             ArchiveFilename = StagingArea + Utilities.GetRandomString(8);
 
             /// To avoid `path traversal attacks` from malicious software, 

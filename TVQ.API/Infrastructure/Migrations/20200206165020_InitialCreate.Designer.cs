@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
     [DbContext(typeof(TVQContext))]
-    [Migration("20200203164004_InitialCreate")]
+    [Migration("20200206165020_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -229,9 +229,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ToolID")
-                        .HasColumnType("int");
-
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
@@ -244,8 +241,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.HasKey("ID");
 
                     b.HasIndex("LiteratureCrawlingJobID");
-
-                    b.HasIndex("ToolID");
 
                     b.ToTable("Publications");
                 });
@@ -429,6 +424,28 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.ToTable("ToolDownloadRecords");
                 });
 
+            modelBuilder.Entity("Genometric.TVQ.API.Model.ToolPublicationAssociation", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("PublicationID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ToolID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("PublicationID");
+
+                    b.HasIndex("ToolID");
+
+                    b.ToTable("ToolPublicationAssociations");
+                });
+
             modelBuilder.Entity("Genometric.TVQ.API.Model.ToolRepoAssociation", b =>
                 {
                     b.Property<int>("ID")
@@ -515,12 +532,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.HasOne("Genometric.TVQ.API.Model.LiteratureCrawlingJob", null)
                         .WithMany("Publications")
                         .HasForeignKey("LiteratureCrawlingJobID");
-
-                    b.HasOne("Genometric.TVQ.API.Model.Tool", "Tool")
-                        .WithMany("Publications")
-                        .HasForeignKey("ToolID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.RepoCrawlingJob", b =>
@@ -567,6 +578,21 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.HasOne("Genometric.TVQ.API.Model.ToolRepoAssociation", null)
                         .WithMany("Downloads")
                         .HasForeignKey("ToolRepoAssociationID");
+                });
+
+            modelBuilder.Entity("Genometric.TVQ.API.Model.ToolPublicationAssociation", b =>
+                {
+                    b.HasOne("Genometric.TVQ.API.Model.Publication", "Publication")
+                        .WithMany("ToolAssociations")
+                        .HasForeignKey("PublicationID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Genometric.TVQ.API.Model.Tool", "Tool")
+                        .WithMany("PublicationAssociations")
+                        .HasForeignKey("ToolID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Genometric.TVQ.API.Model.ToolRepoAssociation", b =>

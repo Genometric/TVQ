@@ -12,7 +12,7 @@
                 return;
 
             ID = publication.ID;
-            ToolID = publication.ToolID;
+            //ToolID = publication.ToolID;
         }
     }
 }

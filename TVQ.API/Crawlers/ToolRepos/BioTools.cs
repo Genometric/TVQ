@@ -11,7 +11,12 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 {
     public class BioTools : BaseToolRepoCrawler
     {
-        public BioTools(Repository repo, List<Tool> tools, List<Category> categories) : base(repo, tools, categories)
+        public BioTools(
+            Repository repo,
+            List<Tool> tools,
+            List<Publication> publications,
+            List<Category> categories) :
+            base(repo, tools, publications, categories)
         { }
 
         public override async Task ScanAsync()

@@ -2,8 +2,11 @@
 using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,12 +24,13 @@ namespace Genometric.TVQ.API.Crawlers
             LiteratureCrawlingJob job,
             CancellationToken cancellationToken)
         {
-            if(job.ScanAllPublications)
+            if (job.ScanAllPublications)
                 job.Publications = Context.Publications.ToList();
-            
+
             Context.Entry(job).Collection(x => x.Publications).Load();
             using var scopusCrawler = new Scopus(job.Publications, Logger);
             await scopusCrawler.CrawlAsync().ConfigureAwait(false);
+            //Map();
 
             /// It is better to let the scheduler to set the status and 
             /// save the changes. However, since the scheduler is in a 
@@ -40,6 +44,51 @@ namespace Genometric.TVQ.API.Crawlers
             /// ACID).
             job.Status = State.Completed;
             await Context.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+
+        // THIS IS AN EXPERIMENTAL METHOD.
+        private void Map()
+        {
+            var tools = Context.Tools.Include(x => x.PublicationAssociations)
+                .ThenInclude(x => x.Publication.Citations)
+                .Include(x => x.RepoAssociations)
+                .ThenInclude(x => x.Repository)
+                .ToList();
+
+            var toolsDict = new Dictionary<string, Tool>();
+
+            foreach (var tool in tools)
+            {
+                foreach (var association in tool.PublicationAssociations)
+                {
+                    if (association.Publication.DOI != null)
+                    {
+                        if (!toolsDict.ContainsKey(association.Publication.DOI))
+                        {
+                            toolsDict.Add(association.Publication.DOI, tool);
+                        }
+                        else
+                        {
+                            var merged = Merge(toolsDict[association.Publication.DOI], tool);
+                            Context.Tools.Remove(tool);
+                            Context.Tools.Remove(toolsDict[association.Publication.DOI]);
+                            Context.Tools.Add(merged);
+                            //toolsDict.Add(publication.DOI, merged);
+                        }
+                    }
+                }
+            }
+        }
+
+        private Tool Merge(Tool a, Tool b)
+        {
+            return a;
+            foreach (PropertyInfo prop in typeof(Tool).GetProperties())
+                if (prop.GetValue(a) == null && prop.GetValue(b) != null)
+                    prop.SetValue(a, prop.GetValue(b));
+
+            return a;
         }
     }
 }

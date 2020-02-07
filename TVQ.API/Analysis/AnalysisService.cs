@@ -50,8 +50,8 @@ namespace Genometric.TVQ.API.Analysis
                                       .Include(x => x.Repository)
                                         .ThenInclude(x => x.ToolAssociations)
                                             .ThenInclude(x => x.Tool)
-                                                .ThenInclude(x => x.Publications)
-                                                    .ThenInclude(x => x.Citations)
+                                                .ThenInclude(x => x.PublicationAssociations)
+                                                    .ThenInclude(x => x.Publication.Citations)
                                       .Include(x => x.Repository)
                                         .ThenInclude(x => x.Statistics)
                                       .First(x => x.ID == job.ID);
@@ -83,12 +83,15 @@ namespace Genometric.TVQ.API.Analysis
                 if (toolsToInclude != null &&
                     !toolsToInclude.Contains(tool.ID))
                     continue;
-                Context.Entry(tool).Collection(x => x.Publications).Load();
-                foreach (var pub in tool.Publications)
-                    if (pub.Citations != null && pub.Year >= _earliestCitationYear)
+                Context.Entry(tool).Collection(x => x.PublicationAssociations).Load();
+                foreach (var publicationAssociation in tool.PublicationAssociations)
+                {
+                    //Context.Entry(pub).Collection(x => x.Publication).Load();
+                    var publication = publicationAssociation.Publication;
+                    if (publication.Citations != null && publication.Year >= _earliestCitationYear)
                     {
-                        Context.Entry(pub).Collection(x => x.Citations).Load();
-                        foreach (var citation in pub.Citations)
+                        Context.Entry(publication).Collection(x => x.Citations).Load();
+                        foreach (var citation in publication.Citations)
                         {
                             if (!changes.ContainsKey(tool.ID))
                                 changes.Add(tool.ID, new List<CitationChange>());
@@ -110,6 +113,7 @@ namespace Genometric.TVQ.API.Analysis
                             // maxCitationCount = Math.Max(maxCitationCount, citation.Count);
                         }
                     }
+                }
             }
 
 
@@ -216,10 +220,10 @@ namespace Genometric.TVQ.API.Analysis
             foreach (var association in repository.ToolAssociations)
             {
                 var tool = association.Tool;
-                foreach (var pub in tool.Publications)
+                foreach (var publicationAssociation in tool.PublicationAssociations)
                 {
-                    if (pub.Citations != null)
-                        foreach (var citation in pub.Citations)
+                    if (publicationAssociation.Publication.Citations != null)
+                        foreach (var citation in publicationAssociation.Publication.Citations)
                         {
                             count = citation.Count / 12;
                             if (citation.Date < association.DateAddedToRepository)
@@ -237,13 +241,13 @@ namespace Genometric.TVQ.API.Analysis
             foreach (var association in repository.ToolAssociations)
             {
                 var tool = association.Tool;
-                foreach (var pub in tool.Publications)
+                foreach (var pub in tool.PublicationAssociations)
                 {
                     if (!citations.ContainsKey(tool.ID))
                         citations.Add(tool.ID, new double[2]);
 
-                    if (pub.Citations != null)
-                        foreach (var citation in pub.Citations)
+                    if (pub.Publication.Citations != null)
+                        foreach (var citation in pub.Publication.Citations)
                             if (citation.Date < association.DateAddedToRepository)
                             {
                                 citations[tool.ID][0] += citation.Count;
@@ -267,16 +271,16 @@ namespace Genometric.TVQ.API.Analysis
             foreach (var association in repository.ToolAssociations)
             {
                 var tool = association.Tool;
-                Context.Entry(tool).Collection(x => x.Publications).Load();
-                foreach (var pub in tool.Publications)
-                    if (pub.Citations != null && pub.Year >= _earliestCitationYear)
+                Context.Entry(tool).Collection(x => x.PublicationAssociations).Load();
+                foreach (var pub in tool.PublicationAssociations)
+                    if (pub.Publication.Citations != null && pub.Publication.Year >= _earliestCitationYear)
                     {
-                        Context.Entry(pub).Collection(x => x.Citations).Load();
-                        if (pub.Citations.Count == 0 ||
-                            (pub.Citations.Count == 1 && pub.Citations.First().Count == 0))
+                        Context.Entry(pub).Collection(x => x.Publication.Citations).Load();
+                        if (pub.Publication.Citations.Count == 0 ||
+                            (pub.Publication.Citations.Count == 1 && pub.Publication.Citations.First().Count == 0))
                             continue;
 
-                        foreach (var citation in pub.Citations)
+                        foreach (var citation in pub.Publication.Citations)
                         {
                             if (!changes.ContainsKey(tool.ID))
                                 changes.Add(tool.ID, new SortedDictionary<double, double>());

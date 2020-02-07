@@ -83,6 +83,42 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Publications",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PubMedID = table.Column<string>(nullable: true),
+                    EID = table.Column<string>(nullable: true),
+                    ScopusID = table.Column<string>(nullable: true),
+                    Type = table.Column<int>(nullable: false),
+                    Title = table.Column<string>(nullable: true),
+                    Year = table.Column<int>(nullable: true),
+                    Month = table.Column<int>(nullable: true),
+                    Day = table.Column<int>(nullable: true),
+                    CitedBy = table.Column<int>(nullable: true),
+                    DOI = table.Column<string>(nullable: true),
+                    BibTeXEntry = table.Column<string>(nullable: true),
+                    Journal = table.Column<string>(nullable: true),
+                    Volume = table.Column<string>(nullable: true),
+                    Number = table.Column<int>(nullable: true),
+                    Chapter = table.Column<string>(nullable: true),
+                    Pages = table.Column<string>(nullable: true),
+                    Publisher = table.Column<string>(nullable: true),
+                    LiteratureCrawlingJobID = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Publications", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Publications_LiteratureCrawlingJobs_LiteratureCrawlingJobID",
+                        column: x => x.LiteratureCrawlingJobID,
+                        principalTable: "LiteratureCrawlingJobs",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AnalysisJobs",
                 columns: table => new
                 {
@@ -144,49 +180,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         name: "FK_Statistics_Repositories_RepositoryID",
                         column: x => x.RepositoryID,
                         principalTable: "Repositories",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Publications",
-                columns: table => new
-                {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ToolID = table.Column<int>(nullable: false),
-                    PubMedID = table.Column<string>(nullable: true),
-                    EID = table.Column<string>(nullable: true),
-                    ScopusID = table.Column<string>(nullable: true),
-                    Type = table.Column<int>(nullable: false),
-                    Title = table.Column<string>(nullable: true),
-                    Year = table.Column<int>(nullable: true),
-                    Month = table.Column<int>(nullable: true),
-                    Day = table.Column<int>(nullable: true),
-                    CitedBy = table.Column<int>(nullable: true),
-                    DOI = table.Column<string>(nullable: true),
-                    BibTeXEntry = table.Column<string>(nullable: true),
-                    Journal = table.Column<string>(nullable: true),
-                    Volume = table.Column<string>(nullable: true),
-                    Number = table.Column<int>(nullable: true),
-                    Chapter = table.Column<string>(nullable: true),
-                    Pages = table.Column<string>(nullable: true),
-                    Publisher = table.Column<string>(nullable: true),
-                    LiteratureCrawlingJobID = table.Column<int>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Publications", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_Publications_LiteratureCrawlingJobs_LiteratureCrawlingJobID",
-                        column: x => x.LiteratureCrawlingJobID,
-                        principalTable: "LiteratureCrawlingJobs",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Publications_Tools_ToolID",
-                        column: x => x.ToolID,
-                        principalTable: "Tools",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -312,6 +305,32 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ToolPublicationAssociations",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ToolID = table.Column<int>(nullable: false),
+                    PublicationID = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ToolPublicationAssociations", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_ToolPublicationAssociations_Publications_PublicationID",
+                        column: x => x.PublicationID,
+                        principalTable: "Publications",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ToolPublicationAssociations_Tools_ToolID",
+                        column: x => x.ToolID,
+                        principalTable: "Tools",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ToolDownloadRecords",
                 columns: table => new
                 {
@@ -401,11 +420,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 column: "LiteratureCrawlingJobID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Publications_ToolID",
-                table: "Publications",
-                column: "ToolID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_RepoCrawlingJobs_RepositoryID",
                 table: "RepoCrawlingJobs",
                 column: "RepositoryID");
@@ -446,6 +460,16 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 name: "IX_ToolDownloadRecords_ToolRepoAssociationID",
                 table: "ToolDownloadRecords",
                 column: "ToolRepoAssociationID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ToolPublicationAssociations_PublicationID",
+                table: "ToolPublicationAssociations",
+                column: "PublicationID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ToolPublicationAssociations_ToolID",
+                table: "ToolPublicationAssociations",
+                column: "ToolID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ToolRepoAssociations_RepositoryID",
@@ -495,6 +519,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 name: "ToolDownloadRecords");
 
             migrationBuilder.DropTable(
+                name: "ToolPublicationAssociations");
+
+            migrationBuilder.DropTable(
                 name: "Authors");
 
             migrationBuilder.DropTable(
@@ -510,10 +537,10 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 name: "Repositories");
 
             migrationBuilder.DropTable(
-                name: "LiteratureCrawlingJobs");
+                name: "Tools");
 
             migrationBuilder.DropTable(
-                name: "Tools");
+                name: "LiteratureCrawlingJobs");
         }
     }
 }

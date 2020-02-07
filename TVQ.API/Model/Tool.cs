@@ -20,15 +20,15 @@ namespace Genometric.TVQ.API.Model
 
         public virtual ICollection<ToolRepoAssociation> RepoAssociations { set; get; }
 
-        public virtual ICollection<Publication> Publications { set; get; }
-
         public virtual ICollection<ToolCategoryAssociation> CategoryAssociations { set; get; }
+
+        public virtual ICollection<ToolPublicationAssociation> PublicationAssociations { set; get; }
 
         public Tool()
         {
             RepoAssociations = new List<ToolRepoAssociation>();
-            Publications = new List<Publication>();
             CategoryAssociations = new List<ToolCategoryAssociation>();
+            PublicationAssociations = new List<ToolPublicationAssociation>();
         }
     }
 }
