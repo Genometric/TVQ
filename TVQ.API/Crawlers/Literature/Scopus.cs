@@ -31,14 +31,10 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             get { return Environment.GetEnvironmentVariable("SCOPUS_API_KEY"); }
         }
 
-        private readonly List<Publication> _publications;
-        private readonly ILogger<BaseService<LiteratureCrawlingJob>> _logger;
-
-        public Scopus(List<Publication> publications, ILogger<BaseService<LiteratureCrawlingJob>> logger)
-        {
-            _logger = logger;
-            _publications = publications;
-        }
+        public Scopus(List<Publication> publications,
+                      ILogger<BaseService<LiteratureCrawlingJob>> logger) :
+            base(publications, logger)
+        { }
 
         public async Task CrawlAsync()
         {
@@ -60,13 +56,18 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 new Func<Publication, Publication>(UpdateWithScopusInfo),
                 blockOptions);
 
+            var mergePubsIfNecessary = new TransformBlock<Publication, Publication>(
+                new Func<Publication, Publication>(MergePubsIfNecessary),
+                blockOptions);
+
             var getCitations = new ActionBlock<Publication>(
                 input => { GetCitations(input); },
                 blockOptions);
 
-            updateWithScopusInfo.LinkTo(getCitations, linkOptions);
+            updateWithScopusInfo.LinkTo(mergePubsIfNecessary, linkOptions);
+            mergePubsIfNecessary.LinkTo(getCitations, linkOptions);
 
-            foreach (var publication in _publications)
+            foreach (var publication in Publications)
                 updateWithScopusInfo.Post(publication);
 
             updateWithScopusInfo.Complete();
@@ -76,7 +77,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
 
         private Publication UpdateWithScopusInfo(Publication publication)
         {
-            _logger.LogInformation($"Updating publication {publication.ID} info.");
+            Logger.LogInformation($"Updating publication {publication.ID} info.");
 
             var uriBuilder = new UriBuilder("https://api.elsevier.com/content/search/scopus");
             var parameters = HttpUtility.ParseQueryString(string.Empty);
@@ -343,13 +344,13 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             for (int i = 1; i < dates.Count; i++)
                 accumulatedCitationsCount[dates[i]] += accumulatedCitationsCount[dates[i - 1]];
 
-            foreach(var citation in publication.Citations)
+            foreach (var citation in publication.Citations)
                 citation.AccumulatedCount = accumulatedCitationsCount[citation.Date];
         }
 
         private void LogSkippedPublications(Publication publication, string reason)
         {
-            _logger.LogDebug($"Skipping publication {publication.ID}: {reason}");
+            Logger.LogDebug($"Skipping publication {publication.ID}: {reason}");
         }
     }
 }

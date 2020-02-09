@@ -17,10 +17,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected ConcurrentDictionary<string, ToolRepoAssociation> ToolRepoAssociationsDict { get; }
 
-        protected ConcurrentDictionary<string, Publication> PublicationsDict { get; }
-
-        protected ConcurrentDictionary<string, ToolPublicationAssociation> ToolPubAssociationsDict { get; }
-
         protected Dictionary<string, Category> Categories { get; }
 
         public ReadOnlyCollection<Tool> Tools
@@ -35,11 +31,11 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected Repository Repo { get; }
 
-        protected BaseToolRepoCrawler(
-            Repository repo,
-            List<Tool> tools,
-            List<Publication> publications,
-            List<Category> categories)
+        protected BaseToolRepoCrawler(Repository repo,
+                                      List<Tool> tools,
+                                      List<Publication> publications,
+                                      List<Category> categories) :
+            base(publications)
         {
             Repo = repo;
             if (tools != null)
@@ -54,23 +50,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                         repo.ToolAssociations.ToDictionary(
                             x => FormatToolRepoAssociationName(x),
                             x => x));
-
-            if (publications != null)
-            {
-                PublicationsDict = new ConcurrentDictionary<string, Publication>();
-                foreach (var publication in publications)
-                    if (TryGetPublicationHashkey(publication, out string hashKey))
-                        PublicationsDict.TryAdd(hashKey, publication);
-
-                ToolPubAssociationsDict =
-                    new ConcurrentDictionary<string, ToolPublicationAssociation>();
-
-                foreach (var publication in publications)
-                    foreach (var association in publication.ToolAssociations)
-                        if (TryGetToolPubAssociationHashKey(association.Tool, association, out string hashKey))
-                            ToolPubAssociationsDict.TryAdd(hashKey, association);
-            }
-
 
             Categories = new Dictionary<string, Category>();
             UpdateCategories(categories);
@@ -98,57 +77,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             return FormatToolRepoAssociationName(association.Tool);
         }
 
-        private bool TryGetPublicationHashkey(Publication publication, out string hashKey)
-        {
-            if (publication.DOI != null)
-                hashKey = publication.DOI;
-            else if (publication.PubMedID != null)
-                hashKey = publication.PubMedID;
-            else if (publication.Title != null)
-                hashKey = publication.Title;
-            else
-            {
-                hashKey = null;
-                return false;
-            }
-            return true;
-        }
-
-        private bool TryGetToolPubAssociationHashKey(
-            Tool tool,
-            string publicationHashKey,
-            out string hashKey)
-        {
-            if (tool == null || tool.Name == null || publicationHashKey == null)
-            {
-                hashKey = null;
-                return false;
-            }
-
-            hashKey = FormatToolName(tool.Name) + "::" + publicationHashKey;
-            return true;
-        }
-
-        private bool TryGetToolPubAssociationHashKey(
-            Tool tool,
-            ToolPublicationAssociation association,
-            out string hashKey)
-        {
-            // The reason that the "Tool" property of association is not used here, is 
-            // because that property is only set if it can be set; e.g., if checking the 
-            // related dictionaries, it turns out that the given association already 
-            // exists, then it will not be added to the tool.
-
-            hashKey = null;
-            if (association == null ||
-                association.Publication == null)
-                return false;
-
-            return
-                TryGetPublicationHashkey(association.Publication, out string pubHashKey) &&
-                TryGetToolPubAssociationHashKey(tool, pubHashKey, out hashKey);
-        }
-
         public abstract Task ScanAsync();
 
         private void AddToolPubAssociations(Tool tool, List<ToolPublicationAssociation> associations)
@@ -158,13 +86,10 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
             foreach (var association in associations)
             {
-                if (!TryGetPublicationHashkey(association.Publication, out string pubHashKey))
-                    continue;
-
                 // Does a publication (according to the publication hash key) as the 
                 // given one has already been defined?
                 // If no, then keep the parsed publication and add it to the dictionary.
-                if (!PublicationsDict.TryAdd(pubHashKey, association.Publication))
+                if (!TryAddPublication(association.Publication))
                 {
                     // Yes, then replaced the parsed publication with the one that already exists.
                     /// Note:
@@ -172,29 +97,19 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                     /// Alternative to this is to merge the information in two citations. 
                     /// However, since the one already in PublicationsDict may have more complete
                     /// information because it may have been updated by the info from Scopus, this
-                    /// approach is used. Also, merging two publications (fill the missing info
-                    /// from each other) is not trivial.
-                    association.Publication = PublicationsDict[pubHashKey];
+                    /// approach is used. Also, merging two publications comes with many corner 
+                    /// cases to be addressed.
+                    association.Publication = GetPublication(association.Publication);
                 }
 
-                if (TryGetToolPubAssociationHashKey(tool, pubHashKey, out string associationHashKey))
+                if(TryAddToolPublicationAssociation(tool, association))
                 {
-                    if (ToolPubAssociationsDict.TryAdd(associationHashKey, association))
-                    {
-                        // The tool-publication association does not exist, and can be added.
-                        association.Tool = tool;
-                        tool.PublicationAssociations.Add(association);
-                    }
-                    else
-                    {
-                        // This association already exists.
-                        // TODO: log this.
-                        continue;
-                    }
+                    association.Tool = tool;
+                    tool.PublicationAssociations.Add(association);
                 }
                 else
                 {
-                    // Cannot compute a hash key for the association, 
+                    // This association already exists.
                     // TODO: log this.
                     continue;
                 }

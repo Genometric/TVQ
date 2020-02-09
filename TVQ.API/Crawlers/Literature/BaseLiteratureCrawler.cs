@@ -1,12 +1,19 @@
-﻿using System;
+﻿using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
+using Genometric.TVQ.API.Model;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Genometric.TVQ.API.Crawlers;
 
 namespace Genometric.TVQ.API.Crawlers.Literature
 {
     public class BaseLiteratureCrawler : BaseCrawler
     {
+        protected ILogger<BaseService<LiteratureCrawlingJob>> Logger { set; get; }
+
+        public BaseLiteratureCrawler(List<Publication> publications,
+                                     ILogger<BaseService<LiteratureCrawlingJob>> logger) :
+            base(publications)
+        {
+            Logger = logger;
+        }
     }
 }
