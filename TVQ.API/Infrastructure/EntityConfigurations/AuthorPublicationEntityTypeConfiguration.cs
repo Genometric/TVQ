@@ -4,25 +4,24 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Genometric.TVQ.API.Infrastructure.EntityConfigurations
 {
-    public class AuthorPubEntityTypeConfiguration : IEntityTypeConfiguration<AuthorPublication>
+    public class AuthorPublicationAssociationsETC : IEntityTypeConfiguration<AuthorPublicationAssociation>
     {
-        public void Configure(EntityTypeBuilder<AuthorPublication> builder)
+        public void Configure(EntityTypeBuilder<AuthorPublicationAssociation> builder)
         {
-            builder.ToTable("AuthorsPublications");
-            builder.HasKey(e => new { e.PublicationID, e.AuthorID });
+            builder.ToTable("AuthorsPublicationAssociations");
 
-            builder
-                .HasOne(authorPub => authorPub.Author)
-                .WithMany(author => author.AuthorPublications)
-                .HasForeignKey(authorPub => authorPub.AuthorID);
+            builder.HasKey(obi => obi.ID);
 
-            builder
-                .HasOne(authorPub => authorPub.Publication)
-                .WithMany(pub => pub.AuthorPublications)
-                .HasForeignKey(authorPub => authorPub.PublicationID);
+            builder.Property(obj => obj.ID).IsRequired(true);
 
-            //builder.Property(e => e.AuthorID);
-            //builder.Property(e => e.PublicationID);
+            foreach (var p in typeof(AuthorPublicationAssociation).GetProperties())
+            {
+                if (p.Name == nameof(AuthorPublicationAssociation.ID) ||
+                    p.Name == nameof(AuthorPublicationAssociation.Publication) ||
+                    p.Name == nameof(AuthorPublicationAssociation.Author))
+                    continue;
+                builder.Property(p.Name);
+            }
         }
     }
 }

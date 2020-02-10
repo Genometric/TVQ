@@ -1,7 +1,9 @@
 ﻿namespace Genometric.TVQ.API.Model
 {
-    public class AuthorPublication
+    public class AuthorPublicationAssociation
     {
+        public int ID { set; get; }
+
         public int AuthorID { set; get; }
         public virtual Author Author { set; get; }
 
@@ -9,9 +11,9 @@
         public virtual Publication Publication { set; get; }
 
         // This parameterless constructor is required by EF.
-        public AuthorPublication() { }
+        public AuthorPublicationAssociation() { }
 
-        public AuthorPublication(Author author, Publication publication)
+        public AuthorPublicationAssociation(Author author, Publication publication)
         {
             Author = author;
             Publication = publication;

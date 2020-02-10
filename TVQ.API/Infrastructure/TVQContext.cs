@@ -27,6 +27,8 @@ namespace Genometric.TVQ.API.Infrastructure
         public DbSet<AnalysisJob> AnalysisJobs { set; get; }
         public DbSet<Statistics> Statistics { set; get; }
         public DbSet<ToolPublicationAssociation> ToolPublicationAssociations { set; get; }
+        public DbSet<AuthorPublicationAssociation> AuthorPublicationAssociations { set; get; }
+        public DbSet<PublicationKeywordAssociation> PublicationKeywordAssociations { set; get; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -38,13 +40,14 @@ namespace Genometric.TVQ.API.Infrastructure
             builder.ApplyConfiguration(new ToolDownloadRecordEntityTypeConfiguration());
             builder.ApplyConfiguration(new AuthorEntityTypeConfiguration());
             builder.ApplyConfiguration(new KeywordEntityTypeConfiguration());
-            builder.ApplyConfiguration(new AuthorPubEntityTypeConfiguration());
+            builder.ApplyConfiguration(new AuthorPublicationAssociationsETC());
             builder.ApplyConfiguration(new StatisticsEntityTypeConfiguration());
             builder.ApplyConfiguration(new CategoryETC());
             builder.ApplyConfiguration(new ServiceETC());
             builder.ApplyConfiguration(new RepoCrawlingJobETC());
             builder.ApplyConfiguration(new LiteratureCrawlingJobETC());
             builder.ApplyConfiguration(new AnalysisJobETC());
+            builder.ApplyConfiguration(new PublicationKeywordAssociationETC());
         }
     }
 }

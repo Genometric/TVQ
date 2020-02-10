@@ -1,4 +1,5 @@
 ﻿using Genometric.BibitemParser;
+using Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes;
 using Genometric.TVQ.API.Model;
 using System;
 using System.Collections.Concurrent;
@@ -11,7 +12,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 {
     public abstract class BaseToolRepoCrawler : BaseCrawler
     {
-        private readonly Parser<Publication, Author, Keyword> _bibitemParser;
+        private readonly Parser<ParsedPublication, Author, Keyword> _bibitemParser;
 
         protected ConcurrentDictionary<string, Tool> ToolsDict { get; }
 
@@ -56,8 +57,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
             ToolDownloadRecords = new ConcurrentBag<ToolDownloadRecord>();
 
-            _bibitemParser = new Parser<Publication, Author, Keyword>(
-                new PublicationConstructor(),
+            _bibitemParser = new Parser<ParsedPublication, Author, Keyword>(
+                new ParsedPublicationConstructor(),
                 new AuthorConstructor(),
                 new KeywordConstructor());
         }
@@ -197,21 +198,17 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected bool TryParseBibitem(string bibitem, out Publication publication)
         {
-            if (_bibitemParser.TryParse(bibitem, out publication) &&
-                publication.Year != null)
+            if (_bibitemParser.TryParse(bibitem, out ParsedPublication parsedPublication) &&
+                parsedPublication.Year != null)
             {
-                if (publication.Authors != null &&
-                    publication.Authors.Count > 0)
-                {
-                    publication.AuthorPublications = new List<AuthorPublication>();
-                    foreach (var author in publication.Authors)
-                        publication.AuthorPublications
-                            .Add(new AuthorPublication(author, publication));
-                }
+                publication = new Publication(parsedPublication);
                 return true;
             }
             else
+            {
+                publication = null;
                 return false;
+            }
         }
 
         public void UpdateCategories(List<Category> categories)

@@ -1,28 +1,30 @@
 ﻿using Genometric.BibitemParser;
 using Genometric.BibitemParser.Interfaces;
+using Genometric.TVQ.API.Model;
 using System.Collections.Generic;
 
-namespace Genometric.TVQ.API.Model
+namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
 {
-    public class PublicationConstructor : IPublicationConstructor<Author, Keyword, Publication>
+    public class ParsedPublicationConstructor :
+        IPublicationConstructor<Author, Keyword, ParsedPublication>
     {
-        public Publication Construct(
-            BibTexEntryType type, 
-            string doi, 
-            string title, 
-            List<Author> authors, 
-            int? year, 
-            int? month, 
+        public ParsedPublication Construct(
+            BibTexEntryType type,
+            string doi,
+            string title,
+            List<Author> authors,
+            int? year,
+            int? month,
             int? day,
-            string journal, 
-            string volume, 
-            int? number, 
-            string chapter, 
-            string pages, 
-            string publisher, 
+            string journal,
+            string volume,
+            int? number,
+            string chapter,
+            string pages,
+            string publisher,
             List<Keyword> keywords)
         {
-            return new Publication()
+            return new ParsedPublication()
             {
                 Type = type,
                 DOI = doi,

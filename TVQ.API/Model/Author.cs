@@ -11,7 +11,7 @@ namespace Genometric.TVQ.API.Model
 
         public string LastName { get; }
 
-        public virtual ICollection<AuthorPublication> AuthorPublications { set; get; }
+        public virtual ICollection<AuthorPublicationAssociation> AuthorPublications { set; get; }
 
         public Author(string firstName, string lastName)
         {

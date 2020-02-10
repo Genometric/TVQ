@@ -1,12 +1,12 @@
 ﻿using Genometric.BibitemParser;
-using Genometric.BibitemParser.Interfaces;
+using Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace Genometric.TVQ.API.Model
 {
     [JsonConverter(typeof(PublicationJsonConverter))]
-    public class Publication : IPublication<Author, Keyword>
+    public class Publication
     {
         public int ID { set; get; }
 
@@ -46,58 +46,48 @@ namespace Genometric.TVQ.API.Model
 
         public virtual ICollection<Citation> Citations { set; get; }
 
-        public virtual ICollection<Author> Authors { set; get; }
-
-        public virtual ICollection<Keyword> Keywords { set; get; }
-
-        public virtual ICollection<AuthorPublication> AuthorPublications { set; get; }
+        public virtual ICollection<AuthorPublicationAssociation> AuthorAssociations { set; get; }
 
         public virtual ICollection<ToolPublicationAssociation> ToolAssociations { set; get; }
 
+        public virtual ICollection<PublicationKeywordAssociation> KeywordAssociations { set; get; }
+
         public Publication() { }
 
-        public Publication(
-            string pubMedID = default,
-            string eID = default,
-            string scopusID = default,
-            BibTexEntryType type = default,
-            string title = default,
-            int? year = default,
-            int? month = default,
-            int citedBy = default,
-            string doi = default,
-            string bibTeXEntry = default,
-            string journal = default,
-            string volume = default,
-            int? number = default,
-            string chapter = default,
-            string pages = default,
-            string publisher = default,
-            ICollection<Citation> citations = default,
-            List<Author> authors = default,
-            List<Keyword> keywords = default,
-            ICollection<ToolPublicationAssociation> toolAssociations = default)
+        public Publication(ParsedPublication parsedPublication)
         {
-            PubMedID = pubMedID;
-            EID = eID;
-            ScopusID = scopusID;
-            Type = type;
-            Title = title;
-            Year = year;
-            Month = month;
-            CitedBy = citedBy;
-            DOI = doi;
-            BibTeXEntry = bibTeXEntry;
-            Journal = journal;
-            Volume = volume;
-            Number = number;
-            Chapter = chapter;
-            Pages = pages;
-            Publisher = publisher;
-            Citations = citations;
-            Authors = authors;
-            Keywords = keywords;
-            ToolAssociations = toolAssociations;
+            PubMedID = parsedPublication.PubMedID;
+            EID = parsedPublication.EID;
+            ScopusID = parsedPublication.ScopusID;
+            Type = parsedPublication.Type;
+            Title = parsedPublication.Title;
+            Year = parsedPublication.Year;
+            Month = parsedPublication.Month;
+            Day = parsedPublication.Day;
+            CitedBy = parsedPublication.CitedBy;
+            DOI = parsedPublication.DOI;
+            BibTeXEntry = parsedPublication.BibTeXEntry;
+            Journal = parsedPublication.Journal;
+            Volume = parsedPublication.Volume;
+            Number = parsedPublication.Number;
+            Chapter = parsedPublication.Chapter;
+            Pages = parsedPublication.Pages;
+            Publisher = parsedPublication.Publisher;
+            Citations = parsedPublication.Citations;
+
+            if (parsedPublication.Authors != null && parsedPublication.Authors.Count > 0)
+            {
+                AuthorAssociations = new List<AuthorPublicationAssociation>();
+                foreach (var author in parsedPublication.Authors)
+                    AuthorAssociations.Add(new AuthorPublicationAssociation(author, this));
+            }
+
+            if (parsedPublication.Keywords != null && parsedPublication.Keywords.Count > 0)
+            {
+                KeywordAssociations = new List<PublicationKeywordAssociation>();
+                foreach (var keyword in parsedPublication.Keywords)
+                    KeywordAssociations.Add(new PublicationKeywordAssociation(keyword, this));
+            }
         }
     }
 }

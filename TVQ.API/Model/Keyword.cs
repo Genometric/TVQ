@@ -1,4 +1,5 @@
 ﻿using Genometric.BibitemParser.Interfaces;
+using System.Collections.Generic;
 
 namespace Genometric.TVQ.API.Model
 {
@@ -6,11 +7,9 @@ namespace Genometric.TVQ.API.Model
     {
         public int ID { set; get; }
 
-        public int PublicationID { set; get; }
-
         public string Label { get; }
 
-        public virtual Publication Publication { set; get; }
+        public virtual ICollection<PublicationKeywordAssociation> PublicationAssociations { set; get; }
 
         public Keyword(string label)
         {

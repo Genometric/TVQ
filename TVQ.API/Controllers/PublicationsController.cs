@@ -42,13 +42,16 @@ namespace TVQ.API.Controllers
             /// to include Publication info of a citation.
             var publication = await
                 _context.Publications
-                .Include(x => x.Citations).Include(x => x.Authors).Include(x => x.Keywords)
-                .FirstOrDefaultAsync(x => x.ID == id).ConfigureAwait(false);
+                .Include(x => x.Citations)
+                .Include(x => x.AuthorAssociations)
+                .ThenInclude(x => x.Author)
+                .Include(x => x.KeywordAssociations)
+                .ThenInclude(x => x.Keyword)
+                .FirstOrDefaultAsync(x => x.ID == id)
+                .ConfigureAwait(false);
 
             if (publication == null)
-            {
                 return NotFound();
-            }
 
             return publication;
         }
