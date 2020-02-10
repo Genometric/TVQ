@@ -12,7 +12,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 {
     public abstract class BaseToolRepoCrawler : BaseCrawler
     {
-        private readonly Parser<ParsedPublication, Author, Keyword> _bibitemParser;
+        protected Parser<ParsedPublication, Author, Keyword> BibitemParser { get; }
 
         protected ConcurrentDictionary<string, Tool> ToolsDict { get; }
 
@@ -57,7 +57,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
             ToolDownloadRecords = new ConcurrentBag<ToolDownloadRecord>();
 
-            _bibitemParser = new Parser<ParsedPublication, Author, Keyword>(
+            BibitemParser = new Parser<ParsedPublication, Author, Keyword>(
                 new ParsedPublicationConstructor(),
                 new AuthorConstructor(),
                 new KeywordConstructor());
@@ -198,7 +198,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected bool TryParseBibitem(string bibitem, out Publication publication)
         {
-            if (_bibitemParser.TryParse(bibitem, out ParsedPublication parsedPublication) &&
+            if (BibitemParser.TryParse(bibitem, out ParsedPublication parsedPublication) &&
                 parsedPublication.Year != null)
             {
                 publication = new Publication(parsedPublication);

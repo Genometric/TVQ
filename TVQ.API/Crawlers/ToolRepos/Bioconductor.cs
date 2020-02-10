@@ -20,7 +20,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             List<Publication> publications,
             List<Category> categories) :
             base(repo, tools, publications, categories)
-        { }
+        {
+            BibitemParser.KeywordsDelimiter = ',';
+        }
 
         public override async Task ScanAsync()
         {
