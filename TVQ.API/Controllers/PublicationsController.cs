@@ -27,8 +27,8 @@ namespace TVQ.API.Controllers
             // As an exception, return List instead of IEnumerable
             // in this API, because the tools count can be more 
             // than the default maximum size of IEnumerable.
-            var publications = from publication in _context.Publications
-                        select new PublicationDTO(publication);
+            var publications = from publication in _context.Publications.Include(x => x.ToolAssociations)
+                               select new PublicationDTO(publication);
             return await publications.ToListAsync().ConfigureAwait(false);
         }
 

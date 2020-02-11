@@ -1,10 +1,12 @@
-﻿namespace Genometric.TVQ.API.Model
+﻿using System.Collections.Generic;
+
+namespace Genometric.TVQ.API.Model
 {
     public class PublicationDTO
     {
         public int ID { get; }
 
-        public int ToolID { get; }
+        public List<int> ToolAssociations { get; }
 
         public PublicationDTO(Publication publication)
         {
@@ -12,7 +14,9 @@
                 return;
 
             ID = publication.ID;
-            //ToolID = publication.ToolID;
+            ToolAssociations = new List<int>();
+            foreach (var association in publication.ToolAssociations)
+                ToolAssociations.Add(association.ID);
         }
     }
 }
