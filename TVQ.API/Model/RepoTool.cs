@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using YamlDotNet.RepresentationModel;
 
 namespace Genometric.TVQ.API.Model
 {
@@ -46,7 +47,7 @@ namespace Genometric.TVQ.API.Model
         public DateTime? DateAddedToRepository { set; get; }
 
 #pragma warning disable CA2227 // Collection properties should be read only
-        public List<Publication> Publications { set;  get; }
+        public List<Publication> Publications { set; get; }
 #pragma warning restore CA2227 // Collection properties should be read only
 
         public static bool TryDeserialize(
@@ -58,6 +59,84 @@ namespace Genometric.TVQ.API.Model
             var repoTool = JsonConvert.DeserializeObject<RepoTool>(json);
 
             // Convert the helper type to TVQ's model. 
+            toolRepoAssociation = new ToolRepoAssociation(repoTool);
+            if (repoTool.Publications != null && repoTool.Publications.Count > 0)
+            {
+                toolPubAssociations = new List<ToolPublicationAssociation>();
+                foreach (var pub in repoTool.Publications)
+                    toolPubAssociations.Add(new ToolPublicationAssociation() { Publication = pub });
+            }
+            else
+            {
+                toolPubAssociations = null;
+            }
+
+            return true;
+        }
+
+        public static bool TryDeserialize(
+            YamlStream yamlStream,
+            out ToolRepoAssociation toolRepoAssociation,
+            out List<ToolPublicationAssociation> toolPubAssociations)
+        {
+            toolRepoAssociation = null;
+            toolPubAssociations = null;
+            if (yamlStream == null)
+                return false;
+
+            var mapping = (YamlMappingNode)yamlStream.Documents[0].RootNode;
+            var repoTool = new RepoTool() { Publications = new List<Publication>() };
+            foreach (var entry in mapping.Children)
+            {
+                switch (entry.Key.ToString())
+                {
+                    case "package":
+                        foreach (var child in ((YamlMappingNode)entry.Value).Children)
+                            if (child.Key.ToString() == "name")
+                            {
+                                repoTool.Name = child.Value.ToString();
+                                break;
+                            }
+                        break;
+
+                    case "source":
+                        if (entry.Value.GetType() == typeof(YamlMappingNode))
+                        {
+                            foreach (var child in ((YamlMappingNode)entry.Value).Children)
+                                if (child.Key.ToString() == "url")
+                                {
+                                    repoTool.CodeRepo = child.Value.ToString();
+                                    break;
+                                }
+                        }
+                        else if (entry.Value.GetType() == typeof(YamlSequenceNode))
+                        {
+                            foreach (YamlMappingNode child in ((YamlSequenceNode)entry.Value).Children)
+                                foreach (var c in child.Children)
+                                    if (c.Key.ToString() == "url")
+                                    {
+                                        repoTool.CodeRepo = c.Value.ToString();
+                                        break;
+                                    }
+                        }
+                        break;
+
+                    case "extra":
+                        foreach (var child in ((YamlMappingNode)entry.Value).Children)
+                            if (child.Key.ToString() == "identifiers")
+                                foreach (var x in ((YamlSequenceNode)child.Value).Children)
+                                    if (x.ToString().StartsWith("doi:", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        repoTool.Publications.Add(new Publication()
+                                        {
+                                            DOI = x.ToString().Split(':')[1]
+                                        });
+                                        break;
+                                    }
+                        break;
+                }
+            }
+
             toolRepoAssociation = new ToolRepoAssociation(repoTool);
             if (repoTool.Publications != null && repoTool.Publications.Count > 0)
             {

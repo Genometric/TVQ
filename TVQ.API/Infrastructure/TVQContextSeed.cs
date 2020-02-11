@@ -68,9 +68,16 @@ namespace Genometric.TVQ.API.Infrastructure
             };
             bioconductor.Statistics = new Statistics() { Repository = bioconductor };
 
+            var bioconda = new Repository()
+            {
+                Name = Repository.Repo.Bioconda,
+                URI = "https://github.com/bioconda/bioconda-recipes/archive/master.zip"
+            };
+            bioconda.Statistics = new Statistics() { Repository = bioconda };
+
             return new List<Repository>()
             {
-                toolshed, biotools, bioconductor
+                toolshed, biotools, bioconductor, bioconda
             };
         }
 

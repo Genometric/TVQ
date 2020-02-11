@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Genometric.TVQ.API.Crawlers
 {
@@ -74,6 +75,12 @@ namespace Genometric.TVQ.API.Crawlers
                 foreach (var association in pub.ToolAssociations)
                     TryAddToolPublicationAssociation(association.Tool, association);
             }
+        }
+
+        public Task DownloadFileAsync(Uri address, out string filename)
+        {
+            filename = SessionTempPath + Utilities.GetRandomString();
+            return WebClient.DownloadFileTaskAsync(address, filename);
         }
 
         public bool PublicationExists(Publication publication)

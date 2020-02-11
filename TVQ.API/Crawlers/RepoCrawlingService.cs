@@ -53,6 +53,10 @@ namespace Genometric.TVQ.API.Crawlers
                     crawler = new Bioconductor(repo, tools, publications, categories);
                     break;
 
+                case Repo.Bioconda:
+                    crawler = new Bioconda(repo, tools, publications, categories);
+                    break;
+
                 default:
                     /// TODO: replace with an exception.
                     return;
