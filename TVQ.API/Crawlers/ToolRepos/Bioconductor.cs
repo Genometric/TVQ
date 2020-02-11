@@ -24,11 +24,13 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             BibitemParser.KeywordsDelimiter = ',';
         }
 
+        private Dictionary<string, DateTime?> _toolsAddToRepoDates;
+
         public override async Task ScanAsync()
         {
+            GetAddedDate();
             ReadCitationsFile();
             GetDownloadStats();
-            GetAddedDate();
         }
 
         private void ReadCitationsFile()
@@ -48,9 +50,16 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                     try
                     {
                         if (TryParseBibitem(item.Value, out Publication pub))
+                        {
+                            _toolsAddToRepoDates.TryGetValue(
+                                FormatToolName(item.Key),
+                                out DateTime? addedDate);
+
                             TryAddEntities(
                                 new Tool() { Name = item.Key.Trim() },
+                                addedDate,
                                 pub);
+                        }
                     }
                     catch (ArgumentException e)
                     {
@@ -117,6 +126,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         {
             var dateAddedFileName = SessionTempPath + Utilities.GetRandomString();
             WebClient.DownloadFileTaskAsync(Repo.GetURI() + _dateAddedFileName, dateAddedFileName).Wait();
+            _toolsAddToRepoDates = new Dictionary<string, DateTime?>();
 
             string line;
             using var reader = new StreamReader(dateAddedFileName);
@@ -124,22 +134,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             while ((line = reader.ReadLine()) != null)
             {
                 var cols = line.Split(',');
-                if (!ToolsDict.TryGetValue(FormatToolName(cols[1]), out Tool tool))
-                {
-                    // TODO: log this.
-                    // This mean the tool for which we have added date 
-                    // is not recognized.
-                    continue;
-                }
-
-                try
-                {
-                    UpdateAssociation(tool, DateTime.Parse(cols[3], CultureInfo.CurrentCulture));
-                }
-                catch (Exception e)
-                {
-                    // TODO: log exception and continue, do NOT break the while loop.
-                }
+                _toolsAddToRepoDates.TryAdd(FormatToolName(cols[1]),
+                                            DateTime.Parse(cols[3], CultureInfo.CurrentCulture));
             }
         }
     }

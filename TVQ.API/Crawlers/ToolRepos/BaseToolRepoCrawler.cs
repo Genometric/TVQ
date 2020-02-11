@@ -142,7 +142,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             }
         }
 
-        protected bool TryAddEntities(Tool tool, Publication pub)
+        protected bool TryAddEntities(Tool tool, DateTime? dateAddedToRepo, Publication pub)
         {
             var toolPubAssociations = new List<ToolPublicationAssociation>
             {
@@ -150,7 +150,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             };
 
             return TryAddEntities(
-                new ToolRepoAssociation() { Tool = tool },
+                new ToolRepoAssociation() { Tool = tool, DateAddedToRepository = dateAddedToRepo },
                 toolPubAssociations,
                 new List<string>());
         }
