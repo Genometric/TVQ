@@ -106,7 +106,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 if (TryAddToolPublicationAssociation(tool, association))
                 {
                     association.Tool = tool;
-                    tool.PublicationAssociations.Add(association);
+                    association.Tool.PublicationAssociations.Add(association);
+                    association.Publication.ToolAssociations.Add(association);
                 }
                 else
                 {

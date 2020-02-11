@@ -52,9 +52,15 @@ namespace Genometric.TVQ.API.Model
 
         public virtual ICollection<PublicationKeywordAssociation> KeywordAssociations { set; get; }
 
-        public Publication() { }
+        public Publication()
+        {
+            Citations = new List<Citation>();
+            ToolAssociations = new List<ToolPublicationAssociation>();
+            AuthorAssociations = new List<AuthorPublicationAssociation>();
+            KeywordAssociations = new List<PublicationKeywordAssociation>();
+        }
 
-        public Publication(ParsedPublication parsedPublication)
+        public Publication(ParsedPublication parsedPublication) : this()
         {
             PubMedID = parsedPublication.PubMedID;
             EID = parsedPublication.EID;
