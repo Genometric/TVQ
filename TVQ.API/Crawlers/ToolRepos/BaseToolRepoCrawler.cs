@@ -103,7 +103,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                     association.Publication = GetPublication(association.Publication);
                 }
 
-                if(TryAddToolPublicationAssociation(tool, association))
+                if (TryAddToolPublicationAssociation(tool, association))
                 {
                     association.Tool = tool;
                     tool.PublicationAssociations.Add(association);
@@ -119,9 +119,12 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         private bool TryAddToolRepoAssociations(ToolRepoAssociation association)
         {
+            // Check if the association and the tool 
+            // contains the required information.
             if (association == null ||
                 association.Tool == null ||
-                association.Tool.Name == null)
+                association.Tool.Name == null ||
+                association.DateAddedToRepository == null)
                 return false;
 
             if (ToolRepoAssociationsDict.TryAdd(FormatToolRepoAssociationName(association), association))
@@ -199,7 +202,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         protected bool TryParseBibitem(string bibitem, out Publication publication)
         {
             if (BibitemParser.TryParse(bibitem, out ParsedPublication parsedPublication) &&
-                parsedPublication.Year != null)
+                (parsedPublication.DOI != null ||
+                parsedPublication.PubMedID != null ||
+                parsedPublication.Title != null))
             {
                 publication = new Publication(parsedPublication);
                 return true;
