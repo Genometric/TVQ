@@ -28,7 +28,8 @@ namespace Genometric.TVQ.API.Model
                 {"category_ids", nameof(RepoTool.CategoryIDs)},
                 {"create_time", nameof(RepoTool.DateAddedToRepository)},
                 {"additionDate", nameof(RepoTool.DateAddedToRepository)}, // for bio.tools
-                {"publication", nameof(RepoTool.Publications) }
+                {"publication", nameof(RepoTool.Publications)},
+                {"topic", nameof(RepoTool.Topics)}
 
                 /// Why not reading Bio.Tools Publication.Metadata?
                 /// A JSON object from Bio.Tools contains a field named "metadata" for 

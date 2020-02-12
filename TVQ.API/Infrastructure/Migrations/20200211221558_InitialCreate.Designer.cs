@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Genometric.TVQ.API.Infrastructure.Migrations
 {
     [DbContext(typeof(TVQContext))]
-    [Migration("20200210211146_InitialCreate")]
+    [Migration("20200211221558_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -98,6 +98,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ToolShedID")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("URI")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");

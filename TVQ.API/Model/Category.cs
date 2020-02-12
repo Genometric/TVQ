@@ -14,6 +14,8 @@ namespace Genometric.TVQ.API.Model
 
         public string Description { set; get; }
 
+        public string URI { set; get; }
+
         public virtual ICollection<ToolCategoryAssociation> ToolAssociations { set; get; }
 
         public Category()

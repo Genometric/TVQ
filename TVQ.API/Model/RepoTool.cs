@@ -1,4 +1,5 @@
 ﻿using Genometric.TVQ.API.Crawlers.ToolRepos;
+using Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -36,6 +37,8 @@ namespace Genometric.TVQ.API.Model
 
         public int? TimesDownloaded { set; get; }
 
+        public List<BioToolsTopic> Topics { set; get; }
+
 #pragma warning disable CA2227 // Collection properties should be read only
         public List<string> CategoryIDs { set; get; }
 #pragma warning restore CA2227 // Collection properties should be read only
@@ -52,23 +55,31 @@ namespace Genometric.TVQ.API.Model
 
         public static bool TryDeserialize(
             string json,
-            out ToolRepoAssociation toolRepoAssociation,
-            out List<ToolPublicationAssociation> toolPubAssociations)
+            string sessionPath,
+            out ToolInfo toolInfo)
         {
             // Deserialize the JSON object to a helper type. 
             var repoTool = JsonConvert.DeserializeObject<RepoTool>(json);
 
             // Convert the helper type to TVQ's model. 
-            toolRepoAssociation = new ToolRepoAssociation(repoTool);
+            var toolRepoAssociation = new ToolRepoAssociation(repoTool);
+            var toolPubAssociations = new List<ToolPublicationAssociation>();
+
             if (repoTool.Publications != null && repoTool.Publications.Count > 0)
-            {
-                toolPubAssociations = new List<ToolPublicationAssociation>();
                 foreach (var pub in repoTool.Publications)
                     toolPubAssociations.Add(new ToolPublicationAssociation() { Publication = pub });
-            }
             else
-            {
                 toolPubAssociations = null;
+
+            toolInfo = new ToolInfo(toolRepoAssociation, toolPubAssociations, sessionPath);
+
+            foreach (var topic in repoTool.Topics)
+            {
+                toolInfo.Categories.Add(new Category()
+                {
+                    Name = topic.Term,
+                    URI = topic.URI
+                });
             }
 
             return true;
@@ -158,10 +169,10 @@ namespace Genometric.TVQ.API.Model
             var infos = new List<ToolInfo>(repoTools.Count);
             foreach (var repoTool in repoTools)
                 infos.Add(
-                    new ToolInfo(new ToolRepoAssociation(repoTool), null, sessionPath)
-                    {
-                        CategoryIDs = repoTool.CategoryIDs
-                    });
+                      new ToolInfo(new ToolRepoAssociation(repoTool), null, sessionPath)
+                      {
+                          CategoryIDs = repoTool.CategoryIDs
+                      });
 
             return infos;
         }

@@ -12,6 +12,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         public List<string> CategoryIDs { set; get; }
 
+        public List<Category> Categories { get; }
+
         /// <summary>
         /// Gets a path to a temporary folder
         /// where all the related temporary files are
@@ -68,6 +70,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             XMLFiles = new List<string>(capacity: 5);
 
             CategoryIDs = new List<string>();
+            Categories = new List<Category>();
         }
     }
 }

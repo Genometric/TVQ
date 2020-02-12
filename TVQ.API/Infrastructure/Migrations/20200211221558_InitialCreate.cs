@@ -29,7 +29,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ToolShedID = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true)
+                    Description = table.Column<string>(nullable: true),
+                    URI = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {

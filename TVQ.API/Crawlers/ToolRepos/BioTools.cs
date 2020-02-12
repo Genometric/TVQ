@@ -32,20 +32,22 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                     if (entry.FullName.EndsWith(".json", StringComparison.OrdinalIgnoreCase) &&
                         !entry.FullName.EndsWith("oeb.json", StringComparison.OrdinalIgnoreCase))
                     {
-                        ToolRepoAssociation toolRepoAssociation = null;
-                        List<ToolPublicationAssociation> toolPubAssociations = null;
-
                         string extractedFileName = SessionTempPath + Utilities.GetRandomString() + ".json";
                         try
                         {
                             entry.ExtractToFile(extractedFileName);
                             using var reader = new StreamReader(extractedFileName);
                             if (!RepoTool.TryDeserialize(reader.ReadToEnd(),
-                                                         out toolRepoAssociation,
-                                                         out toolPubAssociations))
+                                                         SessionTempPath,
+                                                         out ToolInfo toolInfo))
                             {
                                 // TODO: log this.
                                 continue;
+                            }
+
+                            if (!TryAddEntities(toolInfo))
+                            {
+                                // TODO: log why this tool will not be added to db.
                             }
                         }
                         catch (IOException e)
@@ -55,11 +57,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                         finally
                         {
                             File.Delete(extractedFileName);
-                        }
-
-                        if (!TryAddEntities(toolRepoAssociation, toolPubAssociations))
-                        {
-                            // TODO: log why this tool will not be added to db.
                         }
                     }
             }

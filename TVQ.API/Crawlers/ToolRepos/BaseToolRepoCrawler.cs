@@ -20,6 +20,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected Dictionary<string, Category> Categories { get; }
 
+        private Dictionary<string, Category> _categoriesByToolShedID;
+        private Dictionary<string, Category> _categoriesByName;
+
         public ReadOnlyCollection<Tool> Tools
         {
             get
@@ -55,12 +58,44 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             Categories = new Dictionary<string, Category>();
             UpdateCategories(categories);
 
+            _categoriesByName = new Dictionary<string, Category>();
+            _categoriesByToolShedID = new Dictionary<string, Category>();
+            foreach(var category in categories)
+                EnsureCategory(category);
+
             ToolDownloadRecords = new ConcurrentBag<ToolDownloadRecord>();
 
             BibitemParser = new Parser<ParsedPublication, Author, Keyword>(
                 new ParsedPublicationConstructor(),
                 new AuthorConstructor(),
                 new KeywordConstructor());
+        }
+
+        protected Category EnsureCategory(Category category)
+        {
+            Category rtv = null;
+            if (category == null)
+                return rtv;
+
+            if (category.Name != null)
+            {
+                if (!_categoriesByName.TryGetValue(category.Name, out rtv))
+                {
+                    rtv = category;
+                    _categoriesByName.Add(category.Name, category);
+                }
+            }
+            
+            if (category.ToolShedID != null)
+            {
+                if (!_categoriesByToolShedID.TryGetValue(category.ToolShedID, out rtv))
+                {
+                    rtv = category;
+                    _categoriesByToolShedID.Add(category.ToolShedID, category);
+                }
+            }
+
+            return rtv;
         }
 
         protected static string FormatToolName(string name)
@@ -152,26 +187,18 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
             return TryAddEntities(
                 new ToolRepoAssociation() { Tool = tool, DateAddedToRepository = dateAddedToRepo },
-                toolPubAssociations,
-                new List<string>());
+                toolPubAssociations);
         }
 
         protected bool TryAddEntities(
             ToolRepoAssociation toolRepoAssociation,
-            List<ToolPublicationAssociation> toolPublicationAssociation,
-            List<string> categoryIDs = null)
+            List<ToolPublicationAssociation> toolPublicationAssociation)
         {
-            if (categoryIDs == null)
-                categoryIDs = new List<string>();
-
             return TryAddEntities(
                 new ToolInfo(
                     toolRepoAssociation,
                     toolPublicationAssociation,
-                    SessionTempPath)
-                {
-                    CategoryIDs = categoryIDs
-                });
+                    SessionTempPath));
         }
 
         protected bool TryAddEntities(ToolInfo info)
@@ -180,12 +207,30 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 return false;
 
             foreach (var categoryID in info.CategoryIDs)
+            {
                 if (Categories.TryGetValue(categoryID, out Category category))
+                {
                     info.ToolRepoAssociation.Tool.CategoryAssociations
                         .Add(new ToolCategoryAssociation()
                         {
-                            Category = category
+                            Category = category,
+                            Tool = info.ToolRepoAssociation.Tool,
                         });
+                }
+            }
+
+            foreach (var parsedCategory in info.Categories)
+            {
+                var category = EnsureCategory(parsedCategory);
+                if (category == null)
+                    category = parsedCategory;
+                info.ToolRepoAssociation.Tool.CategoryAssociations
+                    .Add(new ToolCategoryAssociation()
+                    {
+                        Category = category,
+                        Tool = info.ToolRepoAssociation.Tool
+                    });
+            }
 
             AddToolPubAssociations(info.ToolRepoAssociation.Tool, info.ToolPubAssociations);
             return TryAddToolRepoAssociations(info.ToolRepoAssociation);
@@ -221,7 +266,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         {
             if (categories != null)
                 foreach (var category in categories)
-                    Categories.TryAdd(category.ToolShedID, category);
+                    if (category.ToolShedID != null)
+                        Categories.TryAdd(category.ToolShedID, category);
         }
     }
 }

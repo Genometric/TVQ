@@ -98,6 +98,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<string>("ToolShedID")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("URI")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("ID");
 
                     b.HasIndex("Name")
