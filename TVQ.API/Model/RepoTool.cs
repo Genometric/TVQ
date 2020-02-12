@@ -73,13 +73,16 @@ namespace Genometric.TVQ.API.Model
 
             toolInfo = new ToolInfo(toolRepoAssociation, toolPubAssociations, sessionPath);
 
-            foreach (var topic in repoTool.Topics)
+            if (repoTool.Topics != null)
             {
-                toolInfo.Categories.Add(new Category()
+                foreach (var topic in repoTool.Topics)
                 {
-                    Name = topic.Term,
-                    URI = topic.URI
-                });
+                    toolInfo.Categories.Add(new Category()
+                    {
+                        Name = topic.Term,
+                        URI = topic.URI
+                    });
+                }
             }
 
             return true;
