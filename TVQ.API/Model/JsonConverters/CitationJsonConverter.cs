@@ -2,26 +2,27 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
-namespace Genometric.TVQ.API.Model
+namespace Genometric.TVQ.API.Model.JsonConverters
 {
-    public class PublicationJsonConverter : JsonConverter
+    public class CitationJsonConverter : JsonConverter
     {
         private readonly Dictionary<string, string> _propertyMappings;
 
-        public PublicationJsonConverter()
+        public CitationJsonConverter()
         {
             _propertyMappings = new Dictionary<string, string>
             {
-                {"id", nameof(Publication.ID)},
-                {"title", nameof(Publication.Title)},
-                {"year", nameof(Publication.Year)},
-                {"CitedBy", nameof(Publication.CitedBy)},
-                {"doi", nameof(Publication.DOI)},
-                {"citation", nameof(Publication.BibTeXEntry)},
-                {"pmid", nameof(Publication.PubMedID)}
+                {"id", nameof(Citation.ID) },
+                {"publication_id", nameof(Citation.PublicationID) },
+                {"count", nameof(Citation.Count) },
+                {"accumulated_count", nameof(Citation.AccumulatedCount) },
+                {"date", nameof(Citation.Date) },
+                {"source", nameof(Citation.Source) },
+                {"publication", nameof(Citation.Publication) }
             };
         }
 
@@ -56,7 +57,10 @@ namespace Genometric.TVQ.API.Model
             return instance;
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(
+            JsonWriter writer,
+            object value,
+            JsonSerializer serializer)
         {
             if (value == null) return;
 
@@ -68,7 +72,11 @@ namespace Genometric.TVQ.API.Model
                 {
                     object propVal = prop.GetValue(value, null);
                     if (propVal != null)
-                        obj.Add(prop.Name, JToken.FromObject(propVal, serializer));
+                        obj.Add(
+                            prop.Name,
+                            prop.Name == nameof(Citation.Date) ?
+                            ((DateTime)propVal).ToString("MMMM d, yyyy", CultureInfo.InvariantCulture) :
+                            JToken.FromObject(propVal, serializer));
                 }
 
             obj.WriteTo(writer);

@@ -1,4 +1,5 @@
 ﻿using Genometric.TVQ.API.Model;
+using Genometric.TVQ.API.Model.Associations;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

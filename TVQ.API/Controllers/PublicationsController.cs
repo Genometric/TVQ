@@ -1,6 +1,7 @@
 ﻿using Genometric.TVQ.API;
 using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Model;
+using Genometric.TVQ.API.Model.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;

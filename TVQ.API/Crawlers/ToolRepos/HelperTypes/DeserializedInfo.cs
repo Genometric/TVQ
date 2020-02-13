@@ -1,4 +1,5 @@
 ﻿using Genometric.TVQ.API.Model;
+using Genometric.TVQ.API.Model.Associations;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

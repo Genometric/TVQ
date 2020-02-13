@@ -1,5 +1,6 @@
 ﻿using Genometric.TVQ.API.Infrastructure.EntityConfigurations;
 using Genometric.TVQ.API.Model;
+using Genometric.TVQ.API.Model.Associations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Genometric.TVQ.API.Infrastructure

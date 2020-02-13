@@ -1,6 +1,7 @@
 ﻿using Genometric.TVQ.API.Analysis;
 using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Model;
+using Genometric.TVQ.API.Model.Associations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;

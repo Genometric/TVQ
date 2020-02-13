@@ -1,4 +1,4 @@
-﻿namespace Genometric.TVQ.API.Model
+﻿namespace Genometric.TVQ.API.Model.Associations
 {
     public class PublicationKeywordAssociation
     {

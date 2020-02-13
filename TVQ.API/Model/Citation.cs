@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Genometric.TVQ.API.Model.JsonConverters;
+using Newtonsoft.Json;
 using System;
 
 namespace Genometric.TVQ.API.Model

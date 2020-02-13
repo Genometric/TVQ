@@ -1,7 +1,8 @@
 ﻿using Genometric.BibitemParser;
 using Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes;
 using Genometric.TVQ.API.Model;
-using System;
+using Genometric.TVQ.API.Model.Associations;
+using Genometric.TVQ.API.Model.JsonConverters;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

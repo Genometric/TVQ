@@ -1,6 +1,7 @@
 ﻿using Genometric.BibitemParser;
 using Genometric.BibitemParser.Interfaces;
 using Genometric.TVQ.API.Model;
+using Genometric.TVQ.API.Model.Associations;
 using System.Collections.Generic;
 
 namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes

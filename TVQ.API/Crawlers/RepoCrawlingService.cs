@@ -2,6 +2,7 @@
 using Genometric.TVQ.API.Infrastructure;
 using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
+using Genometric.TVQ.API.Model.Associations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;

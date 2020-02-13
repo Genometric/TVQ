@@ -1,4 +1,4 @@
-﻿using Genometric.TVQ.API.Model;
+﻿using Genometric.TVQ.API.Model.Associations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

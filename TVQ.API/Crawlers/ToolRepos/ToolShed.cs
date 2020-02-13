@@ -1,6 +1,7 @@
 ﻿using Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes;
 using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
+using Genometric.TVQ.API.Model.Associations;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;

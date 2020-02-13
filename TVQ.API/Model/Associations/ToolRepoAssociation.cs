@@ -1,8 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using Genometric.TVQ.API.Model.JsonConverters;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
-namespace Genometric.TVQ.API.Model
+namespace Genometric.TVQ.API.Model.Associations
 {
     [JsonConverter(typeof(ToolRepoAssociationJsonConverter))]
     public class ToolRepoAssociation

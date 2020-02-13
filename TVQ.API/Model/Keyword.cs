@@ -1,4 +1,5 @@
 ﻿using Genometric.BibitemParser.Interfaces;
+using Genometric.TVQ.API.Model.Associations;
 using System.Collections.Generic;
 
 namespace Genometric.TVQ.API.Model

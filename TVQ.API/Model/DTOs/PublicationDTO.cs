@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Genometric.TVQ.API.Model
+namespace Genometric.TVQ.API.Model.DTOs
 {
     public class PublicationDTO
     {
