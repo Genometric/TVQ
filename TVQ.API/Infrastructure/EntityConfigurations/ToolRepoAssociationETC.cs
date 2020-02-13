@@ -4,15 +4,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Genometric.TVQ.API.Infrastructure.EntityConfigurations
 {
-    public class ToolRepoAssociationETC :
-        IEntityTypeConfiguration<ToolRepoAssociation>
+    public class ToolRepoAssociationETC : IEntityTypeConfiguration<ToolRepoAssociation>
     {
         public void Configure(EntityTypeBuilder<ToolRepoAssociation> builder)
         {
             builder.ToTable("ToolRepoAssociations");
-
             builder.HasKey(obi => obi.ID);
-
             builder.Property(obj => obj.ID).IsRequired(true);
 
             foreach (var p in typeof(ToolRepoAssociation).GetProperties())

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Genometric.TVQ.API.Infrastructure.EntityConfigurations
 {
-    public class AuthorEntityTypeConfiguration : IEntityTypeConfiguration<Author>
+    public class AuthorETC : IEntityTypeConfiguration<Author>
     {
         public void Configure(EntityTypeBuilder<Author> builder)
         {

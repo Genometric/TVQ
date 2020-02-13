@@ -4,21 +4,18 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Genometric.TVQ.API.Infrastructure.EntityConfigurations
 {
-    public class CitationEntityTypeConfiguration :
-        IEntityTypeConfiguration<Citation>
+    public class ToolDownloadRecordETC : IEntityTypeConfiguration<ToolDownloadRecord>
     {
-        public void Configure(EntityTypeBuilder<Citation> builder)
+        public void Configure(EntityTypeBuilder<ToolDownloadRecord> builder)
         {
-            builder.ToTable("Citations");
-
+            builder.ToTable("ToolDownloadRecords");
             builder.HasKey(obi => obi.ID);
-
             builder.Property(obj => obj.ID).IsRequired(true);
 
-            foreach (var p in typeof(Citation).GetProperties())
+            foreach (var p in typeof(ToolDownloadRecord).GetProperties())
             {
-                if (p.Name == nameof(Citation.ID) ||
-                    p.Name == nameof(Citation.Publication))
+                if (p.Name == nameof(ToolDownloadRecord.ID) ||
+                    p.Name == nameof(ToolDownloadRecord.Tool))
                     continue;
                 builder.Property(p.Name);
             }

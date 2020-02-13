@@ -33,16 +33,16 @@ namespace Genometric.TVQ.API.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.ApplyConfiguration(new ToolEntityTypeConfiguration());
-            builder.ApplyConfiguration(new PublicationEntityTypeConfiguration());
-            builder.ApplyConfiguration(new RepositoryItemEntityTypeConfiguration());
+            builder.ApplyConfiguration(new ToolETC());
+            builder.ApplyConfiguration(new PublicationETC());
+            builder.ApplyConfiguration(new RepositoryETC());
             builder.ApplyConfiguration(new ToolRepoAssociationETC());
-            builder.ApplyConfiguration(new CitationEntityTypeConfiguration());
-            builder.ApplyConfiguration(new ToolDownloadRecordEntityTypeConfiguration());
-            builder.ApplyConfiguration(new AuthorEntityTypeConfiguration());
-            builder.ApplyConfiguration(new KeywordEntityTypeConfiguration());
+            builder.ApplyConfiguration(new CitationETC());
+            builder.ApplyConfiguration(new ToolDownloadRecordETC());
+            builder.ApplyConfiguration(new AuthorETC());
+            builder.ApplyConfiguration(new KeywordETC());
             builder.ApplyConfiguration(new AuthorPublicationAssociationsETC());
-            builder.ApplyConfiguration(new StatisticsEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StatisticsETC());
             builder.ApplyConfiguration(new CategoryETC());
             builder.ApplyConfiguration(new ServiceETC());
             builder.ApplyConfiguration(new RepoCrawlingJobETC());

@@ -4,8 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Genometric.TVQ.API.Infrastructure.EntityConfigurations
 {
-    public class PublicationEntityTypeConfiguration :
-        IEntityTypeConfiguration<Publication>
+    public class PublicationETC : IEntityTypeConfiguration<Publication>
     {
         public void Configure(EntityTypeBuilder<Publication> builder)
         {
