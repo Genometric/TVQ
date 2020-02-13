@@ -1,4 +1,5 @@
-﻿using Genometric.TVQ.API.Model;
+﻿using Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes;
+using Genometric.TVQ.API.Model;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -55,15 +56,15 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                                 FormatToolName(item.Key),
                                 out DateTime? addedDate);
 
-                            TryAddEntities(
-                                new Tool() { Name = item.Key.Trim() },
-                                addedDate,
-                                pub);
+                            if(!TryAddEntities(new DeserializedInfo(item.Key.Trim(), addedDate, pub)))
+                            {
+                                // TODO: log this.
+                            }
                         }
                     }
                     catch (ArgumentException e)
                     {
-
+                        // TODO: log this exception.
                     }
             }
 

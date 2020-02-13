@@ -1,4 +1,5 @@
-﻿using Genometric.TVQ.API.Model;
+﻿using Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes;
+using Genometric.TVQ.API.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,9 +35,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 foreach (ZipArchiveEntry entry in archive.Entries)
                     if (entry.FullName.EndsWith("meta.yaml", StringComparison.OrdinalIgnoreCase))
                     {
-                        ToolRepoAssociation toolRepoAssociation = null;
-                        List<ToolPublicationAssociation> toolPubAssociations = null;
-
                         string extractedFileName = SessionTempPath + Utilities.GetRandomString() + ".yaml";
                         try
                         {
@@ -44,15 +42,13 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                             using var reader = new StreamReader(extractedFileName);
                             var yaml = new YamlStream();
                             yaml.Load(reader);
-                            if (!RepoTool.TryDeserialize(yaml,
-                                                         out toolRepoAssociation,
-                                                         out toolPubAssociations))
+                            if (!DeserializedInfo.TryDeserialize(yaml, out DeserializedInfo deserializedInfo))
                             {
                                 // TODO: log this.
                                 continue;
                             }
 
-                            if (!TryAddEntities(toolRepoAssociation, toolPubAssociations))
+                            if (!TryAddEntities(deserializedInfo))
                             {
                                 // TODO: log why this tool will not be added to db.
                             }

@@ -61,6 +61,7 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners
             }
             finally
             {
+                // TODO: catch exception that may happen here (e.g., Microsoft.Data.SqlClient.SqlException).
                 await Context.SaveChangesAsync().ConfigureAwait(false);
             }
         }

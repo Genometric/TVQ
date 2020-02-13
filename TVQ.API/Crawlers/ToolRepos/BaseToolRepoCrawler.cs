@@ -20,8 +20,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected Dictionary<string, Category> Categories { get; }
 
-        private Dictionary<string, Category> _categoriesByToolShedID;
-        private Dictionary<string, Category> _categoriesByName;
+        private readonly Dictionary<string, Category> _categoriesByToolShedID;
+        private readonly Dictionary<string, Category> _categoriesByName;
 
         public ReadOnlyCollection<Tool> Tools
         {
@@ -52,7 +52,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 ToolRepoAssociationsDict =
                     new ConcurrentDictionary<string, ToolRepoAssociation>(
                         repo.ToolAssociations.ToDictionary(
-                            x => FormatToolRepoAssociationName(x),
+                            x => FormatToolRepoAssociationName(x.Tool),
                             x => x));
 
             Categories = new Dictionary<string, Category>();
@@ -60,8 +60,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
             _categoriesByName = new Dictionary<string, Category>();
             _categoriesByToolShedID = new Dictionary<string, Category>();
-            foreach(var category in categories)
-                EnsureCategory(category);
+            if (categories != null)
+                foreach (var category in categories)
+                    EnsureCategory(category);
 
             ToolDownloadRecords = new ConcurrentBag<ToolDownloadRecord>();
 
@@ -79,13 +80,14 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
             if (category.Name != null)
             {
-                if (!_categoriesByName.TryGetValue(category.Name, out rtv))
+                var name = category.Name.ToUpperInvariant();
+                if (!_categoriesByName.TryGetValue(name, out rtv))
                 {
                     rtv = category;
-                    _categoriesByName.Add(category.Name, category);
+                    _categoriesByName.Add(name, category);
                 }
             }
-            
+
             if (category.ToolShedID != null)
             {
                 if (!_categoriesByToolShedID.TryGetValue(category.ToolShedID, out rtv))
@@ -106,11 +108,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         private string FormatToolRepoAssociationName(Tool tool)
         {
             return Repo.Name + "::" + FormatToolName(tool.Name); ;
-        }
-
-        private string FormatToolRepoAssociationName(ToolRepoAssociation association)
-        {
-            return FormatToolRepoAssociationName(association.Tool);
         }
 
         public abstract Task ScanAsync();
@@ -142,6 +139,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 {
                     association.Tool = tool;
                     association.Tool.PublicationAssociations.Add(association);
+
+                    // todo: this may not be needed.
                     association.Publication.ToolAssociations.Add(association);
                 }
                 else
@@ -153,22 +152,11 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             }
         }
 
-        private bool TryAddToolRepoAssociations(ToolRepoAssociation association)
+        private bool TryAddToolRepoAssociations(DeserializedInfo info)
         {
-            // Check if the association and the tool 
-            // contains the required information.
-            if (association == null ||
-                association.Tool == null ||
-                association.Tool.Name == null ||
-                association.DateAddedToRepository == null)
-                return false;
-
-            if (ToolRepoAssociationsDict.TryAdd(FormatToolRepoAssociationName(association), association))
+            if (ToolRepoAssociationsDict.TryAdd(FormatToolRepoAssociationName(info.ToolRepoAssociation.Tool), info.ToolRepoAssociation))
             {
-                var toolName = association.Tool.Name = FormatToolName(association.Tool.Name);
-                if (!ToolsDict.TryAdd(toolName, association.Tool))
-                    association.Tool = ToolsDict[toolName];
-                Repo.ToolAssociations.Add(association);
+                Repo.ToolAssociations.Add(info.ToolRepoAssociation);
                 return true;
             }
             else
@@ -178,46 +166,19 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             }
         }
 
-        protected bool TryAddEntities(Tool tool, DateTime? dateAddedToRepo, Publication pub)
+        protected bool TryAddEntities(DeserializedInfo info)
         {
-            var toolPubAssociations = new List<ToolPublicationAssociation>
-            {
-                new ToolPublicationAssociation { Publication = pub }
-            };
-
-            return TryAddEntities(
-                new ToolRepoAssociation() { Tool = tool, DateAddedToRepository = dateAddedToRepo },
-                toolPubAssociations);
-        }
-
-        protected bool TryAddEntities(
-            ToolRepoAssociation toolRepoAssociation,
-            List<ToolPublicationAssociation> toolPublicationAssociation)
-        {
-            return TryAddEntities(
-                new ToolInfo(
-                    toolRepoAssociation,
-                    toolPublicationAssociation,
-                    SessionTempPath));
-        }
-
-        protected bool TryAddEntities(ToolInfo info)
-        {
-            if (info == null)
+            // Checks if the association and the tool 
+            // contains the required information.
+            if (info == null ||
+                info.ToolRepoAssociation.Tool == null ||
+                info.ToolRepoAssociation.Tool.Name == null ||
+                info.ToolRepoAssociation.DateAddedToRepository == null)
                 return false;
 
-            foreach (var categoryID in info.CategoryIDs)
-            {
-                if (Categories.TryGetValue(categoryID, out Category category))
-                {
-                    info.ToolRepoAssociation.Tool.CategoryAssociations
-                        .Add(new ToolCategoryAssociation()
-                        {
-                            Category = category,
-                            Tool = info.ToolRepoAssociation.Tool,
-                        });
-                }
-            }
+            var toolName = info.ToolRepoAssociation.Tool.Name = FormatToolName(info.ToolRepoAssociation.Tool.Name);
+            if (!ToolsDict.TryAdd(toolName, info.ToolRepoAssociation.Tool))
+                info.ToolRepoAssociation.Tool = ToolsDict[toolName];
 
             foreach (var parsedCategory in info.Categories)
             {
@@ -233,16 +194,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             }
 
             AddToolPubAssociations(info.ToolRepoAssociation.Tool, info.ToolPubAssociations);
-            return TryAddToolRepoAssociations(info.ToolRepoAssociation);
-        }
-
-        protected void UpdateAssociation(Tool tool, DateTime dateAddedToRepository)
-        {
-            if (tool != null &&
-                ToolRepoAssociationsDict.TryGetValue(
-                FormatToolRepoAssociationName(tool),
-                out ToolRepoAssociation association))
-                association.DateAddedToRepository = dateAddedToRepository;
+            return TryAddToolRepoAssociations(info);
         }
 
         protected bool TryParseBibitem(string bibitem, out Publication publication)

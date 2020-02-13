@@ -31,21 +31,5 @@ namespace Genometric.TVQ.API.Model
         {
             Downloads = new List<ToolDownloadRecord>();
         }
-
-        public ToolRepoAssociation(RepoTool repoTool) : this()
-        {
-            IDinRepo = repoTool.IDinRepo;
-            UserID = repoTool.UserID;
-            TimesDownloaded = repoTool.TimesDownloaded;
-            DateAddedToRepository = repoTool.DateAddedToRepository;
-            Tool = new Tool()
-            {
-                Name = repoTool.Name,
-                Homepage = repoTool.Homepage,
-                CodeRepo = repoTool.CodeRepo,
-                Owner = repoTool.Owner,
-                Description = repoTool.Description
-            };
-        }
     }
 }

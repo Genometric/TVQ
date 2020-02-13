@@ -1,38 +1,27 @@
-﻿using Newtonsoft.Json;
+﻿using Genometric.TVQ.API.Model;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Genometric.TVQ.API.Model
+namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
 {
-    public class RepoToolJsonConverter : JsonConverter
+    public class ExternalToolModelJsonConverter : JsonConverter
     {
         private readonly Dictionary<string, string> _propertyMappings;
 
-        public RepoToolJsonConverter()
+        public ExternalToolModelJsonConverter()
         {
             _propertyMappings = new Dictionary<string, string>
             {
-                {"times_downloaded", nameof(RepoTool.TimesDownloaded)},
-                {"user_id", nameof(RepoTool.UserID)},
-                {"name", nameof(RepoTool.Name)},
-                {"homepage", nameof(RepoTool.Homepage)},
-                {"homepage_url", nameof(RepoTool.Homepage)},
-                {"owner", nameof(RepoTool.Owner)},
-                {"id", nameof(RepoTool.IDinRepo)},
-                {"biotoolsID", nameof(RepoTool.IDinRepo)},
-                {"remote_repository_url", nameof(RepoTool.CodeRepo)},
-                {"description", nameof(RepoTool.Description)},
-                {"category_ids", nameof(RepoTool.CategoryIDs)},
-                {"create_time", nameof(RepoTool.DateAddedToRepository)},
-                {"additionDate", nameof(RepoTool.DateAddedToRepository)}, // for bio.tools
-                {"publication", nameof(RepoTool.Publications)},
-                {"topic", nameof(RepoTool.Topics)}
+                {"topic", nameof(DeserializedInfo.Categories)},
+                {"category_ids", nameof(DeserializedInfo.CategoryIDs)},
+                {"publication", nameof(DeserializedInfo.Publications)}
 
                 /// Why not reading Bio.Tools Publication.Metadata?
-                /// A JSON object from Bio.Tools contains a field named "metadata" for 
+                /// A JSON object from Bio.Tools contains a field named "meta-data" for 
                 /// each publication. This field (at the time of writing this) is not 
                 /// set for every publication. Hence, it can be more reliable to 
                 /// capture only DOI and/or PubMedID and query details of each 
@@ -51,7 +40,7 @@ namespace Genometric.TVQ.API.Model
             object existingValue,
             JsonSerializer serializer)
         {
-            object instance = Activator.CreateInstance(objectType);
+            var instance = new DeserializedInfo();
             var props = objectType.GetTypeInfo().DeclaredProperties.ToList();
 
             JObject obj = JObject.Load(reader);
@@ -68,23 +57,14 @@ namespace Genometric.TVQ.API.Model
                     jsonProperty.Value.ToObject(prop.PropertyType, serializer));
             }
 
+            instance.ToolRepoAssociation = JsonConvert.DeserializeObject<ToolRepoAssociation>(obj.ToString());
+            instance.ToolRepoAssociation.Tool = JsonConvert.DeserializeObject<Tool>(obj.ToString());
             return instance;
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            JObject obj = new JObject();
-            Type type = value.GetType();
-
-            foreach (PropertyInfo prop in type.GetProperties())
-                if (prop.CanRead)
-                {
-                    object propVal = prop.GetValue(value, null);
-                    if (propVal != null)
-                        obj.Add(prop.Name, JToken.FromObject(propVal, serializer));
-                }
-
-            obj.WriteTo(writer);
+            throw new NotImplementedException();
         }
     }
 }

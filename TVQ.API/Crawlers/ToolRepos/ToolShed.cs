@@ -1,4 +1,5 @@
-﻿using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
+﻿using Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes;
+using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -81,7 +82,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             UpdateCategories(new List<Category>(JsonConvert.DeserializeObject<List<Category>>(content)));
         }
 
-        private async Task<List<ToolInfo>> GetToolsAsync()
+        private async Task<List<DeserializedInfo>> GetToolsAsync()
         {
             _logger.LogDebug("Getting tools list from ToolShed.");
             using var client = new HttpClient();
@@ -94,30 +95,33 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 return null;
 
             _logger.LogDebug("Received tools from ToolShed, deserializing them.");
-            return RepoTool.DeserializeTools(content, SessionTempPath);
+            DeserializedInfo.TryDeserialize(content, out List<DeserializedInfo> deserializedInfos);
+            foreach (var info in deserializedInfos)
+                info.SetStagingArea(SessionTempPath);
+            return deserializedInfos;
         }
 
         /// <summary>
         /// This method is implemented using the Task Parallel Library (TPL).
         //. https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-parallel-library-tpl
         /// </summary>
-        private async Task GetPublicationsAsync(List<ToolInfo> ToolsInfo)
+        private async Task GetPublicationsAsync(List<DeserializedInfo> ToolsInfo)
         {
             var linkOptions = new DataflowLinkOptions
             {
                 PropagateCompletion = true
             };
 
-            var downloader = new TransformBlock<ToolInfo, ToolInfo>(
-                new Func<ToolInfo, ToolInfo>(Downloader), _downloadExeOptions);
+            var downloader = new TransformBlock<DeserializedInfo, DeserializedInfo>(
+                new Func<DeserializedInfo, DeserializedInfo>(Downloader), _downloadExeOptions);
 
-            var extractXMLs = new TransformBlock<ToolInfo, ToolInfo>(
-                new Func<ToolInfo, ToolInfo>(WrapperExtractor), _xmlExtractExeOptions);
+            var extractXMLs = new TransformBlock<DeserializedInfo, DeserializedInfo>(
+                new Func<DeserializedInfo, DeserializedInfo>(WrapperExtractor), _xmlExtractExeOptions);
 
-            var extractPublications = new TransformBlock<ToolInfo, ToolInfo>(
-                new Func<ToolInfo, ToolInfo>(ExtractPublications), _pubExtractExeOptions);
+            var extractPublications = new TransformBlock<DeserializedInfo, DeserializedInfo>(
+                new Func<DeserializedInfo, DeserializedInfo>(ExtractPublications), _pubExtractExeOptions);
 
-            var cleanup = new ActionBlock<ToolInfo>(
+            var cleanup = new ActionBlock<DeserializedInfo>(
                 input => { Cleanup(input); });
 
             downloader.LinkTo(extractXMLs, linkOptions);
@@ -131,7 +135,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             await cleanup.Completion.ConfigureAwait(false);
         }
 
-        private ToolInfo Downloader(ToolInfo info)
+        private DeserializedInfo Downloader(DeserializedInfo info)
         {
             try
             {
@@ -155,7 +159,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             }
         }
 
-        private ToolInfo WrapperExtractor(ToolInfo info)
+        private DeserializedInfo WrapperExtractor(DeserializedInfo info)
         {
             if (info == null)
                 return null;
@@ -204,7 +208,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             }
         }
 
-        private ToolInfo ExtractPublications(ToolInfo info)
+        private DeserializedInfo ExtractPublications(DeserializedInfo info)
         {
             if (info == null)
                 return null;
@@ -282,7 +286,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             return info;
         }
 
-        private void Cleanup(ToolInfo info)
+        private void Cleanup(DeserializedInfo info)
         {
             if (info == null)
                 return;

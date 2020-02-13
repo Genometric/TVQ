@@ -1,4 +1,5 @@
-﻿using Genometric.TVQ.API.Model;
+﻿using Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes;
+using Genometric.TVQ.API.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -37,15 +38,15 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                         {
                             entry.ExtractToFile(extractedFileName);
                             using var reader = new StreamReader(extractedFileName);
-                            if (!RepoTool.TryDeserialize(reader.ReadToEnd(),
-                                                         SessionTempPath,
-                                                         out ToolInfo toolInfo))
+                            if (!DeserializedInfo.TryDeserialize(
+                                reader.ReadToEnd(),
+                                out DeserializedInfo deserializedInfo))
                             {
                                 // TODO: log this.
                                 continue;
                             }
 
-                            if (!TryAddEntities(toolInfo))
+                            if (!TryAddEntities(deserializedInfo))
                             {
                                 // TODO: log why this tool will not be added to db.
                             }
