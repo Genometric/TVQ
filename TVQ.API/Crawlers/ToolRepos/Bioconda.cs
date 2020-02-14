@@ -63,13 +63,13 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 if (!_addedDates.ContainsKey(columns[0]))
                 {
                     DateTimeOffset.TryParseExact(
-                        columns[1],
+                        columns[1].Trim(),
                         "ddd MMM d HH:mm:ss yyyy K",
                         CultureInfo.InvariantCulture,
                         DateTimeStyles.None,
                         out DateTimeOffset dateTimeOffset);
 
-                    _addedDates.Add(columns[0], dateTimeOffset.DateTime);
+                    _addedDates.Add(columns[0].Trim(), dateTimeOffset.DateTime);
                 }
             }
         }
