@@ -48,7 +48,6 @@ namespace Genometric.TVQ.API.Crawlers
             // TODO: There must a much better way of doing this; e.g., an approach 
             // that automatically reflects changes in the database. 
             Context.Publications.RemoveRange(scopusCrawler.PublicationsToBeDeleted);
-            Context.ToolPublicationAssociations.RemoveRange(scopusCrawler.ToolPubAssociationsToBeDeleted);
 
             /// It is better to let the scheduler to set the status and 
             /// save the changes. However, since the scheduler is in a 
