@@ -71,7 +71,7 @@ namespace Genometric.TVQ.API.Infrastructure
             var bioconda = new Repository()
             {
                 Name = Repository.Repo.Bioconda,
-                URI = "https://github.com/bioconda/bioconda-recipes/archive/master.zip"
+                URI = "https://github.com/VJalili/bioconda-recipes/archive/cheetah_template.zip"
             };
             bioconda.Statistics = new Statistics() { Repository = bioconda };
 
