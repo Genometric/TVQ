@@ -29,18 +29,14 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         private readonly ExecutionDataflowBlockOptions _xmlExtractExeOptions;
         private readonly ExecutionDataflowBlockOptions _pubExtractExeOptions;
 
-        private readonly ILogger<BaseService<RepoCrawlingJob>> _logger;
-
         public ToolShed(
             Repository repo,
             List<Tool> tools,
             List<Publication> publications,
             List<Category> categories,
             ILogger<BaseService<RepoCrawlingJob>> logger) :
-            base(repo, tools, publications, categories)
+            base(repo, tools, publications, categories, logger)
         {
-            _logger = logger;
-
             _downloadExeOptions = new ExecutionDataflowBlockOptions
             {
                 MaxDegreeOfParallelism = _maxParallelDownloads
@@ -69,7 +65,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         private void UpdateCategories()
         {
-            _logger.LogDebug("Getting Categories list from ToolShed.");
+            Logger.LogDebug("Getting Categories list from ToolShed.");
             using var client = new HttpClient();
             HttpResponseMessage response = client.GetAsync(new Uri(Repo.URI + _categoriesEndpoint)).GetAwaiter().GetResult();
             string content;
@@ -79,13 +75,13 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 /// TODO: replace with an exception.
                 return;
 
-            _logger.LogDebug("Received Categories from ToolShed, deserializing them.");
+            Logger.LogDebug("Received Categories from ToolShed, deserializing them.");
             UpdateCategories(new List<Category>(JsonConvert.DeserializeObject<List<Category>>(content)));
         }
 
         private async Task<List<DeserializedInfo>> GetToolsAsync()
         {
-            _logger.LogDebug("Getting tools list from ToolShed.");
+            Logger.LogDebug("Getting tools list from ToolShed.");
             using var client = new HttpClient();
             HttpResponseMessage response = await client.GetAsync(new Uri(Repo.URI + _repositoriesEndpoint)).ConfigureAwait(false);
             string content;
@@ -95,7 +91,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 /// TODO: replace with an exception.
                 return null;
 
-            _logger.LogDebug("Received tools from ToolShed, deserializing them.");
+            Logger.LogDebug("Received tools from ToolShed, deserializing them.");
             DeserializedInfo.TryDeserialize(content, out List<DeserializedInfo> deserializedInfos);
             foreach (var info in deserializedInfos)
                 info.SetStagingArea(SessionTempPath);
@@ -140,7 +136,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         {
             try
             {
-                _logger.LogDebug($"Downloading archive of {info.ToolRepoAssociation.Tool.Name}.");
+                Logger.LogDebug($"Downloading archive of {info.ToolRepoAssociation.Tool.Name}.");
                 /// Note: do not use base WebClient, because it cannot 
                 /// download multiple files concurrently.
                 using var client = new WebClient();
@@ -150,12 +146,12 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                         $"{info.ToolRepoAssociation.Tool.Owner}/{info.ToolRepoAssociation.Tool.Name}/" +
                         $"archive/tip.zip"),
                     fileName: info.ArchiveFilename);
-                _logger.LogDebug($"Successfully downloaded archive of {info.ToolRepoAssociation.Tool.Name}.");
+                Logger.LogDebug($"Successfully downloaded archive of {info.ToolRepoAssociation.Tool.Name}.");
                 return info;
             }
             catch (WebException e)
             {
-                _logger.LogDebug($"Failed downloading archive of {info.ToolRepoAssociation.Tool.Name}: {e.Message}");
+                Logger.LogDebug($"Failed downloading archive of {info.ToolRepoAssociation.Tool.Name}: {e.Message}");
                 return null;
             }
         }
@@ -167,7 +163,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
             try
             {
-                _logger.LogDebug($"Extracting XML files from tool {info.ToolRepoAssociation.Tool.Name} archive.");
+                Logger.LogDebug($"Extracting XML files from tool {info.ToolRepoAssociation.Tool.Name} archive.");
                 using ZipArchive archive = ZipFile.Open(info.ArchiveFilename, ZipArchiveMode.Read);
                 foreach (ZipArchiveEntry entry in archive.Entries)
                     if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
@@ -186,25 +182,25 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                         /// may be valid.
                         try
                         {
-                            _logger.LogInformation($"Extracting XML file {entry.FullName} of tool {info.ToolRepoAssociation.Tool.Name}.");
+                            Logger.LogInformation($"Extracting XML file {entry.FullName} of tool {info.ToolRepoAssociation.Tool.Name}.");
                             entry.ExtractToFile(extractedFileName);
-                            _logger.LogInformation($"Successfully extracted XML file {entry.FullName} of tool {info.ToolRepoAssociation.Tool.Name}.");
+                            Logger.LogInformation($"Successfully extracted XML file {entry.FullName} of tool {info.ToolRepoAssociation.Tool.Name}.");
                             info.XMLFiles.Add(extractedFileName);
                         }
                         catch (InvalidDataException e)
                         {
                             // This exception is thrown when the Zip archive cannot be read.
-                            _logger.LogDebug($"Failed extracting XML file {entry.FullName} of tool {info.ToolRepoAssociation.Tool.Name}: {e.Message}");
+                            Logger.LogDebug($"Failed extracting XML file {entry.FullName} of tool {info.ToolRepoAssociation.Tool.Name}: {e.Message}");
                         }
                     }
 
-                _logger.LogDebug($"Extracted {info.XMLFiles.Count} XML file(s) for tool {info.ToolRepoAssociation.Tool.Name}.");
+                Logger.LogDebug($"Extracted {info.XMLFiles.Count} XML file(s) for tool {info.ToolRepoAssociation.Tool.Name}.");
                 return info;
             }
             catch (InvalidDataException e)
             {
                 // This exception is thrown when the Zip archive cannot be read.
-                _logger.LogDebug($"Failed extracting XML files from tool {info.ToolRepoAssociation.Tool.Name} archive: {e.Message}");
+                Logger.LogDebug($"Failed extracting XML files from tool {info.ToolRepoAssociation.Tool.Name} archive: {e.Message}");
                 return null;
             }
         }
@@ -216,7 +212,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
             foreach (var filename in info.XMLFiles)
             {
-                _logger.LogDebug(
+                Logger.LogDebug(
                     $"Extracting publication info from XML file " +
                     $"{Path.GetFileNameWithoutExtension(filename)} " +
                     $"of tool {info.ToolRepoAssociation.Tool.Name}.");
@@ -255,7 +251,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                                     }
                                     catch (ArgumentException e)
                                     {
-                                        _logger.LogDebug(
+                                        Logger.LogDebug(
                                             $"Error extracting publication from XML file of tool " +
                                             $"{info.ToolRepoAssociation.Tool.Name}:{e.Message}");
                                     }
@@ -263,7 +259,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                             }
                     }
 
-                    _logger.LogDebug(
+                    Logger.LogDebug(
                         $"Successfully extract publication info from XML file " +
                         $"{Path.GetFileNameWithoutExtension(filename)} " +
                         $"of tool {info.ToolRepoAssociation.Tool.Name}.");
@@ -275,7 +271,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 {
                     /// This exception may happen if the XML 
                     /// file has multiple roots.
-                    _logger.LogDebug(
+                    Logger.LogDebug(
                         $"Failed extracting publication info from XML file " +
                         $"{Path.GetFileNameWithoutExtension(filename)}" +
                         $" of tool {info.ToolRepoAssociation.Tool.Name}: {e.Message}");
@@ -291,9 +287,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         {
             if (info == null)
                 return;
-            _logger.LogDebug($"Deleting temporary files of tool {info.ToolRepoAssociation.Tool.Name}.");
+            Logger.LogDebug($"Deleting temporary files of tool {info.ToolRepoAssociation.Tool.Name}.");
             Directory.Delete(info.StagingArea, true);
-            _logger.LogDebug($"Deleted temporary files of tool {info.ToolRepoAssociation.Tool.Name}.");
+            Logger.LogDebug($"Deleted temporary files of tool {info.ToolRepoAssociation.Tool.Name}.");
         }
     }
 }

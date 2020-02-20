@@ -1,5 +1,7 @@
 ﻿using Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes;
+using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -19,8 +21,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             Repository repo,
             List<Tool> tools,
             List<Publication> publications,
-            List<Category> categories) :
-            base(repo, tools, publications, categories)
+            List<Category> categories,
+            ILogger<BaseService<RepoCrawlingJob>> logger) :
+            base(repo, tools, publications, categories, logger)
         {
             BibitemParser.KeywordsDelimiter = ',';
         }
@@ -56,10 +59,14 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                                 FormatToolName(item.Key),
                                 out DateTime? addedDate);
 
-                            if(!TryAddEntities(new DeserializedInfo(item.Key.Trim(), addedDate, pub)))
+                            if (!TryAddEntities(new DeserializedInfo(item.Key.Trim(), addedDate, pub)))
                             {
                                 // TODO: log this.
                             }
+                        }
+                        else
+                        {
+                            // TODO: log this.
                         }
                     }
                     catch (ArgumentException e)

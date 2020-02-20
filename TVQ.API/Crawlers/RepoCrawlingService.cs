@@ -47,15 +47,15 @@ namespace Genometric.TVQ.API.Crawlers
                     break;
 
                 case Repo.BioTools:
-                    crawler = new BioTools(repo, tools, publications, categories);
+                    crawler = new BioTools(repo, tools, publications, categories, Logger);
                     break;
 
                 case Repo.Bioconductor:
-                    crawler = new Bioconductor(repo, tools, publications, categories);
+                    crawler = new Bioconductor(repo, tools, publications, categories, Logger);
                     break;
 
                 case Repo.Bioconda:
-                    crawler = new Bioconda(repo, tools, publications, categories);
+                    crawler = new Bioconda(repo, tools, publications, categories, Logger);
                     break;
 
                 default:

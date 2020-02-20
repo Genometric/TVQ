@@ -1,5 +1,7 @@
 ﻿using Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes;
+using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -20,11 +22,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         public Bioconda(Repository repository,
                         List<Tool> tools,
                         List<Publication> publications,
-                        List<Category> categories) :
-            base(repository,
-                 tools,
-                 publications,
-                 categories)
+                        List<Category> categories,
+                        ILogger<BaseService<RepoCrawlingJob>> logger) :
+            base(repository, tools, publications, categories, logger)
         { }
 
         public override async Task ScanAsync()

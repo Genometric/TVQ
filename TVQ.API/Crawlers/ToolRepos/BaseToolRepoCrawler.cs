@@ -1,8 +1,10 @@
 ﻿using Genometric.BibitemParser;
 using Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes;
+using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
 using Genometric.TVQ.API.Model.Associations;
 using Genometric.TVQ.API.Model.JsonConverters;
+using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -36,12 +38,16 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected Repository Repo { get; }
 
+        protected ILogger<BaseService<RepoCrawlingJob>> Logger { get; }
+
         protected BaseToolRepoCrawler(Repository repo,
                                       List<Tool> tools,
                                       List<Publication> publications,
-                                      List<Category> categories) :
+                                      List<Category> categories,
+                                      ILogger<BaseService<RepoCrawlingJob>> logger) :
             base(publications)
         {
+            Logger = logger;
             Repo = repo;
             if (tools != null)
                 ToolsDict = new ConcurrentDictionary<string, Tool>(
