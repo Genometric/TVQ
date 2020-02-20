@@ -91,7 +91,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                             yaml.Load(reader);
                             if (!DeserializedInfo.TryDeserialize(yaml, out DeserializedInfo deserializedInfo))
                             {
-                                // TODO: log this.
+                                Logger.LogInformation($"Cannot deserialize tool info from {entry.FullName}.");
                                 continue;
                             }
 
@@ -107,21 +107,11 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                                 // TODO: log why this tool will not be added to db.
                             }
                         }
-                        catch (IOException e)
+                        catch (Exception e) when (e is YamlDotNet.Core.YamlException ||
+                                                  e is YamlDotNet.Core.SyntaxErrorException ||
+                                                  e is YamlDotNet.Core.SemanticErrorException)
                         {
-                            // TODO: log this.
-                        }
-                        catch (YamlDotNet.Core.SyntaxErrorException e)
-                        {
-                            // TODO: log as malformed YAML file. 
-                        }
-                        catch (YamlDotNet.Core.SemanticErrorException e)
-                        {
-                            // TODO: log as malformed YAML file. 
-                        }
-                        catch (YamlDotNet.Core.YamlException e)
-                        {
-                            // TODO: log as malformed YAML file.
+                            Logger.LogDebug($"Cannot parse the YAML file {entry.FullName}: {e.Message}");
                         }
                         finally
                         {
@@ -131,7 +121,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             }
             catch (Exception e)
             {
-
+                Logger.LogError($"Error occurred traversing Bioconda repository: {e.Message}");
             }
             finally
             {

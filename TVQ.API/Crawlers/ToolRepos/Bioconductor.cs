@@ -66,7 +66,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                         }
                         else
                         {
-                            // TODO: log this.
+                            Logger.LogDebug($"Cannot parse bibliography: {item.Value}");
                         }
                     }
                     catch (ArgumentException e)
