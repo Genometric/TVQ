@@ -152,8 +152,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 }
                 else
                 {
-                    // This association already exists.
-                    // TODO: log this.
+                    Logger.LogDebug($"Association between Tool {tool.Name} and Repository {Repo.Name} already exists.");
                     continue;
                 }
             }
@@ -168,7 +167,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             }
             else
             {
-                // TODO: log this as the association already exists. 
+                Logger.LogDebug($"Association between Tool {info.ToolRepoAssociation.Tool.Name} and Repository {Repo.Name} already exists."); 
                 return false;
             }
         }
@@ -178,10 +177,20 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             // Checks if the association and the tool 
             // contains the required information.
             if (info == null ||
-                info.ToolRepoAssociation.Tool == null ||
-                info.ToolRepoAssociation.Tool.Name == null ||
-                info.ToolRepoAssociation.DateAddedToRepository == null)
+                info.ToolRepoAssociation.Tool == null)
                 return false;
+
+            if (info.ToolRepoAssociation.Tool.Name == null)
+            {
+                Logger.LogDebug("Skipping tool because missing name.");
+                return false;
+            }
+
+            if (info.ToolRepoAssociation.DateAddedToRepository == null)
+            {
+                Logger.LogDebug($"Skipping tool {info.ToolRepoAssociation.Tool.Name} because the data it was added to repository is not set.");
+                return false;
+            }
 
             var toolName = info.ToolRepoAssociation.Tool.Name = FormatToolName(info.ToolRepoAssociation.Tool.Name);
             if (!ToolsDict.TryAdd(toolName, info.ToolRepoAssociation.Tool))
