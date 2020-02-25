@@ -362,7 +362,7 @@ namespace Genometric.TVQ.API.Analysis
                 var c = new CitationChange();
                 c.AddCitationCount(item.Value);
                 c.DaysOffset = item.Key;
-                c.RemoveOutliers();
+                // c.RemoveOutliers();
                 rtv.Add(c);
             }
 
