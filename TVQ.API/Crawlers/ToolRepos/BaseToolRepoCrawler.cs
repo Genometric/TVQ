@@ -21,8 +21,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         protected ConcurrentDictionary<string, ToolRepoAssociation> ToolRepoAssociationsDict { get; }
 
-        protected Dictionary<string, Category> Categories { get; }
-
         private readonly Dictionary<string, Category> _categoriesByToolShedID;
         private readonly Dictionary<string, Category> _categoriesByName;
 
@@ -62,14 +60,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                             x => FormatToolRepoAssociationName(x.Tool),
                             x => x));
 
-            Categories = new Dictionary<string, Category>();
-            UpdateCategories(categories);
-
             _categoriesByName = new Dictionary<string, Category>();
             _categoriesByToolShedID = new Dictionary<string, Category>();
-            if (categories != null)
-                foreach (var category in categories)
-                    EnsureCategory(category);
+            UpdateCategories(categories);
 
             ToolDownloadRecords = new ConcurrentBag<ToolDownloadRecord>();
 
@@ -234,8 +227,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         {
             if (categories != null)
                 foreach (var category in categories)
-                    if (category.ToolShedID != null)
-                        Categories.TryAdd(category.ToolShedID, category);
+                    EnsureCategory(category);
         }
     }
 }
