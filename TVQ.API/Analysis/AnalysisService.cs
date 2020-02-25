@@ -275,7 +275,7 @@ namespace Genometric.TVQ.API.Analysis
                 foreach (var pub in tool.PublicationAssociations)
                     if (pub.Publication.Citations != null && pub.Publication.Year >= _earliestCitationYear)
                     {
-                        Context.Entry(pub).Collection(x => x.Publication.Citations).Load();
+                        Context.Entry(pub.Publication).Collection(x => x.Citations).Load();
                         if (pub.Publication.Citations.Count == 0 ||
                             (pub.Publication.Citations.Count == 1 && pub.Publication.Citations.First().Count == 0))
                             continue;
@@ -288,10 +288,10 @@ namespace Genometric.TVQ.API.Analysis
                             var daysOffset = (citation.Date - association.DateAddedToRepository).Value.Days;
                             // This can be true when multiple publications per tool exist.
                             if (changes[tool.ID].ContainsKey(daysOffset))
-                                changes[tool.ID][daysOffset] += citation.AccumulatedCount;
+                                changes[tool.ID][daysOffset] += citation.Count;
                             else
                                 changes[tool.ID].Add(daysOffset,
-                                    citation.AccumulatedCount);
+                                    citation.Count);
                         }
                     }
             }
