@@ -35,6 +35,7 @@ namespace Genometric.TVQ.API.Controllers
             CreateTimeDistributionPerYear,
             CreateTimeDistributionPerMonth,
             ToolDistributionAmongRepositories,
+            ToolDistributionAmongRepositoriesExpression,
             ToolDistributionAmongCategories,
             ToolDistributionAmongCategoriesPerYear,
             NormalizedBeforeAfterVector,
@@ -103,6 +104,8 @@ namespace Genometric.TVQ.API.Controllers
                     return CreateTimeDistributionPerMonth(repository);
                 case ReportTypes.ToolDistributionAmongRepositories:
                     return Ok(await ToolDistributionAmongRepositories().ConfigureAwait(false));
+                case ReportTypes.ToolDistributionAmongRepositoriesExpression:
+                    return Ok(await ToolDistributionAmongRepositoriesExpression().ConfigureAwait(false));
                 case ReportTypes.ToolDistributionAmongCategories:
                     return Ok(await ToolDistributionAmongCategories().ConfigureAwait(false));
                 case ReportTypes.ToolDistributionAmongCategoriesPerYear:
@@ -311,6 +314,21 @@ namespace Genometric.TVQ.API.Controllers
                 dist.Value.Percentage = dist.Value.Count / (double)tools.Count;
 
             return distributions.Values;
+        }
+
+        // This method generates an output that can be as input to the UpSet plot shiny app (https://gehlenborglab.shinyapps.io/upsetr/). 
+        private async Task<string> ToolDistributionAmongRepositoriesExpression()
+        {
+            var toolRepoDis = await ToolDistributionAmongRepositories().ConfigureAwait(false);
+            var builder = new StringBuilder();
+
+            foreach (var intersection in toolRepoDis)
+            {
+                builder.Append(string.Join("&", intersection.Repositories.Select(x => x.Name)));
+                builder.Append($"={intersection.Count},");
+            }
+
+            return builder.ToString();
         }
 
         private async Task<IEnumerable<ToolCategoryDistribution>> ToolDistributionAmongCategories()
