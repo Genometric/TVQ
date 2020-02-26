@@ -16,6 +16,8 @@ namespace Genometric.TVQ.API.Model
 
         private HashSet<int> RepositoriesID { set; get; }
 
+        public Statistics Statistics { set; get; }
+
         public ToolRepoDistribution()
         {
             Repositories = new List<Repository>();

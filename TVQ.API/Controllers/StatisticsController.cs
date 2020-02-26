@@ -39,6 +39,7 @@ namespace Genometric.TVQ.API.Controllers
             ToolDistributionAmongCategories,
             ToolDistributionAmongCategoriesPerYear,
             NormalizedBeforeAfterVector,
+            BetweenRepoTTest,
             Overview
         };
 
@@ -114,6 +115,8 @@ namespace Genometric.TVQ.API.Controllers
                     return NormalizedBeforeAfterVector(repository);
                 case ReportTypes.Overview:
                     return await Overview(repository).ConfigureAwait(false);
+                case ReportTypes.BetweenRepoTTest:
+                    return Ok(await BetweenRepoTTest().ConfigureAwait(false));
             }
 
             return BadRequest();
@@ -471,6 +474,53 @@ namespace Genometric.TVQ.API.Controllers
             IFileInfo fileInfo = provider.GetFileInfo("TVQStats.csv");
 
             return File(fileInfo.CreateReadStream(), contentType, "TVQStats.csv");
+        }
+
+        private async Task<IEnumerable<ToolRepoDistribution>> BetweenRepoTTest()
+        {
+            var rtv = new List<ToolRepoDistribution>();
+            var repos = _context.Repositories.Include(repo => repo.ToolAssociations)
+                                                .ThenInclude(x => x.Tool)
+                                             .Include(repo => repo.ToolAssociations)
+                                                .ThenInclude(x => x.Downloads)
+                                             .Include(repo => repo.ToolAssociations)
+                                                .ThenInclude(x => x.Tool)
+                                                    .ThenInclude(x => x.PublicationAssociations)
+                                                        .ThenInclude(x => x.Publication.Citations)
+                                             .Include(repo => repo.Statistics)
+                                             .ToList();
+
+            for (int i = 0; i < repos.Count - 1; i++)
+            {
+                for (int j = i + 1; j < repos.Count; j++)
+                {
+                    var repoADeltas = _analysisService.GetDeltaPrePostCitationChanges(repos[i]);
+                    var repoBDeltas = _analysisService.GetDeltaPrePostCitationChanges(repos[j]);
+
+                    var sigDiff = InferentialStatistics.ComputeTTest(repoADeltas,
+                                                                     repoBDeltas,
+                                                                     0.05,
+                                                                     out double df,
+                                                                     out double tScore,
+                                                                     out double pValue,
+                                                                     out double criticalValue);
+                    var toolRepoDist = new ToolRepoDistribution();
+                    toolRepoDist.Add(repos[i]);
+                    toolRepoDist.Add(repos[j]);
+                    toolRepoDist.Statistics = new Statistics()
+                    {
+                        TScore = tScore,
+                        PValue = pValue,
+                        DegreeOfFreedom = df,
+                        CriticalValue = criticalValue,
+                        MeansSignificantlyDifferent = sigDiff
+                    };
+
+                    rtv.Add(toolRepoDist);
+                }
+            }
+
+            return rtv;
         }
 
         private FileStreamResult NormalizedBeforeAfterVector(Repository repository)
