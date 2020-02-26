@@ -131,9 +131,6 @@ def plot(root, filename):
     filename_without_extension = os.path.splitext(filename)[0]
     plt.title(filename_without_extension)
 
-    plt.show()
-    exit()
-
     image_file = os.path.join(root, filename_without_extension + '.png')
     if os.path.isfile(image_file):
         os.remove(image_file)
