@@ -556,7 +556,7 @@ namespace Genometric.TVQ.API.Controllers
             var overview = new Overview();
 
             overview.RepositoryCount = _context.Repositories.Count();
-            overview.ToolsCount = _context.Tools.Count();
+            overview.ToolsCountInAllRepositories = _context.Tools.Count();
 
             var repo = _context.Repositories.Include(x => x.ToolAssociations)
                                 .ThenInclude(x => x.Tool)

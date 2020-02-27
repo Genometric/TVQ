@@ -115,7 +115,10 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             if (TryUpdatePublication(publication, entries))
                 return publication;
             else
+            {
+                TryRemovePublication(publication);
                 return null;
+            }
         }
 
         private bool TryGetQuery(Publication publication, out string query)

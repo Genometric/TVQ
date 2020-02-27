@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Genometric.TVQ.API.Model
+﻿namespace Genometric.TVQ.API.Model
 {
     public class Overview
     {
@@ -11,7 +6,7 @@ namespace Genometric.TVQ.API.Model
 
         public int RepositoryCount { set; get; }
 
-        public int ToolsCount { set; get; }
+        public int ToolsCountInAllRepositories { set; get; }
 
         public int ToolRepoAssociationsCount { set; get; }
 

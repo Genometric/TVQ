@@ -135,6 +135,9 @@ namespace Genometric.TVQ.API.Crawlers
             if (publication.Title != null)
                 PubsByTitle.TryRemove(publication.Title, out _);
 
+            PublicationsToBeDeleted.Add(publication);
+            ToolPubAssociationsToBeDeleted.AddRange(publication.ToolAssociations);
+
             return true;
         }
 
@@ -227,9 +230,6 @@ namespace Genometric.TVQ.API.Crawlers
                         });
                 
                 TryRemovePublication(duplicate);
-                PublicationsToBeDeleted.Add(duplicate);
-                ToolPubAssociationsToBeDeleted.AddRange(duplicate.ToolAssociations);
-
                 TryAddPublication(publication);
                 return publication;
             }
