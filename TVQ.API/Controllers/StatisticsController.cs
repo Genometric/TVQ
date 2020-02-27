@@ -503,7 +503,8 @@ namespace Genometric.TVQ.API.Controllers
                                                                      out double df,
                                                                      out double tScore,
                                                                      out double pValue,
-                                                                     out double criticalValue);
+                                                                     out double criticalValue,
+                                                                     doubleSide: false);
                     var toolRepoDist = new ToolRepoDistribution();
                     toolRepoDist.Add(repos[i]);
                     toolRepoDist.Add(repos[j]);

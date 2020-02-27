@@ -36,7 +36,8 @@ namespace Genometric.TVQ.API.Analysis
             out double df,
             out double tScore,
             out double pValue,
-            out double criticalValue)
+            out double criticalValue,
+            bool doubleSide = true)
         {
             df = double.NaN;
             tScore = double.NaN;
@@ -54,6 +55,9 @@ namespace Genometric.TVQ.API.Analysis
             tScore =
                 (aMean - bMean) /
                 Math.Sqrt((aVari / x.Count) + (bVari / y.Count));
+
+            if (!doubleSide)
+                tScore = Math.Abs(tScore);
 
             df = Math.Round(
                 Math.Pow((aVari / x.Count) + (bVari / y.Count), 2) /
