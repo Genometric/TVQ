@@ -149,7 +149,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                             LogSkippedPublications(publication, "missing title");
                             return false;
                         }
-                        query = $"TITLE(\"{publication.Title}\")";
+                        query = $"TITLE(\"{FormatPublicationTitle(publication.Title)}\")";
                         break;
 
                     default:

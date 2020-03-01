@@ -15,6 +15,8 @@ namespace Genometric.TVQ.API.Crawlers
 
         protected string SessionTempPath { get; }
 
+        public string[] TitleStopWords = new string[] { "{", "}" };
+
         protected List<Publication> Publications { get; }
 
         private ConcurrentDictionary<string, Publication> PubsByDOI { get; }
@@ -58,6 +60,17 @@ namespace Genometric.TVQ.API.Crawlers
         private static string FormatToolName(string toolName)
         {
             return toolName.ToUpperInvariant();
+        }
+
+        public string FormatPublicationTitle(string title)
+        {
+            if (string.IsNullOrEmpty(title))
+                return title;
+
+            foreach (var word in TitleStopWords)
+                title = title.Replace(word, string.Empty, StringComparison.InvariantCultureIgnoreCase);
+
+            return title;
         }
 
         private string GetAssociationHashKey(string toolName, string attribute)
