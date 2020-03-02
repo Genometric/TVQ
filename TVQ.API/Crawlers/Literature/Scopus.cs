@@ -181,8 +181,53 @@ namespace Genometric.TVQ.API.Crawlers.Literature
 
             if (response.Count > 1)
             {
-                LogSkippedPublications(publication, "more than one record found");
-                return false;
+                // When multiple publications are found,
+                // then choose the most current one.
+
+                static DateTime GetDate(JToken input)
+                {
+                    if (TryExtractFromResponse(input, "prism:coverDate", out string date))
+                        return DateTime.Parse(date, CultureInfo.InvariantCulture);
+                    else
+                        return DateTime.Today;
+                }
+
+                static bool AssertTitle(JToken input)
+                {
+                    if (TryExtractFromResponse(input, "dc:title", out string title))
+                        return !title.StartsWith("corrigendum:", StringComparison.InvariantCultureIgnoreCase);
+                    else
+                        return true;
+                }
+
+                var selectedToken = response.Aggregate(
+                    // Seed value.
+                    response[0],
+
+                    // Condition: choose the latest publication which is not a correction 
+                    // (determined using the paper title: a correction paper usually has 
+                    // `corrigendum:` in its title).
+                    (mostCurrent, next) =>
+                    {
+                        return (
+                        // The selected publication should not be a correction.
+                        !AssertTitle(mostCurrent)
+
+                        // The next publication should not be a correction, 
+                        // and more current than the selected publication.
+                        || (AssertTitle(next) && GetDate(next) > GetDate(mostCurrent)))
+
+                        // If above condition are met, the replace the 
+                        // currently selected publication with the next 
+                        // publication in the JArray.
+                        ? next : mostCurrent;
+                    },
+
+                    // Return the currently selected publication.
+                    x => x);
+
+                Logger.LogDebug($"Found {response.Count} publications, chose the most current one.");
+                response = new JArray(selectedToken);
             }
 
             if (!TryExtractFromResponse(response, "eid", out string eid) ||
@@ -234,6 +279,15 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 int.TryParse(citedBy, out int c))
                 publication.CitedBy = c;
 
+            return true;
+        }
+
+        private static bool TryExtractFromResponse(JToken response, string field, out string value)
+        {
+            value = null;
+            if (response == null)
+                return false;
+            value = response[field].ToString();
             return true;
         }
 
