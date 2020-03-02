@@ -134,28 +134,16 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             }
             else
             {
-                switch (publication.Type)
+                // It is better to keep a title-based search as last option,
+                // because Scopus's title-based search is exact-match-based; 
+                // i.e., if the title is missing a word or a word is misspelled
+                // then Scopus will not find a match. 
+                if (string.IsNullOrWhiteSpace(publication.Title))
                 {
-                    case BibTexEntryType.Article:
-                    case BibTexEntryType.Book:
-                    case BibTexEntryType.Inproceedings:
-                    case BibTexEntryType.Misc:
-                        ///var title = new Regex(@".*title={(?<title>.+)}.*").Match(publication.BibTeXEntry).Groups["title"].Value;
-                        //var author = new Regex(@".*author={(?<author>.+)}.*").Match(publication.Citation).Groups["author"].Value;
-                        //var year = new Regex(@".*year={(?<year>.+)}.*").Match(publication.Citation).Groups["year"].Value;
-
-                        if (string.IsNullOrWhiteSpace(publication.Title))
-                        {
-                            LogSkippedPublications(publication, "missing title");
-                            return false;
-                        }
-                        query = $"TITLE(\"{FormatPublicationTitle(publication.Title)}\")";
-                        break;
-
-                    default:
-                        LogSkippedPublications(publication, $"unsupported type {publication.Type}");
-                        return false;
+                    LogSkippedPublications(publication, "missing title");
+                    return false;
                 }
+                query = $"TITLE(\"{FormatPublicationTitle(publication.Title)}\")";
             }
 
             return true;
