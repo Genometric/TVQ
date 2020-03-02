@@ -180,12 +180,16 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                         return DateTime.Today;
                 }
 
-                static bool AssertTitle(JToken input)
+                static bool AssertErrata(JToken input)
                 {
+                    if (TryExtractFromResponse(input, "subtypeDescription", out string type))
+                        if (string.Equals(type, "erratum", StringComparison.InvariantCultureIgnoreCase))
+                            return true;
+
                     if (TryExtractFromResponse(input, "dc:title", out string title))
-                        return !title.StartsWith("corrigendum:", StringComparison.InvariantCultureIgnoreCase);
-                    else
-                        return true;
+                        return title.StartsWith("corrigendum:", StringComparison.InvariantCultureIgnoreCase);
+
+                    return false;
                 }
 
                 var selectedToken = response.Aggregate(
@@ -199,11 +203,11 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                     {
                         return (
                         // The selected publication should not be a correction.
-                        !AssertTitle(mostCurrent)
+                        AssertErrata(mostCurrent)
 
                         // The next publication should not be a correction, 
                         // and more current than the selected publication.
-                        || (AssertTitle(next) && GetDate(next) > GetDate(mostCurrent)))
+                        || (!AssertErrata(next) && GetDate(next) > GetDate(mostCurrent)))
 
                         // If above condition are met, the replace the 
                         // currently selected publication with the next 
