@@ -93,11 +93,12 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             try
             {
                 using var client = new HttpClient();
+                Logger.LogDebug($"Querying Scopus using `{query}`.");
                 response = client.GetAsync(uriBuilder.Uri).ConfigureAwait(false).GetAwaiter().GetResult();
             }
             catch (HttpRequestException e)
             {
-                // TODO: log this exception.
+                Logger.LogError($"Exception querying Scopus: {e.Message}");
                 return null;
             }
 
