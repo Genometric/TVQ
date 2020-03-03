@@ -271,6 +271,15 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 int.TryParse(citedBy, out int c))
                 publication.CitedBy = c;
 
+            // A publication's type may be set to types 
+            // such as InPrepration, or Manual, and not 
+            // updated once a related publication is 
+            // published. This section can get the type 
+            // of such publications updated. 
+            if (TryExtractFromResponse(response, "subtypeDescription", out string type))
+                if (Enum.TryParse(type, ignoreCase: true, out BibTexEntryType bibTexEntryType))
+                    publication.Type = bibTexEntryType;
+
             return true;
         }
 
