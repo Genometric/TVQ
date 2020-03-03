@@ -17,7 +17,8 @@ def get_citation(filename):
                 "To obtain the references in BibTex format, enter" in line):
                 break
             if extract:
-                bibitem += line
+                # the trailing empty char accounts for line breaks.
+                bibitem += line + " "
         return bibitem
 
 
