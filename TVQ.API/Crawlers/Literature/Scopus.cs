@@ -235,28 +235,22 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 publication.ScopusID = id.Split(':')[1];
             }
 
-            if (publication.DOI == null &&
-                TryExtractFromResponse(response, "prism:doi", out string doi))
+            if (TryExtractFromResponse(response, "prism:doi", out string doi))
                 publication.DOI = doi;
 
-            if (publication.Title == null &&
-                TryExtractFromResponse(response, "dc:title", out string title))
+            if (TryExtractFromResponse(response, "dc:title", out string title))
                 publication.Title = title;
 
-            if (publication.Volume == null &&
-                TryExtractFromResponse(response, "prism:volume", out string volume))
+            if (TryExtractFromResponse(response, "prism:volume", out string volume))
                 publication.Volume = volume;
 
-            if (publication.Pages == null &&
-                TryExtractFromResponse(response, "prism:pageRange", out string pageRange))
+            if (TryExtractFromResponse(response, "prism:pageRange", out string pageRange))
                 publication.Pages = pageRange;
 
-            if (publication.Journal == null &&
-                TryExtractFromResponse(response, "prism:publicationName", out string publicationName))
+            if (TryExtractFromResponse(response, "prism:publicationName", out string publicationName))
                 publication.Journal = publicationName;
 
-            if (publication.Year == null &&
-                TryExtractFromResponse(response, "prism:coverDate", out string coverDate))
+            if (TryExtractFromResponse(response, "prism:coverDate", out string coverDate))
             {
                 var date = DateTime.Parse(coverDate, CultureInfo.InvariantCulture);
                 publication.Year = date.Year;
@@ -264,8 +258,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
                 publication.Day = date.Day;
             }
 
-            if (publication.PubMedID == null &&
-                TryExtractFromResponse(response, "pubmed-id", out string pmid))
+            if (TryExtractFromResponse(response, "pubmed-id", out string pmid))
                 publication.PubMedID = pmid;
 
             if (TryExtractFromResponse(response, "citedby-count", out string citedBy) &&
