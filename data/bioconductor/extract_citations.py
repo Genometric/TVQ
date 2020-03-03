@@ -18,7 +18,7 @@ def get_citation(filename):
                 break
             if extract:
                 # the trailing empty char accounts for line breaks.
-                bibitem += line + " "
+                bibitem += line.replace("\t", " ") + " "
         return bibitem
 
 
