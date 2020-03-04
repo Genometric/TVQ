@@ -3,6 +3,7 @@ using Genometric.TVQ.API.Model.Associations;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
@@ -15,7 +16,23 @@ namespace Genometric.TVQ.API.Crawlers
 
         protected string SessionTempPath { get; }
 
-        public string[] TitleStopWords = new string[] { "{", "}" };
+        public ReadOnlyCollection<string> TitleStopWords
+        {
+            get { return Array.AsReadOnly(_titleStopWords); }
+        }
+        private readonly string[] _titleStopWords = new string[]
+        {
+            "{", "}",
+
+            // Scopus fails to find the article when its title contains `?`. 
+            "?",
+
+            // Open and close parenthesis are Scopus query segment delimiters;
+            // hence, having them as part of a publication title will a malformed
+            // request (i.e., BAD REQUEST). They cannot be escaped, doing so 
+            // will cause Scopus fail to find a match.
+            "(", ")"
+        };
 
         protected List<Publication> Publications { get; }
 
@@ -67,7 +84,7 @@ namespace Genometric.TVQ.API.Crawlers
             if (string.IsNullOrEmpty(title))
                 return title;
 
-            foreach (var word in TitleStopWords)
+            foreach (var word in _titleStopWords)
                 title = title.Replace(word, string.Empty, StringComparison.InvariantCultureIgnoreCase);
 
             return title;
