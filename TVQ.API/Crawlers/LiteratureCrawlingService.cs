@@ -61,6 +61,7 @@ namespace Genometric.TVQ.API.Crawlers
             /// ACID).
             job.Status = State.Completed;
             await Context.SaveChangesAsync().ConfigureAwait(false);
+            Logger.LogInformation("Successfully finished literature crawling.");
         }
     }
 }

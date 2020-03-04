@@ -65,6 +65,7 @@ namespace Genometric.TVQ.API.Crawlers
 
             await crawler.ScanAsync().ConfigureAwait(false);
             crawler.Dispose();
+            Logger.LogInformation($"Successfully finished crawling repository `{repo.Name}`.");
         }
     }
 }
