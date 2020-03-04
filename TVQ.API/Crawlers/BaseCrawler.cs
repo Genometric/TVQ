@@ -45,7 +45,6 @@ namespace Genometric.TVQ.API.Crawlers
         private ConcurrentDictionary<string, ToolPublicationAssociation> ToolPubAssoByTitle { get; }
 
         public List<Publication> PublicationsToBeDeleted { get; }
-        public List<ToolPublicationAssociation> ToolPubAssociationsToBeDeleted { get; }
 
         protected BaseCrawler(List<Publication> publications)
         {
@@ -71,7 +70,6 @@ namespace Genometric.TVQ.API.Crawlers
             InitializePublicationHelper();
 
             PublicationsToBeDeleted = new List<Publication>();
-            ToolPubAssociationsToBeDeleted = new List<ToolPublicationAssociation>();
         }
 
         private static string FormatToolName(string toolName)
@@ -166,7 +164,6 @@ namespace Genometric.TVQ.API.Crawlers
                 PubsByTitle.TryRemove(publication.Title, out _);
 
             PublicationsToBeDeleted.Add(publication);
-            ToolPubAssociationsToBeDeleted.AddRange(publication.ToolAssociations);
 
             return true;
         }
