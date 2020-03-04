@@ -31,7 +31,12 @@ namespace Genometric.TVQ.API.Crawlers
             // hence, having them as part of a publication title will a malformed
             // request (i.e., BAD REQUEST). They cannot be escaped, doing so 
             // will cause Scopus fail to find a match.
-            "(", ")"
+            "(", ")",
+
+            // Some publication titles may have LaTeX formatting, it is better
+            // to remove them more appropriately. Meanwhile, removing the following
+            // strings seems reasonable. 
+            "\\it"
         };
 
         protected List<Publication> Publications { get; }
