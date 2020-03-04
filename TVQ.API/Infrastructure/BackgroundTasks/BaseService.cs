@@ -54,7 +54,7 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners
             }
             catch (Exception e)
             {
-                // TODO log this.
+                Logger.LogError($"Error occurred executing job `{job.ID}`: {e.Message}");
                 job.Status = State.Failed;
                 job.Message = e.Message;
                 throw;
@@ -63,6 +63,7 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners
             {
                 // TODO: catch exception that may happen here (e.g., Microsoft.Data.SqlClient.SqlException).
                 await Context.SaveChangesAsync().ConfigureAwait(false);
+                Logger.LogInformation($"Job `{job.ID}` executed successfully.");
             }
         }
     }
