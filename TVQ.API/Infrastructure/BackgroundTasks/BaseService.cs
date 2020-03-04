@@ -38,22 +38,11 @@ namespace Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners
                 await ExecuteAsync(job, cancellationToken).ConfigureAwait(false);
                 job.Status = State.Completed;
             }
-            catch (DbUpdateConcurrencyException e)
-            {
-                // TODO log this.
-                job.Status = State.Failed;
-                job.Message = e.Message;
-                throw;
-            }
-            catch (DbUpdateException e)
-            {
-                // TODO log this. 
-                job.Status = State.Failed;
-                job.Message = e.Message;
-                throw;
-            }
             catch (Exception e)
             {
+                if (e is DbUpdateException || e is DbUpdateConcurrencyException)
+                { }
+
                 Logger.LogError($"Error occurred executing job `{job.ID}`: {e.Message}");
                 job.Status = State.Failed;
                 job.Message = e.Message;
