@@ -6,7 +6,6 @@ using Polly;
 using Polly.Retry;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -32,14 +31,14 @@ namespace Genometric.TVQ.API.Infrastructure
                     saveRequired = true;
                 }
 
-                if(!context.Services.Any())
+                if (!context.Services.Any())
                 {
                     await context.Services.AddRangeAsync(GetPreconfiguredServices())
                                           .ConfigureAwait(false);
                     saveRequired = true;
                 }
 
-                if(saveRequired)
+                if (saveRequired)
                     await context.SaveChangesAsync().ConfigureAwait(false);
 
             }).ConfigureAwait(false);
@@ -91,27 +90,25 @@ namespace Genometric.TVQ.API.Infrastructure
         }
 
         private static AsyncRetryPolicy CreatePolicy(
-            ILogger<TVQContextSeed> logger, 
-            string prefix, 
+            ILogger<TVQContextSeed> logger,
+            string prefix,
             int retries = 3)
         {
-            return Policy.Handle<SqlException>().
-                WaitAndRetryAsync(
-                    retryCount: retries,
-                    sleepDurationProvider: retry => TimeSpan.FromSeconds(5),
-                    onRetry: (exception, timeSpan, retry, ctx) =>
-                    {
-                        logger.LogWarning(
-                            exception, 
-                            "[{prefix}] Exception {ExceptionType} with message {Message} " +
-                            "detected on attempt {retry} of {retries}", 
-                            prefix, 
-                            exception.GetType().Name, 
-                            exception.Message, 
-                            retry, 
-                            retries);
-                    }
-                );
+            return Policy
+                .Handle<Exception>()
+                .WaitAndRetryAsync(6,
+                                   retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                                   onRetry: (exception, timeSpan, retry, ctx) =>
+                                   {
+                                       logger.LogWarning(exception,
+                                                         "[{prefix}] Exception {ExceptionType} with message " +
+                                                         "{Message} detected on attempt {retry} of {retries}",
+                                                         prefix,
+                                                         exception.GetType().Name,
+                                                         exception.Message,
+                                                         retry,
+                                                         retries);
+                                   });
         }
     }
 }

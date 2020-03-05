@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Polly;
 using System;
-using System.Data.SqlClient;
 
 namespace Genometric.TVQ.API.BuildingBlocks.WebHost
 {
@@ -25,15 +24,22 @@ namespace Genometric.TVQ.API.BuildingBlocks.WebHost
                 {
                     logger.LogInformation($"Migrating database associated with context {typeof(TContext).Name}");
 
-                    var retry = Policy.Handle<SqlException>()
-                         .WaitAndRetry(new TimeSpan[]
-                         {
-                             TimeSpan.FromSeconds(10),
-                             TimeSpan.FromSeconds(30),
-                             TimeSpan.FromSeconds(60),
-                             TimeSpan.FromSeconds(90),
-                             TimeSpan.FromSeconds(120)
-                         });
+                    var retry = Policy
+                        .Handle<Exception>()
+                        .WaitAndRetry(5,
+                                      retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                                      onRetry: (exception, timeSpan, retry, ctx) =>
+                                      {
+                                          logger.LogWarning(exception,
+                                                            "[{prefix}] Exception {ExceptionType} with " +
+                                                            "message {Message} detected on attempt {retry} " +
+                                                            "of {retries}",
+                                                            nameof(IWebHostExtensions),
+                                                            exception.GetType().Name,
+                                                            exception.Message,
+                                                            retry,
+                                                            100);
+                                      });
 
                     /// if the sql server container is not created on run docker 	
                     /// compose this migration can't fail for network related 	

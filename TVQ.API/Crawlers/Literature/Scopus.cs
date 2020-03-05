@@ -98,7 +98,7 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             }
             catch (HttpRequestException e)
             {
-                Logger.LogError($"Exception querying Scopus: {e.Message}");
+                Logger.LogError($"Exception querying Scopus: {e.Message}. Check your Internet connection.");
                 return null;
             }
 
