@@ -6,8 +6,8 @@ namespace Genometric.TVQ.API.Model
     {
         public int ID { set; get; }
 
-        public DateTime CreateDate { set; get; }
+        public DateTime CreatedDate { set; get; }
 
-        public DateTime LastUpdate { set; get; }
+        public DateTime UpdatedDate { set; get; }
     }
 }
