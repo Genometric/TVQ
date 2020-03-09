@@ -1,9 +1,7 @@
 ﻿namespace Genometric.TVQ.API.Model.Associations
 {
-    public class AuthorPublicationAssociation
+    public class AuthorPublicationAssociation : BaseModel
     {
-        public int ID { set; get; }
-
         public int AuthorID { set; get; }
         public virtual Author Author { set; get; }
 

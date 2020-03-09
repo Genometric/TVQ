@@ -1,9 +1,7 @@
 ﻿namespace Genometric.TVQ.API.Model.Associations
 {
-    public class ToolPublicationAssociation
+    public class ToolPublicationAssociation : BaseModel
     {
-        public int ID { set; get; }
-
         public int ToolID { set; get; }
 
         public int PublicationID { set; get; }

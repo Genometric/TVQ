@@ -1,9 +1,7 @@
 ﻿namespace Genometric.TVQ.API.Model.Associations
 {
-    public class ToolCategoryAssociation
+    public class ToolCategoryAssociation : BaseModel
     {
-        public int ID { set; get; }
-
         public int ToolID { set; get; }
         public virtual Tool Tool { set; get; }
 

@@ -1,27 +1,20 @@
 ﻿using Genometric.TVQ.API.Model;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Diagnostics.Contracts;
 
 namespace Genometric.TVQ.API.Infrastructure.EntityConfigurations
 {
-    public class ToolETC : IEntityTypeConfiguration<Tool>
+    public class ToolETC : BaseETC<Tool>
     {
-        public void Configure(EntityTypeBuilder<Tool> builder)
-        {
-            builder.ToTable("Tools");
-            builder.HasKey(obi => obi.ID);
-            builder.Property(obj => obj.ID).IsRequired(true);
-            builder.HasIndex(obj => obj.Name).IsUnique();
+        public ToolETC() : base("Tools")
+        { }
 
-            foreach (var p in typeof(Tool).GetProperties())
-            {
-                if (p.Name == nameof(Tool.ID) ||
-                    p.Name == nameof(Tool.RepoAssociations) ||
-                    p.Name == nameof(Tool.CategoryAssociations) ||
-                    p.Name == nameof(Tool.PublicationAssociations))
-                    continue;
-                builder.Property(p.Name);
-            }
+        public override void Configure(EntityTypeBuilder<Tool> builder)
+        {
+            Contract.Requires(builder != null);
+
+            base.Configure(builder);
+            builder.HasIndex(obj => obj.Name).IsUnique();
         }
     }
 }

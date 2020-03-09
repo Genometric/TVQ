@@ -6,10 +6,8 @@ using System.Collections.Generic;
 namespace Genometric.TVQ.API.Model.Associations
 {
     [JsonConverter(typeof(ToolRepoAssociationJsonConverter))]
-    public class ToolRepoAssociation
+    public class ToolRepoAssociation : BaseModel
     {
-        public int ID { set; get; }
-
         public string IDinRepo { set; get; }
 
         public int ToolID { set; get; }

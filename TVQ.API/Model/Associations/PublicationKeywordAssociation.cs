@@ -1,9 +1,7 @@
 ﻿namespace Genometric.TVQ.API.Model.Associations
 {
-    public class PublicationKeywordAssociation
+    public class PublicationKeywordAssociation : BaseModel
     {
-        public int ID { set; get; }
-
         public int PublicationID { set; get; }
         public virtual Publication Publication { set; get; }
 

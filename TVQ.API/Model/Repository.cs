@@ -15,17 +15,6 @@ namespace Genometric.TVQ.API.Model
 
         public string URI { set; get; }
 
-        public int ToolsCount
-        {
-            get
-            {
-                if (ToolAssociations != null)
-                    return ToolAssociations.Count;
-                else
-                    return 0;
-            }
-        }
-
         public virtual ICollection<ToolRepoAssociation> ToolAssociations { set; get; }
 
         public virtual Statistics Statistics { set; get; }
