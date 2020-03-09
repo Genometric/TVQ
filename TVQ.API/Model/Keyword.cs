@@ -6,7 +6,7 @@ namespace Genometric.TVQ.API.Model
 {
     public class Keyword : BaseModel, IKeyword
     {
-        public string Label { get; }
+        public string Label { set; get; }
 
         public virtual ICollection<PublicationKeywordAssociation> PublicationAssociations { set; get; }
 

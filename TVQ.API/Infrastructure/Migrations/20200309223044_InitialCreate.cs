@@ -13,6 +13,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true)
                 },
@@ -27,6 +29,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     ToolShedID = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
@@ -43,6 +47,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     Label = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -56,6 +62,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     Status = table.Column<int>(nullable: false),
                     Message = table.Column<string>(nullable: true),
                     ScanAllPublications = table.Column<bool>(nullable: false)
@@ -71,8 +79,10 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     Name = table.Column<int>(nullable: true),
-                    URI = table.Column<string>(nullable: false)
+                    URI = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -85,6 +95,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     Name = table.Column<int>(nullable: false),
                     MaxDegreeOfParallelism = table.Column<int>(nullable: false)
                 },
@@ -99,6 +111,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     Name = table.Column<string>(nullable: true),
                     Homepage = table.Column<string>(nullable: true),
                     CodeRepo = table.Column<string>(nullable: true),
@@ -116,6 +130,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     PubMedID = table.Column<string>(nullable: true),
                     EID = table.Column<string>(nullable: true),
                     ScopusID = table.Column<string>(nullable: true),
@@ -152,6 +168,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     Status = table.Column<int>(nullable: false),
                     Message = table.Column<string>(nullable: true),
                     RepositoryID = table.Column<int>(nullable: true)
@@ -173,6 +191,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     Status = table.Column<int>(nullable: false),
                     Message = table.Column<string>(nullable: true),
                     RepositoryID = table.Column<int>(nullable: false)
@@ -194,6 +214,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     RepositoryID = table.Column<int>(nullable: false),
                     TScore = table.Column<double>(nullable: true),
                     PValue = table.Column<double>(nullable: true),
@@ -213,25 +235,27 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ToolCategoryAssociation",
+                name: "ToolCategoryAssociations",
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     ToolID = table.Column<int>(nullable: false),
                     CategoryID = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ToolCategoryAssociation", x => x.ID);
+                    table.PrimaryKey("PK_ToolCategoryAssociations", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_ToolCategoryAssociation_Categories_CategoryID",
+                        name: "FK_ToolCategoryAssociations_Categories_CategoryID",
                         column: x => x.CategoryID,
                         principalTable: "Categories",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ToolCategoryAssociation_Tools_ToolID",
+                        name: "FK_ToolCategoryAssociations_Tools_ToolID",
                         column: x => x.ToolID,
                         principalTable: "Tools",
                         principalColumn: "ID",
@@ -244,6 +268,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     IDinRepo = table.Column<string>(nullable: true),
                     ToolID = table.Column<int>(nullable: false),
                     RepositoryID = table.Column<int>(nullable: false),
@@ -274,6 +300,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     AuthorID = table.Column<int>(nullable: false),
                     PublicationID = table.Column<int>(nullable: false)
                 },
@@ -300,6 +328,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     PublicationID = table.Column<int>(nullable: false),
                     Count = table.Column<int>(nullable: false),
                     AccumulatedCount = table.Column<int>(nullable: false),
@@ -323,6 +353,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     PublicationID = table.Column<int>(nullable: false),
                     KeywordID = table.Column<int>(nullable: false)
                 },
@@ -349,6 +381,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     ToolID = table.Column<int>(nullable: false),
                     PublicationID = table.Column<int>(nullable: false)
                 },
@@ -375,6 +409,8 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
                     ToolID = table.Column<int>(nullable: false),
                     Count = table.Column<int>(nullable: false),
                     Date = table.Column<DateTime>(nullable: false),
@@ -413,13 +449,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 column: "PublicationID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Categories_Name",
-                table: "Categories",
-                column: "Name",
-                unique: true,
-                filter: "[Name] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Citations_PublicationID",
                 table: "Citations",
                 column: "PublicationID");
@@ -445,11 +474,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 column: "RepositoryID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RepoCrawlingJobs_Status",
-                table: "RepoCrawlingJobs",
-                column: "Status");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Services_Name",
                 table: "Services",
                 column: "Name",
@@ -462,13 +486,13 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ToolCategoryAssociation_CategoryID",
-                table: "ToolCategoryAssociation",
+                name: "IX_ToolCategoryAssociations_CategoryID",
+                table: "ToolCategoryAssociations",
                 column: "CategoryID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ToolCategoryAssociation_ToolID",
-                table: "ToolCategoryAssociation",
+                name: "IX_ToolCategoryAssociations_ToolID",
+                table: "ToolCategoryAssociations",
                 column: "ToolID");
 
             migrationBuilder.CreateIndex(
@@ -533,7 +557,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 name: "Statistics");
 
             migrationBuilder.DropTable(
-                name: "ToolCategoryAssociation");
+                name: "ToolCategoryAssociations");
 
             migrationBuilder.DropTable(
                 name: "ToolDownloadRecords");

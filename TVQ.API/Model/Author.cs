@@ -6,9 +6,9 @@ namespace Genometric.TVQ.API.Model
 {
     public class Author : BaseModel, IAuthor
     {
-        public string FirstName { get; }
+        public string FirstName { set; get; }
 
-        public string LastName { get; }
+        public string LastName { set; get; }
 
         public virtual ICollection<AuthorPublicationAssociation> AuthorPublications { set; get; }
 
