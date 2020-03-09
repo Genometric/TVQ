@@ -1,9 +1,7 @@
 ﻿namespace Genometric.TVQ.API.Model
 {
-    public class Overview
+    public class Overview : BaseModel
     {
-        public int ID { set; get; }
-
         public int RepositoryCount { set; get; }
 
         public int ToolsCountInAllRepositories { set; get; }

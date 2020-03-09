@@ -2,10 +2,8 @@
 
 namespace Genometric.TVQ.API.Model.DTOs
 {
-    public class PublicationDTO
+    public class PublicationDTO : BaseModel
     {
-        public int ID { get; }
-
         public List<int> ToolAssociations { get; }
 
         public PublicationDTO(Publication publication)

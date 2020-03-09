@@ -13,11 +13,9 @@ namespace Genometric.TVQ.API.Model
     /// generic types cannot be used here, hence the 
     /// <see cref="GetJobs{T}"/> method is implemented.
     /// </summary>
-    public class Service
+    public class Service : BaseModel
     {
         public enum Type { ToolRepoCrawler, LiteratureCrawler, Analysis };
-
-        public int ID { set; get; }
 
         /// <summary>
         /// Implementation note:

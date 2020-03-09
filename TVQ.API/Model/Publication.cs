@@ -8,10 +8,8 @@ using System.Collections.Generic;
 namespace Genometric.TVQ.API.Model
 {
     [JsonConverter(typeof(PublicationJsonConverter))]
-    public class Publication
+    public class Publication : BaseModel
     {
-        public int ID { set; get; }
-
         public string PubMedID { set; get; }
 
         public string EID { set; get; }

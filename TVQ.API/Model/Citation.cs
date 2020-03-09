@@ -5,11 +5,9 @@ using System;
 namespace Genometric.TVQ.API.Model
 {
     [JsonConverter(typeof(CitationJsonConverter))]
-    public class Citation
+    public class Citation : BaseModel
     {
         public enum InfoSource { Scopus };
-
-        public int ID { set; get; }
 
         public int PublicationID { set; get; }
 

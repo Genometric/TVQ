@@ -6,10 +6,8 @@ using System.Collections.Generic;
 namespace Genometric.TVQ.API.Model
 {
     [JsonConverter(typeof(CategoryJsonConverter))]
-    public class Category
+    public class Category : BaseModel
     {
-        public int ID { set; get; }
-
         public string ToolShedID { set; get; }
 
         public string Name { set; get; }

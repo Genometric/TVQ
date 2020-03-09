@@ -4,10 +4,8 @@ using System.Collections.Generic;
 
 namespace Genometric.TVQ.API.Model
 {
-    public class Author : IAuthor
+    public class Author : BaseModel, IAuthor
     {
-        public int ID { set; get; }
-
         public string FirstName { get; }
 
         public string LastName { get; }

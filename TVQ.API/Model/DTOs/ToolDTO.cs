@@ -1,9 +1,7 @@
 ﻿namespace Genometric.TVQ.API.Model.DTOs
 {
-    public class ToolDTO
+    public class ToolDTO : BaseModel
     {
-        public int ID { get; }
-
         public string Name { get; }
 
         public ToolDTO(Tool tool)
