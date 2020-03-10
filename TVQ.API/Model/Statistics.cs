@@ -1,5 +1,9 @@
-﻿namespace Genometric.TVQ.API.Model
+﻿using Genometric.TVQ.API.Model.JsonConverters;
+using Newtonsoft.Json;
+
+namespace Genometric.TVQ.API.Model
 {
+    [JsonConverter(typeof(StatisticsJsonConverter))]
     public class Statistics : BaseModel
     {
         public int RepositoryID { set; get; }
