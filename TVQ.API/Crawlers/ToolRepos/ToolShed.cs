@@ -2,6 +2,7 @@
 using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
 using Genometric.TVQ.API.Model.Associations;
+using Genometric.TVQ.API.Model.JsonConverters;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
@@ -29,6 +30,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         private readonly ExecutionDataflowBlockOptions _xmlExtractExeOptions;
         private readonly ExecutionDataflowBlockOptions _pubExtractExeOptions;
 
+        private readonly JsonSerializerSettings _categoryJsonSerializerSettings;
+
         public ToolShed(
             Repository repo,
             List<Tool> tools,
@@ -53,6 +56,21 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 BoundedCapacity = _boundedCapacity,
                 MaxDegreeOfParallelism = _maxParallelActions
             };
+
+            _categoryJsonSerializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CustomContractResolver(
+                    typeof(Category),
+                    new BaseJsonConverter(
+                        propertyMappings: new Dictionary<string, string>
+                        {
+                            { "name", nameof(Category.Name) },
+                            { "term", nameof(Category.Name) },
+                            { "id", nameof(Category.ToolShedID) },
+                            { "uri", nameof(Category.URI) },
+                            { "description", nameof(Category.Description) }
+                        }))
+            };
         }
 
         public override async Task ScanAsync()
@@ -76,7 +94,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 return;
 
             Logger.LogDebug("Received Categories from ToolShed, deserializing them.");
-            UpdateCategories(new List<Category>(JsonConvert.DeserializeObject<List<Category>>(content)));
+            UpdateCategories(JsonConvert.DeserializeObject<List<Category>>(content, _categoryJsonSerializerSettings));
         }
 
         private async Task<List<DeserializedInfo>> GetToolsAsync()
