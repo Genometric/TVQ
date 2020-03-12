@@ -26,7 +26,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             ToolJsonSerializerSettings = new JsonSerializerSettings
             {
                 ContractResolver = new CustomContractResolver(
-                    typeof(Category),
+                    typeof(Tool),
                     new BaseJsonConverter(
                         propertyMappings: new Dictionary<string, string>
                         {

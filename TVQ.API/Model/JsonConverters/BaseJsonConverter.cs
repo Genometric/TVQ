@@ -60,11 +60,19 @@ namespace Genometric.TVQ.API.Model.JsonConverters
                     name = jsonProperty.Name;
 
                 PropertyInfo prop = props.FirstOrDefault(
-                    pi => pi.CanWrite && pi.Name == name);
+                    pi => pi.CanWrite && 
+                    pi.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
 
-                prop?.SetValue(
-                    instance,
-                    jsonProperty.Value.ToObject(prop.PropertyType, serializer));
+                try
+                {
+                    prop?.SetValue(
+                        instance,
+                        jsonProperty.Value.ToObject(prop.PropertyType, serializer));
+                }
+                catch (JsonSerializationException)
+                {
+                    continue;
+                }
             }
 
             return instance;
