@@ -176,6 +176,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.Property<string>("IDinRepo")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Owner")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("RepositoryID")
                         .HasColumnType("int");
 
@@ -551,9 +554,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Owner")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime2");

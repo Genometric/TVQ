@@ -67,7 +67,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                         {
                             { "name", nameof(Tool.Name) },
                             { "homepage_url", nameof(Tool.Homepage) },
-                            { "owner", nameof(Tool.Owner) },
                             { "remote_repository_url", nameof(Tool.CodeRepo) },
                             { "description", nameof(Tool.Description) } 
                         }))
@@ -81,6 +80,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                         propertyMappings: new Dictionary<string, string>
                         {
                             { "times_downloaded", nameof(ToolRepoAssociation.TimesDownloaded) },
+                            //{ "owner", nameof(Tool.Owner) },
                             { "user_id", nameof(ToolRepoAssociation.UserID) },
                             { "id", nameof(ToolRepoAssociation.IDinRepo) },
                             { "create_time", nameof(ToolRepoAssociation.DateAddedToRepository) }
@@ -195,7 +195,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 client.DownloadFile(
                     address: new Uri(
                         $"https://toolshed.g2.bx.psu.edu/repos/" +
-                        $"{info.ToolRepoAssociation.Tool.Owner}/{info.ToolRepoAssociation.Tool.Name}/" +
+                        $"{info.ToolRepoAssociation.Owner}/{info.ToolRepoAssociation.Tool.Name}/" +
                         $"archive/tip.zip"),
                     fileName: info.ArchiveFilename);
                 Logger.LogDebug($"Successfully downloaded archive of {info.ToolRepoAssociation.Tool.Name}.");

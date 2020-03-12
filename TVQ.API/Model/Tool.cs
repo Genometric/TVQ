@@ -14,8 +14,6 @@ namespace Genometric.TVQ.API.Model
 
         public string CodeRepo { set; get; }
 
-        public string Owner { set; get; }
-
         public string Description { set; get; }
 
         public virtual ICollection<ToolRepoAssociation> RepoAssociations { set; get; }

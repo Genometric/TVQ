@@ -14,6 +14,8 @@ namespace Genometric.TVQ.API.Model.Associations
 
         public int RepositoryID { set; get; }
 
+        public string Owner { set; get; }
+
         public string UserID { set; get; }
 
         public int? TimesDownloaded { set; get; }

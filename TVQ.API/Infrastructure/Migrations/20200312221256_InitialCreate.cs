@@ -116,7 +116,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     Name = table.Column<string>(nullable: true),
                     Homepage = table.Column<string>(nullable: true),
                     CodeRepo = table.Column<string>(nullable: true),
-                    Owner = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -273,6 +272,7 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     IDinRepo = table.Column<string>(nullable: true),
                     ToolID = table.Column<int>(nullable: false),
                     RepositoryID = table.Column<int>(nullable: false),
+                    Owner = table.Column<string>(nullable: true),
                     UserID = table.Column<string>(nullable: true),
                     TimesDownloaded = table.Column<int>(nullable: true),
                     DateAddedToRepository = table.Column<DateTime>(nullable: true)

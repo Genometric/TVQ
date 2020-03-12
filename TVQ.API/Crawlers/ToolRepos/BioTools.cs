@@ -32,7 +32,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                         {
                             { "name", nameof(Tool.Name) },
                             { "homepage", nameof(Tool.Homepage) },
-                            { "owner", nameof(Tool.Owner) },
                             { "description", nameof(Tool.Description) }
                         }))
             };
@@ -44,6 +43,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                     new BaseJsonConverter(
                         propertyMappings: new Dictionary<string, string>
                         {
+                            { "owner", nameof(ToolRepoAssociation.Owner) },
                             { "user_id", nameof(ToolRepoAssociation.UserID) },
                             { "biotoolsID", nameof(ToolRepoAssociation.IDinRepo) },
                             { "additionDate", nameof(ToolRepoAssociation.DateAddedToRepository) }
