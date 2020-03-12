@@ -18,6 +18,7 @@ namespace Genometric.TVQ.API.Model.JsonConverters
         public BaseJsonConverter()
         {
             _propertyMappings = new Dictionary<string, string>();
+            _propertiesToIgnore = new List<string>();
         }
 
         public BaseJsonConverter(Dictionary<string, string> propertyMappings,

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Genometric.TVQ.API.Model
 {
-    [JsonConverter(typeof(RepositoryJsonConverter))]
+    [JsonConverter(typeof(BaseJsonConverter))]
     public class Repository : BaseModel
     {
         public enum Repo { ToolShed, BioTools, Bioconductor, Bioconda };
@@ -15,6 +15,7 @@ namespace Genometric.TVQ.API.Model
 
         public string URI { set; get; }
 
+        [JsonIgnore]
         public virtual ICollection<ToolRepoAssociation> ToolAssociations { set; get; }
 
         public virtual Statistics Statistics { set; get; }
