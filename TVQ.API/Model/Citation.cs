@@ -4,7 +4,7 @@ using System;
 
 namespace Genometric.TVQ.API.Model
 {
-    [JsonConverter(typeof(CitationJsonConverter))]
+    [JsonConverter(typeof(BaseJsonConverter))]
     public class Citation : BaseModel
     {
         public enum InfoSource { Scopus };

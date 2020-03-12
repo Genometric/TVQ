@@ -23,7 +23,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
             {
                 {"topic", nameof(DeserializedInfo.Categories)},
                 {"category_ids", nameof(DeserializedInfo.CategoryIDs)},
-                //{"publication", nameof(DeserializedInfo.Publications)}
 
                 /// Why not reading Bio.Tools Publication.Metadata?
                 /// A JSON object from Bio.Tools contains a field named "meta-data" for 
