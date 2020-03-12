@@ -1,7 +1,10 @@
 ﻿using Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes;
 using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
+using Genometric.TVQ.API.Model.Associations;
+using Genometric.TVQ.API.Model.JsonConverters;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,7 +22,34 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             List<Category> categories,
             ILogger<BaseService<RepoCrawlingJob>> logger) :
             base(repo, tools, publications, categories, logger)
-        { }
+        {
+            ToolJsonSerializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CustomContractResolver(
+                    typeof(Category),
+                    new BaseJsonConverter(
+                        propertyMappings: new Dictionary<string, string>
+                        {
+                            { "name", nameof(Tool.Name) },
+                            { "homepage", nameof(Tool.Homepage) },
+                            { "owner", nameof(Tool.Owner) },
+                            { "description", nameof(Tool.Description) }
+                        }))
+            };
+
+            ToolRepoAssoJsonSerializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CustomContractResolver(
+                    typeof(ToolRepoAssociation),
+                    new BaseJsonConverter(
+                        propertyMappings: new Dictionary<string, string>
+                        {
+                            { "user_id", nameof(ToolRepoAssociation.UserID) },
+                            { "biotoolsID", nameof(ToolRepoAssociation.IDinRepo) },
+                            { "additionDate", nameof(ToolRepoAssociation.DateAddedToRepository) }
+                        }))
+            };
+        }
 
         public override async Task ScanAsync()
         {
@@ -43,6 +73,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                             using var reader = new StreamReader(extractedFileName);
                             if (!DeserializedInfo.TryDeserialize(
                                 reader.ReadToEnd(),
+                                ToolJsonSerializerSettings,
+                                ToolRepoAssoJsonSerializerSettings,
                                 out DeserializedInfo deserializedInfo))
                             {
                                 // TODO: log this.

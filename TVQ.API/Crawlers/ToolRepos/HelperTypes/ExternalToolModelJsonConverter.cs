@@ -13,6 +13,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
     {
         private readonly Dictionary<string, string> _propertyMappings;
 
+        private readonly JsonSerializerSettings _toolSerializerSettings;
+        private readonly JsonSerializerSettings _toolRepoAssoSerializerSettings;
+
         public ExternalToolModelJsonConverter()
         {
             _propertyMappings = new Dictionary<string, string>
@@ -28,6 +31,14 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
                 /// capture only DOI and/or PubMedID and query details of each 
                 /// publication from Scopus. 
             };
+        }
+
+        public ExternalToolModelJsonConverter(
+            JsonSerializerSettings toolSerializerSettings, 
+            JsonSerializerSettings toolRepoAssoSerializerSettings) : this()
+        {
+            _toolSerializerSettings = toolSerializerSettings;
+            _toolRepoAssoSerializerSettings = toolRepoAssoSerializerSettings;
         }
 
         public override bool CanConvert(Type objectType)
@@ -58,8 +69,14 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
                     jsonProperty.Value.ToObject(prop.PropertyType, serializer));
             }
 
-            instance.ToolRepoAssociation = JsonConvert.DeserializeObject<ToolRepoAssociation>(obj.ToString());
-            instance.ToolRepoAssociation.Tool = JsonConvert.DeserializeObject<Tool>(obj.ToString());
+            instance.ToolRepoAssociation = 
+                JsonConvert.DeserializeObject<ToolRepoAssociation>(
+                    obj.ToString(), _toolRepoAssoSerializerSettings);
+
+            instance.ToolRepoAssociation.Tool = 
+                JsonConvert.DeserializeObject<Tool>(
+                    obj.ToString(), _toolSerializerSettings);
+
             return instance;
         }
 

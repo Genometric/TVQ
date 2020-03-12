@@ -30,6 +30,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         private readonly ExecutionDataflowBlockOptions _xmlExtractExeOptions;
         private readonly ExecutionDataflowBlockOptions _pubExtractExeOptions;
 
+        
         private readonly JsonSerializerSettings _categoryJsonSerializerSettings;
 
         public ToolShed(
@@ -55,6 +56,35 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             {
                 BoundedCapacity = _boundedCapacity,
                 MaxDegreeOfParallelism = _maxParallelActions
+            };
+
+            ToolJsonSerializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CustomContractResolver(
+                    typeof(Tool),
+                    new BaseJsonConverter(
+                        propertyMappings: new Dictionary<string, string>
+                        {
+                            { "name", nameof(Tool.Name) },
+                            { "homepage_url", nameof(Tool.Homepage) },
+                            { "owner", nameof(Tool.Owner) },
+                            { "remote_repository_url", nameof(Tool.CodeRepo) },
+                            { "description", nameof(Tool.Description) } 
+                        }))
+            };
+
+            ToolRepoAssoJsonSerializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CustomContractResolver(
+                    typeof(ToolRepoAssociation),
+                    new BaseJsonConverter(
+                        propertyMappings: new Dictionary<string, string>
+                        {
+                            { "times_downloaded", nameof(ToolRepoAssociation.TimesDownloaded) },
+                            { "user_id", nameof(ToolRepoAssociation.UserID) },
+                            { "id", nameof(ToolRepoAssociation.IDinRepo) },
+                            { "create_time", nameof(ToolRepoAssociation.DateAddedToRepository) }
+                        }))
             };
 
             _categoryJsonSerializerSettings = new JsonSerializerSettings
@@ -110,7 +140,11 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 return null;
 
             Logger.LogDebug("Received tools from ToolShed, deserializing them.");
-            DeserializedInfo.TryDeserialize(content, out List<DeserializedInfo> deserializedInfos);
+            DeserializedInfo.TryDeserialize(
+                content, 
+                ToolJsonSerializerSettings, 
+                ToolRepoAssoJsonSerializerSettings, 
+                out List<DeserializedInfo> deserializedInfos);
             foreach (var info in deserializedInfos)
                 info.SetStagingArea(SessionTempPath);
             return deserializedInfos;

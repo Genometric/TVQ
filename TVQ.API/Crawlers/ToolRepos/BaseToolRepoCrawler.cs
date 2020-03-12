@@ -5,6 +5,7 @@ using Genometric.TVQ.API.Model;
 using Genometric.TVQ.API.Model.Associations;
 using Genometric.TVQ.API.Model.JsonConverters;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -20,6 +21,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         protected ConcurrentDictionary<string, Tool> ToolsDict { get; }
 
         protected ConcurrentDictionary<string, ToolRepoAssociation> ToolRepoAssociationsDict { get; }
+
+        protected JsonSerializerSettings ToolJsonSerializerSettings { set; get; }
+        protected JsonSerializerSettings ToolRepoAssoJsonSerializerSettings { set; get; }
 
         private readonly Dictionary<string, Category> _categoriesByToolShedID;
         private readonly Dictionary<string, Category> _categoriesByName;

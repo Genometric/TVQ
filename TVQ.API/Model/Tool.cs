@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Genometric.TVQ.API.Model
 {
-    [JsonConverter(typeof(ToolJsonConverter))]
+    [JsonConverter(typeof(BaseJsonConverter))]
     public class Tool : BaseModel
     {
         public string Name { set; get; }

@@ -40,12 +40,12 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             /// There is separate script in the Scripts folder that retrieves the date 
             /// when each tool was added to the Bioconda's repository from the repository's 
             /// git log. The algorithm to retrieve the dates is not optimized, hence it
-            /// takes significantly long time (in order of hours) to retrieve such info.
+            /// takes significantly long time (in the order of hours) to retrieve such info.
             /// Therefore, until the algorithm is optimized and a better code is implemented 
             /// here (maybe using LibGit2Sharp (https://github.com/libgit2/libgit2sharp)), 
             /// it is more practical to run the afore-mentioned script offline, cache the 
             /// date and store them in the TVQ's git repository, and then read that file 
-            /// in this method (how it is currently implemented).
+            /// in this method (i.e., how it is currently implemented).
 
             var dateAddedFileName = SessionTempPath + Utilities.GetRandomString();
 

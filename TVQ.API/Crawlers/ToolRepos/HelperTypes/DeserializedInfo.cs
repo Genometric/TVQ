@@ -1,5 +1,6 @@
 ﻿using Genometric.TVQ.API.Model;
 using Genometric.TVQ.API.Model.Associations;
+using Genometric.TVQ.API.Model.JsonConverters;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -126,15 +127,40 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
             }
         }
 
-        public static bool TryDeserialize(string json, out DeserializedInfo deserializedInfo)
+        private static JsonSerializerSettings GetJsonSerializerSettings(
+            JsonSerializerSettings toolSettings, 
+            JsonSerializerSettings repoAssoSettings)
         {
-            deserializedInfo = JsonConvert.DeserializeObject<DeserializedInfo>(json);
+            return new JsonSerializerSettings
+            {
+                ContractResolver = new CustomContractResolver(
+                    typeof(DeserializedInfo),
+                    new ExternalToolModelJsonConverter(
+                        toolSettings,
+                        repoAssoSettings))
+            };
+        }
+
+        public static bool TryDeserialize(
+            string json, 
+            JsonSerializerSettings toolSettings,
+            JsonSerializerSettings assoSettings,
+            out DeserializedInfo deserializedInfo)
+        {
+            deserializedInfo = JsonConvert.DeserializeObject<DeserializedInfo>(
+                json, GetJsonSerializerSettings(toolSettings, assoSettings));
             return true;
         }
 
-        public static bool TryDeserialize(string json, out List<DeserializedInfo> deserializedInfos)
+        public static bool TryDeserialize(
+            string json,
+            JsonSerializerSettings toolSettings,
+            JsonSerializerSettings assoSettings,
+            out List<DeserializedInfo> deserializedInfos)
         {
-            deserializedInfos = JsonConvert.DeserializeObject<List<DeserializedInfo>>(json);
+            deserializedInfos =
+                JsonConvert.DeserializeObject<List<DeserializedInfo>>(
+                    json, GetJsonSerializerSettings(toolSettings, assoSettings));
             return true;
         }
 
