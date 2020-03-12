@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Genometric.TVQ.API.Model
 {
-    [JsonConverter(typeof(StatisticsJsonConverter))]
+    [JsonConverter(typeof(BaseJsonConverter))]
     public class Statistics : BaseModel
     {
         public int RepositoryID { set; get; }
