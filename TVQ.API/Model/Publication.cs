@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Genometric.TVQ.API.Model
 {
-    [JsonConverter(typeof(PublicationJsonConverter))]
+    [JsonConverter(typeof(BaseJsonConverter))]
     public class Publication : BaseModel
     {
         public string PubMedID { set; get; }

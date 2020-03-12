@@ -128,8 +128,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
         }
 
         private static JsonSerializerSettings GetJsonSerializerSettings(
-            JsonSerializerSettings toolSettings, 
-            JsonSerializerSettings repoAssoSettings)
+            JsonSerializerSettings toolSettings,
+            JsonSerializerSettings repoAssoSettings,
+            JsonSerializerSettings publicationSettings = null)
         {
             return new JsonSerializerSettings
             {
@@ -137,18 +138,20 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
                     typeof(DeserializedInfo),
                     new ExternalToolModelJsonConverter(
                         toolSettings,
-                        repoAssoSettings))
+                        repoAssoSettings,
+                        publicationSettings))
             };
         }
 
         public static bool TryDeserialize(
-            string json, 
+            string json,
             JsonSerializerSettings toolSettings,
             JsonSerializerSettings assoSettings,
+            JsonSerializerSettings publicationSettings,
             out DeserializedInfo deserializedInfo)
         {
             deserializedInfo = JsonConvert.DeserializeObject<DeserializedInfo>(
-                json, GetJsonSerializerSettings(toolSettings, assoSettings));
+                json, GetJsonSerializerSettings(toolSettings, assoSettings, publicationSettings));
             return true;
         }
 

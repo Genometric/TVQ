@@ -49,6 +49,22 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                             { "additionDate", nameof(ToolRepoAssociation.DateAddedToRepository) }
                         }))
             };
+
+            PublicationSerializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CustomContractResolver(
+                    typeof(Publication),
+                    new BaseJsonConverter(
+                        propertyMappings: new Dictionary<string, string>
+                        {
+                            { "title", nameof(Publication.Title) }, 
+                            { "year", nameof(Publication.Year) }, 
+                            { "citedBy", nameof(Publication.CitedBy) }, 
+                            { "doi", nameof(Publication.DOI) }, 
+                            { "citation", nameof(Publication.BibTeXEntry) }, 
+                            { "pmid", nameof(Publication.PubMedID) }
+                        }))
+            };
         }
 
         public override async Task ScanAsync()
@@ -75,6 +91,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                                 reader.ReadToEnd(),
                                 ToolJsonSerializerSettings,
                                 ToolRepoAssoJsonSerializerSettings,
+                                PublicationSerializerSettings,
                                 out DeserializedInfo deserializedInfo))
                             {
                                 // TODO: log this.

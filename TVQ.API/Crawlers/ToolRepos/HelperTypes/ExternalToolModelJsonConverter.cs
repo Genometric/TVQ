@@ -15,6 +15,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
 
         private readonly JsonSerializerSettings _toolSerializerSettings;
         private readonly JsonSerializerSettings _toolRepoAssoSerializerSettings;
+        private readonly JsonSerializerSettings _publicationSerializerSettings;
 
         public ExternalToolModelJsonConverter()
         {
@@ -22,7 +23,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
             {
                 {"topic", nameof(DeserializedInfo.Categories)},
                 {"category_ids", nameof(DeserializedInfo.CategoryIDs)},
-                {"publication", nameof(DeserializedInfo.Publications)}
+                //{"publication", nameof(DeserializedInfo.Publications)}
 
                 /// Why not reading Bio.Tools Publication.Metadata?
                 /// A JSON object from Bio.Tools contains a field named "meta-data" for 
@@ -35,10 +36,12 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
 
         public ExternalToolModelJsonConverter(
             JsonSerializerSettings toolSerializerSettings, 
-            JsonSerializerSettings toolRepoAssoSerializerSettings) : this()
+            JsonSerializerSettings toolRepoAssoSerializerSettings,
+            JsonSerializerSettings publicationSerializerSettings) : this()
         {
             _toolSerializerSettings = toolSerializerSettings;
             _toolRepoAssoSerializerSettings = toolRepoAssoSerializerSettings;
+            _publicationSerializerSettings = publicationSerializerSettings;
         }
 
         public override bool CanConvert(Type objectType)
@@ -60,6 +63,12 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
             {
                 if (!_propertyMappings.TryGetValue(jsonProperty.Name, out var name))
                     name = jsonProperty.Name;
+
+                if (name == "publication")
+                {
+                    instance.Publications = JsonConvert.DeserializeObject<List<Publication>>(jsonProperty.Value.ToString(), _publicationSerializerSettings);
+                    continue;
+                }
 
                 PropertyInfo prop = props.FirstOrDefault(
                     pi => pi.CanWrite && pi.Name == name);
