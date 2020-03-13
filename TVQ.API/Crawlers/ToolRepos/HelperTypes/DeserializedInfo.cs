@@ -130,7 +130,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
         private static JsonSerializerSettings GetJsonSerializerSettings(
             JsonSerializerSettings toolSettings,
             JsonSerializerSettings repoAssoSettings,
-            JsonSerializerSettings publicationSettings = null)
+            JsonSerializerSettings publicationSettings = null,
+            JsonSerializerSettings categorySettings = null)
         {
             return new JsonSerializerSettings
             {
@@ -139,7 +140,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
                     new ExternalToolModelJsonConverter(
                         toolSettings,
                         repoAssoSettings,
-                        publicationSettings))
+                        publicationSettings,
+                        categorySettings))
             };
         }
 
@@ -148,10 +150,14 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
             JsonSerializerSettings toolSettings,
             JsonSerializerSettings assoSettings,
             JsonSerializerSettings publicationSettings,
+            JsonSerializerSettings categorySettings,
             out DeserializedInfo deserializedInfo)
         {
             deserializedInfo = JsonConvert.DeserializeObject<DeserializedInfo>(
-                json, GetJsonSerializerSettings(toolSettings, assoSettings, publicationSettings));
+                json, GetJsonSerializerSettings(toolSettings,
+                                                assoSettings,
+                                                publicationSettings,
+                                                categorySettings: categorySettings));
             return true;
         }
 

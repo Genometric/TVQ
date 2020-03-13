@@ -25,6 +25,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         protected JsonSerializerSettings ToolJsonSerializerSettings { set; get; }
         protected JsonSerializerSettings ToolRepoAssoJsonSerializerSettings { set; get; }
         protected JsonSerializerSettings PublicationSerializerSettings { set; get; }
+        protected JsonSerializerSettings CategorySerializerSettings { set; get; }
 
         private readonly Dictionary<string, Category> _categoriesByToolShedID;
         private readonly Dictionary<string, Category> _categoriesByName;
@@ -165,7 +166,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             }
             else
             {
-                Logger.LogDebug($"Association between Tool {info.ToolRepoAssociation.Tool.Name} and Repository {Repo.Name} already exists."); 
+                Logger.LogDebug($"Association between Tool {info.ToolRepoAssociation.Tool.Name} and Repository {Repo.Name} already exists.");
                 return false;
             }
         }

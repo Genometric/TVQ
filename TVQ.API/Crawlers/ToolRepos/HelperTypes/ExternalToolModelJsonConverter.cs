@@ -16,12 +16,12 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
         private readonly JsonSerializerSettings _toolSerializerSettings;
         private readonly JsonSerializerSettings _toolRepoAssoSerializerSettings;
         private readonly JsonSerializerSettings _publicationSerializerSettings;
+        private readonly JsonSerializerSettings _categorySerializerSettings;
 
         public ExternalToolModelJsonConverter()
         {
             _propertyMappings = new Dictionary<string, string>
             {
-                {"topic", nameof(DeserializedInfo.Categories)},
                 {"category_ids", nameof(DeserializedInfo.CategoryIDs)},
 
                 /// Why not reading Bio.Tools Publication.Metadata?
@@ -36,11 +36,13 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
         public ExternalToolModelJsonConverter(
             JsonSerializerSettings toolSerializerSettings, 
             JsonSerializerSettings toolRepoAssoSerializerSettings,
-            JsonSerializerSettings publicationSerializerSettings) : this()
+            JsonSerializerSettings publicationSerializerSettings,
+            JsonSerializerSettings categorySerializerSettings) : this()
         {
             _toolSerializerSettings = toolSerializerSettings;
             _toolRepoAssoSerializerSettings = toolRepoAssoSerializerSettings;
             _publicationSerializerSettings = publicationSerializerSettings;
+            _categorySerializerSettings = categorySerializerSettings;
         }
 
         public override bool CanConvert(Type objectType)
@@ -66,6 +68,11 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
                 if (name == "publication")
                 {
                     instance.Publications = JsonConvert.DeserializeObject<List<Publication>>(jsonProperty.Value.ToString(), _publicationSerializerSettings);
+                    continue;
+                }
+                else if (name == "topic")
+                {
+                    instance.Categories = JsonConvert.DeserializeObject<List<Category>>(jsonProperty.Value.ToString(), _categorySerializerSettings);
                     continue;
                 }
 

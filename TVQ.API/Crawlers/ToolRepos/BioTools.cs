@@ -65,6 +65,18 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                             { "pmid", nameof(Publication.PubMedID) }
                         }))
             };
+
+            CategorySerializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CustomContractResolver(
+                    typeof(Category),
+                    new BaseJsonConverter(
+                        propertyMappings: new Dictionary<string, string>
+                        {
+                            { "uri", nameof(Category.URI) },
+                            { "term", nameof(Category.Name) }
+                        }))
+            };
         }
 
         public override async Task ScanAsync()
@@ -92,6 +104,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                                 ToolJsonSerializerSettings,
                                 ToolRepoAssoJsonSerializerSettings,
                                 PublicationSerializerSettings,
+                                CategorySerializerSettings,
                                 out DeserializedInfo deserializedInfo))
                             {
                                 // TODO: log this.

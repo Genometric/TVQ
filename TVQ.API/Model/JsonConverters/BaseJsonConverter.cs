@@ -17,7 +17,7 @@ namespace Genometric.TVQ.API.Model.JsonConverters
 
         public BaseJsonConverter()
         {
-            _propertyMappings = new Dictionary<string, string>();
+            _propertyMappings = null;
             _propertiesToIgnore = new List<string>();
         }
 
@@ -57,11 +57,14 @@ namespace Genometric.TVQ.API.Model.JsonConverters
             JObject obj = JObject.Load(reader);
             foreach (JProperty jsonProperty in obj.Properties())
             {
-                if (!_propertyMappings.TryGetValue(jsonProperty.Name, out var name))
+                string name;
+                if (_propertyMappings == null)
                     name = jsonProperty.Name;
+                else if (!_propertyMappings.TryGetValue(jsonProperty.Name, out name))
+                    continue;
 
                 PropertyInfo prop = props.FirstOrDefault(
-                    pi => pi.CanWrite && 
+                    pi => pi.CanWrite &&
                     pi.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
 
                 try

@@ -80,7 +80,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                         propertyMappings: new Dictionary<string, string>
                         {
                             { "times_downloaded", nameof(ToolRepoAssociation.TimesDownloaded) },
-                            //{ "owner", nameof(Tool.Owner) },
+                            { "owner", nameof(ToolRepoAssociation.Owner) },
                             { "user_id", nameof(ToolRepoAssociation.UserID) },
                             { "id", nameof(ToolRepoAssociation.IDinRepo) },
                             { "create_time", nameof(ToolRepoAssociation.DateAddedToRepository) }
