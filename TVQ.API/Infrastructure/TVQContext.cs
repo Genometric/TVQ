@@ -32,7 +32,8 @@ namespace Genometric.TVQ.API.Infrastructure
         public DbSet<Tool> Tools { set; get; }
         public DbSet<ToolDownloadRecord> ToolDownloadRecords { set; get; }
         public DbSet<ToolPublicationAssociation> ToolPublicationAssociations { set; get; }
-        public DbSet<ToolRepoAssociation> ToolRepoAssociation { get; set; }
+        public DbSet<ToolRepoAssociation> ToolRepoAssociations { get; set; }
+        public DbSet<CategoryRepoAssociation> CategoryRepoAssociations { set; get; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -58,6 +59,7 @@ namespace Genometric.TVQ.API.Infrastructure
             builder.ApplyConfiguration(new BaseETC<ToolDownloadRecord>("ToolDownloadRecords"));
             builder.ApplyConfiguration(new BaseETC<ToolPublicationAssociation>("ToolPublicationAssociations"));
             builder.ApplyConfiguration(new BaseETC<ToolRepoAssociation>("ToolRepoAssociations"));
+            builder.ApplyConfiguration(new BaseETC<CategoryRepoAssociation>("CategoryRepoAssociations"));
         }
 
         private void SetCreateAndUpdateDate()

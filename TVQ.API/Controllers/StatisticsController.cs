@@ -190,7 +190,7 @@ namespace Genometric.TVQ.API.Controllers
                 var tools = new List<int>();
                 // This is a very slow query with multiple joins, should be improved.
                 var toolRepoAssociations =
-                    _context.ToolRepoAssociation.Where(x => x.RepositoryID == repository.ID)
+                    _context.ToolRepoAssociations.Where(x => x.RepositoryID == repository.ID)
                                                 .Include(x => x.Tool)
                                                 .ThenInclude(x => x.CategoryAssociations)
                                                 .ThenInclude(x => x.Category)
@@ -385,7 +385,7 @@ namespace Genometric.TVQ.API.Controllers
         {
             var distributions = new SortedDictionary<int, SortedDictionary<string, double>>();
 
-            var associations = await _context.ToolRepoAssociation.Include(x => x.Tool)
+            var associations = await _context.ToolRepoAssociations.Include(x => x.Tool)
                                                                  .ThenInclude(x => x.CategoryAssociations)
                                                                  .ThenInclude(x => x.Category)
                                                                  .Where(x => x.RepositoryID == repository.ID)

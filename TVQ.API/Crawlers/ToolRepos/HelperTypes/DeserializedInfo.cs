@@ -16,15 +16,24 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
 
         public List<ToolPublicationAssociation> ToolPubAssociations { set; get; }
 
+        public List<CategoryRepoAssociation> CategoryRepoAssociations { set; get; }
+
         public List<string> CategoryIDs
         {
             set
             {
                 if (value != null)
                 {
-                    Categories = new List<Category>();
-                    foreach (var id in value)
-                        Categories.Add(new Category() { ToolShedID = id });
+                    CategoryRepoAssociations = new List<CategoryRepoAssociation>();
+                    foreach(var id in value)
+                    {
+                        CategoryRepoAssociations.Add(
+                            new CategoryRepoAssociation()
+                            {
+                                Category = new Category(),
+                                IDinRepo = id
+                            });
+                    }
                 }
             }
         }

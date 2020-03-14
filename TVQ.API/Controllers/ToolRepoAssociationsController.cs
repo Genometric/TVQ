@@ -24,14 +24,14 @@ namespace TVQ.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ToolRepoAssociation>>> GetToolRepoAssociation()
         {
-            return await _context.ToolRepoAssociation.ToListAsync();
+            return await _context.ToolRepoAssociations.ToListAsync();
         }
 
         // GET: api/ToolRepoAssociations/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ToolRepoAssociation>> GetToolRepoAssociation(int id)
         {
-            var toolRepoAssociation = await _context.ToolRepoAssociation.FindAsync(id);
+            var toolRepoAssociation = await _context.ToolRepoAssociations.FindAsync(id);
 
             if (toolRepoAssociation == null)
             {
@@ -79,7 +79,7 @@ namespace TVQ.API.Controllers
         [HttpPost]
         public async Task<ActionResult<ToolRepoAssociation>> PostToolRepoAssociation(ToolRepoAssociation toolRepoAssociation)
         {
-            _context.ToolRepoAssociation.Add(toolRepoAssociation);
+            _context.ToolRepoAssociations.Add(toolRepoAssociation);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetToolRepoAssociation", new { id = toolRepoAssociation.ID }, toolRepoAssociation);
@@ -89,13 +89,13 @@ namespace TVQ.API.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<ToolRepoAssociation>> DeleteToolRepoAssociation(int id)
         {
-            var toolRepoAssociation = await _context.ToolRepoAssociation.FindAsync(id);
+            var toolRepoAssociation = await _context.ToolRepoAssociations.FindAsync(id);
             if (toolRepoAssociation == null)
             {
                 return NotFound();
             }
 
-            _context.ToolRepoAssociation.Remove(toolRepoAssociation);
+            _context.ToolRepoAssociations.Remove(toolRepoAssociation);
             await _context.SaveChangesAsync();
 
             return toolRepoAssociation;
@@ -103,7 +103,7 @@ namespace TVQ.API.Controllers
 
         private bool ToolRepoAssociationExists(int id)
         {
-            return _context.ToolRepoAssociation.Any(e => e.ID == id);
+            return _context.ToolRepoAssociations.Any(e => e.ID == id);
         }
     }
 }

@@ -76,6 +76,37 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.ToTable("AuthorsPublicationAssociations");
                 });
 
+            modelBuilder.Entity("Genometric.TVQ.API.Model.Associations.CategoryRepoAssociation", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CategoryID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("IDinRepo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RepositoryID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CategoryID");
+
+                    b.HasIndex("RepositoryID");
+
+                    b.ToTable("CategoryRepoAssociations");
+                });
+
             modelBuilder.Entity("Genometric.TVQ.API.Model.Associations.PublicationKeywordAssociation", b =>
                 {
                     b.Property<int>("ID")
@@ -241,9 +272,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ToolShedID")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("URI")
@@ -619,6 +647,21 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                     b.HasOne("Genometric.TVQ.API.Model.Publication", "Publication")
                         .WithMany("AuthorAssociations")
                         .HasForeignKey("PublicationID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Genometric.TVQ.API.Model.Associations.CategoryRepoAssociation", b =>
+                {
+                    b.HasOne("Genometric.TVQ.API.Model.Category", "Category")
+                        .WithMany("RepoAssociations")
+                        .HasForeignKey("CategoryID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Genometric.TVQ.API.Model.Repository", "Repository")
+                        .WithMany("CategoryAssociations")
+                        .HasForeignKey("RepositoryID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

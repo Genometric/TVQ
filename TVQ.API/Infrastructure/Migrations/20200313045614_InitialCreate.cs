@@ -31,7 +31,6 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     UpdatedDate = table.Column<DateTime>(nullable: false),
-                    ToolShedID = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     URI = table.Column<string>(nullable: true)
@@ -182,6 +181,35 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                         principalTable: "Repositories",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CategoryRepoAssociations",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UpdatedDate = table.Column<DateTime>(nullable: false),
+                    IDinRepo = table.Column<string>(nullable: true),
+                    CategoryID = table.Column<int>(nullable: false),
+                    RepositoryID = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CategoryRepoAssociations", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_CategoryRepoAssociations_Categories_CategoryID",
+                        column: x => x.CategoryID,
+                        principalTable: "Categories",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CategoryRepoAssociations_Repositories_RepositoryID",
+                        column: x => x.RepositoryID,
+                        principalTable: "Repositories",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -449,6 +477,16 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
                 column: "PublicationID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CategoryRepoAssociations_CategoryID",
+                table: "CategoryRepoAssociations",
+                column: "CategoryID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CategoryRepoAssociations_RepositoryID",
+                table: "CategoryRepoAssociations",
+                column: "RepositoryID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Citations_PublicationID",
                 table: "Citations",
                 column: "PublicationID");
@@ -540,6 +578,9 @@ namespace Genometric.TVQ.API.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "AuthorsPublicationAssociations");
+
+            migrationBuilder.DropTable(
+                name: "CategoryRepoAssociations");
 
             migrationBuilder.DropTable(
                 name: "Citations");

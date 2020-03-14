@@ -90,15 +90,15 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             _categoryJsonSerializerSettings = new JsonSerializerSettings
             {
                 ContractResolver = new CustomContractResolver(
-                    typeof(Category),
+                    typeof(CategoryRepoAssociation),
                     new BaseJsonConverter(
                         propertyMappings: new Dictionary<string, string>
                         {
-                            { "name", nameof(Category.Name) },
-                            { "term", nameof(Category.Name) },
-                            { "id", nameof(Category.ToolShedID) },
-                            { "uri", nameof(Category.URI) },
-                            { "description", nameof(Category.Description) }
+                            { "name", nameof(CategoryRepoAssociation.Category.Name) },
+                            { "term", nameof(CategoryRepoAssociation.Category.Name) },
+                            { "id", nameof(CategoryRepoAssociation.IDinRepo) },
+                            { "uri", nameof(CategoryRepoAssociation.Category.URI) },
+                            { "description", nameof(CategoryRepoAssociation.Category.Description) }
                         }))
             };
         }
@@ -124,7 +124,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 return;
 
             Logger.LogDebug("Received Categories from ToolShed, deserializing them.");
-            UpdateCategories(JsonConvert.DeserializeObject<List<Category>>(content, _categoryJsonSerializerSettings));
+            var associations = JsonConvert.DeserializeObject<List<CategoryRepoAssociation>>(content, _categoryJsonSerializerSettings);
+            foreach (var association in associations)
+                EnsureEntity(association);
         }
 
         private async Task<List<DeserializedInfo>> GetToolsAsync()

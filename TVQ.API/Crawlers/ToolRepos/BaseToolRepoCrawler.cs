@@ -27,8 +27,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         protected JsonSerializerSettings PublicationSerializerSettings { set; get; }
         protected JsonSerializerSettings CategorySerializerSettings { set; get; }
 
-        private readonly Dictionary<string, Category> _categoriesByToolShedID;
-        private readonly Dictionary<string, Category> _categoriesByName;
+        private readonly Dictionary<string, CategoryRepoAssociation> _categoryRepoAssociationsByName;
+        private readonly Dictionary<string, CategoryRepoAssociation> _categoryRepoAssociationsByIDInRepo;
 
         public ReadOnlyCollection<Tool> Tools
         {
@@ -66,9 +66,11 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                             x => FormatToolRepoAssociationName(x.Tool),
                             x => x));
 
-            _categoriesByName = new Dictionary<string, Category>();
-            _categoriesByToolShedID = new Dictionary<string, Category>();
-            UpdateCategories(categories);
+            _categoryRepoAssociationsByName = new Dictionary<string, CategoryRepoAssociation>();
+            _categoryRepoAssociationsByIDInRepo = new Dictionary<string, CategoryRepoAssociation>();
+            foreach (var category in categories)
+                foreach (var association in category.RepoAssociations)
+                    EnsureEntity(association);
 
             ToolDownloadRecords = new ConcurrentBag<ToolDownloadRecord>();
 
@@ -78,30 +80,56 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 new KeywordConstructor());
         }
 
-        protected Category EnsureCategory(Category category)
+        protected CategoryRepoAssociation EnsureEntity(CategoryRepoAssociation association)
         {
-            Category rtv = null;
-            if (category == null)
-                return rtv;
+            if (association == null)
+                return null;
 
-            if (category.Name != null)
+            if (association.Category == null && association.IDinRepo != null)
+                association.Category = new Category();
+            else
+                return null;
+
+            CategoryRepoAssociation rtv = null;
+            if (association.Category.Name == null && association.IDinRepo != null)
             {
-                var name = category.Name.ToUpperInvariant();
-                if (!_categoriesByName.TryGetValue(name, out rtv))
+                if (!_categoryRepoAssociationsByIDInRepo.TryGetValue(association.IDinRepo, out rtv))
                 {
-                    rtv = category;
-                    _categoriesByName.Add(name, category);
+                    _categoryRepoAssociationsByIDInRepo.Add(association.IDinRepo, association);
+                    rtv = association;
                 }
             }
-
-            if (category.ToolShedID != null)
+            else if (association.Category.Name != null)
             {
-                if (!_categoriesByToolShedID.TryGetValue(category.ToolShedID, out rtv))
+                var name = association.Category.Name.ToUpperInvariant();
+                if (association.IDinRepo == null)
                 {
-                    rtv = category;
-                    _categoriesByToolShedID.Add(category.ToolShedID, category);
+                    if (!_categoryRepoAssociationsByName.TryGetValue(name, out rtv))
+                    {
+                        _categoryRepoAssociationsByName.Add(name, association);
+                        rtv = association;
+                    }
+                }
+                else
+                {
+                    if (_categoryRepoAssociationsByIDInRepo.TryGetValue(association.IDinRepo, out CategoryRepoAssociation existingAssociation))
+                    {
+                        if (existingAssociation.Category.Name != association.Category.Name)
+                        {
+                            _categoryRepoAssociationsByIDInRepo[association.IDinRepo].Category.Name = association.Category.Name;
+                            _categoryRepoAssociationsByName.Remove(name);
+                            _categoryRepoAssociationsByName.Add(name, association);
+                        }
+                    }
+                    else
+                    {
+                        _categoryRepoAssociationsByIDInRepo.Add(association.IDinRepo, association);
+                    }
+
+                    rtv = _categoryRepoAssociationsByIDInRepo[association.IDinRepo];
                 }
             }
+            // The `Name == null && IDinRepo == null` is not possible by design.
 
             return rtv;
         }
@@ -195,17 +223,18 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             if (!ToolsDict.TryAdd(toolName, info.ToolRepoAssociation.Tool))
                 info.ToolRepoAssociation.Tool = ToolsDict[toolName];
 
-            foreach (var parsedCategory in info.Categories)
+            foreach (var association in info.CategoryRepoAssociations)
             {
-                var category = EnsureCategory(parsedCategory);
-                if (category == null)
-                    category = parsedCategory;
+                var asso = EnsureEntity(association);
                 info.ToolRepoAssociation.Tool.CategoryAssociations
                     .Add(new ToolCategoryAssociation()
                     {
-                        Category = category,
+                        Category = asso.Category,
                         Tool = info.ToolRepoAssociation.Tool
                     });
+
+                if (asso.Repository == null)
+                    Repo.CategoryAssociations.Add(asso);
             }
 
             AddToolPubAssociations(info.ToolRepoAssociation.Tool, info.ToolPubAssociations);
@@ -227,13 +256,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 publication = null;
                 return false;
             }
-        }
-
-        public void UpdateCategories(List<Category> categories)
-        {
-            if (categories != null)
-                foreach (var category in categories)
-                    EnsureCategory(category);
         }
     }
 }

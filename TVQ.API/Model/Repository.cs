@@ -18,6 +18,9 @@ namespace Genometric.TVQ.API.Model
         [JsonIgnore]
         public virtual ICollection<ToolRepoAssociation> ToolAssociations { set; get; }
 
+        [JsonIgnore]
+        public virtual ICollection<CategoryRepoAssociation> CategoryAssociations { set; get; }
+
         public virtual Statistics Statistics { set; get; }
 
         public Repository() { }
