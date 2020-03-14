@@ -91,15 +91,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             {
                 ContractResolver = new CustomContractResolver(
                     typeof(CategoryRepoAssociation),
-                    new BaseJsonConverter(
-                        propertyMappings: new Dictionary<string, string>
-                        {
-                            { "name", nameof(CategoryRepoAssociation.Category.Name) },
-                            { "term", nameof(CategoryRepoAssociation.Category.Name) },
-                            { "id", nameof(CategoryRepoAssociation.IDinRepo) },
-                            { "uri", nameof(CategoryRepoAssociation.Category.URI) },
-                            { "description", nameof(CategoryRepoAssociation.Category.Description) }
-                        }))
+                    new CategoryRepoAssoJsonConverter())
             };
         }
 
@@ -124,7 +116,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 return;
 
             Logger.LogDebug("Received Categories from ToolShed, deserializing them.");
-            var associations = JsonConvert.DeserializeObject<List<CategoryRepoAssociation>>(content, _categoryJsonSerializerSettings);
+            var associations = JsonConvert.DeserializeObject<List<CategoryRepoAssociation>>(
+                content, _categoryJsonSerializerSettings);
+
             foreach (var association in associations)
                 EnsureEntity(association);
         }
