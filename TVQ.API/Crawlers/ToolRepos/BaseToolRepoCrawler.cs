@@ -27,8 +27,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         protected JsonSerializerSettings PublicationSerializerSettings { set; get; }
         protected JsonSerializerSettings CategorySerializerSettings { set; get; }
 
-        private readonly Dictionary<string, CategoryRepoAssociation> _categoryRepoAssociationsByName;
-        private readonly Dictionary<string, CategoryRepoAssociation> _categoryRepoAssociationsByIDInRepo;
+        private readonly Dictionary<string, Category> _categories;
+        private readonly Dictionary<string, CategoryRepoAssociation> _categoryRepoAssociations;
 
         public ReadOnlyCollection<Tool> Tools
         {
@@ -66,8 +66,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                             x => FormatToolRepoAssociationName(x.Tool),
                             x => x));
 
-            _categoryRepoAssociationsByName = new Dictionary<string, CategoryRepoAssociation>();
-            _categoryRepoAssociationsByIDInRepo = new Dictionary<string, CategoryRepoAssociation>();
+            _categories = new Dictionary<string, Category>();
+            _categoryRepoAssociations = new Dictionary<string, CategoryRepoAssociation>();
             foreach (var category in categories)
                 foreach (var association in category.RepoAssociations)
                     EnsureEntity(association);
@@ -80,57 +80,46 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 new KeywordConstructor());
         }
 
+        private string GetKey(CategoryRepoAssociation association)
+        {
+            return
+                (association.Repository == null ? Repo.Name : association.Repository.Name)
+                + "::"
+                + association.IDinRepo
+                + "::"
+                + (association.Category == null ? string.Empty : association.Category.Name);
+        }
+
         protected CategoryRepoAssociation EnsureEntity(CategoryRepoAssociation association)
         {
-            if (association == null)
+            if (association == null ||
+                (association.IDinRepo == null && association.Category == null))
                 return null;
 
-            if (association.Category == null && association.IDinRepo != null)
+            association.Category = EnsureEntity(association.Category);
+            if (association.Category == null)
                 association.Category = new Category();
-            else
-                return null;
 
-            CategoryRepoAssociation rtv = null;
-            if (association.Category.Name == null && association.IDinRepo != null)
+            var key = GetKey(association);
+            if (!_categoryRepoAssociations.TryGetValue(key, out CategoryRepoAssociation rtv))
             {
-                if (!_categoryRepoAssociationsByIDInRepo.TryGetValue(association.IDinRepo, out rtv))
-                {
-                    _categoryRepoAssociationsByIDInRepo.Add(association.IDinRepo, association);
-                    rtv = association;
-                }
+                _categoryRepoAssociations.Add(key, association);
+                rtv = association;
             }
-            else if (association.Category.Name != null)
+
+            return rtv;
+        }
+
+        protected Category EnsureEntity(Category category)
+        {
+            if (category == null) return null;
+
+            var name = category.Name.ToUpperInvariant();
+            if (!_categories.TryGetValue(name, out Category rtv))
             {
-                var name = association.Category.Name.ToUpperInvariant();
-                if (association.IDinRepo == null)
-                {
-                    if (!_categoryRepoAssociationsByName.TryGetValue(name, out rtv))
-                    {
-                        _categoryRepoAssociationsByName.Add(name, association);
-                        rtv = association;
-                    }
-                }
-                else
-                {
-                    if (_categoryRepoAssociationsByIDInRepo.TryGetValue(association.IDinRepo, out CategoryRepoAssociation existingAssociation))
-                    {
-                        if (existingAssociation.Category.Name != association.Category.Name)
-                        {
-                            _categoryRepoAssociationsByIDInRepo[association.IDinRepo].Category.Name = association.Category.Name;
-                            _categoryRepoAssociationsByName.Remove(name);
-                            _categoryRepoAssociationsByName.Add(name, association);
-                        }
-                    }
-                    else
-                    {
-                        _categoryRepoAssociationsByIDInRepo.Add(association.IDinRepo, association);
-                    }
-
-                    rtv = _categoryRepoAssociationsByIDInRepo[association.IDinRepo];
-                }
+                _categories.Add(name, category);
+                rtv = category;
             }
-            // The `Name == null && IDinRepo == null` is not possible by design.
-
             return rtv;
         }
 
@@ -223,6 +212,10 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             if (!ToolsDict.TryAdd(toolName, info.ToolRepoAssociation.Tool))
                 info.ToolRepoAssociation.Tool = ToolsDict[toolName];
 
+            // TODO: there could be a better way of associating categories with 
+            // repository if the tool association was successful than this method.
+            var categoryRepoAssoToRegister = new List<CategoryRepoAssociation>();
+
             foreach (var association in info.CategoryRepoAssociations)
             {
                 var asso = EnsureEntity(association);
@@ -233,12 +226,18 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                         Tool = info.ToolRepoAssociation.Tool
                     });
 
-                if (asso.Repository == null)
-                    Repo.CategoryAssociations.Add(asso);
+                categoryRepoAssoToRegister.Add(asso);
             }
 
             AddToolPubAssociations(info.ToolRepoAssociation.Tool, info.ToolPubAssociations);
-            return TryAddToolRepoAssociations(info);
+            if (TryAddToolRepoAssociations(info))
+            {
+                foreach (var association in categoryRepoAssoToRegister)
+                    Repo.CategoryAssociations.Add(association);
+                return true;
+            }
+            else
+                return false;
         }
 
         protected bool TryParseBibitem(string bibitem, out Publication publication)
