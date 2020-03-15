@@ -77,6 +77,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
             /// An archive downloaded from ToolShed generally
             /// encompasses less than 5 XML files. 
             XMLFiles = new List<string>(capacity: 5);
+
+            CategoryRepoAssociations = new List<CategoryRepoAssociation>();
         }
 
         public DeserializedInfo(string toolName, DateTime? dateAddedToRepository, Publication publication) : this()

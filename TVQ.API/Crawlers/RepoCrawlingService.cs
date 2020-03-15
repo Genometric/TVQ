@@ -35,6 +35,10 @@ namespace Genometric.TVQ.API.Crawlers
             if (repo.ToolAssociations == null)
                 repo.ToolAssociations = new List<ToolRepoAssociation>();
 
+            Context.Entry(repo).Collection(x => x.CategoryAssociations).Load();
+            if (repo.CategoryAssociations == null)
+                repo.CategoryAssociations = new List<CategoryRepoAssociation>();
+
             var tools = Context.Tools.Include(x => x.RepoAssociations).ToList();
             var categories = Context.Categories.Include(x => x.ToolAssociations).Include(x => x.RepoAssociations).ToList();
             var publications = Context.Publications.Include(x => x.ToolAssociations).ToList();
