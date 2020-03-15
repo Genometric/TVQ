@@ -35,6 +35,11 @@ namespace Genometric.TVQ.API.Controllers
                           .LoadAsync()
                           .ConfigureAwait(false);
 
+            await _context.Entry(category)
+                          .Collection(x => x.RepoAssociations)
+                          .LoadAsync()
+                          .ConfigureAwait(false);
+
             if (category == null)
                 return NotFound();
 
