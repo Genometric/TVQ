@@ -12,24 +12,17 @@ namespace Genometric.TVQ.API.Model.JsonConverters
     public class BaseJsonConverter : JsonConverter
     {
         private readonly bool _includeNullProperties;
-        private readonly List<string> _propertiesToIgnore;
         private readonly Dictionary<string, string> _propertyMappings;
 
         public BaseJsonConverter()
         {
             _propertyMappings = null;
-            _propertiesToIgnore = new List<string>();
         }
 
         public BaseJsonConverter(Dictionary<string, string> propertyMappings,
-                                 List<string> propertiesToIgnore = null,
                                  bool includeNullProperties = false)
         {
             _propertyMappings = propertyMappings;
-
-            // ?? is a null-coalescing operator
-            _propertiesToIgnore = propertiesToIgnore ?? new List<string>();
-
             _includeNullProperties = includeNullProperties;
         }
 
@@ -95,11 +88,12 @@ namespace Genometric.TVQ.API.Model.JsonConverters
             JObject obj = new JObject();
             foreach (PropertyInfo prop in type.GetProperties())
             {
+                if (Attribute.GetCustomAttribute(prop, typeof(JsonIgnoreAttribute)) != null)
+                    continue;
+                
                 if (prop.CanRead)
                 {
                     object propVal = prop.GetValue(value, null);
-                    if (_propertiesToIgnore.Contains(prop.Name))
-                        continue;
 
                     if (propVal == null)
                     {
