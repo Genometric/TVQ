@@ -415,6 +415,8 @@ namespace Genometric.TVQ.API.Controllers
                     foreach (var categoryAssociation in association.Tool.CategoryAssociations)
                     {
                         var categoryName = categoryAssociation.Category.Name;
+                        if (categoryName == null) 
+                            continue;
                         if (!distributions[date].ContainsKey(categoryName))
                             distributions[date].Add(categoryName, 0.0);
 
@@ -558,10 +560,14 @@ namespace Genometric.TVQ.API.Controllers
             overview.RepositoryCount = _context.Repositories.Count();
             overview.ToolsCountInAllRepositories = _context.Tools.Count();
 
-            var repo = _context.Repositories.Include(x => x.ToolAssociations)
-                                .ThenInclude(x => x.Tool)
-                                .ThenInclude(x => x.PublicationAssociations)
-                                .First(x => x.ID == repository.ID);
+            // Do NOT uncomment the commented-out methods as they may
+            // cause such a big join (on BioTools in particular) that
+            // will throw a database connection timeout.
+            var repo = _context.Repositories//.Include(x => x.ToolAssociations)
+                                            //.ThenInclude(x => x.Tool)
+                                            //.ThenInclude(x => x.PublicationAssociations)
+                                            .Include(x => x.CategoryAssociations)
+                                            .First(x => x.ID == repository.ID);
 
             overview.ToolRepoAssociationsCount = repo.ToolAssociations.Count;
 
@@ -582,6 +588,8 @@ namespace Genometric.TVQ.API.Controllers
                         break;
                 }
             }
+
+            overview.CategoryAssociationsCount = repo.CategoryAssociations.Count;
 
             return Ok(overview);
         }
