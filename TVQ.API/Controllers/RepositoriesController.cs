@@ -30,8 +30,6 @@ namespace Genometric.TVQ.API.Controllers
         {
             return await
                 _context.Repositories
-                .Include(x => x.ToolAssociations)
-                    .ThenInclude(x => x.Tool)
                 .Include(x => x.Statistics)
                 .ToListAsync().ConfigureAwait(false);
         }
