@@ -69,13 +69,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             CategorySerializerSettings = new JsonSerializerSettings
             {
                 ContractResolver = new CustomContractResolver(
-                    typeof(Category),
-                    new BaseJsonConverter(
-                        propertyMappings: new Dictionary<string, string>
-                        {
-                            { "uri", nameof(Category.URI) },
-                            { "term", nameof(Category.Name) }
-                        }))
+                    typeof(CategoryRepoAssociation),
+                    new CategoryRepoAssoJsonConverter())
             };
         }
 

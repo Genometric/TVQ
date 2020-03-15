@@ -38,9 +38,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
             }
         }
 
-        public List<Category> Categories { set; get; }
-
-
         /// <summary>
         /// This is a helper property to deserialize information from JSON objects.
         /// </summary>
@@ -80,8 +77,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
             /// An archive downloaded from ToolShed generally
             /// encompasses less than 5 XML files. 
             XMLFiles = new List<string>(capacity: 5);
-
-            Categories = new List<Category>();
         }
 
         public DeserializedInfo(string toolName, DateTime? dateAddedToRepository, Publication publication) : this()

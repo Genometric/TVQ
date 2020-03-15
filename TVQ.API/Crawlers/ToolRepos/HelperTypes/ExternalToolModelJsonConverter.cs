@@ -67,12 +67,16 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
 
                 if (name == "publication")
                 {
-                    instance.Publications = JsonConvert.DeserializeObject<List<Publication>>(jsonProperty.Value.ToString(), _publicationSerializerSettings);
+                    instance.Publications = 
+                        JsonConvert.DeserializeObject<List<Publication>>(
+                            jsonProperty.Value.ToString(), _publicationSerializerSettings);
                     continue;
                 }
                 else if (name == "topic")
                 {
-                    instance.Categories = JsonConvert.DeserializeObject<List<Category>>(jsonProperty.Value.ToString(), _categorySerializerSettings);
+                    instance.CategoryRepoAssociations = 
+                        JsonConvert.DeserializeObject<List<CategoryRepoAssociation>>(
+                            jsonProperty.Value.ToString(), _categorySerializerSettings);
                     continue;
                 }
 
