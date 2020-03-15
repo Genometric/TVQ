@@ -113,6 +113,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         protected Category EnsureEntity(Category category)
         {
             if (category == null) return null;
+            if (category.Name == null)
+                return category;
 
             var name = category.Name.ToUpperInvariant();
             if (!_categories.TryGetValue(name, out Category rtv))
