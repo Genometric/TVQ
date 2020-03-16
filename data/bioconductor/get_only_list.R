@@ -2,12 +2,10 @@
 # install.packages("BiocManager")
 # install.packages("knitcitations")
 # install.packages("RGtk2")
-packages <- BiocManager::available()
-packages_vector = strsplit(packages, " ")
+biocsoft <- BiocManager::repositories()["BioCsoft"]
+biocsoftpkgs <- rownames(available.packages(repos=biocsoft))
 
-for(i in packages_vector)
+for(i in biocsoftpkgs)
 {
   cat(i,file="packages.txt",sep="\n", append=TRUE)
 }
-
-
