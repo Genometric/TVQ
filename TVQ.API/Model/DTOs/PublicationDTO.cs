@@ -1,10 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using Genometric.TVQ.API.Model.JsonConverters;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 
 namespace Genometric.TVQ.API.Model.DTOs
 {
+    [JsonConverter(typeof(BaseJsonConverter))]
     public class PublicationDTO : BaseModel
     {
         public List<int> ToolAssociations { get; }
+
+        [JsonIgnore]
+        public new DateTime CreatedDate { set; get; }
+
+        [JsonIgnore]
+        public new DateTime UpdatedDate { set; get; }
 
         public PublicationDTO(Publication publication)
         {

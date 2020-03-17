@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -83,14 +84,15 @@ namespace Genometric.TVQ.API.Model.JsonConverters
             Contract.Requires(serializer != null);
 
             Type type = value.GetType();
-            serializer.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+            serializer.Converters.Add(new StringEnumConverter());
 
             JObject obj = new JObject();
-            foreach (PropertyInfo prop in type.GetProperties())
+            var properties = new SortedSet<PropertyInfo>(type.GetProperties(), new PropertyComparer());
+            foreach (PropertyInfo prop in properties)
             {
                 if (Attribute.GetCustomAttribute(prop, typeof(JsonIgnoreAttribute)) != null)
                     continue;
-                
+
                 if (prop.CanRead)
                 {
                     object propVal = prop.GetValue(value, null);
@@ -102,7 +104,8 @@ namespace Genometric.TVQ.API.Model.JsonConverters
                         else
                             continue;
                     }
-                    else if (prop.PropertyType == typeof(DateTime))
+                    else if (prop.PropertyType == typeof(DateTime) ||
+                             prop.PropertyType == typeof(DateTime?))
                         obj.Add(prop.Name,
                                 // U: Universal full format; e.g., Monday, 09 March 2020 22:46:35
                                 ((DateTime)propVal).ToString("U", CultureInfo.InvariantCulture));
