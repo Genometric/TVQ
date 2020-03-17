@@ -81,7 +81,11 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
             CategoryRepoAssociations = new List<CategoryRepoAssociation>();
         }
 
-        public DeserializedInfo(string toolName, DateTime? dateAddedToRepository, Publication publication) : this()
+        public DeserializedInfo(
+            string toolName,
+            DateTime? dateAddedToRepository,
+            Publication publication,
+            List<CategoryRepoAssociation> categoryRepoAssociations) : this()
         {
             ToolRepoAssociation = new ToolRepoAssociation()
             {
@@ -93,6 +97,8 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes
             {
                 new ToolPublicationAssociation() { Publication = publication }
             };
+
+            CategoryRepoAssociations = categoryRepoAssociations;
         }
 
         public void SetStagingArea(string sessionPath)

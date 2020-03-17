@@ -1,6 +1,7 @@
 ﻿using Genometric.TVQ.API.Crawlers.ToolRepos.HelperTypes;
 using Genometric.TVQ.API.Infrastructure.BackgroundTasks.JobRunners;
 using Genometric.TVQ.API.Model;
+using Genometric.TVQ.API.Model.Associations;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,10 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
         private readonly string _citationsFileName = "citations.json";
         private readonly string _statsFileName = "package_stats.tsv";
         private readonly string _dateAddedFileName = "first_appearance.csv";
+        private readonly string _biocViews = "biocViews.json";
+
+        private Dictionary<string, DateTime?> _toolsAddToRepoDates;
+        private Dictionary<string, List<CategoryRepoAssociation>> _categoryRepoAssociations;
 
         public Bioconductor(
             Repository repo,
@@ -28,13 +33,40 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             BibitemParser.KeywordsDelimiter = ',';
         }
 
-        private Dictionary<string, DateTime?> _toolsAddToRepoDates;
-
         public override async Task ScanAsync()
         {
             GetAddedDate();
+            GetBiocView();
             ReadCitationsFile();
             GetDownloadStats();
+        }
+
+        private void GetBiocView()
+        {
+            var biocViewsFilename = SessionTempPath + Utilities.GetRandomString();
+            using var client = new WebClient();
+            client.DownloadFileTaskAsync(Repo.GetURI() + _biocViews, biocViewsFilename).Wait();
+
+            using (var reader = new StreamReader(biocViewsFilename))
+            {
+                string json = reader.ReadToEnd();
+                var biocViews = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(json);
+                _categoryRepoAssociations = new Dictionary<string, List<CategoryRepoAssociation>>();
+                foreach (var view in biocViews)
+                {
+                    var categories = new List<CategoryRepoAssociation>();
+                    foreach (var item in view.Value)
+                    {
+                        if (string.IsNullOrWhiteSpace(item))
+                            continue;
+
+                        categories.Add(new CategoryRepoAssociation() { Category = new Category() { Name = item.Trim() } });
+                    }
+                    _categoryRepoAssociations.TryAdd(FormatToolName(view.Key), categories);
+                }
+            }
+
+            File.Delete(biocViewsFilename);
         }
 
         private void ReadCitationsFile()
@@ -59,7 +91,11 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                                 FormatToolName(item.Key),
                                 out DateTime? addedDate);
 
-                            if (!TryAddEntities(new DeserializedInfo(item.Key.Trim(), addedDate, pub)))
+                            _categoryRepoAssociations.TryGetValue(
+                                FormatToolName(item.Key), 
+                                out List<CategoryRepoAssociation> associations);
+
+                            if (!TryAddEntities(new DeserializedInfo(item.Key.Trim(), addedDate, pub, associations)))
                             {
                                 // TODO: log this.
                             }
