@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Web;
@@ -16,6 +17,10 @@ namespace Genometric.TVQ.API.Crawlers.Literature
 {
     public class Scopus : BaseLiteratureCrawler
     {
+        private int _publicationToScan;
+
+        private int _scannedPublications;
+
         private static string BaseAPI
         {
             get { return "https://api.elsevier.com/content/"; }
@@ -67,6 +72,8 @@ namespace Genometric.TVQ.API.Crawlers.Literature
             updateWithScopusInfo.LinkTo(mergePubsIfNecessary, linkOptions);
             mergePubsIfNecessary.LinkTo(getCitations, linkOptions);
 
+            _publicationToScan = Publications.Count;
+            _scannedPublications = 0;
             foreach (var publication in Publications)
                 updateWithScopusInfo.Post(publication);
 
@@ -77,7 +84,8 @@ namespace Genometric.TVQ.API.Crawlers.Literature
 
         private Publication UpdateWithScopusInfo(Publication publication)
         {
-            Logger.LogInformation($"Updating publication {publication.ID} info.");
+            Interlocked.Increment(ref _scannedPublications);
+            Logger.LogInformation($"Updating publication {_scannedPublications}/{_publicationToScan}: {publication.ID}");
 
             var uriBuilder = new UriBuilder("https://api.elsevier.com/content/search/scopus");
             var parameters = HttpUtility.ParseQueryString(string.Empty);
