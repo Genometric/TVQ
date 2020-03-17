@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Genometric.TVQ.API.Model.JsonConverters;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace Genometric.TVQ.API.Model
@@ -13,6 +15,7 @@ namespace Genometric.TVQ.API.Model
     /// generic types cannot be used here, hence the 
     /// <see cref="GetJobs{T}"/> method is implemented.
     /// </summary>
+    [JsonConverter(typeof(BaseJsonConverter))]
     public class Service : BaseModel
     {
         public enum Type { ToolRepoCrawler, LiteratureCrawler, Analysis };
