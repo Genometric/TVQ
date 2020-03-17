@@ -6,9 +6,9 @@ using Genometric.TVQ.API.Model.Associations;
 using Genometric.TVQ.API.Model.JsonConverters;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -18,7 +18,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
     {
         protected Parser<ParsedPublication, Author, Keyword> BibitemParser { get; }
 
-        protected ConcurrentDictionary<string, Tool> ToolsDict { get; }
+        protected ConcurrentDictionary<string, Tool> Tools { get; }
 
         protected ConcurrentDictionary<string, ToolRepoAssociation> ToolRepoAssociationsDict { get; }
 
@@ -29,14 +29,6 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
         private readonly Dictionary<string, Category> _categories;
         private readonly Dictionary<string, CategoryRepoAssociation> _categoryRepoAssociations;
-
-        public ReadOnlyCollection<Tool> Tools
-        {
-            get
-            {
-                return new ReadOnlyCollection<Tool>(ToolsDict.Values.ToList());
-            }
-        }
 
         public ConcurrentBag<ToolDownloadRecord> ToolDownloadRecords { get; }
 
@@ -54,10 +46,11 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             Logger = logger;
             Repo = repo;
             if (tools != null)
-                ToolsDict = new ConcurrentDictionary<string, Tool>(
+                Tools = new ConcurrentDictionary<string, Tool>(
                             tools.ToDictionary(
-                                x => FormatToolName(x.Name),
-                                x => x));
+                                x => x.Name,
+                                x => x),
+                            StringComparer.InvariantCultureIgnoreCase);
 
             if (Repo != null)
                 ToolRepoAssociationsDict =
@@ -125,14 +118,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             return rtv;
         }
 
-        protected static string FormatToolName(string name)
-        {
-            return name.Trim().ToUpperInvariant();
-        }
-
         private string FormatToolRepoAssociationName(Tool tool)
         {
-            return Repo.Name + "::" + FormatToolName(tool.Name); ;
+            return Repo.Name + "::" + tool.Name.Trim();
         }
 
         public abstract Task ScanAsync();
@@ -210,9 +198,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 return false;
             }
 
-            var toolName = info.ToolRepoAssociation.Tool.Name = FormatToolName(info.ToolRepoAssociation.Tool.Name);
-            if (!ToolsDict.TryAdd(toolName, info.ToolRepoAssociation.Tool))
-                info.ToolRepoAssociation.Tool = ToolsDict[toolName];
+            var toolName = info.ToolRepoAssociation.Tool.Name = info.ToolRepoAssociation.Tool.Name.Trim();
+            if (!Tools.TryAdd(toolName, info.ToolRepoAssociation.Tool))
+                info.ToolRepoAssociation.Tool = Tools[toolName];
 
             // TODO: there could be a better way of associating categories with 
             // repository if the tool association was successful than this method.

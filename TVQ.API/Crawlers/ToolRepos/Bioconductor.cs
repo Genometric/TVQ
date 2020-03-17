@@ -64,7 +64,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
 
                         categories.Add(new CategoryRepoAssociation() { Category = new Category() { Name = item.Trim() } });
                     }
-                    _categoryRepoAssociations.TryAdd(FormatToolName(view.Key), categories);
+                    _categoryRepoAssociations.TryAdd(view.Key.Trim(), categories);
                 }
             }
 
@@ -91,16 +91,17 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                     {
                         if (TryParseBibitem(item.Value, out Publication pub))
                         {
+                            var toolName = item.Key.Trim();
                             _toolsAddToRepoDates.TryGetValue(
-                                FormatToolName(item.Key),
-                                out DateTime? addedDate);
+                                toolName,
+                                out DateTime? addedDate); ;
 
                             _categoryRepoAssociations.TryGetValue(
-                                FormatToolName(item.Key), 
+                                toolName,
                                 out List<CategoryRepoAssociation> associations);
 
-                            if (!TryAddEntities(new DeserializedInfo(item.Key.Trim(), addedDate, pub, associations)))
-                                Logger.LogInformation($"Skipping tool {item.Key.Trim()}.");
+                            if (!TryAddEntities(new DeserializedInfo(toolName, addedDate, pub, associations)))
+                                Logger.LogInformation($"Skipping tool {toolName}.");
                         }
                         else
                         {
@@ -132,7 +133,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 if (cols[2] == "all")
                     continue;
 
-                if (!ToolsDict.TryGetValue(cols[0], out Tool tool))
+                if (!Tools.TryGetValue(cols[0].Trim(), out Tool tool))
                 {
                     Logger.LogDebug($"Received stats for `{cols[0]}`, which is an unrecognized tool.");
                     continue;
@@ -174,7 +175,7 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             while ((line = reader.ReadLine()) != null)
             {
                 var cols = line.Split(',');
-                _toolsAddToRepoDates.TryAdd(FormatToolName(cols[1]),
+                _toolsAddToRepoDates.TryAdd(cols[1].Trim(),
                                             DateTime.Parse(cols[3], CultureInfo.CurrentCulture));
             }
         }
