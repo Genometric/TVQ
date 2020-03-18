@@ -391,6 +391,13 @@ namespace Genometric.TVQ.API.Controllers
                                                                   .Where(x => x.RepositoryID == repository.ID)
                                                                   .ToListAsync()
                                                                   .ConfigureAwait(false);
+
+            var categoriesInRepo = await _context.CategoryRepoAssociations.Include(x => x.Category)
+                                                                          .Include(x => x.Repository)
+                                                                          .Where(x => x.RepositoryID == repository.ID)
+                                                                          .ToDictionaryAsync(x => x.CategoryID, x => x.Category)
+                                                                          .ConfigureAwait(false);
+
             string unspecifiedCategory = "Unspecified";
             var categoriesName = new SortedSet<string>
             {
@@ -399,6 +406,16 @@ namespace Genometric.TVQ.API.Controllers
 
             foreach (var association in associations)
             {
+                var c = false;
+                foreach(var categoryAssociation in association.Tool.CategoryAssociations)
+                    if (categoriesInRepo.ContainsKey(categoryAssociation.CategoryID))
+                    {
+                        c = true;
+                        break;
+                    }
+
+                if (!c) continue;
+
                 var date = association.DateAddedToRepository.Value.Year;
                 if (!distributions.ContainsKey(date))
                     distributions.Add(date, new SortedDictionary<string, double>());
@@ -413,6 +430,9 @@ namespace Genometric.TVQ.API.Controllers
                 {
                     foreach (var categoryAssociation in association.Tool.CategoryAssociations)
                     {
+                        if (!categoriesInRepo.ContainsKey(categoryAssociation.CategoryID))
+                            continue;
+
                         var categoryName = categoryAssociation.Category.Name;
                         if (categoryName == null) 
                             continue;
