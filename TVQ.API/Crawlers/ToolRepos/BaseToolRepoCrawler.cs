@@ -73,14 +73,33 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
                 new KeywordConstructor());
         }
 
-        private string GetKey(CategoryRepoAssociation association)
+        private List<string> GetKeys(CategoryRepoAssociation association)
         {
-            return
-                (association.Repository == null ? Repo.Name : association.Repository.Name)
-                + "::"
-                + association.IDinRepo
-                + "::"
-                + (association.Category == null ? string.Empty : association.Category.Name);
+            var repo = association.Repository == null ? Repo.Name : association.Repository.Name;
+            var id = association.IDinRepo ?? string.Empty;
+            var name = association.Category == null ? string.Empty : association.Category.Name ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(name))
+                return new List<string>();
+
+            string a = null, b = null, c = null;
+
+            a = string.Join("::", repo, id, name);
+
+            if (!string.IsNullOrWhiteSpace(name))
+                b = string.Join("::", repo, string.Empty, name);
+
+            if (!string.IsNullOrWhiteSpace(id))
+                c = string.Join("::", repo, id, string.Empty);
+
+            var keys = new List<string> { a };
+            if (b != null && b != a)
+                keys.Add(b);
+
+            if (c != null && c != b && c != a)
+                keys.Add(c);
+
+            return keys;
         }
 
         protected CategoryRepoAssociation EnsureEntity(CategoryRepoAssociation association)
@@ -93,12 +112,11 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             if (association.Category == null)
                 association.Category = new Category();
 
-            var key = GetKey(association);
-            if (!_categoryRepoAssociations.TryGetValue(key, out CategoryRepoAssociation rtv))
-            {
-                _categoryRepoAssociations.Add(key, association);
-                rtv = association;
-            }
+            var keys = GetKeys(association);
+            var rtv = association;
+            foreach (var key in keys)
+                if (!_categoryRepoAssociations.TryGetValue(key, out rtv))
+                    _categoryRepoAssociations.Add(key, association);
 
             return rtv;
         }
