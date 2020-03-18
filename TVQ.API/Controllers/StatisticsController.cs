@@ -464,7 +464,7 @@ namespace Genometric.TVQ.API.Controllers
                         if (year.Value.ContainsKey(name))
                             builder.Append(year.Value[name] + "\t");
                         else
-                            builder.Append("0.0\t");
+                            builder.Append("0\t");
 
                     writer.WriteLine(builder.ToString());
                 }
