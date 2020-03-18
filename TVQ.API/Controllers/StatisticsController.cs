@@ -386,12 +386,11 @@ namespace Genometric.TVQ.API.Controllers
             var distributions = new SortedDictionary<int, SortedDictionary<string, double>>();
 
             var associations = await _context.ToolRepoAssociations.Include(x => x.Tool)
-                                                                 .ThenInclude(x => x.CategoryAssociations)
-                                                                 .ThenInclude(x => x.Category)
-                                                                 .Where(x => x.RepositoryID == repository.ID)
-                                                                 .ToListAsync()
-                                                                 .ConfigureAwait(false);
-
+                                                                  .ThenInclude(x => x.CategoryAssociations)
+                                                                  .ThenInclude(x => x.Category)
+                                                                  .Where(x => x.RepositoryID == repository.ID)
+                                                                  .ToListAsync()
+                                                                  .ConfigureAwait(false);
             string unspecifiedCategory = "Unspecified";
             var categoriesName = new SortedSet<string>
             {
