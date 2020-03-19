@@ -341,6 +341,8 @@ namespace Genometric.TVQ.API.Analysis
 
             foreach (var tool in changes)
             {
+                if (tool.Value.Keys.Count < 2 || tool.Value.Values.Count < 2)
+                    continue;
                 // data samples to interpolate over
                 var spline = Interpolate.Linear(tool.Value.Keys, tool.Value.Values);
 
