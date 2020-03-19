@@ -392,9 +392,16 @@ namespace Genometric.TVQ.API.Controllers
                                                                   .ToListAsync()
                                                                   .ConfigureAwait(false);
 
+            var repoID = repository.ID;
+            if(repository.Name == Repository.Repo.Bioconda)
+            {
+                var repos = _context.Repositories.ToList();
+                repoID = repos.Find(x => x.Name == Repository.Repo.BioTools).ID;
+            }
+
             var categoriesInRepo = await _context.CategoryRepoAssociations.Include(x => x.Category)
                                                                           .Include(x => x.Repository)
-                                                                          .Where(x => x.RepositoryID == repository.ID)
+                                                                          .Where(x => x.RepositoryID == repoID)
                                                                           .ToDictionaryAsync(x => x.CategoryID, x => x.Category)
                                                                           .ConfigureAwait(false);
 
