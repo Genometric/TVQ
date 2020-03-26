@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 
@@ -21,6 +22,10 @@ namespace Genometric.TVQ.API.Analysis.Clustering
         /// <returns>Return root cluster.</returns>
         public ClusterNode Cluster(double[,] x, string[] labels, DistanceMetric metric, ILinkageStrategy linkage)
         {
+            Contract.Requires(x != null);
+            Contract.Requires(labels != null);
+            Contract.Requires(linkage != null);
+
             var pdist = GetPDist(x, metric);
             _clusters = CreateClusters(labels);
             _distances = CreateLinkages(pdist, _clusters);
@@ -50,16 +55,16 @@ namespace Genometric.TVQ.API.Analysis.Clustering
             for (int i = 0; i < rowCount - 1; i++)
                 for (int j = i + 1; j < rowCount; j++)
                 {
-                    var rowA = Enumerable.Range(0, space.GetLength(1)).Select(x => space[i, x]).ToArray();
-                    var rowB = Enumerable.Range(0, space.GetLength(1)).Select(x => space[j, x]).ToArray();
+                    var rowi = Enumerable.Range(0, space.GetLength(1)).Select(x => space[i, x]).ToArray();
+                    var rowj = Enumerable.Range(0, space.GetLength(1)).Select(x => space[j, x]).ToArray();
 
-                    pDist[0, rtvIndex++] = (double)distanceMethod.Invoke(null, new object[] { rowA, rowB });
+                    pDist[0, rtvIndex++] = (double)distanceMethod.Invoke(null, new object[] { rowi, rowj });
                 }
 
             return pDist;
         }
 
-        public void Agglomerate(ILinkageStrategy linkageStrategy)
+        private void Agglomerate(ILinkageStrategy linkageStrategy)
         {
             ClusterNode minDistLink = _distances.RemoveFirst();
             if (minDistLink != null)
@@ -82,16 +87,9 @@ namespace Genometric.TVQ.API.Analysis.Clustering
                     var linkB = _distances.Remove(c, minDistLink.Right);
 
                     if (linkA != null)
-                    {
                         dists.Add(linkA.Distance);
-
-                    }
                     if (linkB != null)
-                    {
                         dists.Add(linkB.Distance);
-
-                        // double weightVal = link2.GetOtherCluster(iClust).Weight;
-                    }
 
                     newLinkage.Distance = linkageStrategy.CalculateDistance(dists);
                     _distances.Add(newLinkage);
@@ -103,6 +101,10 @@ namespace Genometric.TVQ.API.Analysis.Clustering
 
         private static MethodInfo GetDistanceMethod(DistanceMetric metric)
         {
+            // Maps an enum item to a method name, hence the two should match.
+            // Some methods have different signatures, hence to avoid 
+            // ambiguity the intended signature is also specified.
+            
             Type[] methodTypes;
             if (metric == DistanceMetric.Pearson)
                 methodTypes = new Type[] { typeof(IEnumerable<double>), typeof(IEnumerable<double>) };
@@ -121,7 +123,7 @@ namespace Genometric.TVQ.API.Analysis.Clustering
                 {
                     var link = new ClusterNode
                     {
-                        Distance = distances[0, AccessFunction(row, col, clusters.Count)],
+                        Distance = distances[0, IndicesToCondensedIndex(row, col, clusters.Count)],
                         Left = clusters[col],
                         Right = clusters[row]
                     };
@@ -144,9 +146,16 @@ namespace Genometric.TVQ.API.Analysis.Clustering
             return clusters;
         }
 
-        private static int AccessFunction(int i, int j, int n)
+
+        /// <summary>
+        /// Converts the indices used for accessing the elements of a 
+        /// square matrix to the index in the condensed matrix.
+        /// See <seealso cref="https://stackoverflow.com/a/36867493/947889"/>
+        /// for details. 
+        /// </summary>
+        private static int IndicesToCondensedIndex(int row, int col, int n)
         {
-            return n * j - j * (j + 1) / 2 + i - 1 - j;
+            return n * col - col * (col + 1) / 2 + row - 1 - col;
         }
     }
 }

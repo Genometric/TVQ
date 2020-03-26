@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Text;
 
 namespace Genometric.TVQ.API.Analysis.Clustering
@@ -12,32 +13,20 @@ namespace Genometric.TVQ.API.Analysis.Clustering
         public ClusterNode Left { set; get; }
         public ClusterNode Right { set; get; }
 
-        public List<string> LeafNames { set; get; } = new List<string>();
-        public List<ClusterNode> Children { set; get; } = new List<ClusterNode>();
+        public List<string> LeafNames { get; } = new List<string>();
+        public List<ClusterNode> Children { get; } = new List<ClusterNode>();
 
         public double Distance { set; get; } = double.NaN;
         public double Weight { set; get; } = 1.0;
 
-        public ClusterNode() { }
-
-        public ClusterNode(string name)
+        public ClusterNode(string name = null)
         {
             Name = name;
         }
 
-        public ClusterNode GetOtherCluster(ClusterNode c)
+        public ClusterNode Agglomerate(int index)
         {
-            return Left == c ? Right : Left;
-        }
-
-        public ClusterNode Agglomerate(int clusterIdx)
-        {
-            return Agglomerate("C#" + clusterIdx);
-        }
-
-        public ClusterNode Agglomerate(string name)
-        {
-            var cluster = new ClusterNode(name)
+            var cluster = new ClusterNode("C#" + index)
             {
                 Distance = Distance
             };
@@ -46,13 +35,9 @@ namespace Genometric.TVQ.API.Analysis.Clustering
             cluster.LeafNames.AddRange(Right.LeafNames);
             cluster.Children.Add(Left);
             cluster.Children.Add(Right);
-            Left.Parent = cluster;
-            Right.Parent = cluster;
 
-            double lWeight = Left.Weight;
-            double rWeight = Right.Weight;
-            double weight = lWeight + rWeight;
-            cluster.Weight = weight;
+            Left.Parent = Right.Parent = cluster;
+            cluster.Weight = Left.Weight + Right.Weight;
 
             return cluster;
         }
@@ -78,7 +63,7 @@ namespace Genometric.TVQ.API.Analysis.Clustering
             return count;
         }
 
-        public string ToNewickString(int indent)
+        public string GetInNewick(int indent)
         {
             var builder = new StringBuilder("");
             if (!IsLeaf())
@@ -95,11 +80,11 @@ namespace Genometric.TVQ.API.Analysis.Clustering
             bool firstChild = true;
             foreach (var child in children)
             {
-                builder.Append(child.ToNewickString(indent));
+                builder.Append(child.GetInNewick(indent));
                 if (firstChild)
-                    builder.Append(":" + Distance.ToString().Replace(",", ".") + ",");
+                    builder.Append(":" + Distance.ToString(CultureInfo.InvariantCulture) + ",");
                 else
-                    builder.Append(":" + Weight.ToString().Replace(",", "."));
+                    builder.Append(":" + Weight.ToString(CultureInfo.InvariantCulture));
 
                 firstChild = false;
             }

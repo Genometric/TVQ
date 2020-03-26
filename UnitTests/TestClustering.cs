@@ -43,6 +43,8 @@ namespace Genometric.TVQ.UnitTests
             Assert.True(cluster.Children[1].LeafNames[1] == "2");
             Assert.True(cluster.Children[1].Children.Count == 2);
             Assert.True(cluster.Children[1].Distance == 1.4142135623730951);
+
+            Assert.Equal("(  8 :17.029386365926403,(  1 :1.4142135623730951, 2 :2 ):3 )", cluster.GetInNewick(1));
         }
     }
 }
