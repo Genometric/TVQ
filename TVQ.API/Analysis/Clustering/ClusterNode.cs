@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Text;
 
 namespace Genometric.TVQ.API.Analysis.Clustering
@@ -16,8 +15,7 @@ namespace Genometric.TVQ.API.Analysis.Clustering
         public List<string> LeafNames { set; get; } = new List<string>();
         public List<ClusterNode> Children { set; get; } = new List<ClusterNode>();
 
-        public double LinkageDistance { set; get; }
-        public double Dist { set; get; } = 0;
+        public double Distance { set; get; } = double.NaN;
         public double Weight { set; get; } = 1.0;
 
         public ClusterNode() { }
@@ -41,7 +39,7 @@ namespace Genometric.TVQ.API.Analysis.Clustering
         {
             var cluster = new ClusterNode(name)
             {
-                Dist = LinkageDistance
+                Distance = Distance
             };
 
             cluster.LeafNames.AddRange(Left.LeafNames);
@@ -61,7 +59,7 @@ namespace Genometric.TVQ.API.Analysis.Clustering
 
         public int CompareTo([AllowNull] ClusterNode other)
         {
-            return other == null ? -1 : LinkageDistance.CompareTo(other.LinkageDistance);
+            return other == null ? -1 : Distance.CompareTo(other.Distance);
         }
 
         public bool IsLeaf()
@@ -99,7 +97,7 @@ namespace Genometric.TVQ.API.Analysis.Clustering
             {
                 builder.Append(child.ToNewickString(indent));
                 if (firstChild)
-                    builder.Append(":" + Dist.ToString().Replace(",", ".") + ",");
+                    builder.Append(":" + Distance.ToString().Replace(",", ".") + ",");
                 else
                     builder.Append(":" + Weight.ToString().Replace(",", "."));
 

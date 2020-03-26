@@ -83,19 +83,20 @@ namespace Genometric.TVQ.API.Analysis.Clustering
 
                     if (linkA != null)
                     {
-                        dists.Add(linkA.LinkageDistance);
+                        dists.Add(linkA.Distance);
 
                     }
                     if (linkB != null)
                     {
-                        dists.Add(linkB.LinkageDistance);
+                        dists.Add(linkB.Distance);
 
                         // double weightVal = link2.GetOtherCluster(iClust).Weight;
                     }
 
-                    newLinkage.LinkageDistance = linkageStrategy.CalculateDistance(dists);
+                    newLinkage.Distance = linkageStrategy.CalculateDistance(dists);
                     _distances.Add(newLinkage);
                 }
+
                 _clusters.Add(newCluster);
             }
         }
@@ -120,7 +121,7 @@ namespace Genometric.TVQ.API.Analysis.Clustering
                 {
                     var link = new ClusterNode
                     {
-                        LinkageDistance = distances[0, AccessFunction(row, col, clusters.Count)],
+                        Distance = distances[0, AccessFunction(row, col, clusters.Count)],
                         Left = clusters[col],
                         Right = clusters[row]
                     };
