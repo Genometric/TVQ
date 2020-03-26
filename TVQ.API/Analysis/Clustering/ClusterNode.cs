@@ -19,7 +19,7 @@ namespace Genometric.TVQ.API.Analysis.Clustering
         public double Distance { set; get; } = double.NaN;
         public double Weight { set; get; } = 1.0;
 
-        public ClusterNode(string name = null)
+        public ClusterNode(string name = " ")
         {
             Name = name;
         }
