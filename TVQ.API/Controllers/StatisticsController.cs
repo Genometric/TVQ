@@ -27,6 +27,8 @@ namespace Genometric.TVQ.API.Controllers
         private readonly TVQContext _context;
         private readonly AnalysisService _analysisService;
 
+        private const string _numberFormat = "0.00000";
+
         private enum ReportTypes
         {
             BeforeAfterCitationCountPerTool,
@@ -40,6 +42,7 @@ namespace Genometric.TVQ.API.Controllers
             ToolDistributionAmongCategoriesPerYear,
             NormalizedBeforeAfterVector,
             BetweenRepoTTest,
+            DownloadFeatures,
             Overview
         };
 
@@ -117,6 +120,8 @@ namespace Genometric.TVQ.API.Controllers
                     return await Overview(repository).ConfigureAwait(false);
                 case ReportTypes.BetweenRepoTTest:
                     return Ok(await BetweenRepoTTest().ConfigureAwait(false));
+                case ReportTypes.DownloadFeatures:
+                    return DownloadFeatures();
             }
 
             return BadRequest();
@@ -577,6 +582,69 @@ namespace Genometric.TVQ.API.Controllers
             IFileInfo fileInfo = provider.GetFileInfo("TVQStats.csv");
 
             return File(fileInfo.CreateReadStream(), contentType, "TVQStats.csv");
+        }
+
+        private FileStreamResult DownloadFeatures()
+        {
+            var tempPath =
+                Path.GetFullPath(Path.GetTempPath()) +
+                Utilities.GetRandomString(10) +
+                Path.DirectorySeparatorChar;
+
+            Directory.CreateDirectory(tempPath);
+
+            var fileNames = new List<string>();
+
+            var toolRepoAssociations = _context.ToolRepoAssociations
+                .Include(x => x.Tool).ThenInclude(x => x.CategoryAssociations)
+                .Include(x => x.Tool).ThenInclude(x => x.CategoryAssociations)
+                .Include(x => x.Tool).ThenInclude(x => x.PublicationAssociations).ThenInclude(x => x.Publication)
+                .ToList();
+
+            foreach(var repo in _context.Repositories)
+            {
+                var associations = toolRepoAssociations.Where(x => x.RepositoryID == repo.ID).ToList();
+
+                var normalizedData = _analysisService.GetPrePostCitationChangeVector(associations);
+
+                if (normalizedData.Count == 0)
+                    continue;
+
+                var builder = new StringBuilder();
+                var filename = tempPath + Utilities.SafeFilename(repo.Name + ".csv");
+                using var writer = new StreamWriter(filename);
+
+                builder.Append("ID\tToolName");
+                var pointsX = normalizedData.First().Value.CitationsVector.Keys;
+                foreach (var x in pointsX)
+                    builder.Append("\t" + x.ToString(_numberFormat, CultureInfo.InvariantCulture));
+                writer.WriteLine(builder.ToString());
+                
+                foreach (var tool in normalizedData)
+                {
+                    if (tool.Value.CitationsVector.Count == 0)
+                        continue;
+
+                    builder.Clear();
+                    builder.Append(tool.Key.ToString());
+
+                    foreach (var point in tool.Value.CitationsVector)
+                        builder.Append("\t" + point.Value.ToString(_numberFormat, CultureInfo.InvariantCulture));
+
+                    writer.WriteLine(builder.ToString());
+                }
+            }
+
+            var zipFileTempPath = Path.GetFullPath(Path.GetTempPath()) + Utilities.GetRandomString(10) + Path.DirectorySeparatorChar;
+            Directory.CreateDirectory(zipFileTempPath);
+            var zipFilename = $"TVQStats.zip";
+            ZipFile.CreateFromDirectory(tempPath, zipFileTempPath + zipFilename);
+
+            var contentType = "application/zip";
+            IFileProvider provider = new PhysicalFileProvider(zipFileTempPath);
+            IFileInfo fileInfo = provider.GetFileInfo(zipFilename);
+
+            return File(fileInfo.CreateReadStream(), contentType, zipFilename);
         }
 
         private async Task<IActionResult> Overview(Repository repository)
