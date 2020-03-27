@@ -12,19 +12,27 @@ import seaborn as sns
 def cluster(root, filename):
     input_df = pd.read_csv(os.path.join(root, filename), header=0, sep='\t')
     
-    # remove the tool name column b/c it's a categorical column.
+    # Remove the tool name column b/c it's a categorical column.
     df = input_df.drop("ToolName", 1)
 
-    # remove the ID column b/c it contains a unique record for every row.
+    # Remove the ID column b/c it contains a unique record for every row.
     df = df.drop("ID", 1)
 
+    # Perform hierarchical/agglomerative clustering and 
+    # returns the hierarchical clustering encoded as a linkage matrix.
+    # The `ward` linkage minimizes the variance of the clusters being merged.
+    linkage_matrix = shc.linkage(df, method='ward')
+
+    # Plots the hierarchical clustering as a dendrogram.
     plt.figure(figsize=(10, 7))  
-    plt.title("Dendrograms")  
-    dend = shc.dendrogram(shc.linkage(df, method='ward'))
+    plt.title(filename)  
+    dend = shc.dendrogram(linkage_matrix)
     plt.axhline(y=6, color='r', linestyle='--')
-    # plt.show()
+    plt.show()
+
+    
     cluster = AgglomerativeClustering(n_clusters=2, affinity='euclidean', linkage='ward')  
-    hc = cluster.fit_predict(df)
+    hc = cluster.fit(df)
     df["clusters"] = hc.labels_
 
 
