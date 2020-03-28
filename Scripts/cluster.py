@@ -49,7 +49,12 @@ def cluster(root, filename):
     # rework this and avoid send clustering.
     model = AgglomerativeClustering(n_clusters=cluster_count, affinity='euclidean', linkage='ward')  
     cluster_labels = model.fit_predict(df)
-    df["cluster_label"] = cluster_labels
+
+    # Add cluster information to original data.
+    input_df["cluster_label"] = cluster_labels
+
+    # Write the DataFrame to CSV. 
+    input_df.to_csv(os.path.join(root, filename_without_extension + '_clustered.csv'), sep='\t', encoding='utf-8', index=False)
 
 
 def get_cluster_count(Z, filename):
