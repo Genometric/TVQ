@@ -9,12 +9,14 @@ from sklearn.cluster import AgglomerativeClustering
 import seaborn as sns
 import itertools
 from scipy.spatial.distance import cdist 
+import sklearn
 
 
 CLUSTERED_FILENAME_POSFIX = "_clustered"
 
 
 def cluster(root, filename):
+    print("\n>>> Processing file: {0}".format(filename))
     filename_without_extension = os.path.splitext(filename)[0]
     input_df = pd.read_csv(os.path.join(root, filename), header=0, sep='\t')
     
@@ -30,8 +32,8 @@ def cluster(root, filename):
     linkage_matrix = shc.linkage(df, method='ward')
 
     cluster_count, cut_distance = get_cluster_count(linkage_matrix, filename_without_extension)
-    print(cluster_count)
-    print(cut_distance)
+    print("\t- Cluster Count:\t{0}".format(cluster_count))
+    print("\t- Cluster Cut Height:\t{0}".format(cut_distance))
 
     # Plots the hierarchical clustering as a dendrogram.
     plt.figure(figsize=(10, 7))
@@ -55,6 +57,10 @@ def cluster(root, filename):
 
     # Add cluster information to original data.
     input_df["cluster_label"] = cluster_labels
+
+    silhouette_score = sklearn.metrics.silhouette_score(df, cluster_labels)
+    print("\t- Silhouette Score:\t{0}".format(silhouette_score))
+
 
     # Write the DataFrame to CSV. 
     clustered_filename = os.path.join(root, filename_without_extension + CLUSTERED_FILENAME_POSFIX + '.csv')
