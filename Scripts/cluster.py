@@ -11,6 +11,9 @@ import itertools
 from scipy.spatial.distance import cdist 
 
 
+CLUSTERED_FILENAME_POSFIX = "_clustered"
+
+
 def cluster(root, filename):
     filename_without_extension = os.path.splitext(filename)[0]
     input_df = pd.read_csv(os.path.join(root, filename), header=0, sep='\t')
@@ -54,7 +57,10 @@ def cluster(root, filename):
     input_df["cluster_label"] = cluster_labels
 
     # Write the DataFrame to CSV. 
-    input_df.to_csv(os.path.join(root, filename_without_extension + '_clustered.csv'), sep='\t', encoding='utf-8', index=False)
+    clustered_filename = os.path.join(root, filename_without_extension + CLUSTERED_FILENAME_POSFIX + '.csv')
+    if os.path.isfile(clustered_filename):
+        os.remove(clustered_filename)
+    input_df.to_csv(clustered_filename, sep='\t', encoding='utf-8', index=False)
 
 
 def get_cluster_count(Z, filename):
@@ -87,5 +93,6 @@ if __name__ == "__main__":
     inputPath = sys.argv[1]
     for root, dirpath, filenames in os.walk(inputPath):
         for filename in filenames:
-            if os.path.splitext(filename)[1] == ".csv":
+            if os.path.splitext(filename)[1] == ".csv" and \
+               not os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 cluster(root, filename)
