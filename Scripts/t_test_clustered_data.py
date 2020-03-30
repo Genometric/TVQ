@@ -2,7 +2,9 @@ import numpy as np
 import os
 import sys
 import pandas as pd
-from scipy.stats import ttest_rel
+from scipy.stats import ttest_rel, pearsonr
+from statistics import mean, stdev
+from math import sqrt
 
 
 CLUSTERED_FILENAME_POSFIX = "_clustered"
@@ -30,7 +32,10 @@ def ttest(cluster_label, tools):
         avg_pre.append(np.average(row.get(pre).values.tolist()))
         avg_pst.append(np.average(row.get(post).values.tolist()))
 
-    return ttest_rel(avg_pre, avg_pst)
+    cohens_d = (mean(avg_pre) - mean(avg_pst)) / (sqrt((stdev(avg_pre) ** 2 + stdev(avg_pst) ** 2) / 2))
+    coefficient, pvalue = pearsonr(avg_pre, avg_pre)
+
+    return cohens_d, ttest_rel(avg_pre, avg_pst)
     
 
 
