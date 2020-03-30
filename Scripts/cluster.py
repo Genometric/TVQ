@@ -13,6 +13,7 @@ import sklearn
 
 
 CLUSTERED_FILENAME_POSFIX = "_clustered"
+CLUSTER_NAME_COLUMN_LABEL = "cluster_label"
 
 
 def cluster(root, filename):
@@ -56,7 +57,7 @@ def cluster(root, filename):
     cluster_labels = model.fit_predict(df)
 
     # Add cluster information to original data.
-    input_df["cluster_label"] = cluster_labels
+    input_df[CLUSTER_NAME_COLUMN_LABEL] = cluster_labels
 
     silhouette_score = sklearn.metrics.silhouette_score(df, cluster_labels)
     print("\t- Silhouette Score:\t{0}".format(silhouette_score))
