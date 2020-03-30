@@ -2,6 +2,7 @@ import numpy as np
 import os
 import sys
 import pandas as pd
+from scipy.stats import ttest_rel
 
 
 CLUSTERED_FILENAME_POSFIX = "_clustered"
@@ -12,28 +13,25 @@ def ttest_by_cluster(root, filename):
     print("\n>>> Processing file: {0}".format(filename))
     clusters = get_clusters(root, filename)
     for k in clusters.groups:
-        get_deltas(k, clusters.get_group(k))
-        break
+        t_statistic, pvalue = ttest(k, clusters.get_group(k))
+        print(t_statistic)
+        print(pvalue)
 
 
-def get_deltas(cluster_label, tools):
+def ttest(cluster_label, tools):
     # columns: a list of all the column headers.
     # pre:  a list of headers of columns containing normalized citation counts BEFORE a tool was added to the repository.
     # post: a list of headers of columns containing normalized citation counts AFTER  a tool was added to the repository.
     columns, pre, post = pre_post_columns(tools)
 
-    deltas = []
+    avg_pre = []
+    avg_pst = []
     for index, row in tools.iterrows():
-        avg_pre = np.average(row.get(pre).values.tolist())
-        avg_pst = np.average(row.get(post).values.tolist())
-        deltas.append(avg_pst - avg_pre)
+        avg_pre.append(np.average(row.get(pre).values.tolist()))
+        avg_pst.append(np.average(row.get(post).values.tolist()))
 
-    return deltas
-
-
-
-def ttest(cluster_label, tools):
-    pass
+    return ttest_rel(avg_pre, avg_pst)
+    
 
 
 def pre_post_columns(tools):
@@ -80,4 +78,3 @@ if __name__ == "__main__":
             if os.path.splitext(filename)[1] == ".csv" and \
                os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 ttest_by_cluster(root, filename)
-                exit()
