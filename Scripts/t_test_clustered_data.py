@@ -47,10 +47,14 @@ def ttest(cluster_label, tools):
 
 
 def cohen_d(x,y):
+    # Cohen's d is computed as explained in the following link:
+    # https://stackoverflow.com/a/33002123/947889
     d = len(x) + len(y) - 2
     cohen_d = (mean(x) - mean(y)) / sqrt(((len(x) - 1) * std(x, ddof=1) ** 2 + (len(y) - 1) * std(y, ddof=1) ** 2) / d) 
     cohen_d = abs(cohen_d)
 
+    # This interpretation is based on the info available on Wikipedia:
+    # https://en.wikipedia.org/wiki/Effect_size#Cohen.27s_d
     if cohen_d >= 0.00 and cohen_d < 0.10:
         msg = "Very small"
     if cohen_d >= 0.10 and cohen_d < 0.35:
