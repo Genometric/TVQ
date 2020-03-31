@@ -1,9 +1,10 @@
 import numpy as np
+from numpy import std
 import os
 import sys
 import pandas as pd
 from scipy.stats import ttest_rel, pearsonr
-from statistics import mean, stdev
+from statistics import mean
 from math import sqrt
 
 
@@ -15,28 +16,50 @@ def ttest_by_cluster(root, filename):
     print("\n>>> Processing file: {0}".format(filename))
     clusters = get_clusters(root, filename)
     for k in clusters.groups:
-        t_statistic, pvalue = ttest(k, clusters.get_group(k))
-        print(t_statistic)
-        print(pvalue)
+        (cohen_d, cohen_d_interpretation), (t_statistic, pvalue) = ttest(k, clusters.get_group(k))
 
 
 def ttest(cluster_label, tools):
     # columns: a list of all the column headers.
     # pre:  a list of headers of columns containing normalized citation counts BEFORE a tool was added to the repository.
     # post: a list of headers of columns containing normalized citation counts AFTER  a tool was added to the repository.
-    columns, pre, post = pre_post_columns(tools)
+    columns, pre_headers, post_headers = pre_post_columns(tools)
 
+    # Lists contain citation counts before (pre) and after (post) a tool was added to the repository.
+    pre = []
+    post = []
     avg_pre = []
     avg_pst = []
     for index, row in tools.iterrows():
-        avg_pre.append(np.average(row.get(pre).values.tolist()))
-        avg_pst.append(np.average(row.get(post).values.tolist()))
+        pre_vals = row.get(pre_headers).values.tolist()
+        post_vals = row.get(post_headers).values.tolist()
 
-    cohens_d = (mean(avg_pre) - mean(avg_pst)) / (sqrt((stdev(avg_pre) ** 2 + stdev(avg_pst) ** 2) / 2))
-    coefficient, pvalue = pearsonr(avg_pre, avg_pre)
+        pre.append(pre_vals)
+        post.append(post_vals)
+        avg_pre.append(np.average(pre_vals))
+        avg_pst.append(np.average(post_vals))
 
-    return cohens_d, ttest_rel(avg_pre, avg_pst)
-    
+    return cohen_d(pre_vals,post_vals), ttest_rel(avg_pre, avg_pst)
+
+
+def cohen_d(x,y):
+    d = len(x) + len(y) - 2
+    cohen_d = (mean(x) - mean(y)) / sqrt(((len(x) - 1) * std(x, ddof=1) ** 2 + (len(y) - 1) * std(y, ddof=1) ** 2) / d) 
+    cohen_d = abs(cohen_d)
+
+    if cohen_d >= 0.00 and cohen_d < 0.10:
+        msg = "Very small"
+    if cohen_d >= 0.10 and cohen_d < 0.35:
+        msg = "Small"
+    if cohen_d >= 0.35 and cohen_d < 0.65:
+        msg = "Medium"
+    if cohen_d >= 0.65 and cohen_d < 0.90:
+        msg = "Large"
+    if cohen_d >= 0.90:
+        msg = "Very large"
+
+    return cohen_d, msg + " effect size."
+
 
 
 def pre_post_columns(tools):
