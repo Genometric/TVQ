@@ -83,13 +83,13 @@ def set_plot_style():
     plt.subplots_adjust(wspace=0.15, hspace=0.35)
     return fig, axes
 
-def plot(ax, filename_without_extension, linkage_matrix, cut_distance, cluster_count, silhouette_score, variance, dist_growth_acceleration):
+def plot(ax, filename_without_extension, add_legend, linkage_matrix, cut_distance, cluster_count, silhouette_score, variance, dist_growth_acceleration):
     col0 = ax[0]
     col1 = ax[1]
 
     # Plots the hierarchical clustering as a dendrogram.
     dend = shc.dendrogram(linkage_matrix, no_labels=True, orientation="right", ax=col0)
-    col0.axvline(x=cut_distance, color='r', linestyle='--')
+    col0.axvline(x=cut_distance, color='orange', linewidth=1.5, linestyle="-.")
 
     # Plot to a PNG file.
     col0.set_title(filename_without_extension)
@@ -100,14 +100,16 @@ def plot(ax, filename_without_extension, linkage_matrix, cut_distance, cluster_c
 
     # Plot the Elbow method's results.
     col1.plot(variance, label="Variance", marker='o', color='green')
-    col1.plot(dist_growth_acceleration, label="Distance growth acceleration", marker="x", color="orange")
+    col1.plot(dist_growth_acceleration, label="Distance growth acceleration", marker="x", color="blue")
 
     col1.set_title(filename_without_extension)
     col1.set_xlabel("Number of clusters")
     col1.set_ylabel("Distortion")
-    col1.legend(loc="upper right")
 
-    col1.axvline(x=cluster_count, color="r", linestyle="--")
+    if add_legend:
+        col1.legend(loc='center', bbox_to_anchor=(0.5, -0.3), framealpha=0.0, fancybox=True)
+
+    col1.axvline(x=cluster_count, color="orange", linewidth=1.5, linestyle="-.")
 
     # Show Y-Axis on the right side of the plot.
     #col1.yaxis.set_label_position("right")
@@ -122,12 +124,14 @@ if __name__ == "__main__":
     fig, ax = set_plot_style()
     inputPath = sys.argv[1]
     plot_row = 0
+    col_counter = 0
     for root, dirpath, filenames in os.walk(inputPath):
         for filename in filenames:
             if os.path.splitext(filename)[1] == ".csv" and \
                not os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
+                col_counter += 1
                 filename_without_extension = os.path.splitext(filename)[0]
-                plot(ax[plot_row], filename_without_extension, *cluster(root, filename))
+                plot(ax[plot_row], filename_without_extension, True if col_counter == 4 else False, *cluster(root, filename))
                 plot_row += 1
 
     image_file = os.path.join(inputPath, 'plot.png')
