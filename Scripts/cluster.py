@@ -101,7 +101,7 @@ def plot(ax, filename_without_extension, linkage_matrix, cut_distance, silhouett
     col1.plot(variance, label="Variance", marker='o', color='green')
     col1.plot(dist_growth_acceleration, label="Distance growth acceleration", marker="x", color="orange")
 
-    col1.set_title(filename)
+    col1.set_title(filename_without_extension)
     col1.set_xlabel("Number of clusters")
     col1.set_ylabel("Distortion")
     col1.legend(loc="upper right")
@@ -130,5 +130,5 @@ if __name__ == "__main__":
     image_file = os.path.join(inputPath, 'plot.png')
     if os.path.isfile(image_file):
         os.remove(image_file)
-    plt.savefig(image_file)
+    plt.savefig(image_file, bbox_inches='tight')
     plt.close()
