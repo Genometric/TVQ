@@ -16,8 +16,10 @@ def ttest_by_cluster(root, filename):
     print("\n>>> Processing file: {0}".format(filename))
     clusters = get_clusters(root, filename)
     for k in clusters.groups:
-        (cohen_d, cohen_d_interpretation), (t_statistic, pvalue) = ttest(k, clusters.get_group(k))
+        tools = clusters.get_group(k)
+        (cohen_d, cohen_d_interpretation), (t_statistic, pvalue) = ttest(k, tools)
         print(f"\t- Cluster number:\t{k}")
+        print(f"\t\t* Tools count:\t{len(tools)}")
         print(f"\t\t* t-Statistic:\t{t_statistic}")
         print(f"\t\t* p-value:\t{pvalue}")
         print(f"\t\t* Cohen's d:\t{cohen_d}\t{cohen_d_interpretation}")
