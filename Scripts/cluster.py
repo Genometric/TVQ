@@ -73,10 +73,10 @@ def get_cluster_count(Z, filename, cluster_count):
     dist_growth_acceleration = pd.DataFrame(acceleration_rev, idxs[:-2] + 1)
 
     if cluster_count is None:
-        index = int(acceleration_rev[1:].argmax())
+        index = int(acceleration_rev[1:].argmax()) + 3
     else:
         index = cluster_count
-    return variance, dist_growth_acceleration, index + 3, float(last_rev[index + 2])
+    return variance, dist_growth_acceleration, index, float(last_rev[index - 1])
 
 
 def set_plot_style():
@@ -126,7 +126,7 @@ if __name__ == "__main__":
         exit()
 
     if len(sys.argv) == 3:
-        cluster_count = int(sys.argv[2]) - 2
+        cluster_count = int(sys.argv[2])
     else:
         cluster_count = None
 
