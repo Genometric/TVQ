@@ -55,7 +55,7 @@ def cluster(root, filename):
         os.remove(clustered_filename)
     input_df.to_csv(clustered_filename, sep='\t', encoding='utf-8', index=False)
 
-    return linkage_matrix, cut_distance, silhouette_score, variance, dist_growth_acceleration
+    return linkage_matrix, cut_distance, cluster_count, silhouette_score, variance, dist_growth_acceleration
 
 
 def get_cluster_count(Z, filename):
@@ -71,7 +71,8 @@ def get_cluster_count(Z, filename):
     acceleration_rev = acceleration[::-1]
     dist_growth_acceleration = pd.DataFrame(acceleration_rev, idxs[:-2] + 1)
 
-    return variance, dist_growth_acceleration, acceleration_rev.argmax() + 2, last_rev[acceleration_rev.argmax() + 1]
+    acc_rev_without_first = acceleration_rev[1:]
+    return variance, dist_growth_acceleration, int(acc_rev_without_first.argmax() + 3), float(last_rev[acc_rev_without_first.argmax() + 2])
 
 
 def set_plot_style():
@@ -82,13 +83,13 @@ def set_plot_style():
     plt.subplots_adjust(wspace=0.15, hspace=0.35)
     return fig, axes
 
-def plot(ax, filename_without_extension, linkage_matrix, cut_distance, silhouette_score, variance, dist_growth_acceleration):
+def plot(ax, filename_without_extension, linkage_matrix, cut_distance, cluster_count, silhouette_score, variance, dist_growth_acceleration):
     col0 = ax[0]
     col1 = ax[1]
 
     # Plots the hierarchical clustering as a dendrogram.
     dend = shc.dendrogram(linkage_matrix, no_labels=True, orientation="right", ax=col0)
-    col0.axvline(x=float(cut_distance), color='r', linestyle='--')
+    col0.axvline(x=cut_distance, color='r', linestyle='--')
 
     # Plot to a PNG file.
     col0.set_title(filename_without_extension)
@@ -105,6 +106,8 @@ def plot(ax, filename_without_extension, linkage_matrix, cut_distance, silhouett
     col1.set_xlabel("Number of clusters")
     col1.set_ylabel("Distortion")
     col1.legend(loc="upper right")
+
+    col1.axvline(x=cluster_count, color="r", linestyle="--")
 
     # Show Y-Axis on the right side of the plot.
     #col1.yaxis.set_label_position("right")
