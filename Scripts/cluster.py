@@ -95,9 +95,11 @@ def plot(ax, filename_without_extension, linkage_matrix, cut_distance, silhouett
     col0.set_xlabel("Height")
     col0.grid(axis='x', which='major', color='w')
 
+    col0.text(0.82, 0.1, "Silhouette Score={:.4f}".format(silhouette_score), horizontalalignment='center', verticalalignment='center', transform=col0.transAxes)
+
     # Plot the Elbow method's results.
-    col1.plot(variance, label="Variance")
-    col1.plot(dist_growth_acceleration, label="Distance growth acceleration")
+    col1.plot(variance, label="Variance", marker='o', color='green')
+    col1.plot(dist_growth_acceleration, label="Distance growth acceleration", marker="x", color="orange")
 
     col1.set_title(filename)
     col1.set_xlabel("Number of clusters")
