@@ -17,7 +17,7 @@ CLUSTER_NAME_COLUMN_LABEL = "cluster_label"
 
 
 
-def cluster(root, filename):
+def cluster(root, filename, cluster_count):
     print("\n>>> Processing file: {0}".format(filename))
     filename_without_extension = os.path.splitext(filename)[0]
     input_df = pd.read_csv(os.path.join(root, filename), header=0, sep='\t')
@@ -33,7 +33,8 @@ def cluster(root, filename):
     # The `ward` linkage minimizes the variance of the clusters being merged.
     linkage_matrix = shc.linkage(df, method='ward')
 
-    variance, dist_growth_acceleration, cluster_count, cut_distance = get_cluster_count(linkage_matrix, filename_without_extension)
+    variance, dist_growth_acceleration, cluster_count, cut_distance = get_cluster_count(linkage_matrix, filename_without_extension, cluster_count)
+        
     print("\t- Cluster Count:\t{0}".format(cluster_count))
     print("\t- Cluster Cut Height:\t{0}".format(cut_distance))
 
@@ -58,7 +59,7 @@ def cluster(root, filename):
     return linkage_matrix, cut_distance, cluster_count, silhouette_score, variance, dist_growth_acceleration
 
 
-def get_cluster_count(Z, filename):
+def get_cluster_count(Z, filename, cluster_count):
     # This method is implemented based on info available from the following link.
     # https://joernhees.de/blog/2015/08/26/scipy-hierarchical-clustering-and-dendrogram-tutorial/#Elbow-Method
     last = Z[-10:, 2]
@@ -71,8 +72,11 @@ def get_cluster_count(Z, filename):
     acceleration_rev = acceleration[::-1]
     dist_growth_acceleration = pd.DataFrame(acceleration_rev, idxs[:-2] + 1)
 
-    acc_rev_without_first = acceleration_rev[1:]
-    return variance, dist_growth_acceleration, int(acc_rev_without_first.argmax() + 3), float(last_rev[acc_rev_without_first.argmax() + 2])
+    if cluster_count is None:
+        index = int(acceleration_rev[1:].argmax())
+    else:
+        index = cluster_count
+    return variance, dist_growth_acceleration, index + 3, float(last_rev[index + 2])
 
 
 def set_plot_style():
@@ -117,9 +121,14 @@ def plot(ax, filename_without_extension, add_legend, linkage_matrix, cut_distanc
     
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print("Missing input path.")
         exit()
+
+    if len(sys.argv) == 3:
+        cluster_count = int(sys.argv[2]) - 2
+    else:
+        cluster_count = None
 
     fig, ax = set_plot_style()
     inputPath = sys.argv[1]
@@ -131,7 +140,7 @@ if __name__ == "__main__":
                not os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 col_counter += 1
                 filename_without_extension = os.path.splitext(filename)[0]
-                plot(ax[plot_row], filename_without_extension, True if col_counter == 4 else False, *cluster(root, filename))
+                plot(ax[plot_row], filename_without_extension, True if col_counter == 4 else False, *cluster(root, filename, cluster_count))
                 plot_row += 1
 
     image_file = os.path.join(inputPath, 'plot.png')
