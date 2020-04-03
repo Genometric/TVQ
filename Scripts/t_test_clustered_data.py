@@ -115,19 +115,38 @@ def get_vectors(tools):
     return citations, sums, avg_pre, avg_pst
 
 
+def get_sorted_clusters(clusters):
+    agg_cluster_mapping = {}
+    for k in clusters.groups:
+        citations, _, _, _ = get_vectors(clusters.get_group(k))
+        flattend = []
+        for c in citations:
+            flattend.append(c[0] + c[1])
+
+        agg_cluster_mapping[np.average(flattend)] = k
+
+    return sorted(agg_cluster_mapping), agg_cluster_mapping
+
+
 def ttest_corresponding_clusters(root, filename_a, filename_b):
     print(f"\n>>> Processing files: {filename_a} and {filename_b}")
 
     clusters_a = get_clusters(root, filename_a)
     clusters_b = get_clusters(root, filename_b)
+    sorted_keys_a, agg_cluster_mapping_a = get_sorted_clusters(clusters_a)
+    sorted_keys_b, agg_cluster_mapping_b = get_sorted_clusters(clusters_b)    
 
-    for k in clusters_a.groups:
-        _, sums_a, _, _ = get_vectors(clusters_a.get_group(k))
-        _, sums_b, _, _ = get_vectors(clusters_b.get_group(k))
+    for i in range(0, len(sorted_keys_a)):
+        cluster_a_num = agg_cluster_mapping_a[sorted_keys_a[i]]
+        cluster_b_num = agg_cluster_mapping_b[sorted_keys_b[i]]
+        _, sums_a, _, _ = get_vectors(clusters_a.get_group(cluster_a_num))
+        _, sums_b, _, _ = get_vectors(clusters_b.get_group(cluster_b_num))
         t_statistic, pvalue = ttest_ind(sums_a, sums_b, equal_var=False)
-        print(f"\t- Cluster number:\t{k}")
-        print(f"\t\t * t-Statistic:\t{t_statistic}")
-        print(f"\t\t * p-value:\t{pvalue}")
+        print(f"\t- Matching clusters:")
+        print(f"\t\t* {cluster_a_num}, avg={sorted_keys_a[i]}")
+        print(f"\t\t* {cluster_b_num}, avg={sorted_keys_b[i]}")
+        print(f"\t\t\t~ t-Statistic:\t{t_statistic}")
+        print(f"\t\t\t~ p-value:\t{pvalue}")
 
 
 if __name__ == "__main__":
