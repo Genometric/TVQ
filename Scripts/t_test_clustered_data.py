@@ -128,25 +128,24 @@ def get_sorted_clusters(clusters):
     return sorted(agg_cluster_mapping), agg_cluster_mapping
 
 
-def ttest_corresponding_clusters(root, filename_a, filename_b):
-    print(f"\n>>> Processing files: {filename_a} and {filename_b}")
+def ttest_corresponding_clusters(root, filename_a, filename_b, output_filename):
+    print(f">>> Processing files: {filename_a} and {filename_b}")
 
     clusters_a = get_clusters(root, filename_a)
     clusters_b = get_clusters(root, filename_b)
     sorted_keys_a, agg_cluster_mapping_a = get_sorted_clusters(clusters_a)
     sorted_keys_b, agg_cluster_mapping_b = get_sorted_clusters(clusters_b)    
 
-    for i in range(0, len(sorted_keys_a)):
-        cluster_a_num = agg_cluster_mapping_a[sorted_keys_a[i]]
-        cluster_b_num = agg_cluster_mapping_b[sorted_keys_b[i]]
-        _, sums_a, _, _ = get_vectors(clusters_a.get_group(cluster_a_num))
-        _, sums_b, _, _ = get_vectors(clusters_b.get_group(cluster_b_num))
-        t_statistic, pvalue = ttest_ind(sums_a, sums_b, equal_var=False)
-        print(f"\t- Matching clusters:")
-        print(f"\t\t* {cluster_a_num}, avg={sorted_keys_a[i]}")
-        print(f"\t\t* {cluster_b_num}, avg={sorted_keys_b[i]}")
-        print(f"\t\t\t~ t-Statistic:\t{t_statistic}")
-        print(f"\t\t\t~ p-value:\t{pvalue}")
+    with open(output_filename, "a") as f:
+        for i in range(0, len(sorted_keys_a)):
+            cluster_a_num = agg_cluster_mapping_a[sorted_keys_a[i]]
+            cluster_b_num = agg_cluster_mapping_b[sorted_keys_b[i]]
+            _, sums_a, _, _ = get_vectors(clusters_a.get_group(cluster_a_num))
+            _, sums_b, _, _ = get_vectors(clusters_b.get_group(cluster_b_num))
+            t_statistic, pvalue = ttest_ind(sums_a, sums_b, equal_var=False)
+            d, d_interpretation = cohen_d(sums_a, sums_b)
+
+            f.write(f"{filename_a}\t{filename_b}\t{cluster_a_num}\t{cluster_b_num}\t{sorted_keys_a[i]}\t{sorted_keys_b[i]}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
 
 
 if __name__ == "__main__":
@@ -168,6 +167,9 @@ if __name__ == "__main__":
 
     # Iterate through all the permutations of repositories,
     # and compute t-test between corresponding clusters.
+    tcc_filename = os.path.join(inputPath, 'ttest_corresponding_clusters.txt')
+    if os.path.isfile(tcc_filename):
+        os.remove(tcc_filename)
     for i in range(0, len(filenames)-1):
         for j in range(i+1, len(filenames)):
-            ttest_corresponding_clusters(root, filenames[i], filenames[j])
+            ttest_corresponding_clusters(root, filenames[i], filenames[j], tcc_filename)
