@@ -33,15 +33,17 @@ def cluster(root, filename, cluster_count):
     # The `ward` linkage minimizes the variance of the clusters being merged.
     linkage_matrix = shc.linkage(df, method='ward')
 
-    variance, dist_growth_acceleration, cluster_count, cut_distance = get_cluster_count(linkage_matrix, filename_without_extension, cluster_count)
+    variance, dist_growth_acceleration, auto_cluster_count, auto_cut_distance, manual_cluster_count, manual_cut_distance = get_cluster_count(linkage_matrix, filename_without_extension, cluster_count)
         
-    print("\t- Cluster Count:\t{0}".format(cluster_count))
-    print("\t- Cluster Cut Height:\t{0}".format(cut_distance))
+    print("\t- Auto-determined Cluster Count:\t{0}".format(auto_cluster_count))
+    print("\t- Auto-determined Cluster Cut Height:\t{0}".format(auto_cut_distance))
+    print("\t- Manually-set Cluster Count:\t{0}".format(manual_cluster_count))
+    print("\t- Manually-set Cluster Cut Height:\t{0}".format(manual_cut_distance))
 
     # Apply cluster to data.
     # It is not ideal to re-cluster data; hence, a potential improvement would be to
     # rework this and avoid send clustering.
-    model = AgglomerativeClustering(n_clusters=cluster_count, affinity='euclidean', linkage='ward')  
+    model = AgglomerativeClustering(n_clusters=manual_cluster_count, affinity='euclidean', linkage='ward')  
     cluster_labels = model.fit_predict(df)
 
     # Add cluster information to original data.
@@ -56,7 +58,7 @@ def cluster(root, filename, cluster_count):
         os.remove(clustered_filename)
     input_df.to_csv(clustered_filename, sep='\t', encoding='utf-8', index=False)
 
-    return linkage_matrix, cut_distance, cluster_count, silhouette_score, variance, dist_growth_acceleration
+    return linkage_matrix, auto_cut_distance, auto_cluster_count, manual_cut_distance, manual_cluster_count, silhouette_score, variance, dist_growth_acceleration
 
 
 def get_cluster_count(Z, filename, cluster_count):
@@ -72,11 +74,9 @@ def get_cluster_count(Z, filename, cluster_count):
     acceleration_rev = acceleration[::-1]
     dist_growth_acceleration = pd.DataFrame(acceleration_rev, idxs[:-2] + 1)
 
-    if cluster_count is None:
-        index = int(acceleration_rev[1:].argmax()) + 3
-    else:
-        index = cluster_count
-    return variance, dist_growth_acceleration, index, float(last_rev[index - 1])
+    auto_index = int(acceleration_rev[1:].argmax()) + 3
+    manual_index = auto_index if cluster_count is None else cluster_count
+    return variance, dist_growth_acceleration, auto_index, float(last_rev[auto_index - 1]), manual_index, float(last_rev[manual_index - 1])
 
 
 def set_plot_style():
@@ -87,13 +87,14 @@ def set_plot_style():
     plt.subplots_adjust(wspace=0.15, hspace=0.35)
     return fig, axes
 
-def plot(ax, filename_without_extension, add_legend, linkage_matrix, cut_distance, cluster_count, silhouette_score, variance, dist_growth_acceleration):
+def plot(ax, filename_without_extension, add_legend, linkage_matrix, auto_cut_distance, auto_cluster_count, manual_cut_distance, manual_cluster_count, silhouette_score, variance, dist_growth_acceleration):
     col0 = ax[0]
     col1 = ax[1]
 
     # Plots the hierarchical clustering as a dendrogram.
     dend = shc.dendrogram(linkage_matrix, no_labels=True, orientation="right", ax=col0)
-    col0.axvline(x=cut_distance, color='orange', linewidth=1.5, linestyle="-.")
+    col0.axvline(x=auto_cut_distance, color='orange', linewidth=1.5, linestyle="dotted")
+    col0.axvline(x=manual_cut_distance, color='orange', linewidth=1.5, linestyle="dashed")
 
     # Plot to a PNG file.
     col0.set_title(filename_without_extension)
@@ -113,7 +114,8 @@ def plot(ax, filename_without_extension, add_legend, linkage_matrix, cut_distanc
     if add_legend:
         col1.legend(loc='center', bbox_to_anchor=(0.5, -0.3), framealpha=0.0, fancybox=True)
 
-    col1.axvline(x=cluster_count, color="orange", linewidth=1.5, linestyle="-.")
+    col1.axvline(x=auto_cluster_count, color="orange", linewidth=1.5, linestyle="dotted")
+    col1.axvline(x=manual_cluster_count, color="orange", linewidth=1.5, linestyle="dashed")
 
     # Show Y-Axis on the right side of the plot.
     #col1.yaxis.set_label_position("right")
