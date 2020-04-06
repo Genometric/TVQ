@@ -14,11 +14,21 @@ import sklearn
 
 CLUSTERED_FILENAME_POSFIX = "_clustered"
 CLUSTER_NAME_COLUMN_LABEL = "cluster_label"
+CLUSTERING_STATS_REPORT_FILENAME = "clustering_stats.txt"
 
+
+def get_silhouette_score(df, cluster_count):
+    # Apply cluster to data.
+    # It is not ideal to re-cluster data; hence, a potential improvement would be to
+    # rework this and avoid send clustering.
+    model = AgglomerativeClustering(n_clusters=cluster_count, affinity='euclidean', linkage='ward')  
+    cluster_labels = model.fit_predict(df)
+
+    return cluster_labels, sklearn.metrics.silhouette_score(df, cluster_labels)
 
 
 def cluster(root, filename, cluster_count):
-    print("\n>>> Processing file: {0}".format(filename))
+    print(">>> Processing file: {0}".format(filename))
     filename_without_extension = os.path.splitext(filename)[0]
     input_df = pd.read_csv(os.path.join(root, filename), header=0, sep='\t')
     
@@ -34,23 +44,6 @@ def cluster(root, filename, cluster_count):
     linkage_matrix = shc.linkage(df, method='ward')
 
     variance, dist_growth_acceleration, auto_cluster_count, auto_cut_distance, manual_cluster_count, manual_cut_distance = get_cluster_count(linkage_matrix, filename_without_extension, cluster_count)
-        
-    print("\t- Auto-determined Cluster Count:\t{0}".format(auto_cluster_count))
-    print("\t- Auto-determined Cluster Cut Height:\t{0}".format(auto_cut_distance))
-    print("\t- Manually-set Cluster Count:\t{0}".format(manual_cluster_count))
-    print("\t- Manually-set Cluster Cut Height:\t{0}".format(manual_cut_distance))
-
-    # Apply cluster to data.
-    # It is not ideal to re-cluster data; hence, a potential improvement would be to
-    # rework this and avoid send clustering.
-    model = AgglomerativeClustering(n_clusters=manual_cluster_count, affinity='euclidean', linkage='ward')  
-    cluster_labels = model.fit_predict(df)
-
-    # Add cluster information to original data.
-    input_df[CLUSTER_NAME_COLUMN_LABEL] = cluster_labels
-
-    silhouette_score = sklearn.metrics.silhouette_score(df, cluster_labels)
-    print("\t- Silhouette Score:\t{0}".format(silhouette_score))
 
     # Write the DataFrame to CSV. 
     clustered_filename = os.path.join(root, filename_without_extension + CLUSTERED_FILENAME_POSFIX + '.csv')
@@ -58,7 +51,16 @@ def cluster(root, filename, cluster_count):
         os.remove(clustered_filename)
     input_df.to_csv(clustered_filename, sep='\t', encoding='utf-8', index=False)
 
-    return linkage_matrix, auto_cut_distance, auto_cluster_count, manual_cut_distance, manual_cluster_count, silhouette_score, variance, dist_growth_acceleration
+    _, auto_silhouette_score = get_silhouette_score(df, auto_cluster_count)
+    cluster_labels, manual_silhouette_score = get_silhouette_score(df, manual_cluster_count)
+
+    # Add cluster information to original data.
+    input_df[CLUSTER_NAME_COLUMN_LABEL] = cluster_labels
+
+    with open(os.path.join(root, CLUSTERING_STATS_REPORT_FILENAME), "a") as f:
+        f.write(f"{filename}\t{auto_cluster_count}\t{auto_cut_distance}\t{auto_silhouette_score}\t{manual_cluster_count}\t{manual_cut_distance}\t{manual_silhouette_score}\n")
+
+    return linkage_matrix, auto_cut_distance, auto_cluster_count, auto_silhouette_score, manual_cut_distance, manual_cluster_count, manual_silhouette_score, variance, dist_growth_acceleration
 
 
 def get_cluster_count(Z, filename, cluster_count):
@@ -87,7 +89,7 @@ def set_plot_style():
     plt.subplots_adjust(wspace=0.15, hspace=0.35)
     return fig, axes
 
-def plot(ax, filename_without_extension, add_legend, linkage_matrix, auto_cut_distance, auto_cluster_count, manual_cut_distance, manual_cluster_count, silhouette_score, variance, dist_growth_acceleration):
+def plot(ax, filename_without_extension, add_legend, linkage_matrix, auto_cut_distance, auto_cluster_count, auto_silhouette_score, manual_cut_distance, manual_cluster_count, manual_silhouette_score, variance, dist_growth_acceleration):
     col0 = ax[0]
     col1 = ax[1]
 
@@ -101,7 +103,7 @@ def plot(ax, filename_without_extension, add_legend, linkage_matrix, auto_cut_di
     col0.set_xlabel("Height")
     col0.grid(axis='x', which='major', color='w')
 
-    col0.text(0.82, 0.1, "Silhouette Score={:.4f}".format(silhouette_score), horizontalalignment='center', verticalalignment='center', transform=col0.transAxes)
+    col0.text(0.82, 0.1, "Silhouette Score={:.4f}".format(manual_silhouette_score), horizontalalignment='center', verticalalignment='center', transform=col0.transAxes)
 
     # Plot the Elbow method's results.
     col1.plot(variance, label="Variance", marker='o', color='green')
@@ -136,6 +138,14 @@ if __name__ == "__main__":
     inputPath = sys.argv[1]
     plot_row = 0
     col_counter = 0
+
+    cluster_ststs_filename = os.path.join(inputPath, CLUSTERING_STATS_REPORT_FILENAME)
+    if os.path.isfile(cluster_ststs_filename):
+        os.remove(cluster_ststs_filename)
+    # Write column's headers.
+    with open(cluster_ststs_filename, "a") as f:
+        f.write("Filename\tAuto-determined Cluster Count\tAuto-determined Dendrogram Cut Height\tAuto-determined Cluster Silhouette Score\tManually-set Cluster Count\tManually-set Dendrogram Cut Height\tManually-set Cluster Silhouette Score\n")
+
     for root, dirpath, filenames in os.walk(inputPath):
         for filename in filenames:
             if os.path.splitext(filename)[1] == ".csv" and \
