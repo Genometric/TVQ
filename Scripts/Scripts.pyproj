@@ -34,6 +34,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="plotting.py" />
+    <Compile Include="plot_cluster_quartiles.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="t_test_clustered_data.py">
       <SubType>Code</SubType>
     </Compile>

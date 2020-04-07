@@ -27,6 +27,7 @@ def read_input(filename):
                 after_y.append(float(y))
     return before_x, before_y, after_x, after_y
 
+
 def plot(root, filename):
     before_x, before_y, after_x, after_y = read_input(os.path.join(root, filename))
     fig, ax = plt.subplots()

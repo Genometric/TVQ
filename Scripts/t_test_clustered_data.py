@@ -173,3 +173,7 @@ if __name__ == "__main__":
     for i in range(0, len(filenames)-1):
         for j in range(i+1, len(filenames)):
             ttest_corresponding_clusters(root, filenames[i], filenames[j], tcc_filename)
+
+    for i in range(0, len(filenames)):
+        plot_quartile_of_clusters(root, filenames[i])
+

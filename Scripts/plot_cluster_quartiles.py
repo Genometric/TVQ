@@ -1,79 +1,35 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import os
 import sys
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.cluster.hierarchy as shc
+from sklearn.cluster import AgglomerativeClustering
+import seaborn as sns
+import itertools
+from scipy.spatial.distance import cdist 
+import sklearn
 
-from scipy.interpolate import make_interp_spline, BSpline
 
-STEP_SIZE = 10
-BACKGROND_COLOR = (0.9, 0.9, 0.9)
-GRID_COLOR = (0.95, 0.95, 0.95)
+CLUSTERED_FILENAME_POSFIX = "_clustered"
+CLUSTER_NAME_COLUMN_LABEL = "cluster_label"
+CLUSTERING_STATS_REPORT_FILENAME = "clustering_stats.txt"
 
-def read_input(filename):
-    before_x = []
-    before_median = []
-    before_lower_quartile = []
-    before_upper_quartile = []
-    before_max = []
-    before_min = []
-    after_x = []
-    after_median = []
-    after_lower_quartile = []
-    after_upper_quartile = []
-    after_max = []
-    after_min = []    
+
+def get_clusters(root, filename):
+    """
+    Returns a data frame grouped-by cluster name.
     
-    with open(filename) as f:
-        lines = [line.rstrip() for line in f]
-        for line in lines:
-            columns = line.split("\t")
-            x = float(columns[1])
-            median = float(columns[3])
-            lower_quartile = float(columns[2])
-            upper_quartile = float(columns[4])
-            max = float(columns[5])
-            min = float(columns[6])
+    :rtype:  pandas.core.groupby.generic.DataFrameGroupBy
+    """
+    input_df = pd.read_csv(os.path.join(root, filename), header=0, sep='\t')
+    return input_df.groupby(CLUSTER_NAME_COLUMN_LABEL)
 
-            if x < 0:
-                before_x.append(x)
-                before_median.append(median)
-                before_lower_quartile.append(lower_quartile)
-                before_upper_quartile.append(upper_quartile)
-                before_max.append(max)
-                before_min.append(min)
-            elif x > 0:
-                after_x.append(x)
-                after_median.append(median)
-                after_lower_quartile.append(lower_quartile)
-                after_upper_quartile.append(upper_quartile)
-                after_max.append(max)
-                after_min.append(min)
-            else:
-                before_x.append(x)
-                before_median.append(median)
-                before_lower_quartile.append(lower_quartile)
-                before_upper_quartile.append(upper_quartile)
-                before_max.append(max)
-                before_min.append(min)
-                after_x.append(x)
-                after_median.append(median)
-                after_lower_quartile.append(lower_quartile)
-                after_upper_quartile.append(upper_quartile)
-                after_max.append(max)
-                after_min.append(min)
-    return \
-        before_x, \
-        before_median, \
-        before_lower_quartile, \
-        before_upper_quartile, \
-        before_max, \
-        before_min, \
-        after_x, \
-        after_median, \
-        after_lower_quartile, \
-        after_upper_quartile, \
-        after_max, \
-        after_min
+
+def get_quartiles(cluster):
+    pass
+
 
 def smooth(x, y):
     x = np.array(x)
@@ -136,12 +92,32 @@ def plot(root, filename):
     plt.close()
 
 
+def set_plot_style():
+    sns.set()
+    sns.set_context("paper")
+    sns.set_style("darkgrid")
+    fig, axes = plt.subplots(nrows=4, ncols=2, figsize=(12, 16), dpi=300, gridspec_kw={'width_ratios': [2, 1]})  # , constrained_layout=True)
+    plt.subplots_adjust(wspace=0.15, hspace=0.35)
+    return fig, axes
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Missing input path.")
         exit()
 
     inputPath = sys.argv[1]
+
+    set_plot_style()
+    col_counter = 0
     for root, dirpath, filenames in os.walk(inputPath):
         for filename in filenames:
-            plot(root, filename)
+            if os.path.splitext(filename)[1] == ".csv" and \
+               not os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
+                col_counter += 1
+                filename_without_extension = os.path.splitext(filename)[0]
+                clusters = get_clusters(root, filename)
+                print(clusters)
+
+                plot(ax[plot_row], filename_without_extension, True if col_counter == 4 else False, *cluster(root, filename, cluster_count))
+                plot_row += 1
