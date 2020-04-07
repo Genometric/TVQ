@@ -49,13 +49,14 @@ def cluster(root, filename, cluster_count):
     clustered_filename = os.path.join(root, filename_without_extension + CLUSTERED_FILENAME_POSFIX + '.csv')
     if os.path.isfile(clustered_filename):
         os.remove(clustered_filename)
-    input_df.to_csv(clustered_filename, sep='\t', encoding='utf-8', index=False)
 
     _, auto_silhouette_score = get_silhouette_score(df, auto_cluster_count)
     cluster_labels, manual_silhouette_score = get_silhouette_score(df, manual_cluster_count)
 
     # Add cluster information to original data.
     input_df[CLUSTER_NAME_COLUMN_LABEL] = cluster_labels
+
+    input_df.to_csv(clustered_filename, sep='\t', encoding='utf-8', index=False)
 
     with open(os.path.join(root, CLUSTERING_STATS_REPORT_FILENAME), "a") as f:
         f.write(f"{filename}\t{auto_cluster_count}\t{auto_cut_distance}\t{auto_silhouette_score}\t{manual_cluster_count}\t{manual_cut_distance}\t{manual_silhouette_score}\n")
