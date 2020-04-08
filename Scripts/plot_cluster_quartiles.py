@@ -32,9 +32,6 @@ def get_clusters(root, filename):
 
 
 def get_quartiles(citations):
-    _, pre, post = pre_post_columns(citations)
-    columns = pre + post
-
     # A list of quartiles to be computed for each column of the 
     # citations matrix (i.e., for each entry of normalized date).
     quartiles = [0.25, 0.5, 0.75]
@@ -42,11 +39,8 @@ def get_quartiles(citations):
     # A data frame whose columns are set to the entries of normalized date,
     # and rows containing their quartiles. The quartile is given as the index 
     # of the row. 
-    quartiles_df = pd.DataFrame(index=quartiles, columns=columns)
+    return citations.quantile(quartiles)
 
-    for q in quartiles:
-        for column in columns:
-            quartiles_df.at[q, column] = citations[column].quantile(q)
 
 
 def smooth(x, y):
