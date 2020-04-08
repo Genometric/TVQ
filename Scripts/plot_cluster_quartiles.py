@@ -140,7 +140,10 @@ def pre_post_columns(tools):
         except ValueError:
             continue
 
-        if v < 0:
+        if v == 0:
+            pre.append(header)
+            post.append(header)
+        elif v < 0:
             pre.append(header)
         else:
             post.append(header)
