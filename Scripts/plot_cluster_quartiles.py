@@ -11,6 +11,7 @@ import itertools
 from scipy.spatial.distance import cdist 
 import sklearn
 from scipy.interpolate import make_interp_spline, BSpline
+from t_test_clustered_data import get_sorted_clusters
 
 
 # THIS SCRIPT IS EXPERIMENTAL.
@@ -76,7 +77,7 @@ def plot(ax, filename, add_legend, quartiles):
     idxes = quartiles.index.sort_values()
     median = np.median(idxes)
     for idx in idxes:
-        linestyle = "dashed" if idx == median else "dotted"
+        linestyle = "solid" if idx == median else "dashed"
         y = get_cols(quartiles, idx, pre_x)
         plot_smooth_line(ax, pre_x, y, "red", label="Before adding to repository", linestyle=linestyle)
 
@@ -226,9 +227,10 @@ if __name__ == "__main__":
         clusters = get_clusters(root, filename)
 
         col_counter = -1
-        for k in clusters.groups:
+        keys, mappings = get_sorted_clusters(clusters)
+        for i in range(0, len(keys)):
             col_counter += 1
-            citations, _, _, _, _ = get_vectors(clusters.get_group(k))
+            citations, _, _, _, _ = get_vectors(clusters.get_group(mappings[keys[i]]))
             quartiles = get_quartiles(citations)
             plot(ax[row_counter][col_counter], filename_without_extension, True if col_counter == 4 else False, quartiles)
 
