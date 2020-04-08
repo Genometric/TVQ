@@ -12,6 +12,10 @@ from scipy.spatial.distance import cdist
 import sklearn
 
 
+# THIS SCRIPT IS EXPERIMENTAL.
+# MOST METHODS OVERLAP WITH SIMILAR METHODS FROM OTHER SCRIPTS.
+
+
 CLUSTERED_FILENAME_POSFIX = "_clustered"
 CLUSTER_NAME_COLUMN_LABEL = "cluster_label"
 CLUSTERING_STATS_REPORT_FILENAME = "clustering_stats.txt"
@@ -27,8 +31,22 @@ def get_clusters(root, filename):
     return input_df.groupby(CLUSTER_NAME_COLUMN_LABEL)
 
 
-def get_quartiles(cluster):
-    pass
+def get_quartiles(citations):
+    _, pre, post = pre_post_columns(citations)
+    columns = pre + post
+
+    # A list of quartiles to be computed for each column of the 
+    # citations matrix (i.e., for each entry of normalized date).
+    quartiles = [0.25, 0.5, 0.75]
+
+    # A data frame whose columns are set to the entries of normalized date,
+    # and rows containing their quartiles. The quartile is given as the index 
+    # of the row. 
+    quartiles_df = pd.DataFrame(index=quartiles, columns=columns)
+
+    for q in quartiles:
+        for column in columns:
+            quartiles_df.at[q, column] = citations[column].quantile(q)
 
 
 def smooth(x, y):
@@ -92,6 +110,62 @@ def plot(root, filename):
     plt.close()
 
 
+def pre_post_columns(tools):
+    """
+    Returns all the column headers, and headers of columns containing 
+    normalized citation counts belonging to when before and after a 
+    tool was added to the repository.
+    """
+    column_headers = tools.columns.values.tolist()
+    pre = []
+    post = []
+    for header in column_headers:
+        try:
+            v = float(header)
+        except ValueError:
+            continue
+
+        if v < 0:
+            pre.append(header)
+        else:
+            post.append(header)
+
+    return column_headers, pre, post
+
+
+def get_vectors(tools):
+    # columns: a list of all the column headers.
+    # pre:  a list of headers of columns containing normalized citation counts BEFORE a tool was added to the repository.
+    # post: a list of headers of columns containing normalized citation counts AFTER  a tool was added to the repository.
+    columns, pre_headers, post_headers = pre_post_columns(tools)
+
+    # A list of two-dimensional lists, first dimension is pre counts
+    # and second dimension contains post citation counts.
+    pre_post_citations = []
+
+    citations = pd.DataFrame(columns=tools.columns)
+
+    sums = []
+
+    # Lists contain citation counts before (pre) and after (post)
+    # a tool was added to the repository.
+    avg_pre = []
+    avg_pst = []
+
+    for index, row in tools.iterrows():
+        citations = citations.append(row, ignore_index=True)
+
+        pre_vals = row.get(pre_headers).values.tolist()
+        post_vals = row.get(post_headers).values.tolist()
+
+        pre_post_citations.append([pre_vals, post_vals])
+        sums.append(np.sum(pre_vals + post_vals))
+        avg_pre.append(np.average(pre_vals))
+        avg_pst.append(np.average(post_vals))
+
+    return citations, pre_post_citations, sums, avg_pre, avg_pst
+
+
 def set_plot_style():
     sns.set()
     sns.set_context("paper")
@@ -108,16 +182,24 @@ if __name__ == "__main__":
 
     inputPath = sys.argv[1]
 
-    set_plot_style()
+    fig, ax = set_plot_style()
     col_counter = 0
     for root, dirpath, filenames in os.walk(inputPath):
         for filename in filenames:
             if os.path.splitext(filename)[1] == ".csv" and \
-               not os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
+            os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 col_counter += 1
                 filename_without_extension = os.path.splitext(filename)[0]
                 clusters = get_clusters(root, filename)
-                print(clusters)
+                for k in clusters.groups:
+                    citations, _, _, _, _ = get_vectors(clusters.get_group(k))
+                    quartiles = get_quartiles(citations)
+
+
+                
+               
+
+                
 
                 plot(ax[plot_row], filename_without_extension, True if col_counter == 4 else False, *cluster(root, filename, cluster_count))
                 plot_row += 1
