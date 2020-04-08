@@ -22,9 +22,18 @@ CLUSTERED_FILENAME_POSFIX = "_clustered"
 CLUSTER_NAME_COLUMN_LABEL = "cluster_label"
 CLUSTERING_STATS_REPORT_FILENAME = "clustering_stats.txt"
 
+PRE = "pre"
+POST = "post"
+
 # A list of quartiles to be computed for each column of the 
 # citations matrix (i.e., for each entry of normalized date).
-QUARTILES = [0.25, 0.5, 0.75]
+QUARTILES = {0.25: {PRE: {"label": "25th percentile (pre)", "linestyle": "dashed", "color": "red"}, POST: {"label": "25th percentile (post)", "linestyle": "dashed", "color": "green"}},
+             0.50: {PRE: {"label": "Median (pre)",          "linestyle": "solid",  "color": "red"}, POST: {"label": "Median (post)",          "linestyle": "solid",  "color": "green"}},
+             0.75: {PRE: {"label": "75th percentile (pre)", "linestyle": "dotted", "color": "red"}, POST: {"label": "75th percentile (post)", "linestyle": "dotted", "color": "green"}}}
+
+FILL_BETWEEN_PRE_COLOR = "red"
+FILL_BETWEEN_POST_COLOR = "green"
+
 
 
 def get_clusters(root, filename):
@@ -41,7 +50,8 @@ def get_quartiles(citations):
     # A data frame whose columns are set to the entries of normalized date,
     # and rows containing their quartiles. The quartile is given as the index 
     # of the row. 
-    return citations.quantile(QUARTILES)
+    # A note on syntax: [*dictionary] unpacks the keys of the dictionary as a list.
+    return citations.quantile([*QUARTILES])
 
 
 def smooth(x, y):
@@ -71,26 +81,29 @@ def get_cols(dataframe, row, cols):
     return y
 
 
-def plot(ax, filename, add_legend, quartiles):
+def plot(ax, filename, add_legend, quartiles, header=None, x_axis_label=None, y_axis_label=None):
     _, pre_x, post_x = pre_post_columns(quartiles)
 
     idxes = quartiles.index.sort_values()
-    median = np.median(idxes)
     for idx in idxes:
-        linestyle = "solid" if idx == median else "dashed"
         y = get_cols(quartiles, idx, pre_x)
-        plot_smooth_line(ax, pre_x, y, "red", label="Before adding to repository", linestyle=linestyle)
+        kwargs = QUARTILES[idx][PRE]
+        plot_smooth_line(ax, pre_x, y, **kwargs)
 
         y = get_cols(quartiles, idx, post_x)
-        plot_smooth_line(ax, post_x, y, "green", label="Before adding to repository", linestyle=linestyle)
+        kwargs = QUARTILES[idx][POST]
+        plot_smooth_line(ax, post_x, y, **kwargs)
         
     y_min = get_cols(quartiles, min(idxes), pre_x)
     y_max = get_cols(quartiles, max(idxes), pre_x)
-    plot_smooth_fill_between(ax, pre_x, y_min, y_max, "red")
+    plot_smooth_fill_between(ax, pre_x, y_min, y_max, FILL_BETWEEN_PRE_COLOR)
 
     y_min = get_cols(quartiles, min(idxes), post_x)
     y_max = get_cols(quartiles, max(idxes), post_x)
-    plot_smooth_fill_between(ax, post_x, y_min, y_max, "green")
+    plot_smooth_fill_between(ax, post_x, y_min, y_max, FILL_BETWEEN_POST_COLOR)
+
+    if header:
+        ax.set_title(header)
 
 
     #plot_smooth_line(ax, pre_x, before_median, "red", label="Before adding to repository")
@@ -103,13 +116,15 @@ def plot(ax, filename, add_legend, quartiles):
     #plot_smooth_line(ax, post_x, after_min, color="green", linestyle='dotted')
     #plot_smooth_fill_between(ax, post_x, after_lower_quartile, after_upper_quartile, "green")
 
-    #start = -1
-    #end = 1.01
-    #stepsize = 0.4
-    #ax.xaxis.set_ticks(np.arange(start, end, stepsize))
-    #ax.set_xlabel("Date offset from adding to repository")
+    start = -1
+    end = 1.01
+    stepsize = 0.4
+    ax.xaxis.set_ticks(np.arange(start, end, stepsize))
+    if x_axis_label:
+        ax.set_xlabel(x_axis_label)
 
-    #ax.set_ylabel("Citations")
+    if y_axis_label:
+        ax.set_ylabel(y_axis_label)
 
     #ax.set_facecolor(BACKGROND_COLOR)
     #ax.legend(loc="upper left")
@@ -199,8 +214,8 @@ def set_plot_style(nrows, ncols):
     sns.set()
     sns.set_context("paper")
     sns.set_style("darkgrid")
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 16), dpi=300)  #, gridspec_kw={'width_ratios': [2, 1]})  # , constrained_layout=True)
-    plt.subplots_adjust(wspace=0.15, hspace=0.35)
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 12), dpi=300, sharex=True)
+    plt.subplots_adjust(wspace=0.25, hspace=0.07)
     return fig, axes
 
 
@@ -220,21 +235,32 @@ if __name__ == "__main__":
 
     fig, ax = set_plot_style(len(files), 3)
 
+    x_axis_label = "\n Date offset"
+    y_axis_label = "Citations \n"
     row_counter = -1
     for filename in files:
+        print(f">>> Processing file: {filename}")
         row_counter += 1
         filename_without_extension = os.path.splitext(filename)[0]
+        repository_name = filename_without_extension.replace(CLUSTERED_FILENAME_POSFIX, "")
         clusters = get_clusters(root, filename)
 
         col_counter = -1
         keys, mappings = get_sorted_clusters(clusters)
         for i in range(0, len(keys)):
+            print(f"\t- Processing cluster {i}")
+            header = f"Cluster {i+1}"
             col_counter += 1
             citations, _, _, _, _ = get_vectors(clusters.get_group(mappings[keys[i]]))
             quartiles = get_quartiles(citations)
-            plot(ax[row_counter][col_counter], filename_without_extension, True if col_counter == 4 else False, quartiles)
+            plot(ax[row_counter][col_counter], filename_without_extension, True if col_counter == 4 else False, quartiles, header=header if row_counter == 0 else None, x_axis_label=x_axis_label if row_counter == len(keys) else None, y_axis_label=f"{repository_name} \n \n {y_axis_label}" if col_counter == 0 else None)
+    
+    handles, labels = ax[row_counter][col_counter].get_legend_handles_labels()
 
-    image_file = os.path.join(inputPath, 'plot.png')
+    # The "magical" numbers of bbox_to_anchor are determined by trial-and-error.
+    fig.legend(handles, labels, loc='center', bbox_to_anchor=(0.454, 0.03), ncol=6, framealpha=0.0)
+
+    image_file = os.path.join(inputPath, 'clustered_citation_change.png')
     if os.path.isfile(image_file):
         os.remove(image_file)
     plt.savefig(image_file, bbox_inches='tight')
