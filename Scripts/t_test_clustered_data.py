@@ -133,7 +133,7 @@ def get_sorted_clusters(clusters):
 
 
 def ttest_corresponding_clusters(root, filename_a, filename_b, output_filename):
-    print(f"\n>>> Performing (two independent samples) t-test on relative clusters of {get_repo_name(filename_a)} and {get_repo_name(filename_b)} ...")
+    print(f"\n>>> Performing t-test (Welch’s t-test, which does not assume equal population variance) on relative clusters of {get_repo_name(filename_a)} and {get_repo_name(filename_b)} ...")
 
     clusters_a = get_clusters(root, filename_a)
     clusters_b = get_clusters(root, filename_b)
