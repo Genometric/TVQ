@@ -12,8 +12,12 @@ CLUSTERED_FILENAME_POSFIX = "_clustered"
 CLUSTER_NAME_COLUMN_LABEL = "cluster_label"
 
 
+def get_repo_name(filename):
+    return (os.path.splitext(filename)[0]).replace(CLUSTERED_FILENAME_POSFIX, "")
+
+
 def ttest_by_cluster(root, filename):
-    print("\n>>> Processing file: {0}".format(filename))
+    print("\n>>> Performing paired t-test on repository: {0}".format(get_repo_name(filename)))
     clusters = get_clusters(root, filename)
     for k in clusters.groups:
         tools = clusters.get_group(k)
@@ -129,7 +133,7 @@ def get_sorted_clusters(clusters):
 
 
 def ttest_corresponding_clusters(root, filename_a, filename_b, output_filename):
-    print(f">>> Processing files: {filename_a} and {filename_b}")
+    print(f"\n>>> Performing (two independent samples) t-test on relative clusters of {get_repo_name(filename_a)} and {get_repo_name(filename_b)} ...")
 
     clusters_a = get_clusters(root, filename_a)
     clusters_b = get_clusters(root, filename_b)
@@ -145,8 +149,8 @@ def ttest_corresponding_clusters(root, filename_a, filename_b, output_filename):
             t_statistic, pvalue = ttest_ind(sums_a, sums_b, equal_var=False)
             d, d_interpretation = cohen_d(sums_a, sums_b)
 
-            repo_a = (os.path.splitext(filename_a)[0]).replace(CLUSTERED_FILENAME_POSFIX, "")
-            repo_b = (os.path.splitext(filename_b)[0]).replace(CLUSTERED_FILENAME_POSFIX, "")
+            repo_a = get_repo_name(filename_a)
+            repo_b = get_repo_name(filename_b)
             f.write(f"{repo_a}\t{repo_b}\t{i}\t{i}\t{sorted_keys_a[i]}\t{sorted_keys_b[i]}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
 
 
