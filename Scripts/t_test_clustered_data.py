@@ -145,7 +145,9 @@ def ttest_corresponding_clusters(root, filename_a, filename_b, output_filename):
             t_statistic, pvalue = ttest_ind(sums_a, sums_b, equal_var=False)
             d, d_interpretation = cohen_d(sums_a, sums_b)
 
-            f.write(f"{filename_a}\t{filename_b}\t{cluster_a_num}\t{cluster_b_num}\t{sorted_keys_a[i]}\t{sorted_keys_b[i]}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
+            repo_a = (os.path.splitext(filename_a)[0]).replace(CLUSTERED_FILENAME_POSFIX, "")
+            repo_b = (os.path.splitext(filename_b)[0]).replace(CLUSTERED_FILENAME_POSFIX, "")
+            f.write(f"{repo_a}\t{repo_b}\t{cluster_a_num}\t{cluster_b_num}\t{sorted_keys_a[i]}\t{sorted_keys_b[i]}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
 
 
 if __name__ == "__main__":
@@ -165,11 +167,16 @@ if __name__ == "__main__":
     for filename in filenames:
         ttest_by_cluster(root, filename)
 
-    # Iterate through all the permutations of repositories,
-    # and compute t-test between corresponding clusters.
     tcc_filename = os.path.join(inputPath, 'ttest_corresponding_clusters.txt')
     if os.path.isfile(tcc_filename):
         os.remove(tcc_filename)
+
+    # Add column header. 
+    with open(tcc_filename, "a") as f:
+        f.write(f"Repo A\tRepo B\tRepo A Cluster Number\tRepo B Cluster Number\tAverage Citation Count in Repo A Cluster\tAverage Citation Count in Repo B Cluster\tt Statistic\tp-value\tCohen's d\tCohen's d Interpretation\n")
+
+    # Iterate through all the permutations of repositories,
+    # and compute t-test between corresponding clusters.
     for i in range(0, len(filenames)-1):
         for j in range(i+1, len(filenames)):
             ttest_corresponding_clusters(root, filenames[i], filenames[j], tcc_filename)
