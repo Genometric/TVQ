@@ -147,7 +147,7 @@ def ttest_corresponding_clusters(root, filename_a, filename_b, output_filename):
 
             repo_a = (os.path.splitext(filename_a)[0]).replace(CLUSTERED_FILENAME_POSFIX, "")
             repo_b = (os.path.splitext(filename_b)[0]).replace(CLUSTERED_FILENAME_POSFIX, "")
-            f.write(f"{repo_a}\t{repo_b}\t{cluster_a_num}\t{cluster_b_num}\t{sorted_keys_a[i]}\t{sorted_keys_b[i]}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
+            f.write(f"{repo_a}\t{repo_b}\t{i}\t{i}\t{sorted_keys_a[i]}\t{sorted_keys_b[i]}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
 
 
 if __name__ == "__main__":
