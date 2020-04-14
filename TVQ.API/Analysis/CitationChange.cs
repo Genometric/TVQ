@@ -47,6 +47,17 @@ namespace Genometric.TVQ.API.Analysis
             get { return MathNet.Numerics.Statistics.Statistics.UpperQuartile(Citations); }
         }
 
+        private double _gainScore = double.NaN;
+        public double GainScore
+        {
+            get
+            {
+                if (double.IsNaN(_gainScore))
+                    _gainScore = GetGainScore();
+                return _gainScore;
+            }
+        }
+
         public CitationChange()
         {
             Citations = new SortedSet<double>();
@@ -171,6 +182,34 @@ namespace Genometric.TVQ.API.Analysis
             foreach (var count in Citations)
                 normalizedCitationCount.Add((count - min) / (max - min));
             Citations = normalizedCitationCount;
+        }
+
+        private double GetGainScore()
+        {
+            double score = 0.0;
+            double normalizedDate;
+
+            foreach(var point in CitationsVectorNormalizedByYears)
+            {
+                normalizedDate = ZeroOneNormalize(point.Key);
+
+                // Multiply citation count by _logit_ of 0-1 normalized date; 
+                // hence citation counts of when the tool was NOT added to the 
+                // repository will decrease the score (which decreases more as 
+                // the citation count belongs to a time older date as when the 
+                // tool was added to the repository) and citation counts of 
+                // after when the tool was added to the repository, increase the 
+                // score (effect of which increase the date of citation is more 
+                // current.
+                score += point.Value * (-Math.Log((1 / normalizedDate) - 1, Math.E));
+            }
+
+            return score;
+        }
+
+        private double ZeroOneNormalize(double x, double epsilon = 1e-6)
+        {
+            return (x - (-1 - epsilon)) / ((1 + epsilon) - (-1 - epsilon));
         }
     }
 }

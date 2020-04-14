@@ -398,7 +398,7 @@ namespace Genometric.TVQ.API.Controllers
                                                                   .ConfigureAwait(false);
 
             var repoID = repository.ID;
-            if(repository.Name == Repository.Repo.Bioconda)
+            if (repository.Name == Repository.Repo.Bioconda)
             {
                 var repos = _context.Repositories.ToList();
                 repoID = repos.Find(x => x.Name == Repository.Repo.BioTools).ID;
@@ -419,7 +419,7 @@ namespace Genometric.TVQ.API.Controllers
             foreach (var association in associations)
             {
                 var c = false;
-                foreach(var categoryAssociation in association.Tool.CategoryAssociations)
+                foreach (var categoryAssociation in association.Tool.CategoryAssociations)
                     if (categoriesInRepo.ContainsKey(categoryAssociation.CategoryID))
                     {
                         c = true;
@@ -446,7 +446,7 @@ namespace Genometric.TVQ.API.Controllers
                             continue;
 
                         var categoryName = categoryAssociation.Category.Name;
-                        if (categoryName == null) 
+                        if (categoryName == null)
                             continue;
                         if (!distributions[date].ContainsKey(categoryName))
                             distributions[date].Add(categoryName, 0.0);
@@ -595,15 +595,13 @@ namespace Genometric.TVQ.API.Controllers
             Directory.CreateDirectory(normalizedByDayTmpPath);
             Directory.CreateDirectory(normalizedByYearTmpPath);
 
-            var fileNames = new List<string>();
-
             var toolRepoAssociations = _context.ToolRepoAssociations
                 .Include(x => x.Tool).ThenInclude(x => x.CategoryAssociations)
                 .Include(x => x.Tool).ThenInclude(x => x.CategoryAssociations)
                 .Include(x => x.Tool).ThenInclude(x => x.PublicationAssociations).ThenInclude(x => x.Publication)
                 .ToList();
 
-            foreach(var repo in _context.Repositories)
+            foreach (var repo in _context.Repositories)
             {
                 var associations = toolRepoAssociations.Where(x => x.RepositoryID == repo.ID).ToList();
 
@@ -612,13 +610,17 @@ namespace Genometric.TVQ.API.Controllers
                 if (normalizedData.Count == 0)
                     continue;
 
+                // TODO: Rework the following to avoid creating two dictionaries, and instead 
+                // just pass normalizedData to the WriteToFile method.
                 WriteToFile(
                     Path.Combine(normalizedByDayTmpPath, Utilities.SafeFilename(repo.Name + ".csv")),
-                    normalizedData.ToDictionary(x => x.Key, x => x.Value.CitationsVectorNormalizedByDays));
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.CitationsVectorNormalizedByDays),
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore));
 
                 WriteToFile(
                     Path.Combine(normalizedByYearTmpPath, Utilities.SafeFilename(repo.Name + ".csv")),
-                    normalizedData.ToDictionary(x => x.Key, x => x.Value.CitationsVectorNormalizedByYears));
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.CitationsVectorNormalizedByYears),
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore));
             }
 
             var zipFileTempPath = Path.GetFullPath(Path.GetTempPath()) + Utilities.GetRandomString(10) + Path.DirectorySeparatorChar;
@@ -706,12 +708,12 @@ namespace Genometric.TVQ.API.Controllers
             }
         }
 
-        private void WriteToFile(string filename, Dictionary<Tool, SortedDictionary<double, double>> vectors)
+        private void WriteToFile(string filename, Dictionary<Tool, SortedDictionary<double, double>> vectors, Dictionary<Tool, double> GainScores)
         {
             var builder = new StringBuilder();
             using var writer = new StreamWriter(filename);
 
-            builder.Append("ID\tToolName");
+            builder.Append("ID\tToolName\tGainScore");
             var pointsX = vectors.First().Value.Keys;
             foreach (var x in pointsX)
                 builder.Append("\t" + x.ToString(_numberFormat, CultureInfo.InvariantCulture));
@@ -724,6 +726,8 @@ namespace Genometric.TVQ.API.Controllers
 
                 builder.Clear();
                 builder.Append(tool.Key.ToString());
+
+                builder.Append("\t" + GainScores[tool.Key]);
 
                 foreach (var point in tool.Value)
                     builder.Append("\t" + point.Value.ToString(_numberFormat, CultureInfo.InvariantCulture));
