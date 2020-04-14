@@ -105,17 +105,6 @@ def plot(ax, filename, add_legend, quartiles, header=None, x_axis_label=None, y_
     if header:
         ax.set_title(header)
 
-
-    #plot_smooth_line(ax, pre_x, before_median, "red", label="Before adding to repository")
-    #plot_smooth_line(ax, pre_x, before_max, color="red", linestyle='dashed')
-    #plot_smooth_line(ax, pre_x, before_min, color="red", linestyle='dotted')
-    #plot_smooth_fill_between(ax, pre_x, before_lower_quartile, before_upper_quartile, "red")
-
-    #plot_smooth_line(ax, post_x, after_median, "green", label="After adding to repository")
-    #plot_smooth_line(ax, post_x, after_max, color="green", linestyle='dashed')
-    #plot_smooth_line(ax, post_x, after_min, color="green", linestyle='dotted')
-    #plot_smooth_fill_between(ax, post_x, after_lower_quartile, after_upper_quartile, "green")
-
     start = -1
     end = 1.01
     stepsize = 0.4
@@ -125,20 +114,6 @@ def plot(ax, filename, add_legend, quartiles, header=None, x_axis_label=None, y_
 
     if y_axis_label:
         ax.set_ylabel(y_axis_label)
-
-    #ax.set_facecolor(BACKGROND_COLOR)
-    #ax.legend(loc="upper left")
-    #ax.grid(color=GRID_COLOR, linestyle='-', linewidth=1)
-    #ax.set_axisbelow(True)
-
-    #filename_without_extension = os.path.splitext(filename)[0]
-    #plt.title(filename_without_extension)
-
-    #image_file = os.path.join(root, filename_without_extension + '.png')
-    #if os.path.isfile(image_file):
-    #    os.remove(image_file)
-    #plt.savefig(image_file)
-    #plt.close()
 
 
 def pre_post_columns(tools):
