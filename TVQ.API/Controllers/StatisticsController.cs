@@ -586,12 +586,14 @@ namespace Genometric.TVQ.API.Controllers
 
         private FileStreamResult DownloadFeatures()
         {
-            var tempPath =
-                Path.GetFullPath(Path.GetTempPath()) +
-                Utilities.GetRandomString(10) +
-                Path.DirectorySeparatorChar;
+            var tempPath = Path.Combine(
+                Path.GetFullPath(Path.GetTempPath()),
+                Utilities.GetRandomString(10));
 
-            Directory.CreateDirectory(tempPath);
+            var normalizedByDayTmpPath = Path.Combine(tempPath, "NormalizedByDays");
+            var normalizedByYearTmpPath = Path.Combine(tempPath, "NormalizedByYears");
+            Directory.CreateDirectory(normalizedByDayTmpPath);
+            Directory.CreateDirectory(normalizedByYearTmpPath);
 
             var fileNames = new List<string>();
 
@@ -611,11 +613,11 @@ namespace Genometric.TVQ.API.Controllers
                     continue;
 
                 WriteToFile(
-                    tempPath + Utilities.SafeFilename(repo.Name + "_normalized_by_days.csv"), 
+                    Path.Combine(normalizedByDayTmpPath, Utilities.SafeFilename(repo.Name + ".csv")),
                     normalizedData.ToDictionary(x => x.Key, x => x.Value.CitationsVectorNormalizedByDays));
 
                 WriteToFile(
-                    tempPath + Utilities.SafeFilename(repo.Name + "_normalized_by_years.csv"), 
+                    Path.Combine(normalizedByYearTmpPath, Utilities.SafeFilename(repo.Name + ".csv")),
                     normalizedData.ToDictionary(x => x.Key, x => x.Value.CitationsVectorNormalizedByYears));
             }
 
