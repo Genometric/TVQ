@@ -28,8 +28,8 @@ def get_silhouette_score(df, cluster_count):
 
 
 def cluster(root, filename, cluster_count):
-    print(">>> Processing file: {0}".format(filename))
-    filename_without_extension = os.path.splitext(filename)[0]
+    repo_name = os.path.splitext(filename)[0]
+    print(">>> Clustering repository: {0}".format(repo_name))
     input_df = pd.read_csv(os.path.join(root, filename), header=0, sep='\t')
     
     # Remove the tool name column b/c it's a categorical column.
@@ -43,10 +43,10 @@ def cluster(root, filename, cluster_count):
     # The `ward` linkage minimizes the variance of the clusters being merged.
     linkage_matrix = shc.linkage(df, method='ward')
 
-    variance, dist_growth_acceleration, auto_cluster_count, auto_cut_distance, manual_cluster_count, manual_cut_distance = get_cluster_count(linkage_matrix, filename_without_extension, cluster_count)
+    variance, dist_growth_acceleration, auto_cluster_count, auto_cut_distance, manual_cluster_count, manual_cut_distance = get_cluster_count(linkage_matrix, repo_name, cluster_count)
 
     # Write the DataFrame to CSV. 
-    clustered_filename = os.path.join(root, filename_without_extension + CLUSTERED_FILENAME_POSFIX + '.csv')
+    clustered_filename = os.path.join(root, repo_name + CLUSTERED_FILENAME_POSFIX + '.csv')
     if os.path.isfile(clustered_filename):
         os.remove(clustered_filename)
 
@@ -59,7 +59,7 @@ def cluster(root, filename, cluster_count):
     input_df.to_csv(clustered_filename, sep='\t', encoding='utf-8', index=False)
 
     with open(os.path.join(root, CLUSTERING_STATS_REPORT_FILENAME), "a") as f:
-        f.write(f"{filename}\t{auto_cluster_count}\t{auto_cut_distance}\t{auto_silhouette_score}\t{manual_cluster_count}\t{manual_cut_distance}\t{manual_silhouette_score}\n")
+        f.write(f"{repo_name}\t{auto_cluster_count}\t{auto_cut_distance}\t{auto_silhouette_score}\t{manual_cluster_count}\t{manual_cut_distance}\t{manual_silhouette_score}\n")
 
     return linkage_matrix, auto_cut_distance, auto_cluster_count, auto_silhouette_score, manual_cut_distance, manual_cluster_count, manual_silhouette_score, variance, dist_growth_acceleration
 
@@ -156,7 +156,7 @@ if __name__ == "__main__":
                 plot(ax[plot_row], filename_without_extension, True if col_counter == 4 else False, *cluster(root, filename, cluster_count))
                 plot_row += 1
 
-    image_file = os.path.join(inputPath, 'plot.png')
+    image_file = os.path.join(inputPath, 'dendrogram-and-elbow.png')
     if os.path.isfile(image_file):
         os.remove(image_file)
     plt.savefig(image_file, bbox_inches='tight')
