@@ -10,6 +10,7 @@ import seaborn as sns
 import itertools
 from scipy.spatial.distance import cdist 
 import sklearn
+from matplotlib.lines import Line2D
 
 
 CLUSTERED_FILENAME_POSFIX = "_clustered"
@@ -94,10 +95,18 @@ def plot(ax, filename_without_extension, add_legend, linkage_matrix, auto_cut_di
     col0 = ax[0]
     col1 = ax[1]
 
+    auto_cut_color = "orange"
+    manu_cut_color = "orange"
+
+    auto_cut_line_style = "dotted"
+    manu_cut_line_style = "dashed"
+
+    linewidth = 1.5
+
     # Plots the hierarchical clustering as a dendrogram.
     dend = shc.dendrogram(linkage_matrix, no_labels=True, orientation="right", ax=col0)
-    col0.axvline(x=auto_cut_distance, color='orange', linewidth=1.5, linestyle="dotted")
-    col0.axvline(x=manual_cut_distance, color='orange', linewidth=1.5, linestyle="dashed")
+    col0.axvline(x=auto_cut_distance, color=auto_cut_color, linewidth=linewidth, linestyle=auto_cut_line_style)
+    col0.axvline(x=manual_cut_distance, color=manu_cut_color, linewidth=linewidth, linestyle=manu_cut_line_style)
 
     # Plot to a PNG file.
     col0.set_title(filename_without_extension)
@@ -117,8 +126,12 @@ def plot(ax, filename_without_extension, add_legend, linkage_matrix, auto_cut_di
     if add_legend:
         col1.legend(loc='center', bbox_to_anchor=(0.5, -0.3), framealpha=0.0, fancybox=True)
 
-    col1.axvline(x=auto_cluster_count, color="orange", linewidth=1.5, linestyle="dotted")
-    col1.axvline(x=manual_cluster_count, color="orange", linewidth=1.5, linestyle="dashed")
+        lines = [Line2D([0], [0], color=auto_cut_color, linewidth=linewidth, linestyle=auto_cut_line_style), Line2D([0], [0], color=manu_cut_color, linewidth=linewidth, linestyle=manu_cut_line_style)]
+        labels = ['Auto-determined cut height', 'Manually-set cut height']
+        col0.legend(lines, labels, loc='center', bbox_to_anchor=(0.5, -0.3), framealpha=0.0, fancybox=True)
+
+    col1.axvline(x=auto_cluster_count, color=auto_cut_color, linewidth=1.5, linestyle=auto_cut_line_style)
+    col1.axvline(x=manual_cluster_count, color=manu_cut_color, linewidth=1.5, linestyle=manu_cut_line_style)
 
     # Show Y-Axis on the right side of the plot.
     #col1.yaxis.set_label_position("right")
