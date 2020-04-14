@@ -610,29 +610,13 @@ namespace Genometric.TVQ.API.Controllers
                 if (normalizedData.Count == 0)
                     continue;
 
-                var builder = new StringBuilder();
-                var filename = tempPath + Utilities.SafeFilename(repo.Name + ".csv");
-                using var writer = new StreamWriter(filename);
+                WriteToFile(
+                    tempPath + Utilities.SafeFilename(repo.Name + "_normalized_by_days.csv"), 
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.CitationsVectorNormalizedByDays));
 
-                builder.Append("ID\tToolName");
-                var pointsX = normalizedData.First().Value.CitationsVector.Keys;
-                foreach (var x in pointsX)
-                    builder.Append("\t" + x.ToString(_numberFormat, CultureInfo.InvariantCulture));
-                writer.WriteLine(builder.ToString());
-                
-                foreach (var tool in normalizedData)
-                {
-                    if (tool.Value.CitationsVector.Count == 0)
-                        continue;
-
-                    builder.Clear();
-                    builder.Append(tool.Key.ToString());
-
-                    foreach (var point in tool.Value.CitationsVector)
-                        builder.Append("\t" + point.Value.ToString(_numberFormat, CultureInfo.InvariantCulture));
-
-                    writer.WriteLine(builder.ToString());
-                }
+                WriteToFile(
+                    tempPath + Utilities.SafeFilename(repo.Name + "_normalized_by_years.csv"), 
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.CitationsVectorNormalizedByYears));
             }
 
             var zipFileTempPath = Path.GetFullPath(Path.GetTempPath()) + Utilities.GetRandomString(10) + Path.DirectorySeparatorChar;
@@ -717,6 +701,32 @@ namespace Genometric.TVQ.API.Controllers
                         .ThenInclude(x => x.Tool)
                             .ThenInclude(x => x.PublicationAssociations)
                     .First(x => x.ID == id);
+            }
+        }
+
+        private void WriteToFile(string filename, Dictionary<Tool, SortedDictionary<double, double>> vectors)
+        {
+            var builder = new StringBuilder();
+            using var writer = new StreamWriter(filename);
+
+            builder.Append("ID\tToolName");
+            var pointsX = vectors.First().Value.Keys;
+            foreach (var x in pointsX)
+                builder.Append("\t" + x.ToString(_numberFormat, CultureInfo.InvariantCulture));
+            writer.WriteLine(builder.ToString());
+
+            foreach (var tool in vectors)
+            {
+                if (tool.Value.Count == 0)
+                    continue;
+
+                builder.Clear();
+                builder.Append(tool.Key.ToString());
+
+                foreach (var point in tool.Value)
+                    builder.Append("\t" + point.Value.ToString(_numberFormat, CultureInfo.InvariantCulture));
+
+                writer.WriteLine(builder.ToString());
             }
         }
     }

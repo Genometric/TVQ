@@ -18,7 +18,9 @@ namespace Genometric.TVQ.API.Analysis
 
         private SortedSet<double> Citations { set; get; }
 
-        public SortedDictionary<double, double> CitationsVector { get; }
+        public SortedDictionary<double, double> CitationsVectorNormalizedByDays { get; }
+
+        public SortedDictionary<double, double> CitationsVectorNormalizedByYears { get; }
 
         public double Min
         {
@@ -48,7 +50,8 @@ namespace Genometric.TVQ.API.Analysis
         public CitationChange()
         {
             Citations = new SortedSet<double>();
-            CitationsVector = new SortedDictionary<double, double>();
+            CitationsVectorNormalizedByDays = new SortedDictionary<double, double>();
+            CitationsVectorNormalizedByYears = new SortedDictionary<double, double>();
         }
 
         public CitationChange(double daysOffset, double count)
@@ -68,8 +71,12 @@ namespace Genometric.TVQ.API.Analysis
             Contract.Requires(points != null);
 
             AddRange(citations, dateAddedToRepository);
-            Normalize();
-            Interpolate(points);
+
+            Normalize(CitationsVectorNormalizedByDays);
+            Normalize(CitationsVectorNormalizedByYears);
+
+            Interpolate(CitationsVectorNormalizedByDays, points);
+            Interpolate(CitationsVectorNormalizedByYears, points);
         }
 
         private void AddRange(
@@ -77,59 +84,69 @@ namespace Genometric.TVQ.API.Analysis
             DateTime? dateAddedToRepository)
         {
             double daysOffset;
+            double yearsOffset;
             foreach (var citation in citations)
             {
                 daysOffset = (citation.Date - dateAddedToRepository).Value.Days;
-                if (CitationsVector.ContainsKey(daysOffset))
-                    CitationsVector[daysOffset] += citation.Count;
+                if (CitationsVectorNormalizedByDays.ContainsKey(daysOffset))
+                    CitationsVectorNormalizedByDays[daysOffset] += citation.Count;
                 else
-                    CitationsVector.Add(daysOffset,
+                    CitationsVectorNormalizedByDays.Add(daysOffset,
+                        citation.Count);
+
+                // The average number of days per year is 365 + ​1⁄4 − ​1⁄100 + ​1⁄400 = 365.2425
+                // REF: https://en.wikipedia.org/wiki/Leap_year
+                yearsOffset = (citation.Date - dateAddedToRepository).Value.TotalDays / 365.2425;
+                if (CitationsVectorNormalizedByYears.ContainsKey(yearsOffset))
+                    CitationsVectorNormalizedByYears[yearsOffset] += citation.Count;
+                else
+                    CitationsVectorNormalizedByYears.Add(yearsOffset,
                         citation.Count);
             }
         }
 
-        private void Normalize()
+        private void Normalize(SortedDictionary<double, double> citations)
         {
-            var minBeforeDays = CitationsVector.First().Key;
-            var maxAfterDays = CitationsVector.Last().Key;
-            var delta = maxAfterDays - minBeforeDays;
+            var minBeforeDate = citations.First().Key;
+            var maxAfterDate = citations.Last().Key;
+            var deltaDate = maxAfterDate - minBeforeDate;
 
             // Normalize citation count.
-            var days = new double[CitationsVector.Keys.Count];
-            CitationsVector.Keys.CopyTo(days, 0);
-            foreach (var day in days)
-                CitationsVector[day] /= delta;
+            var dates = new double[citations.Keys.Count];
+            citations.Keys.CopyTo(dates, 0);
+            foreach (var date in dates)
+                citations[date] /= deltaDate;
 
             // Min-Max normalize date.
-            foreach (var day in days)
+            foreach (var date in dates)
             {
                 double normalizedDate;
-                if (day <= 0)
-                    normalizedDate = (-1) * ((day - maxAfterDays) / (minBeforeDays - maxAfterDays));
+                if (date <= 0)
+                    normalizedDate = (-1) * ((date - maxAfterDate) / (minBeforeDate - maxAfterDate));
                 else
-                    normalizedDate = (day - minBeforeDays) / (maxAfterDays - minBeforeDays);
+                    normalizedDate = (date - minBeforeDate) / (maxAfterDate - minBeforeDate);
 
-                CitationsVector.Add(normalizedDate, CitationsVector[day]);
-                CitationsVector.Remove(day);
+                citations.Add(normalizedDate, citations[date]);
+                citations.Remove(date);
             }
         }
 
-        private void Interpolate(IEnumerable<double> points)
+        private void Interpolate(SortedDictionary<double, double> citations, IEnumerable<double> points)
         {
             // At least two items are required for interpolation.
-            if (CitationsVector.Count < 2)
+            if (citations.Count < 2)
                 return;
 
             var spline = MathNet.Numerics.Interpolate.Linear(
-                CitationsVector.Keys, CitationsVector.Values);
+                citations.Keys, citations.Values);
 
-            CitationsVector.Clear();
+            citations.Clear();
             foreach(var x in points)
             {
                 var y = spline.Interpolate(x);
                 if (y < 0) y = 0;
 
-                CitationsVector.Add(x, y);
+                citations.Add(x, y);
             }
         }
 
