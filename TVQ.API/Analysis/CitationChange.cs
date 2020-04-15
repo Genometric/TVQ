@@ -8,6 +8,18 @@ namespace Genometric.TVQ.API.Analysis
 {
     public class CitationChange
     {
+        // TODO: This class and the methods leveraging it shall be re-implemented/designed/thought.
+        public class Number
+        {
+            // Number of citations per year.
+            public double Count { set; get; }
+
+            // Cumulative number of citations in a given year.
+            public double CumulativeCount { set; get; }
+        }
+
+        public enum DateNormalizationType { ByYear, ByDay };
+
         public double DaysOffset { set; get; }
 
         public double YearsOffset { set; get; }
@@ -18,9 +30,9 @@ namespace Genometric.TVQ.API.Analysis
 
         private SortedSet<double> Citations { set; get; }
 
-        public SortedDictionary<double, double> CitationsVectorNormalizedByDays { get; }
+        public SortedDictionary<double, Number> CitationsNormalizedByDays { get; }
 
-        public SortedDictionary<double, double> CitationsVectorNormalizedByYears { get; }
+        public SortedDictionary<double, Number> CitationsNormalizedByYears { get; }
 
         public double Min
         {
@@ -61,8 +73,8 @@ namespace Genometric.TVQ.API.Analysis
         public CitationChange()
         {
             Citations = new SortedSet<double>();
-            CitationsVectorNormalizedByDays = new SortedDictionary<double, double>();
-            CitationsVectorNormalizedByYears = new SortedDictionary<double, double>();
+            CitationsNormalizedByDays = new SortedDictionary<double, Number>();
+            CitationsNormalizedByYears = new SortedDictionary<double, Number>();
         }
 
         public CitationChange(double daysOffset, double count)
@@ -73,8 +85,8 @@ namespace Genometric.TVQ.API.Analysis
         }
 
         public void AddRange(
-            ICollection<Citation> citations, 
-            DateTime? dateAddedToRepository, 
+            ICollection<Citation> citations,
+            DateTime? dateAddedToRepository,
             IEnumerable<double> points)
         {
             Contract.Requires(citations != null);
@@ -83,15 +95,15 @@ namespace Genometric.TVQ.API.Analysis
 
             AddRange(citations, dateAddedToRepository);
 
-            Normalize(CitationsVectorNormalizedByDays);
-            Normalize(CitationsVectorNormalizedByYears);
+            Normalize(CitationsNormalizedByDays);
+            Normalize(CitationsNormalizedByYears);
 
-            Interpolate(CitationsVectorNormalizedByDays, points);
-            Interpolate(CitationsVectorNormalizedByYears, points);
+            Interpolate(CitationsNormalizedByDays, points);
+            Interpolate(CitationsNormalizedByYears, points);
         }
 
         private void AddRange(
-            ICollection<Citation> citations, 
+            ICollection<Citation> citations,
             DateTime? dateAddedToRepository)
         {
             double daysOffset;
@@ -99,24 +111,28 @@ namespace Genometric.TVQ.API.Analysis
             foreach (var citation in citations)
             {
                 daysOffset = (citation.Date - dateAddedToRepository).Value.Days;
-                if (CitationsVectorNormalizedByDays.ContainsKey(daysOffset))
-                    CitationsVectorNormalizedByDays[daysOffset] += citation.Count;
+                if (CitationsNormalizedByDays.ContainsKey(daysOffset))
+                {
+                    CitationsNormalizedByDays[daysOffset].Count += citation.Count;
+                    CitationsNormalizedByDays[daysOffset].CumulativeCount += citation.AccumulatedCount;
+                }
                 else
-                    CitationsVectorNormalizedByDays.Add(daysOffset,
-                        citation.Count);
+                    CitationsNormalizedByDays.Add(daysOffset, new Number() { Count = citation.Count, CumulativeCount = citation.AccumulatedCount });
 
                 // The average number of days per year is 365 + ​1⁄4 − ​1⁄100 + ​1⁄400 = 365.2425
                 // REF: https://en.wikipedia.org/wiki/Leap_year
                 yearsOffset = (citation.Date - dateAddedToRepository).Value.TotalDays / 365.2425;
-                if (CitationsVectorNormalizedByYears.ContainsKey(yearsOffset))
-                    CitationsVectorNormalizedByYears[yearsOffset] += citation.Count;
+                if (CitationsNormalizedByYears.ContainsKey(yearsOffset))
+                {
+                    CitationsNormalizedByYears[yearsOffset].Count += citation.Count;
+                    CitationsNormalizedByYears[yearsOffset].CumulativeCount += citation.AccumulatedCount;
+                }
                 else
-                    CitationsVectorNormalizedByYears.Add(yearsOffset,
-                        citation.Count);
+                    CitationsNormalizedByYears.Add(yearsOffset, new Number() { Count = citation.Count, CumulativeCount = citation.AccumulatedCount });
             }
         }
 
-        private void Normalize(SortedDictionary<double, double> citations)
+        private void Normalize(SortedDictionary<double, Number> citations)
         {
             var minBeforeDate = citations.First().Key;
             var maxAfterDate = citations.Last().Key;
@@ -126,7 +142,10 @@ namespace Genometric.TVQ.API.Analysis
             var dates = new double[citations.Keys.Count];
             citations.Keys.CopyTo(dates, 0);
             foreach (var date in dates)
-                citations[date] /= deltaDate;
+            {
+                citations[date].Count /= deltaDate;
+                citations[date].CumulativeCount /= deltaDate;
+            }
 
             // Min-Max normalize date.
             foreach (var date in dates)
@@ -142,22 +161,27 @@ namespace Genometric.TVQ.API.Analysis
             }
         }
 
-        private void Interpolate(SortedDictionary<double, double> citations, IEnumerable<double> points)
+        private void Interpolate(SortedDictionary<double, Number> citations, IEnumerable<double> points)
         {
             // At least two items are required for interpolation.
             if (citations.Count < 2)
                 return;
 
-            var spline = MathNet.Numerics.Interpolate.Linear(
-                citations.Keys, citations.Values);
+            var countsSpline = MathNet.Numerics.Interpolate.Linear(citations.Keys, citations.Values.Select(x => x.Count));
+            var cumulativeCountsSpline = MathNet.Numerics.Interpolate.Linear(citations.Keys, citations.Values.Select(x => x.CumulativeCount));
 
             citations.Clear();
-            foreach(var x in points)
+            double y1;
+            double y2;
+            foreach (var x in points)
             {
-                var y = spline.Interpolate(x);
-                if (y < 0) y = 0;
+                y1 = countsSpline.Interpolate(x);
+                if (y1 < 0) y1 = 0;
 
-                citations.Add(x, y);
+                y2 = cumulativeCountsSpline.Interpolate(x);
+                if (y2 < 0) y2 = 0;
+
+                citations.Add(x, new Number() { Count = y1, CumulativeCount = y2 });
             }
         }
 
@@ -189,7 +213,7 @@ namespace Genometric.TVQ.API.Analysis
             double score = 0.0;
             double normalizedDate;
 
-            foreach(var point in CitationsVectorNormalizedByYears)
+            foreach (var point in CitationsNormalizedByYears)
             {
                 normalizedDate = ZeroOneNormalize(point.Key);
 
@@ -201,7 +225,7 @@ namespace Genometric.TVQ.API.Analysis
                 // after when the tool was added to the repository, increase the 
                 // score (effect of which increase the date of citation is more 
                 // current.
-                score += point.Value * (-Math.Log((1 / normalizedDate) - 1, Math.E));
+                score += point.Value.Count * (-Math.Log((1 / normalizedDate) - 1, Math.E));
             }
 
             return score;

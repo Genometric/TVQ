@@ -592,8 +592,6 @@ namespace Genometric.TVQ.API.Controllers
 
             var normalizedByDayTmpPath = Path.Combine(tempPath, "NormalizedByDays");
             var normalizedByYearTmpPath = Path.Combine(tempPath, "NormalizedByYears");
-            Directory.CreateDirectory(normalizedByDayTmpPath);
-            Directory.CreateDirectory(normalizedByYearTmpPath);
 
             var toolRepoAssociations = _context.ToolRepoAssociations
                 .Include(x => x.Tool).ThenInclude(x => x.CategoryAssociations)
@@ -613,13 +611,43 @@ namespace Genometric.TVQ.API.Controllers
                 // TODO: Rework the following to avoid creating two dictionaries, and instead 
                 // just pass normalizedData to the WriteToFile method.
                 WriteToFile(
-                    Path.Combine(normalizedByDayTmpPath, Utilities.SafeFilename(repo.Name + ".csv")),
-                    normalizedData.ToDictionary(x => x.Key, x => x.Value.CitationsVectorNormalizedByDays),
+                    Path.Combine(normalizedByDayTmpPath, "CitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
+                    normalizedData.ToDictionary(
+                        x => x.Key, 
+                        x => new SortedDictionary<double, double>(
+                            x.Value.CitationsNormalizedByDays.ToDictionary(
+                                x => x.Key, 
+                                x => x.Value.Count))),
                     normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore));
 
                 WriteToFile(
-                    Path.Combine(normalizedByYearTmpPath, Utilities.SafeFilename(repo.Name + ".csv")),
-                    normalizedData.ToDictionary(x => x.Key, x => x.Value.CitationsVectorNormalizedByYears),
+                    Path.Combine(normalizedByDayTmpPath, "CumulativeCitationsCount", Utilities.SafeFilename(repo.Name + ".csv")), 
+                    normalizedData.ToDictionary(
+                        x => x.Key, 
+                        x => new SortedDictionary<double, double>(
+                            x.Value.CitationsNormalizedByDays.ToDictionary(
+                                x => x.Key, 
+                                x => x.Value.Count))), 
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore));
+
+                WriteToFile(
+                    Path.Combine(normalizedByYearTmpPath, "CitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
+                    normalizedData.ToDictionary(
+                        x => x.Key,
+                        x => new SortedDictionary<double, double>(
+                            x.Value.CitationsNormalizedByYears.ToDictionary(
+                                x => x.Key,
+                                x => x.Value.Count))),
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore));
+
+                WriteToFile(
+                    Path.Combine(normalizedByYearTmpPath, "CumulativeCitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
+                    normalizedData.ToDictionary(
+                        x => x.Key,
+                        x => new SortedDictionary<double, double>(
+                            x.Value.CitationsNormalizedByYears.ToDictionary(
+                                x => x.Key,
+                                x => x.Value.Count))),
                     normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore));
             }
 
@@ -711,6 +739,7 @@ namespace Genometric.TVQ.API.Controllers
         private void WriteToFile(string filename, Dictionary<Tool, SortedDictionary<double, double>> vectors, Dictionary<Tool, double> GainScores)
         {
             var builder = new StringBuilder();
+            Directory.CreateDirectory(Path.GetDirectoryName(filename));
             using var writer = new StreamWriter(filename);
 
             builder.Append("ID\tToolName\tGainScore");
