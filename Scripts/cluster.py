@@ -11,6 +11,7 @@ import itertools
 from scipy.spatial.distance import cdist 
 import sklearn
 from matplotlib.lines import Line2D
+from t_test_clustered_data import get_sorted_clusters
 
 
 CLUSTERED_FILENAME_POSFIX = "_clustered"
@@ -39,6 +40,9 @@ def cluster(root, filename, cluster_count):
     # Remove the ID column b/c it contains a unique record for every row.
     df = df.drop("ID", 1)
 
+    # Remove the GainScore column because its values should not be considered for clustering.
+    df = df.drop("GainScore", 1)
+
     # Perform hierarchical/agglomerative clustering and 
     # returns the hierarchical clustering encoded as a linkage matrix.
     # The `ward` linkage minimizes the variance of the clusters being merged.
@@ -46,17 +50,29 @@ def cluster(root, filename, cluster_count):
 
     variance, dist_growth_acceleration, auto_cluster_count, auto_cut_distance, manual_cluster_count, manual_cut_distance = get_cluster_count(linkage_matrix, repo_name, cluster_count)
 
-    # Write the DataFrame to CSV. 
-    clustered_filename = os.path.join(root, repo_name + CLUSTERED_FILENAME_POSFIX + '.csv')
-    if os.path.isfile(clustered_filename):
-        os.remove(clustered_filename)
-
     _, auto_silhouette_score = get_silhouette_score(df, auto_cluster_count)
     cluster_labels, manual_silhouette_score = get_silhouette_score(df, manual_cluster_count)
 
     # Add cluster information to original data.
     input_df[CLUSTER_NAME_COLUMN_LABEL] = cluster_labels
 
+    # Sort cluster labels based on the mean value of tools in each cluster.
+    # For instance, a group of tools might be clustered as cluster `0` and 
+    # another group as cluster `1`. If the mean of the second group is less
+    # than the mean of the first group, then the following code will update 
+    # cluster labels of the tools so that all clustered as cluster `0` are 
+    # clustered as cluster `1`, and those clustered as `1` are clustered as 
+    # cluster `0`.
+    mappings = {}
+    sorted_keys, mean_cluster_num_mappings = get_sorted_clusters(input_df.groupby(CLUSTER_NAME_COLUMN_LABEL))
+    for i in range(0, len(sorted_keys)):
+        mappings[mean_cluster_num_mappings[sorted_keys[i]]] = i
+    input_df[CLUSTER_NAME_COLUMN_LABEL] = input_df[CLUSTER_NAME_COLUMN_LABEL].map(mappings)
+    
+    # Write the DataFrame to CSV. 
+    clustered_filename = os.path.join(root, repo_name + CLUSTERED_FILENAME_POSFIX + '.csv')
+    if os.path.isfile(clustered_filename):
+        os.remove(clustered_filename)
     input_df.to_csv(clustered_filename, sep='\t', encoding='utf-8', index=False)
 
     with open(os.path.join(root, CLUSTERING_STATS_REPORT_FILENAME), "a") as f:
@@ -90,6 +106,7 @@ def set_plot_style():
     fig, axes = plt.subplots(nrows=4, ncols=2, figsize=(12, 16), dpi=300, gridspec_kw={'width_ratios': [2, 1]})  # , constrained_layout=True)
     plt.subplots_adjust(wspace=0.15, hspace=0.35)
     return fig, axes
+
 
 def plot(ax, filename_without_extension, add_legend, linkage_matrix, auto_cut_distance, auto_cluster_count, auto_silhouette_score, manual_cut_distance, manual_cluster_count, manual_silhouette_score, variance, dist_growth_acceleration):
     col0 = ax[0]
@@ -132,10 +149,6 @@ def plot(ax, filename_without_extension, add_legend, linkage_matrix, auto_cut_di
 
     col1.axvline(x=auto_cluster_count, color=auto_cut_color, linewidth=1.5, linestyle=auto_cut_line_style)
     col1.axvline(x=manual_cluster_count, color=manu_cut_color, linewidth=1.5, linestyle=manu_cut_line_style)
-
-    # Show Y-Axis on the right side of the plot.
-    #col1.yaxis.set_label_position("right")
-    #col1.yaxis.tick_right()
     
 
 if __name__ == "__main__":
