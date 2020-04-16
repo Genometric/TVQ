@@ -84,6 +84,48 @@ namespace Genometric.TVQ.API.Analysis
             Citations = new SortedSet<double>();
         }
 
+        // This method is experimental and it Should be re-implemented.
+        public SortedDictionary<double, double> GetCitations(DateNormalizationType dateNormalizationType)
+        {
+            SortedDictionary<double, Number> input = null;
+            switch (dateNormalizationType)
+            {
+                case DateNormalizationType.ByDay:
+                    input = CitationsNormalizedByDays;
+                    break;
+
+                case DateNormalizationType.ByYear:
+                    input = CitationsNormalizedByYears;
+                    break;
+            }
+
+            var rtv = new SortedDictionary<double, double>();
+            foreach (var item in input)
+                rtv.Add(item.Key, item.Value.Count);
+            return rtv;
+        }
+
+        // This method is experimental and it Should be re-implemented.
+        public SortedDictionary<double, double> GetCumulativeCitations(DateNormalizationType dateNormalizationType)
+        {
+            SortedDictionary<double, Number> input = null;
+            switch (dateNormalizationType)
+            {
+                case DateNormalizationType.ByDay:
+                    input = CitationsNormalizedByDays;
+                    break;
+
+                case DateNormalizationType.ByYear:
+                    input = CitationsNormalizedByYears;
+                    break;
+            }
+
+            var rtv = new SortedDictionary<double, double>();
+            foreach (var item in input)
+                rtv.Add(item.Key, item.Value.CumulativeCount);
+            return rtv;
+        }
+
         public void AddRange(
             ICollection<Citation> citations,
             DateTime? dateAddedToRepository,

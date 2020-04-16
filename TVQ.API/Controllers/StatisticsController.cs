@@ -614,40 +614,28 @@ namespace Genometric.TVQ.API.Controllers
                     Path.Combine(normalizedByDayTmpPath, "CitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
                     normalizedData.ToDictionary(
                         x => x.Key, 
-                        x => new SortedDictionary<double, double>(
-                            x.Value.CitationsNormalizedByDays.ToDictionary(
-                                x => x.Key, 
-                                x => x.Value.Count))),
+                        x => x.Value.GetCitations(CitationChange.DateNormalizationType.ByDay)),
                     normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore));
 
                 WriteToFile(
                     Path.Combine(normalizedByDayTmpPath, "CumulativeCitationsCount", Utilities.SafeFilename(repo.Name + ".csv")), 
                     normalizedData.ToDictionary(
                         x => x.Key, 
-                        x => new SortedDictionary<double, double>(
-                            x.Value.CitationsNormalizedByDays.ToDictionary(
-                                x => x.Key, 
-                                x => x.Value.Count))), 
+                        x => x.Value.GetCumulativeCitations(CitationChange.DateNormalizationType.ByDay)),
                     normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore));
 
                 WriteToFile(
                     Path.Combine(normalizedByYearTmpPath, "CitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
                     normalizedData.ToDictionary(
                         x => x.Key,
-                        x => new SortedDictionary<double, double>(
-                            x.Value.CitationsNormalizedByYears.ToDictionary(
-                                x => x.Key,
-                                x => x.Value.Count))),
+                        x => x.Value.GetCitations(CitationChange.DateNormalizationType.ByYear)),
                     normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore));
 
                 WriteToFile(
                     Path.Combine(normalizedByYearTmpPath, "CumulativeCitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
                     normalizedData.ToDictionary(
                         x => x.Key,
-                        x => new SortedDictionary<double, double>(
-                            x.Value.CitationsNormalizedByYears.ToDictionary(
-                                x => x.Key,
-                                x => x.Value.Count))),
+                        x => x.Value.GetCumulativeCitations(CitationChange.DateNormalizationType.ByYear)),
                     normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore));
             }
 
