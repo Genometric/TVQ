@@ -724,7 +724,10 @@ namespace Genometric.TVQ.API.Controllers
             }
         }
 
-        private void WriteToFile(string filename, Dictionary<Tool, SortedDictionary<double, double>> vectors, Dictionary<Tool, double> GainScores)
+        private void WriteToFile(
+            string filename, 
+            Dictionary<Tool, SortedDictionary<double, double>> vectors, 
+            Dictionary<Tool, double> GainScores)
         {
             var builder = new StringBuilder();
             Directory.CreateDirectory(Path.GetDirectoryName(filename));
