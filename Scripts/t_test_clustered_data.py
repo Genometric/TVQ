@@ -18,14 +18,14 @@ def get_repo_name(filename):
 
 
 def ttest_by_cluster(root, filename):
-    print("\n>>> Performing paired t-test on repository: {0}".format(get_repo_name(filename)))
+    print("\t- Repository: {0}".format(get_repo_name(filename)))
     clusters = get_clusters(root, filename)
     for k in clusters.groups:
         tools = clusters.get_group(k)
         (cohen_d, cohen_d_interpretation), (t_statistic, pvalue) = paired_ttest(tools)
-        print(f"\t- Cluster number:\t{k}")
-        print(f"\t\t* Tools count:\t{len(tools)}")
-        print_ttest_results(pvalue, t_statistic, cohen_d, cohen_d_interpretation)
+        print(f"\t\t- Cluster number:\t{k}")
+        print(f"\t\t\t* Tools count:\t{len(tools)}")
+        print_ttest_results(pvalue, t_statistic, cohen_d, cohen_d_interpretation, "\t\t\t")
 
 
 def print_ttest_results(pvalue, t_statistic, cohen_d, cohen_d_interpretation, indentation="\t\t"):
@@ -158,7 +158,7 @@ def ttest_repository(input_filename, output_filename):
 
 
 def ttest_corresponding_clusters(root, filename_a, filename_b, output_filename):
-    print(f"\n>>> Performing t-test (Welch’s t-test, which does not assume equal population variance) on relative clusters of {get_repo_name(filename_a)} and {get_repo_name(filename_b)} ...")
+    print(f"\t- Repositories: {get_repo_name(filename_a)} and {get_repo_name(filename_b)}")
 
     clusters_a = get_clusters(root, filename_a)
     clusters_b = get_clusters(root, filename_b)
@@ -172,6 +172,7 @@ def ttest_corresponding_clusters(root, filename_a, filename_b, output_filename):
             _, _, _, sums_a, _, _, _ = get_vectors(clusters_a.get_group(cluster_a_num))
             _, _, _, sums_b, _, _, _ = get_vectors(clusters_b.get_group(cluster_b_num))
             t_statistic, pvalue = ttest_ind(sums_a, sums_b, equal_var=False)
+            t_statistic = abs(t_statistic)
             d, d_interpretation = cohen_d(sums_a, sums_b)
 
             repo_a = get_repo_name(filename_a)
@@ -203,9 +204,11 @@ if __name__ == "__main__":
     for filename in filenames:
         ttest_repository(os.path.join(root, filename), repo_ttest_filename)
 
+    print("\n>>> Performing t-test on pre and post citations of tools in different clusters for the null hypothesis that the two have identical average values.")
     for filename in filenames:
         ttest_by_cluster(root, filename)
 
+    print(f"\n>>> Performing Welch's t-test for the null hypothesis that the two independent relative clusters of two repositories have identical average (expected) values NOT assuming equal population variance.")
     tcc_filename = os.path.join(inputPath, 'ttest_corresponding_clusters.txt')
     if os.path.isfile(tcc_filename):
         os.remove(tcc_filename)
