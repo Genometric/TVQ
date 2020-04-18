@@ -194,6 +194,8 @@ if __name__ == "__main__":
 
     print("\n>>> Performing t-test on pre and post citations for the null hypothesis that the two have identical average values.")
     repo_ttest_filename = os.path.join(root, "ttest_repository.txt")
+    if os.path.isfile(repo_ttest_filename):
+        os.remove(repo_ttest_filename)
     with open(repo_ttest_filename, "a") as f:
         f.write("Repository\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
 
