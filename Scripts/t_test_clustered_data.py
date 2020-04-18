@@ -36,7 +36,8 @@ def print_ttest_results(pvalue, t_statistic, cohen_d, cohen_d_interpretation, in
 
 def paired_ttest(tools):
     citations, _, _, sums, avg_pre, avg_post, _ = get_vectors(tools)
-    return cohen_d(avg_pre, avg_post), ttest_rel(avg_pre, avg_post)
+    t_statistic, pvalue = ttest_rel(avg_pre, avg_post)
+    return cohen_d(avg_pre, avg_post), (abs(t_statistic), pvalue)
 
 
 def cohen_d(x,y):
