@@ -40,6 +40,13 @@ def paired_ttest(tools):
     return cohen_d(avg_pre, avg_post), (abs(t_statistic), pvalue)
 
 
+def independent_ttest(x, y):
+    t_statistic, pvalue = ttest_ind(x, y, equal_var=False)
+    t_statistic = abs(t_statistic)
+    d, d_interpretation = cohen_d(x, y)
+    return t_statistic, pvalue, d, d_interpretation
+
+
 def cohen_d(x,y):
     # Cohen's d is computed as explained in the following link:
     # https://stackoverflow.com/a/33002123/947889
@@ -157,8 +164,28 @@ def ttest_repository(input_filename, output_filename):
         f.write(f"{get_repo_name(input_filename)}\t{t_statistic}\t{pvalue}\t{cohen_d}\t{cohen_d_interpretation}\n")
 
 
+def ttest_repositories(repo_a_filename, repo_b_filename, output_filename):
+    repo_a = get_repo_name(repo_a_filename)
+    repo_b = get_repo_name(repo_b_filename)
+    print(f"\t- Repositories: {repo_a} and {repo_b}")
+
+    repo_a_tools = pd.read_csv(repo_a_filename, header=0, sep='\t')
+    repo_b_tools = pd.read_csv(repo_b_filename, header=0, sep='\t')
+
+    _, _, _, _, _, _, deltas_a = get_vectors(repo_a_tools)
+    _, _, _, _, _, _, deltas_b = get_vectors(repo_b_tools)
+
+    t_statistic, pvalue, d, d_interpretation = independent_ttest(deltas_a, deltas_b)
+    print_ttest_results(pvalue, t_statistic, d, d_interpretation, "\t\t")
+
+    with open(output_filename, "a") as f:
+        f.write(f"{repo_a}\t{repo_b}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
+
+
 def ttest_corresponding_clusters(root, filename_a, filename_b, output_filename):
-    print(f"\t- Repositories: {get_repo_name(filename_a)} and {get_repo_name(filename_b)}")
+    repo_a = get_repo_name(filename_a)
+    repo_b = get_repo_name(filename_b)
+    print(f"\t- Repositories: {repo_a} and {repo_b}")
 
     clusters_a = get_clusters(root, filename_a)
     clusters_b = get_clusters(root, filename_b)
@@ -171,12 +198,10 @@ def ttest_corresponding_clusters(root, filename_a, filename_b, output_filename):
             cluster_b_num = agg_cluster_mapping_b[sorted_keys_b[i]]
             _, _, _, sums_a, _, _, _ = get_vectors(clusters_a.get_group(cluster_a_num))
             _, _, _, sums_b, _, _, _ = get_vectors(clusters_b.get_group(cluster_b_num))
-            t_statistic, pvalue = ttest_ind(sums_a, sums_b, equal_var=False)
-            t_statistic = abs(t_statistic)
-            d, d_interpretation = cohen_d(sums_a, sums_b)
 
-            repo_a = get_repo_name(filename_a)
-            repo_b = get_repo_name(filename_b)
+            t_statistic, pvalue, d, d_interpretation = independent_ttest(sums_a, sums_b)
+            print_ttest_results(pvalue, t_statistic, d, d_interpretation, "\t\t")
+
             f.write(f"{repo_a}\t{repo_b}\t{i}\t{i}\t{sorted_keys_a[i]}\t{sorted_keys_b[i]}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
 
 
@@ -203,6 +228,17 @@ if __name__ == "__main__":
 
     for filename in filenames:
         ttest_repository(os.path.join(root, filename), repo_ttest_filename)
+
+    print(f"\n>>> Performing Welch's t-test for the null hypothesis that the two repositories have identical average values of pre-post delta, NOT assuming equal population variance.")
+    repos_ttest_filename = os.path.join(root, "ttest_repositories.txt")
+    if os.path.isfile(repos_ttest_filename):
+        os.remove(repos_ttest_filename)
+    with open(repos_ttest_filename, "a") as f:
+        f.write("Repository A\tRepository B\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
+
+    for i in range(0, len(filenames)-1):
+        for j in range(i+1, len(filenames)):
+            ttest_repositories(os.path.join(root, filenames[i]), os.path.join(root, filenames[j]), repos_ttest_filename)
 
     print("\n>>> Performing t-test on pre and post citations of tools in different clusters for the null hypothesis that the two have identical average values.")
     for filename in filenames:
