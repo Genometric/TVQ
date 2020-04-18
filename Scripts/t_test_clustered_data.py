@@ -148,7 +148,7 @@ def get_sorted_clusters(clusters):
 
 
 def ttest_repository(input_filename, output_filename):
-    print(f"\t- Repository {get_repo_name(input_filename)} ...")
+    print(f"\t- Repository: {get_repo_name(input_filename)}")
     tools = pd.read_csv(input_filename, header=0, sep='\t')
     (cohen_d, cohen_d_interpretation), (t_statistic, pvalue) = paired_ttest(tools)
     print_ttest_results(pvalue, t_statistic, cohen_d, cohen_d_interpretation, "\t\t")
