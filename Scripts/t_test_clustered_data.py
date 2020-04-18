@@ -13,6 +13,7 @@ CLUSTER_NAME_COLUMN_LABEL = "cluster_label"
 
 
 def get_repo_name(filename):
+    filename = os.path.basename(filename)
     return (os.path.splitext(filename)[0]).replace(CLUSTERED_FILENAME_POSFIX, "")
 
 
