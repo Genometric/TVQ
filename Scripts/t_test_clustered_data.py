@@ -24,13 +24,17 @@ def ttest_by_cluster(root, filename):
         (cohen_d, cohen_d_interpretation), (t_statistic, pvalue) = paired_ttest(tools)
         print(f"\t- Cluster number:\t{k}")
         print(f"\t\t* Tools count:\t{len(tools)}")
-        print(f"\t\t* t-Statistic:\t{t_statistic}")
-        print(f"\t\t* p-value:\t{pvalue}")
-        print(f"\t\t* Cohen's d:\t{cohen_d}\t{cohen_d_interpretation}")
+        print_ttest_results(pvalue, t_statistic, cohen_d, cohen_d_interpretation)
+
+
+def print_ttest_results(pvalue, t_statistic, cohen_d, cohen_d_interpretation, indentation="\t\t"):
+    print(f"{indentation}* t-Statistic:\t{t_statistic}")
+    print(f"{indentation}* p-value:\t{pvalue}")
+    print(f"{indentation}* Cohen's d:\t{cohen_d}\t{cohen_d_interpretation}")
 
 
 def paired_ttest(tools):
-    citations, sums, avg_pre, avg_post = get_vectors(tools)
+    citations, _, _, sums, avg_pre, avg_post, _ = get_vectors(tools)
     return cohen_d(avg_pre, avg_post), ttest_rel(avg_pre, avg_post)
 
 
@@ -103,26 +107,36 @@ def get_vectors(tools):
 
     sums = []
 
+    deltas = []
+
     # Lists contain citation counts before (pre) and after (post)
     # a tool was added to the repository.
     avg_pre = []
     avg_pst = []
+
+    pre_citations = []
+    post_citations = []
     for index, row in tools.iterrows():
         pre_vals = row.get(pre_headers).values.tolist()
         post_vals = row.get(post_headers).values.tolist()
+
+        pre_citations.append(pre_vals)
+        post_citations.append(post_vals)
 
         citations.append([pre_vals, post_vals])
         sums.append(np.sum(pre_vals + post_vals))
         avg_pre.append(np.average(pre_vals))
         avg_pst.append(np.average(post_vals))
 
-    return citations, sums, avg_pre, avg_pst
+        deltas.append(abs(np.average(post_vals) - np.average(pre_vals)))
+
+    return citations, pre_citations, post_citations, sums, avg_pre, avg_pst, deltas
 
 
 def get_sorted_clusters(clusters):
     agg_cluster_mapping = {}
     for k in clusters.groups:
-        citations, _, _, _ = get_vectors(clusters.get_group(k))
+        citations, _, _, _, _, _, _ = get_vectors(clusters.get_group(k))
         flattend = []
         for c in citations:
             flattend.append(c[0] + c[1])
@@ -130,6 +144,15 @@ def get_sorted_clusters(clusters):
         agg_cluster_mapping[np.average(flattend)] = k
 
     return sorted(agg_cluster_mapping), agg_cluster_mapping
+
+
+def ttest_repository(input_filename, output_filename):
+    print(f"\t- Repository {get_repo_name(input_filename)} ...")
+    tools = pd.read_csv(input_filename, header=0, sep='\t')
+    (cohen_d, cohen_d_interpretation), (t_statistic, pvalue) = paired_ttest(tools)
+    print_ttest_results(pvalue, t_statistic, cohen_d, cohen_d_interpretation, "\t\t")
+    with open(output_filename, "a") as f:
+        f.write(f"{get_repo_name(input_filename)}\t{t_statistic}\t{pvalue}\t{cohen_d}\t{cohen_d_interpretation}\n")
 
 
 def ttest_corresponding_clusters(root, filename_a, filename_b, output_filename):
@@ -144,8 +167,8 @@ def ttest_corresponding_clusters(root, filename_a, filename_b, output_filename):
         for i in range(0, len(sorted_keys_a)):
             cluster_a_num = agg_cluster_mapping_a[sorted_keys_a[i]]
             cluster_b_num = agg_cluster_mapping_b[sorted_keys_b[i]]
-            _, sums_a, _, _ = get_vectors(clusters_a.get_group(cluster_a_num))
-            _, sums_b, _, _ = get_vectors(clusters_b.get_group(cluster_b_num))
+            _, _, _, sums_a, _, _, _ = get_vectors(clusters_a.get_group(cluster_a_num))
+            _, _, _, sums_b, _, _, _ = get_vectors(clusters_b.get_group(cluster_b_num))
             t_statistic, pvalue = ttest_ind(sums_a, sums_b, equal_var=False)
             d, d_interpretation = cohen_d(sums_a, sums_b)
 
@@ -167,6 +190,14 @@ if __name__ == "__main__":
             if os.path.splitext(filename)[1] == ".csv" and \
                os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 filenames.append(filename)
+
+    print("\n>>> Performing t-test on pre and post citations for the null hypothesis that the two have identical average values.")
+    repo_ttest_filename = os.path.join(root, "ttest_repository.txt")
+    with open(repo_ttest_filename, "a") as f:
+        f.write("Repository\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
+
+    for filename in filenames:
+        ttest_repository(os.path.join(root, filename), repo_ttest_filename)
 
     for filename in filenames:
         ttest_by_cluster(root, filename)
