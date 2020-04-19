@@ -3,7 +3,7 @@ from numpy import std
 import os
 import sys
 import pandas as pd
-from scipy.stats import ttest_rel, ttest_ind, pearsonr
+from scipy.stats import ttest_rel, ttest_ind, pearsonr, ttest_1samp
 from statistics import mean
 from math import sqrt
 
@@ -40,6 +40,13 @@ def paired_ttest(tools):
     return cohen_d(avg_pre, avg_post), (abs(t_statistic), pvalue)
 
 
+def one_sample_ttest(x, population_mean):
+    t_statistic, pvalue = ttest_1samp(x, population_mean)
+    t_statistic = abs(t_statistic)
+    d, d_interpretation = cohen_d(x, population_mean=population_mean)
+    return t_statistic, pvalue, d, d_interpretation
+
+
 def independent_ttest(x, y):
     t_statistic, pvalue = ttest_ind(x, y, equal_var=False)
     t_statistic = abs(t_statistic)
@@ -47,12 +54,15 @@ def independent_ttest(x, y):
     return t_statistic, pvalue, d, d_interpretation
 
 
-def cohen_d(x,y):
-    # Cohen's d is computed as explained in the following link:
-    # https://stackoverflow.com/a/33002123/947889
-    d = len(x) + len(y) - 2
-    cohen_d = (mean(x) - mean(y)) / sqrt(((len(x) - 1) * std(x, ddof=1) ** 2 + (len(y) - 1) * std(y, ddof=1) ** 2) / d) 
-    cohen_d = abs(cohen_d)
+def cohen_d(x, y=None, population_mean=0.0):
+    if y:
+        # Cohen's d is computed as explained in the following link:
+        # https://stackoverflow.com/a/33002123/947889
+        d = len(x) + len(y) - 2
+        cohen_d = (mean(x) - mean(y)) / sqrt(((len(x) - 1) * std(x, ddof=1) ** 2 + (len(y) - 1) * std(y, ddof=1) ** 2) / d) 
+        cohen_d = abs(cohen_d)
+    else:
+        cohen_d = (mean(x) - population_mean)/std(x, ddof=1)
 
     # This interpretation is based on the info available on Wikipedia:
     # https://en.wikipedia.org/wiki/Effect_size#Cohen.27s_d
@@ -164,6 +174,16 @@ def ttest_repository(input_filename, output_filename):
         f.write(f"{get_repo_name(input_filename)}\t{t_statistic}\t{pvalue}\t{cohen_d}\t{cohen_d_interpretation}\n")
 
 
+def ttest_repository_delta(input_filename, output_filename):
+    print(f"\t- Repository: {get_repo_name(input_filename)}")
+    tools = pd.read_csv(input_filename, header=0, sep='\t')
+    _, _, _, _, _, _, delta = get_vectors(tools)
+    t_statistic, pvalue, d, d_interpretation = one_sample_ttest(delta, 0.0)
+    print_ttest_results(pvalue, t_statistic, d, d_interpretation, "\t\t")
+    with open(output_filename, "a") as f:
+        f.write(f"{get_repo_name(input_filename)}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
+
+
 def ttest_repositories(repo_a_filename, repo_b_filename, output_filename):
     repo_a = get_repo_name(repo_a_filename)
     repo_b = get_repo_name(repo_b_filename)
@@ -228,6 +248,15 @@ if __name__ == "__main__":
 
     for filename in filenames:
         ttest_repository(os.path.join(root, filename), repo_ttest_filename)
+
+    print("\n>>> Performing t-test on citations delta (post - pre) for the null hypothesis that the mean equals zero.")
+    repo_delta_ttest_filename = os.path.join(root, "ttest_repository_delta.txt")
+    if os.path.isfile(repo_delta_ttest_filename):
+        os.remove(repo_delta_ttest_filename)
+    with open(repo_delta_ttest_filename, "a") as f:
+        f.write("Repository\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
+    for filename in filenames:
+        ttest_repository_delta(os.path.join(root, filename), repo_delta_ttest_filename)
 
     print(f"\n>>> Performing Welch's t-test for the null hypothesis that the two repositories have identical average values of pre-post delta, NOT assuming equal population variance.")
     repos_ttest_filename = os.path.join(root, "ttest_repositories.txt")
