@@ -1,4 +1,5 @@
 ﻿using Genometric.TVQ.API.Model.Associations;
+using Genometric.TVQ.API.Model.Comparers;
 using Genometric.TVQ.API.Model.JsonConverters;
 using Newtonsoft.Json;
 using System;
@@ -29,6 +30,37 @@ namespace Genometric.TVQ.API.Model
             RepoAssociations = new List<ToolRepoAssociation>();
             CategoryAssociations = new List<ToolCategoryAssociation>();
             PublicationAssociations = new List<ToolPublicationAssociation>();
+        }
+
+        public SortedList<DateTime, Publication> GetSortedPublications()
+        {
+            // Do NOT use SortedDictionary because there could be 
+            // multiple publications with the same publication date.
+            // The custom comparer used here handles duplicates as greater. 
+            var rtv = new SortedList<DateTime, Publication>(new DuplicateKeyComparer<DateTime>());
+
+            try
+            {
+                foreach (var pubAssociation in PublicationAssociations)
+                {
+                    // If year is null, then do not consider the publication.
+                    int year = pubAssociation.Publication.Year ?? 0;
+                    if (year == 0)
+                        continue;
+
+                    rtv.Add(
+                        new DateTime(year,
+                                     pubAssociation.Publication.Month ?? 1,
+                                     pubAssociation.Publication.Day ?? 1),
+                        pubAssociation.Publication);
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+
+            return rtv;
         }
 
         public bool Equals([AllowNull] Tool other)

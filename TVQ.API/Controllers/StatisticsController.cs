@@ -40,6 +40,7 @@ namespace Genometric.TVQ.API.Controllers
             ToolDistributionAmongRepositoriesExpression,
             ToolDistributionAmongCategories,
             ToolDistributionAmongCategoriesPerYear,
+            ToolCitationDistributionOverYears,
             NormalizedBeforeAfterVector,
             BetweenRepoTTest,
             DownloadFeatures,
@@ -114,6 +115,8 @@ namespace Genometric.TVQ.API.Controllers
                     return Ok(await ToolDistributionAmongCategories().ConfigureAwait(false));
                 case ReportTypes.ToolDistributionAmongCategoriesPerYear:
                     return await ToolDistributionAmongCategoriesPerYear(repository).ConfigureAwait(false);
+                case ReportTypes.ToolCitationDistributionOverYears:
+                    return ToolCitationDistributionOverYears();
                 case ReportTypes.NormalizedBeforeAfterVector:
                     return NormalizedBeforeAfterVector(repository);
                 case ReportTypes.Overview:
@@ -649,6 +652,84 @@ namespace Genometric.TVQ.API.Controllers
             IFileInfo fileInfo = provider.GetFileInfo(zipFilename);
 
             return File(fileInfo.CreateReadStream(), contentType, zipFilename);
+        }
+
+        private FileStreamResult ToolCitationDistributionOverYears()
+        {
+            var repositories = _context.Repositories.Include(x => x.ToolAssociations)
+                                                    .ThenInclude(x => x.Tool)
+                                                    .ThenInclude(x => x.PublicationAssociations)
+                                                    .ThenInclude(x => x.Publication);
+
+            // int[] is of length two; first item is tool count, and second item is citations count. 
+            // TODO: instead of int[] it might be better to use a Struct. 
+            var distributions = new SortedDictionary<int, Dictionary<int, int[]>>();
+
+            var repoIDs = repositories.Select(x => x.ID).ToList();
+
+            foreach(var repository in repositories)
+            {
+                foreach(var toolAssociation in repository.ToolAssociations)
+                {
+                    int year = toolAssociation.DateAddedToRepository.Value.Year;
+                    if (!distributions.ContainsKey(year))
+                    {
+                        distributions.Add(year, new Dictionary<int, int[]>());
+
+                        foreach (var repoID in repoIDs)
+                            distributions[year].Add(repoID, new int[2]);
+                    }
+
+
+                    if (toolAssociation.Tool.PublicationAssociations.Count == 0)
+                        continue;
+
+                    var publication = toolAssociation.Tool.GetSortedPublications().LastOrDefault();
+
+                    // This can be true when the given tool has only citations 
+                    // with invalid date. 
+                    if (publication.Value == null)
+                        continue;
+
+                    distributions[year][repository.ID][0]++;
+                    distributions[year][repository.ID][1] += publication.Value.CitedBy ?? 0;
+                }
+            }
+
+            var tempPath = Path.GetFullPath(Path.GetTempPath()) + Utilities.GetRandomString(10) + Path.DirectorySeparatorChar;
+            Directory.CreateDirectory(tempPath);
+            var filename = "ToolCitationDistributionOverYears.csv";
+            var fullFilename = tempPath + Utilities.SafeFilename(filename);
+
+            using (var writer = new StreamWriter(fullFilename))
+            {
+                var builder = new StringBuilder();
+                builder.Append("Year");
+                for (int i = 0; i < 2; i++)
+                    foreach (var repository in repositories)
+                        builder.Append("\t" + repository.Name + (i == 0 ? "_ToolCount" : "_CitationCount"));
+                writer.WriteLine(builder.ToString());
+
+                foreach(var year in distributions)
+                {
+                    builder.Clear();
+                    builder.Append(year.Key);
+
+                    foreach(var repository in repositories)
+                        builder.Append("\t" + year.Value[repository.ID][0]);
+
+                    foreach (var repository in repositories)
+                        builder.Append("\t" + year.Value[repository.ID][1]);
+
+                    writer.WriteLine(builder.ToString());
+                }
+            }
+
+            var contentType = "application/csv";
+            IFileProvider provider = new PhysicalFileProvider(tempPath);
+            IFileInfo fileInfo = provider.GetFileInfo(filename);
+
+            return File(fileInfo.CreateReadStream(), contentType, filename);
         }
 
         private async Task<IActionResult> Overview(Repository repository)
