@@ -616,14 +616,14 @@ namespace Genometric.TVQ.API.Controllers
                 WriteToFile(
                     Path.Combine(normalizedByDayTmpPath, "CitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
                     normalizedData.ToDictionary(
-                        x => x.Key, 
+                        x => x.Key,
                         x => x.Value.GetCitations(CitationChange.DateNormalizationType.ByDay)),
                     normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore));
 
                 WriteToFile(
-                    Path.Combine(normalizedByDayTmpPath, "CumulativeCitationsCount", Utilities.SafeFilename(repo.Name + ".csv")), 
+                    Path.Combine(normalizedByDayTmpPath, "CumulativeCitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
                     normalizedData.ToDictionary(
-                        x => x.Key, 
+                        x => x.Key,
                         x => x.Value.GetCumulativeCitations(CitationChange.DateNormalizationType.ByDay)),
                     normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore));
 
@@ -667,9 +667,9 @@ namespace Genometric.TVQ.API.Controllers
 
             var repoIDs = repositories.Select(x => x.ID).ToList();
 
-            foreach(var repository in repositories)
+            foreach (var repository in repositories)
             {
-                foreach(var toolAssociation in repository.ToolAssociations)
+                foreach (var toolAssociation in repository.ToolAssociations)
                 {
                     int year = toolAssociation.DateAddedToRepository.Value.Year;
                     if (!distributions.ContainsKey(year))
@@ -692,9 +692,32 @@ namespace Genometric.TVQ.API.Controllers
                         continue;
 
                     distributions[year][repository.ID][0]++;
-                    distributions[year][repository.ID][1] += publication.Value.CitedBy ?? 0;
+
+                    if (publication.Value.Year < 2000)
+                        continue;
+
+                    foreach (var citation in publication.Value.Citations)
+                    {
+                        if (citation.Date.Year < 2000)
+                            continue;
+
+                        if (!distributions.ContainsKey(citation.Date.Year))
+                        {
+                            distributions.Add(citation.Date.Year, new Dictionary<int, int[]>());
+
+                            foreach (var repoID in repoIDs)
+                                distributions[citation.Date.Year].Add(repoID, new int[2]);
+                        }
+
+                        distributions[citation.Date.Year][repository.ID][1] += citation.AccumulatedCount;
+                    }
                 }
             }
+
+            var years = distributions.Keys.ToList();
+            for (int i = 1; i < years.Count; i++)
+                for (int j = 0; j < repoIDs.Count; j++)
+                    distributions[years[i]][repoIDs[j]][0] += distributions[years[i - 1]][repoIDs[j]][0];
 
             var tempPath = Path.GetFullPath(Path.GetTempPath()) + Utilities.GetRandomString(10) + Path.DirectorySeparatorChar;
             Directory.CreateDirectory(tempPath);
@@ -707,15 +730,15 @@ namespace Genometric.TVQ.API.Controllers
                 builder.Append("Year");
                 for (int i = 0; i < 2; i++)
                     foreach (var repository in repositories)
-                        builder.Append("\t" + repository.Name + (i == 0 ? "_ToolCount" : "_CitationCount"));
+                        builder.Append("\t" + repository.Name + (i == 0 ? " Tool Count" : " Citation Count"));
                 writer.WriteLine(builder.ToString());
 
-                foreach(var year in distributions)
+                foreach (var year in distributions)
                 {
                     builder.Clear();
                     builder.Append(year.Key);
 
-                    foreach(var repository in repositories)
+                    foreach (var repository in repositories)
                         builder.Append("\t" + year.Value[repository.ID][0]);
 
                     foreach (var repository in repositories)
@@ -806,8 +829,8 @@ namespace Genometric.TVQ.API.Controllers
         }
 
         private void WriteToFile(
-            string filename, 
-            Dictionary<Tool, SortedDictionary<double, double>> vectors, 
+            string filename,
+            Dictionary<Tool, SortedDictionary<double, double>> vectors,
             Dictionary<Tool, double> GainScores)
         {
             var builder = new StringBuilder();

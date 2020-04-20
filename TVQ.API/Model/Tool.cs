@@ -39,25 +39,18 @@ namespace Genometric.TVQ.API.Model
             // The custom comparer used here handles duplicates as greater. 
             var rtv = new SortedList<DateTime, Publication>(new DuplicateKeyComparer<DateTime>());
 
-            try
+            foreach (var pubAssociation in PublicationAssociations)
             {
-                foreach (var pubAssociation in PublicationAssociations)
-                {
-                    // If year is null, then do not consider the publication.
-                    int year = pubAssociation.Publication.Year ?? 0;
-                    if (year == 0)
-                        continue;
+                // If year is null, then do not consider the publication.
+                int year = pubAssociation.Publication.Year ?? 0;
+                if (year == 0)
+                    continue;
 
-                    rtv.Add(
-                        new DateTime(year,
-                                     pubAssociation.Publication.Month ?? 1,
-                                     pubAssociation.Publication.Day ?? 1),
-                        pubAssociation.Publication);
-                }
-            }
-            catch (Exception e)
-            {
-
+                rtv.Add(
+                    new DateTime(year,
+                                 pubAssociation.Publication.Month ?? 1,
+                                 pubAssociation.Publication.Day ?? 1),
+                    pubAssociation.Publication);
             }
 
             return rtv;
