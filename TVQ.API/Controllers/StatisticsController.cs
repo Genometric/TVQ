@@ -44,6 +44,7 @@ namespace Genometric.TVQ.API.Controllers
             NormalizedBeforeAfterVector,
             BetweenRepoTTest,
             DownloadFeatures,
+            NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository,
             Overview
         };
 
@@ -125,9 +126,81 @@ namespace Genometric.TVQ.API.Controllers
                     return Ok(await BetweenRepoTTest().ConfigureAwait(false));
                 case ReportTypes.DownloadFeatures:
                     return DownloadFeatures();
+                case ReportTypes.NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository:
+                    return await NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository();
             }
 
             return BadRequest();
+        }
+
+        private async Task<IActionResult> NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository()
+        {
+            // This method gets: How many years before or after a tool was added to a repository the first manuscript featuring it was published?
+
+            var repositories = _context.Repositories.Include(x => x.ToolAssociations)
+                                        .ThenInclude(x => x.Tool)
+                                        .ThenInclude(x => x.PublicationAssociations)
+                                        .ThenInclude(x => x.Publication);
+
+            // Order of ints: Year, repo ID, then count. 
+            var distributions = new SortedDictionary<int, Dictionary<int, int>>();
+
+            var repoIDs = repositories.Select(x => x.ID).ToList();
+
+            foreach (var repository in repositories)
+            {
+                foreach (var toolAssociation in repository.ToolAssociations)
+                {
+                    var pub = toolAssociation.Tool.GetSortedPublications().FirstOrDefault(x => x.Key.Year > 2000);
+                    if (pub.Value == null)
+                        continue;
+
+                    // The average number of days per year is 365 + ​1⁄4 − ​1⁄100 + ​1⁄400 = 365.2425
+                    // REF: https://en.wikipedia.org/wiki/Leap_year
+                    var yearsOffset = (int)Math.Round((pub.Key - toolAssociation.DateAddedToRepository).Value.TotalDays / 365.2425);
+
+                    if (!distributions.ContainsKey(yearsOffset))
+                    {
+                        distributions.Add(yearsOffset, new Dictionary<int, int>());
+
+                        foreach (var repoID in repoIDs)
+                            distributions[yearsOffset].Add(repoID, 0);
+                    }
+
+                    distributions[yearsOffset][repository.ID]++;
+                }
+            }
+
+            var tempPath = Path.GetFullPath(Path.GetTempPath()) + Utilities.GetRandomString(10) + Path.DirectorySeparatorChar;
+            Directory.CreateDirectory(tempPath);
+            var filename = "NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository.csv";
+            var fullFilename = tempPath + Utilities.SafeFilename(filename);
+
+            using (var writer = new StreamWriter(fullFilename))
+            {
+                var builder = new StringBuilder();
+                builder.Append("Year");
+                foreach (var repository in repositories)
+                    builder.Append("\t" + repository.Name);
+                writer.WriteLine(builder.ToString());
+
+                foreach (var year in distributions)
+                {
+                    builder.Clear();
+                    builder.Append(year.Key);
+
+                    foreach (var repository in repositories)
+                        builder.Append("\t" + year.Value[repository.ID]);
+
+                    writer.WriteLine(builder.ToString());
+                }
+            }
+
+            var contentType = "application/csv";
+            IFileProvider provider = new PhysicalFileProvider(tempPath);
+            IFileInfo fileInfo = provider.GetFileInfo(filename);
+
+            return File(fileInfo.CreateReadStream(), contentType, filename);
         }
 
         private FileStreamResult BeforeAfterCitationCountPerTool(Repository repository)
