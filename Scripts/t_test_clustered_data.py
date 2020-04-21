@@ -240,7 +240,7 @@ if __name__ == "__main__":
                 filenames.append(filename)
 
     print("\n>>> Performing t-test on pre and post citations for the null hypothesis that the two have identical average values.")
-    repo_ttest_filename = os.path.join(root, "ttest_repository.txt")
+    repo_ttest_filename = os.path.join(root, "paired_ttest_avg_pre_post.txt")
     if os.path.isfile(repo_ttest_filename):
         os.remove(repo_ttest_filename)
     with open(repo_ttest_filename, "a") as f:
