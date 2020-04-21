@@ -250,13 +250,13 @@ if __name__ == "__main__":
         ttest_repository(os.path.join(root, filename), repo_ttest_filename)
 
     print("\n>>> Performing t-test on citations delta (post - pre) for the null hypothesis that the mean equals zero.")
-    repo_delta_ttest_filename = os.path.join(root, "ttest_repository_delta.txt")
-    if os.path.isfile(repo_delta_ttest_filename):
-        os.remove(repo_delta_ttest_filename)
-    with open(repo_delta_ttest_filename, "a") as f:
+    one_sample_ttest_filename = os.path.join(root, "one_sample_ttest.txt")
+    if os.path.isfile(one_sample_ttest_filename):
+        os.remove(one_sample_ttest_filename)
+    with open(one_sample_ttest_filename, "a") as f:
         f.write("Repository\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
     for filename in filenames:
-        ttest_repository_delta(os.path.join(root, filename), repo_delta_ttest_filename)
+        ttest_repository_delta(os.path.join(root, filename), one_sample_ttest_filename)
 
     print(f"\n>>> Performing Welch's t-test for the null hypothesis that the two repositories have identical average values of pre-post delta, NOT assuming equal population variance.")
     repos_ttest_filename = os.path.join(root, "ttest_repositories.txt")
