@@ -143,9 +143,11 @@ namespace Genometric.TVQ.API.Controllers
                                         .ThenInclude(x => x.Publication);
 
             // Order of ints: Year, repo ID, then count. 
-            var distributions = new SortedDictionary<int, Dictionary<int, int>>();
+            var distributions = new SortedDictionary<int, Dictionary<int, double>>();
 
             var repoIDs = repositories.Select(x => x.ID).ToList();
+
+            var sums = new Dictionary<int, int>();
 
             foreach (var repository in repositories)
             {
@@ -161,15 +163,25 @@ namespace Genometric.TVQ.API.Controllers
 
                     if (!distributions.ContainsKey(yearsOffset))
                     {
-                        distributions.Add(yearsOffset, new Dictionary<int, int>());
+                        distributions.Add(yearsOffset, new Dictionary<int, double>());
 
                         foreach (var repoID in repoIDs)
-                            distributions[yearsOffset].Add(repoID, 0);
+                            distributions[yearsOffset].Add(repoID, 0.0);
                     }
 
                     distributions[yearsOffset][repository.ID]++;
+
+                    if (!sums.ContainsKey(repository.ID))
+                        sums.Add(repository.ID, 0);
+
+                    sums[repository.ID]++;
                 }
             }
+
+            var years = distributions.Keys.ToList();
+            foreach (var year in years)
+                foreach (var repoSum in sums)
+                    distributions[year][repoSum.Key] /= repoSum.Value;
 
             var tempPath = Path.GetFullPath(Path.GetTempPath()) + Utilities.GetRandomString(10) + Path.DirectorySeparatorChar;
             Directory.CreateDirectory(tempPath);
