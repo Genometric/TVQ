@@ -77,7 +77,7 @@ def cohen_d(x, y=None, population_mean=0.0):
     if cohen_d >= 0.90:
         msg = "Very large"
 
-    return cohen_d, msg + " effect size."
+    return cohen_d, msg + " effect size"
 
 
 
