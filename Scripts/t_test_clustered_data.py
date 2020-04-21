@@ -225,28 +225,43 @@ def ttest_corresponding_clusters(root, filename_a, filename_b, output_filename):
             f.write(f"{repo_a}\t{repo_b}\t{i}\t{i}\t{sorted_keys_a[i]}\t{sorted_keys_b[i]}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
 
 
-def export_deltas(root, filenames):
-    print(f"\n>>> Exporting pre-post deltas of samples.")
+def get_growthes(pre, post):
+    growthes = []
+    for i in range(0, len(pre)):
+        total_pre_citations = np.max(pre[i])
+        total_pst_citations = np.max(post[i])
+        if total_pre_citations == 0:
+            growthes.append((total_pst_citations - total_pre_citations) * 100.0)
+        else:
+            growthes.append(((total_pst_citations - total_pre_citations) / total_pre_citations) * 100.0)
+    return growthes
+
+
+def export_growthes(root, filenames):
+    # This method assumes it is fed with the cumulative citation counts.
+    print(f"\n>>> Exporting citation growth of samples.")
     for filename in filenames:
-        sample_deltas_filename = os.path.join(root, get_repo_name(filename) + "_deltas.txt")
-        if os.path.isfile(sample_deltas_filename):
-            os.remove(sample_deltas_filename)
-        with open(sample_deltas_filename, "a") as f:
+        sample_citation_growth_filename = os.path.join(root, get_repo_name(filename) + "_citation_growth.txt")
+        if os.path.isfile(sample_citation_growth_filename):
+            os.remove(sample_citation_growth_filename)
+        with open(sample_citation_growth_filename, "a") as f:
             repo_tools = pd.read_csv(os.path.join(root, filename), header=0, sep='\t')
-            _, _, _, _, _, _, deltas = get_vectors(repo_tools)
-            for delta in deltas:
-                f.write(f"{delta}\n")
+            _, pre_citations, post_citations, _, _, _, _ = get_vectors(repo_tools)
+            growthes = get_growthes(pre_citations, post_citations)
+            for growth in growthes:
+                f.write(f"{growth}\n")
 
         # Note: this assumes clusters are already sorted (hence these deltas would match clusters plotted via `plot_cluster_quartiles.py`. 
         clusters = get_clusters(root, filename)
         for k in clusters.groups:
-            _, _, _, _, _, _, deltas = get_vectors(clusters.get_group(k))
-            cluster_delta_filename = os.path.join(root, get_repo_name(filename) + f"_cluster_{k}_deltas.txt")
+            _, pre_citations, post_citations, _, _, _, _ = get_vectors(clusters.get_group(k))
+            cluster_delta_filename = os.path.join(root, get_repo_name(filename) + f"_cluster_{k}_growth.txt")
             if os.path.isfile(cluster_delta_filename):
                 os.remove(cluster_delta_filename)
             with open(cluster_delta_filename, "a") as f:
-                for delta in deltas:
-                    f.write(f"{delta}\n")
+                growthes = get_growthes(pre_citations, post_citations)
+                for growth in growthes:
+                    f.write(f"{growth}\n")
 
 
 if __name__ == "__main__":
@@ -263,7 +278,7 @@ if __name__ == "__main__":
                os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 filenames.append(filename)
 
-    export_deltas(root, filenames)
+    export_growthes(root, filenames)
 
     print("\n>>> Performing t-test on pre and post citations for the null hypothesis that the two have identical average values.")
     repo_ttest_filename = os.path.join(root, "paired_ttest_avg_pre_post.txt")
