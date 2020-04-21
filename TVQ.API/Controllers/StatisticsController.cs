@@ -133,7 +133,7 @@ namespace Genometric.TVQ.API.Controllers
             return BadRequest();
         }
 
-        private async Task<IActionResult> NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository()
+        private async Task<IActionResult> NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository(int windowLength = 20)
         {
             // This method gets: How many years before or after a tool was added to a repository the first manuscript featuring it was published?
 
@@ -149,6 +149,8 @@ namespace Genometric.TVQ.API.Controllers
 
             var sums = new Dictionary<int, int>();
 
+            var maxOffset = windowLength / 2.0;
+
             foreach (var repository in repositories)
             {
                 foreach (var toolAssociation in repository.ToolAssociations)
@@ -160,6 +162,9 @@ namespace Genometric.TVQ.API.Controllers
                     // The average number of days per year is 365 + ​1⁄4 − ​1⁄100 + ​1⁄400 = 365.2425
                     // REF: https://en.wikipedia.org/wiki/Leap_year
                     var yearsOffset = (int)Math.Round((pub.Key - toolAssociation.DateAddedToRepository).Value.TotalDays / 365.2425);
+
+                    if (Math.Abs(yearsOffset) > maxOffset)
+                        yearsOffset = (int)Math.Round(maxOffset * Math.Sign(yearsOffset));
 
                     if (!distributions.ContainsKey(yearsOffset))
                     {
