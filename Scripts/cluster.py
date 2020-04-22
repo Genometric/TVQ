@@ -11,7 +11,7 @@ import itertools
 from scipy.spatial.distance import cdist 
 import sklearn
 from matplotlib.lines import Line2D
-from t_test_clustered_data import get_sorted_clusters
+from t_test_clustered_data import get_sorted_clusters, pre_post_columns
 
 
 CLUSTERED_FILENAME_POSFIX = "_clustered"
@@ -33,15 +33,12 @@ def cluster(root, filename, cluster_count):
     repo_name = os.path.splitext(filename)[0]
     print(">>> Clustering repository: {0}".format(repo_name))
     input_df = pd.read_csv(os.path.join(root, filename), header=0, sep='\t')
-    
-    # Remove the tool name column b/c it's a categorical column.
-    df = input_df.drop("ToolName", 1)
 
-    # Remove the ID column b/c it contains a unique record for every row.
-    df = df.drop("ID", 1)
-
-    # Remove the GainScore column because its values should not be considered for clustering.
-    df = df.drop("GainScore", 1)
+    # Because we would like to cluster only based on the pre and post 
+    # citation counts, then we drop all the other columns. 
+    column_headers, pre, post = pre_post_columns(input_df)
+    columns_to_drop = [x for x in column_headers if (x not in pre and x not in post)]
+    df = input_df.drop(columns_to_drop, 1)
 
     # Perform hierarchical/agglomerative clustering and 
     # returns the hierarchical clustering encoded as a linkage matrix.

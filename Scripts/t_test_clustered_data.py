@@ -80,7 +80,6 @@ def cohen_d(x, y=None, population_mean=0.0):
     return cohen_d, msg + " effect size"
 
 
-
 def pre_post_columns(tools):
     """
     Returns all the column headers, and headers of columns containing 
