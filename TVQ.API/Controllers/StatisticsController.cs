@@ -701,6 +701,8 @@ namespace Genometric.TVQ.API.Controllers
                 if (normalizedData.Count == 0)
                     continue;
 
+                var growthes = normalizedData.ToDictionary(x => x.Key, x => x.Value.Growth);
+
                 // TODO: Rework the following to avoid creating two dictionaries, and instead 
                 // just pass normalizedData to the WriteToFile method.
                 WriteToFile(
@@ -708,42 +710,32 @@ namespace Genometric.TVQ.API.Controllers
                     normalizedData.ToDictionary(
                         x => x.Key,
                         x => x.Value.GetCitations(CitationChange.DateNormalizationType.ByDay)),
-                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore));
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore),
+                    growthes);
 
                 WriteToFile(
                     Path.Combine(normalizedByDayTmpPath, "CumulativeCitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
                     normalizedData.ToDictionary(
                         x => x.Key,
                         x => x.Value.GetCumulativeCitations(CitationChange.DateNormalizationType.ByDay)),
-                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore));
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore),
+                    growthes);
 
                 WriteToFile(
                     Path.Combine(normalizedByYearTmpPath, "CitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
                     normalizedData.ToDictionary(
                         x => x.Key,
                         x => x.Value.GetCitations(CitationChange.DateNormalizationType.ByYear)),
-                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore));
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore),
+                    growthes);
 
                 WriteToFile(
                     Path.Combine(normalizedByYearTmpPath, "CumulativeCitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
                     normalizedData.ToDictionary(
                         x => x.Key,
                         x => x.Value.GetCumulativeCitations(CitationChange.DateNormalizationType.ByYear)),
-                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore));
-
-
-                var citationsImprovementFilename = Path.Combine(normalizedByYearTmpPath, "CumulativeCitationsCount", Utilities.SafeFilename(repo.Name + "CitationsImprovement.txt"));
-                var builder = new StringBuilder();
-                Directory.CreateDirectory(Path.GetDirectoryName(citationsImprovementFilename));
-                using var writer = new StreamWriter(citationsImprovementFilename);
-                writer.WriteLine("Improvement (%)");
-                double num;
-                foreach (var tool in normalizedData)
-                {
-                    num = tool.Value.GetPrePostChangePercentage();
-                    if (!double.IsNaN(num))
-                        writer.WriteLine(num);
-                }
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore),
+                    growthes);
             }
 
             var zipFileTempPath = Path.GetFullPath(Path.GetTempPath()) + Utilities.GetRandomString(10) + Path.DirectorySeparatorChar;
@@ -935,13 +927,14 @@ namespace Genometric.TVQ.API.Controllers
         private void WriteToFile(
             string filename,
             Dictionary<Tool, SortedDictionary<double, double>> vectors,
-            Dictionary<Tool, double> GainScores)
+            Dictionary<Tool, double> GainScores,
+            Dictionary<Tool, double> Growthes)
         {
             var builder = new StringBuilder();
             Directory.CreateDirectory(Path.GetDirectoryName(filename));
             using var writer = new StreamWriter(filename);
 
-            builder.Append("ID\tToolName\tGainScore");
+            builder.Append("ID\tToolName\tGainScore\tCitationGrowth");
             var pointsX = vectors.First().Value.Keys;
             foreach (var x in pointsX)
                 builder.Append("\t" + x.ToString(_numberFormat, CultureInfo.InvariantCulture));
@@ -956,6 +949,8 @@ namespace Genometric.TVQ.API.Controllers
                 builder.Append(tool.Key.ToString());
 
                 builder.Append("\t" + GainScores[tool.Key]);
+
+                builder.Append("\t" + Growthes[tool.Key]);
 
                 foreach (var point in tool.Value)
                     builder.Append("\t" + point.Value.ToString(_numberFormat, CultureInfo.InvariantCulture));

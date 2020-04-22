@@ -73,6 +73,17 @@ namespace Genometric.TVQ.API.Analysis
             }
         }
 
+        private double _growth = double.NaN;
+        public double Growth
+        {
+            get
+            {
+                if (double.IsNaN(_growth))
+                    _growth = GetPrePostChangePercentage();
+                return _growth;
+            }
+        }
+
         public CitationChange()
         {
             CitationCounts = new SortedSet<double>();
@@ -263,7 +274,7 @@ namespace Genometric.TVQ.API.Analysis
             CitationCounts = normalizedCitationCount;
         }
 
-        public double GetPrePostChangePercentage()
+        private double GetPrePostChangePercentage()
         {
             if (_totalPre != 0)
                 return ((_totalPost - _totalPre) / (double)_totalPre) * 100.0;
