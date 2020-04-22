@@ -93,8 +93,6 @@ namespace Genometric.TVQ.API.Analysis
         {
             get
             {
-                if (double.IsNaN(_growthOnNormalizedDataByYear))
-                    _growthOnNormalizedDataByYear = GetGrowthOnNormalizedDataByYear();
                 return _growthOnNormalizedDataByYear;
             }
         }
@@ -104,8 +102,6 @@ namespace Genometric.TVQ.API.Analysis
         {
             get
             {
-                if (double.IsNaN(_growthOnNormalizedDataByDay))
-                    _growthOnNormalizedDataByDay = GetGrowthOnNormalizedDataByDay();
                 return _growthOnNormalizedDataByDay;
             }
         }
@@ -179,6 +175,9 @@ namespace Genometric.TVQ.API.Analysis
 
             Normalize(CitationsNormalizedByDays);
             Normalize(CitationsNormalizedByYears);
+
+            _growthOnNormalizedDataByYear = GetGrowthOnNormalizedDataByYear();
+            _growthOnNormalizedDataByDay = GetGrowthOnNormalizedDataByDay();
 
             Interpolate(CitationsNormalizedByDays, points);
             Interpolate(CitationsNormalizedByYears, points);
