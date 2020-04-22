@@ -730,6 +730,20 @@ namespace Genometric.TVQ.API.Controllers
                         x => x.Key,
                         x => x.Value.GetCumulativeCitations(CitationChange.DateNormalizationType.ByYear)),
                     normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore));
+
+
+                var citationsImprovementFilename = Path.Combine(normalizedByYearTmpPath, "CumulativeCitationsCount", Utilities.SafeFilename(repo.Name + "CitationsImprovement.txt"));
+                var builder = new StringBuilder();
+                Directory.CreateDirectory(Path.GetDirectoryName(citationsImprovementFilename));
+                using var writer = new StreamWriter(citationsImprovementFilename);
+                writer.WriteLine("Improvement (%)");
+                double num;
+                foreach (var tool in normalizedData)
+                {
+                    num = tool.Value.GetPrePostChangePercentage();
+                    if (!double.IsNaN(num))
+                        writer.WriteLine(num);
+                }
             }
 
             var zipFileTempPath = Path.GetFullPath(Path.GetTempPath()) + Utilities.GetRandomString(10) + Path.DirectorySeparatorChar;

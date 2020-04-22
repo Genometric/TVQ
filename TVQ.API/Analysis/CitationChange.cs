@@ -28,7 +28,10 @@ namespace Genometric.TVQ.API.Analysis
 
         public double Average { set; get; }
 
-        private SortedSet<double> Citations { set; get; }
+        private SortedSet<double> CitationCounts { set; get; }
+
+        private int _totalPre;
+        private int _totalPost;
 
         public SortedDictionary<double, Number> CitationsNormalizedByDays { get; }
 
@@ -36,27 +39,27 @@ namespace Genometric.TVQ.API.Analysis
 
         public double Min
         {
-            get { return MathNet.Numerics.Statistics.Statistics.Minimum(Citations); }
+            get { return MathNet.Numerics.Statistics.Statistics.Minimum(CitationCounts); }
         }
 
         public double Max
         {
-            get { return MathNet.Numerics.Statistics.Statistics.Maximum(Citations); }
+            get { return MathNet.Numerics.Statistics.Statistics.Maximum(CitationCounts); }
         }
 
         public double Median
         {
-            get { return MathNet.Numerics.Statistics.Statistics.Median(Citations); }
+            get { return MathNet.Numerics.Statistics.Statistics.Median(CitationCounts); }
         }
 
         public double LowerQuartile
         {
-            get { return MathNet.Numerics.Statistics.Statistics.LowerQuartile(Citations); }
+            get { return MathNet.Numerics.Statistics.Statistics.LowerQuartile(CitationCounts); }
         }
 
         public double UpperQuartile
         {
-            get { return MathNet.Numerics.Statistics.Statistics.UpperQuartile(Citations); }
+            get { return MathNet.Numerics.Statistics.Statistics.UpperQuartile(CitationCounts); }
         }
 
         private double _gainScore = double.NaN;
@@ -72,7 +75,7 @@ namespace Genometric.TVQ.API.Analysis
 
         public CitationChange()
         {
-            Citations = new SortedSet<double>();
+            CitationCounts = new SortedSet<double>();
             CitationsNormalizedByDays = new SortedDictionary<double, Number>();
             CitationsNormalizedByYears = new SortedDictionary<double, Number>();
         }
@@ -81,7 +84,7 @@ namespace Genometric.TVQ.API.Analysis
         {
             DaysOffset = daysOffset;
             CitationCount = count;
-            Citations = new SortedSet<double>();
+            CitationCounts = new SortedSet<double>();
         }
 
         // This method is experimental and it Should be re-implemented.
@@ -150,6 +153,8 @@ namespace Genometric.TVQ.API.Analysis
         {
             double daysOffset;
             double yearsOffset;
+
+            _totalPre = _totalPost = 0;
             foreach (var citation in citations)
             {
                 daysOffset = (citation.Date - dateAddedToRepository).Value.Days;
@@ -171,7 +176,15 @@ namespace Genometric.TVQ.API.Analysis
                 }
                 else
                     CitationsNormalizedByYears.Add(yearsOffset, new Number() { Count = citation.Count, CumulativeCount = citation.AccumulatedCount });
+
+                if (daysOffset < 0)
+                    _totalPre = Math.Max(_totalPre, citation.AccumulatedCount);
+                else
+                    _totalPost = Math.Max(_totalPost, citation.AccumulatedCount);
             }
+
+            if (_totalPost == 0)
+                _totalPost = _totalPre;
         }
 
         private void Normalize(SortedDictionary<double, Number> citations)
@@ -229,25 +242,33 @@ namespace Genometric.TVQ.API.Analysis
 
         public void AddCitationCount(double count)
         {
-            Citations.Add(count);
+            CitationCounts.Add(count);
         }
 
         public void AddCitationCount(List<double> counts)
         {
-            Citations.UnionWith(counts);
+            CitationCounts.UnionWith(counts);
         }
 
         public void RemoveOutliers()
         {
-            Citations = OutliersRemoval.Remove(Citations);
+            CitationCounts = OutliersRemoval.Remove(CitationCounts);
         }
 
         public void MinMaxNormalize(double min, double max)
         {
             var normalizedCitationCount = new SortedSet<double>();
-            foreach (var count in Citations)
+            foreach (var count in CitationCounts)
                 normalizedCitationCount.Add((count - min) / (max - min));
-            Citations = normalizedCitationCount;
+            CitationCounts = normalizedCitationCount;
+        }
+
+        public double GetPrePostChangePercentage()
+        {
+            if (_totalPre != 0)
+                return ((_totalPost - _totalPre) / (double)_totalPre) * 100.0;
+            else
+                return double.NaN;
         }
 
         private double GetGainScore()
