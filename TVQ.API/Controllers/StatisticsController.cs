@@ -742,7 +742,11 @@ namespace Genometric.TVQ.API.Controllers
                 {
                     num = tool.Value.GetPrePostChangePercentage();
                     if (!double.IsNaN(num))
+                    {
+                        if (num > 500)
+                            num = 500;
                         writer.WriteLine(num);
+                    }
                 }
             }
 
