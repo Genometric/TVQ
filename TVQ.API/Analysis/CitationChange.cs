@@ -32,6 +32,10 @@ namespace Genometric.TVQ.API.Analysis
 
         private int _totalPre;
         private int _totalPost;
+        private double _maxPreNormalizedByYear;
+        private double _maxPostNormalizedByYear;
+        private double _maxPreNormalizedByDay;
+        private double _maxPostNormalizedByDay;
 
         public SortedDictionary<double, Number> CitationsNormalizedByDays { get; }
 
@@ -81,6 +85,28 @@ namespace Genometric.TVQ.API.Analysis
                 if (double.IsNaN(_growth))
                     _growth = GetPrePostChangePercentage();
                 return _growth;
+            }
+        }
+
+        private double _growthOnNormalizedDataByYear = double.NaN;
+        public double GrowthOnNormalizedDataByYear
+        {
+            get
+            {
+                if (double.IsNaN(_growthOnNormalizedDataByYear))
+                    _growthOnNormalizedDataByYear = GetGrowthOnNormalizedDataByYear();
+                return _growthOnNormalizedDataByYear;
+            }
+        }
+
+        private double _growthOnNormalizedDataByDay = double.NaN;
+        public double GrowthOnNormalizedDataByDay
+        {
+            get
+            {
+                if (double.IsNaN(_growthOnNormalizedDataByDay))
+                    _growthOnNormalizedDataByDay = GetGrowthOnNormalizedDataByDay();
+                return _growthOnNormalizedDataByDay;
             }
         }
 
@@ -276,8 +302,47 @@ namespace Genometric.TVQ.API.Analysis
 
         private double GetPrePostChangePercentage()
         {
-            if (_totalPre != 0)
-                return ((_totalPost - _totalPre) / (double)_totalPre) * 100.0;
+            return ComputeGrowth(_totalPre, _totalPost);
+        }
+
+        private double GetGrowthOnNormalizedDataByYear()
+        {
+            _maxPreNormalizedByYear = _maxPostNormalizedByYear = 0;
+            foreach(var citation in CitationsNormalizedByYears)
+            {
+                if (citation.Key < 0)
+                    _maxPreNormalizedByYear = Math.Max(_maxPreNormalizedByYear, citation.Value.CumulativeCount);
+                else
+                    _maxPostNormalizedByYear = Math.Max(_maxPostNormalizedByYear, citation.Value.CumulativeCount);
+            }
+
+            if (_maxPostNormalizedByYear == 0)
+                _maxPostNormalizedByYear = _maxPreNormalizedByYear;
+
+            return ComputeGrowth(_maxPreNormalizedByYear, _maxPostNormalizedByYear);
+        }
+
+        private double GetGrowthOnNormalizedDataByDay()
+        {
+            _maxPreNormalizedByDay = _maxPostNormalizedByDay = 0;
+            foreach (var citation in CitationsNormalizedByDays)
+            {
+                if (citation.Key < 0)
+                    _maxPreNormalizedByDay = Math.Max(_maxPreNormalizedByDay, citation.Value.CumulativeCount);
+                else
+                    _maxPostNormalizedByDay = Math.Max(_maxPostNormalizedByDay, citation.Value.CumulativeCount);
+            }
+
+            if (_maxPostNormalizedByDay == 0)
+                _maxPostNormalizedByDay = _maxPreNormalizedByDay;
+
+            return ComputeGrowth(_maxPreNormalizedByDay, _maxPostNormalizedByDay);
+        }
+
+        private double ComputeGrowth(double pre, double post)
+        {
+            if (pre != 0)
+                return ((post - pre) / pre) * 100.0;
             else
                 return double.NaN;
         }

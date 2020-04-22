@@ -711,6 +711,7 @@ namespace Genometric.TVQ.API.Controllers
                         x => x.Key,
                         x => x.Value.GetCitations(CitationChange.DateNormalizationType.ByDay)),
                     normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore),
+                    normalizedData.ToDictionary(x=>x.Key, x=>x.Value.GrowthOnNormalizedDataByDay),
                     growthes);
 
                 WriteToFile(
@@ -719,6 +720,7 @@ namespace Genometric.TVQ.API.Controllers
                         x => x.Key,
                         x => x.Value.GetCumulativeCitations(CitationChange.DateNormalizationType.ByDay)),
                     normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore),
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GrowthOnNormalizedDataByDay),
                     growthes);
 
                 WriteToFile(
@@ -727,6 +729,7 @@ namespace Genometric.TVQ.API.Controllers
                         x => x.Key,
                         x => x.Value.GetCitations(CitationChange.DateNormalizationType.ByYear)),
                     normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore),
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GrowthOnNormalizedDataByYear),
                     growthes);
 
                 WriteToFile(
@@ -735,6 +738,7 @@ namespace Genometric.TVQ.API.Controllers
                         x => x.Key,
                         x => x.Value.GetCumulativeCitations(CitationChange.DateNormalizationType.ByYear)),
                     normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore),
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GrowthOnNormalizedDataByYear),
                     growthes);
             }
 
@@ -928,13 +932,14 @@ namespace Genometric.TVQ.API.Controllers
             string filename,
             Dictionary<Tool, SortedDictionary<double, double>> vectors,
             Dictionary<Tool, double> GainScores,
+            Dictionary<Tool, double> GrowesOnNormalizedData,
             Dictionary<Tool, double> Growthes)
         {
             var builder = new StringBuilder();
             Directory.CreateDirectory(Path.GetDirectoryName(filename));
             using var writer = new StreamWriter(filename);
 
-            builder.Append("ID\tToolName\tGainScore\tCitationGrowth");
+            builder.Append("ID\tToolName\tGainScore\tCitationGrowthOnInputData\tCitationGrowthOnNormalizedData");
             var pointsX = vectors.First().Value.Keys;
             foreach (var x in pointsX)
                 builder.Append("\t" + x.ToString(_numberFormat, CultureInfo.InvariantCulture));
@@ -951,6 +956,8 @@ namespace Genometric.TVQ.API.Controllers
                 builder.Append("\t" + GainScores[tool.Key]);
 
                 builder.Append("\t" + Growthes[tool.Key]);
+
+                builder.Append("\t" + GrowesOnNormalizedData[tool.Key]);
 
                 foreach (var point in tool.Value)
                     builder.Append("\t" + point.Value.ToString(_numberFormat, CultureInfo.InvariantCulture));
