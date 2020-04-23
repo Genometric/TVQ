@@ -37,6 +37,9 @@
     <Compile Include="plot_cluster_quartiles.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="plot_gain_scores.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="t_test_clustered_data.py">
       <SubType>Code</SubType>
     </Compile>
