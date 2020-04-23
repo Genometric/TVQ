@@ -26,7 +26,7 @@ def get_growthes(tools):
     return growthes
 
 
-def plot(ax, filename, growthes, add_legend, header=None, x_axis_label=None, y_axis_label=None):
+def plot(ax, filename, growthes, header=None, x_axis_label=None, y_axis_label=None):
     ax.hist(growthes, density=True, bins=24) # setting density to False will show count, and True will show probability.
     ax.set_yscale('log')
     #ax.yaxis.set_major_formatter(mticker.ScalarFormatter()) # comment this when density=True
@@ -84,12 +84,9 @@ if __name__ == "__main__":
             header = f"Cluster {i+1}"
             col_counter += 1
             growthes = get_growthes(clusters.get_group(mappings[keys[i]]))
-            plot(ax[row_counter][col_counter], filename_without_extension, growthes, True if col_counter == 4 else False, header=header if row_counter == 0 else None, x_axis_label=x_axis_label if row_counter == len(keys) else None, y_axis_label=f"{repository_name} \n \n {y_axis_label}" if col_counter == 0 else None)
+            plot(ax[row_counter][col_counter], filename_without_extension, growthes, header=header if row_counter == 0 else None, x_axis_label=x_axis_label if row_counter == len(keys) else None, y_axis_label=f"{repository_name} \n \n {y_axis_label}" if col_counter == 0 else None)
     
     handles, labels = ax[row_counter][col_counter].get_legend_handles_labels()
-
-    # The "magical" numbers of bbox_to_anchor are determined by trial-and-error.
-    fig.legend(handles, labels, loc='center', bbox_to_anchor=(0.454, 0.03), ncol=6, framealpha=0.0)
 
     image_file = os.path.join(inputPath, 'gain_scores_clustered.png')
     if os.path.isfile(image_file):
@@ -107,12 +104,9 @@ if __name__ == "__main__":
 
         tools = pd.read_csv(os.path.join(root, filename), header=0, sep='\t')
         growthes = get_growthes(tools)
-        plot(ax[col_counter], filename_without_extension, growthes, True if col_counter == 4 else False, header=repository_name, x_axis_label=x_axis_label, y_axis_label=f"\n {y_axis_label}" if col_counter == 0 else None)           
+        plot(ax[col_counter], filename_without_extension, growthes, header=repository_name, x_axis_label=x_axis_label, y_axis_label=f"\n {y_axis_label}" if col_counter == 0 else None)           
         
     handles, labels = ax[col_counter].get_legend_handles_labels()
-
-    # The "magical" numbers of bbox_to_anchor are determined by trial-and-error.
-    fig.legend(handles, labels, loc='center', bbox_to_anchor=(0.454, 0.03), ncol=6, framealpha=0.0)
 
     image_file = os.path.join(inputPath, 'gain_scores.png')
     if os.path.isfile(image_file):
