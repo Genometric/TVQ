@@ -1,3 +1,7 @@
+"""
+
+"""
+
 import numpy as np
 import os
 import sys
@@ -23,7 +27,7 @@ def get_silhouette_score(df, cluster_count):
     # Apply cluster to data.
     # It is not ideal to re-cluster data; hence, a potential improvement would be to
     # rework this and avoid send clustering.
-    model = AgglomerativeClustering(n_clusters=cluster_count, affinity='euclidean', linkage='ward')  
+    model = AgglomerativeClustering(n_clusters=cluster_count, affinity='euclidean', linkage='ward')
     cluster_labels = model.fit_predict(df)
 
     return cluster_labels, sklearn.metrics.silhouette_score(df, cluster_labels)
@@ -73,7 +77,14 @@ def cluster(root, filename, cluster_count):
     input_df.to_csv(clustered_filename, sep='\t', encoding='utf-8', index=False)
 
     with open(os.path.join(root, CLUSTERING_STATS_REPORT_FILENAME), "a") as f:
-        f.write(f"{repo_name}\t{auto_cluster_count}\t{auto_cut_distance}\t{auto_silhouette_score}\t{manual_cluster_count}\t{manual_cut_distance}\t{manual_silhouette_score}\n")
+        f.write(
+            f"{repo_name}\t" \
+            f"{auto_cluster_count}\t" \
+            f"{auto_cut_distance}\t" \
+            f"{auto_silhouette_score}\t" \
+            f"{manual_cluster_count}\t" \
+            f"{manual_cut_distance}\t" \
+            f"{manual_silhouette_score}\n")
 
     return linkage_matrix, auto_cut_distance, auto_cluster_count, auto_silhouette_score, manual_cut_distance, manual_cluster_count, manual_silhouette_score, variance, dist_growth_acceleration
 
@@ -168,7 +179,14 @@ if __name__ == "__main__":
         os.remove(cluster_ststs_filename)
     # Write column's headers.
     with open(cluster_ststs_filename, "a") as f:
-        f.write("Filename\tAuto-determined Cluster Count\tAuto-determined Dendrogram Cut Height\tAuto-determined Cluster Silhouette Score\tManually-set Cluster Count\tManually-set Dendrogram Cut Height\tManually-set Cluster Silhouette Score\n")
+        f.write(
+            "Filename\t" \
+            "Auto-determined Cluster Count\t" \
+            "Auto-determined Dendrogram Cut Height\t" \
+            "Auto-determined Cluster Silhouette Score\t" \
+            "Manually-set Cluster Count\t" \
+            "Manually-set Dendrogram Cut Height\t" \
+            "Manually-set Cluster Silhouette Score\n")
 
     for root, dirpath, filenames in os.walk(inputPath):
         for filename in filenames:
