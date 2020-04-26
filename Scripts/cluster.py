@@ -49,7 +49,10 @@ def cluster(root, filename, cluster_count):
     # The `ward` linkage minimizes the variance of the clusters being merged.
     linkage_matrix = shc.linkage(df, method='ward')
 
-    variance, dist_growth_acceleration, auto_cluster_count, auto_cut_distance, manual_cluster_count, manual_cut_distance = get_cluster_count(linkage_matrix, repo_name, cluster_count)
+    variance, dist_growth_acceleration, \
+        auto_cluster_count, auto_cut_distance, \
+        manual_cluster_count, manual_cut_distance = \
+        get_cluster_count(linkage_matrix, repo_name, cluster_count)
 
     _, auto_silhouette_score = get_silhouette_score(df, auto_cluster_count)
     cluster_labels, manual_silhouette_score = get_silhouette_score(df, manual_cluster_count)
@@ -86,7 +89,12 @@ def cluster(root, filename, cluster_count):
             f"{manual_cut_distance}\t" \
             f"{manual_silhouette_score}\n")
 
-    return linkage_matrix, auto_cut_distance, auto_cluster_count, auto_silhouette_score, manual_cut_distance, manual_cluster_count, manual_silhouette_score, variance, dist_growth_acceleration
+    return \
+        linkage_matrix, auto_cut_distance, \
+        auto_cluster_count, auto_silhouette_score, \
+        manual_cut_distance, manual_cluster_count, \
+        manual_silhouette_score, variance, \
+        dist_growth_acceleration
 
 
 def get_cluster_count(Z, filename, cluster_count):
