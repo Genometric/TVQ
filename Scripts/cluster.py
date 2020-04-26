@@ -6,13 +6,10 @@ import numpy as np
 import os
 import sys
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import scipy.cluster.hierarchy as shc
 from sklearn.cluster import AgglomerativeClustering
 import seaborn as sns
-import itertools
-from scipy.spatial.distance import cdist 
 import sklearn
 from matplotlib.lines import Line2D
 from t_test_clustered_data import get_sorted_clusters, pre_post_columns
@@ -38,8 +35,8 @@ def cluster(root, filename, cluster_count):
     print(">>> Clustering repository: {0}".format(repo_name))
     input_df = pd.read_csv(os.path.join(root, filename), header=0, sep='\t')
 
-    # Because we would like to cluster only based on the pre and post 
-    # citation counts, then we drop all the other columns. 
+    # Because we would like to cluster only based on the pre and post
+    # citation counts, then we drop all the other columns.
     column_headers, pre, post = pre_post_columns(input_df)
     columns_to_drop = [x for x in column_headers if (x not in pre and x not in post)]
     df = input_df.drop(columns_to_drop, 1)
