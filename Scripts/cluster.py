@@ -158,7 +158,12 @@ def plot(\
     col0.set_xlabel("Height")
     col0.grid(axis='x', which='major', color='w')
 
-    col0.text(0.82, 0.1, "Silhouette Score={:.4f}".format(manual_silhouette_score), horizontalalignment='center', verticalalignment='center', transform=col0.transAxes)
+    col0.text(\
+        0.82, 0.1, \
+        "Silhouette Score={:.4f}".format(manual_silhouette_score), \
+        horizontalalignment='center', \
+        verticalalignment='center', \
+        transform=col0.transAxes)
 
     # Plot the Elbow method's results.
     col1.plot(variance, label="Variance", marker='o', color='green')
@@ -171,7 +176,10 @@ def plot(\
     if add_legend:
         col1.legend(loc='center', bbox_to_anchor=(0.5, -0.3), framealpha=0.0, fancybox=True)
 
-        lines = [Line2D([0], [0], color=auto_cut_color, linewidth=linewidth, linestyle=auto_cut_line_style), Line2D([0], [0], color=manu_cut_color, linewidth=linewidth, linestyle=manu_cut_line_style)]
+        lines = [\
+            Line2D([0], [0], color=auto_cut_color, linewidth=linewidth, linestyle=auto_cut_line_style), \
+            Line2D([0], [0], color=manu_cut_color, linewidth=linewidth, linestyle=manu_cut_line_style)]
+
         labels = ['Auto-determined cut height', 'Manually-set cut height']
         col0.legend(lines, labels, loc='center', bbox_to_anchor=(0.5, -0.3), framealpha=0.0, fancybox=True)
 
@@ -214,7 +222,11 @@ if __name__ == "__main__":
                not os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 col_counter += 1
                 filename_without_extension = os.path.splitext(filename)[0]
-                plot(ax[plot_row], filename_without_extension, True if col_counter == 4 else False, *cluster(root, filename, cluster_count))
+                plot(\
+                    ax[plot_row], filename_without_extension, \
+                    True if col_counter == 4 else False, \
+                    *cluster(root, filename, cluster_count))
+
                 plot_row += 1
 
     image_file = os.path.join(inputPath, 'dendrogram-and-elbow.png')
