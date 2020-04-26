@@ -112,19 +112,31 @@ def get_cluster_count(Z, filename, cluster_count):
 
     auto_index = int(acceleration_rev[1:].argmax()) + 3
     manual_index = auto_index if cluster_count is None else cluster_count
-    return variance, dist_growth_acceleration, auto_index, float(last_rev[auto_index - 1]), manual_index, float(last_rev[manual_index - 1])
+    return \
+        variance, dist_growth_acceleration, \
+        auto_index, float(last_rev[auto_index - 1]), \
+        manual_index, float(last_rev[manual_index - 1])
 
 
 def set_plot_style():
     sns.set()
     sns.set_context("paper")
     sns.set_style("darkgrid")
-    fig, axes = plt.subplots(nrows=4, ncols=2, figsize=(12, 16), dpi=300, gridspec_kw={'width_ratios': [2, 1]})  # , constrained_layout=True)
+    fig, axes = plt.subplots(\
+        nrows=4, ncols=2, figsize=(12, 16), dpi=300, \
+        gridspec_kw={'width_ratios': [2, 1]})  # , constrained_layout=True)
+
     plt.subplots_adjust(wspace=0.15, hspace=0.35)
     return fig, axes
 
 
-def plot(ax, filename_without_extension, add_legend, linkage_matrix, auto_cut_distance, auto_cluster_count, auto_silhouette_score, manual_cut_distance, manual_cluster_count, manual_silhouette_score, variance, dist_growth_acceleration):
+def plot(\
+    ax, filename_without_extension, add_legend, \
+    linkage_matrix, auto_cut_distance, auto_cluster_count, \
+    auto_silhouette_score, manual_cut_distance, \
+    manual_cluster_count, manual_silhouette_score, \
+    variance, dist_growth_acceleration):
+
     col0 = ax[0]
     col1 = ax[1]
 
