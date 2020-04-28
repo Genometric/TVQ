@@ -108,12 +108,14 @@ def plot(ax, filename, add_legend, quartiles, changes, header=None, x_axis_label
         changes_x = pre_x[:-1] + post_x
         changes_y = list(changes.values())
         smooth_x, smooth_y = smooth(changes_x, changes_y)
-        zeros_y = [0] * len(smooth_y) 
+        zeros_y = [0] * len(smooth_y)
+        fill_color = ([230/255, 230/255, 239/255])
+        series_color = ([140/255, 140/255, 140/255])
         secondary_ax = ax.twinx()
-        secondary_ax.plot(smooth_x, smooth_y, color="blue", alpha=0.2)
-        secondary_ax.fill_between(smooth_x, zeros_y, smooth_y, facecolor="blue", alpha=0.1)
-        secondary_ax.yaxis.label.set_color("blue")
-        secondary_ax.tick_params(axis='y', colors="blue")
+        secondary_ax.plot(smooth_x, smooth_y, label="Citation Count Change", color=series_color, alpha=0.4)
+        secondary_ax.fill_between(smooth_x, zeros_y, smooth_y, facecolor=fill_color, alpha=0.5)
+        secondary_ax.yaxis.label.set_color(series_color)
+        secondary_ax.tick_params(axis='y', colors=series_color)
         if secondary_y_axis_label:
             secondary_ax.set_ylabel(secondary_y_axis_label)
 
