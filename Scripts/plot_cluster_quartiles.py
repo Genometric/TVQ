@@ -54,6 +54,26 @@ def get_quartiles(citations):
     return citations.quantile([*QUARTILES])
 
 
+def get_changes(citations):
+    sum = 0.0
+    changes = {}
+    previous_col_mean = 0;
+
+    _, pre_headers, post_headers = pre_post_columns(citations)
+
+    for header in pre_headers[:-1] + post_headers:
+        current_col_mean = citations[header].mean()
+        change = current_col_mean - previous_col_mean
+        sum += change
+        changes[header] = change
+        previous_col_mean = current_col_mean
+
+    for k in changes:
+        changes[k] = changes[k] / sum
+
+    return changes
+
+
 def smooth(x, y):
     x = np.array(x)
     y = np.array(y)
@@ -81,8 +101,21 @@ def get_cols(dataframe, row, cols):
     return y
 
 
-def plot(ax, filename, add_legend, quartiles, header=None, x_axis_label=None, y_axis_label=None):
+def plot(ax, filename, add_legend, quartiles, changes, header=None, x_axis_label=None, y_axis_label=None, secondary_y_axis_label=None):
     _, pre_x, post_x = pre_post_columns(quartiles)
+
+    if changes:
+        changes_x = pre_x[:-1] + post_x
+        changes_y = list(changes.values())
+        smooth_x, smooth_y = smooth(changes_x, changes_y)
+        zeros_y = [0] * len(smooth_y) 
+        secondary_ax = ax.twinx()
+        secondary_ax.plot(smooth_x, smooth_y, color="blue", alpha=0.2)
+        secondary_ax.fill_between(smooth_x, zeros_y, smooth_y, facecolor="blue", alpha=0.1)
+        secondary_ax.yaxis.label.set_color("blue")
+        secondary_ax.tick_params(axis='y', colors="blue")
+        if secondary_y_axis_label:
+            secondary_ax.set_ylabel(secondary_y_axis_label)
 
     idxes = quartiles.index.sort_values()
     for idx in idxes:
@@ -185,12 +218,12 @@ def get_vectors(tools):
     return citations, pre_post_citations, sums, avg_pre, avg_pst
 
 
-def set_plot_style(nrows, ncols):
+def set_plot_style(nrows, ncols, wspace=0.25):
     sns.set()
     sns.set_context("paper")
     sns.set_style("darkgrid")
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 12), dpi=300, sharex=True)
-    plt.subplots_adjust(wspace=0.25, hspace=0.07)
+    plt.subplots_adjust(wspace=wspace, hspace=0.07)
     return fig, axes
 
 
@@ -201,6 +234,10 @@ if __name__ == "__main__":
 
     inputPath = sys.argv[1]
 
+    plot_changes = False
+    if len(sys.argv) == 3:
+        plot_changes = sys.argv[2]
+
     files = []
     for root, dirpath, filenames in os.walk(inputPath):
         for filename in filenames:
@@ -208,7 +245,7 @@ if __name__ == "__main__":
             os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 files.append(filename)
 
-    fig, ax = set_plot_style(len(files), 3)
+    fig, ax = set_plot_style(len(files), 3, 0.25 if not plot_changes else 0.4)
 
     x_axis_label = "\n Date offset"
     y_axis_label = "Citations \n"
@@ -227,8 +264,11 @@ if __name__ == "__main__":
             header = f"Cluster {i+1}"
             col_counter += 1
             citations, _, _, _, _ = get_vectors(clusters.get_group(mappings[keys[i]]))
+            changes = None
+            if plot_changes:
+                changes = get_changes(citations)
             quartiles = get_quartiles(citations)
-            plot(ax[row_counter][col_counter], filename_without_extension, True if col_counter == 4 else False, quartiles, header=header if row_counter == 0 else None, x_axis_label=x_axis_label if row_counter == len(keys) else None, y_axis_label=f"{repository_name} \n \n {y_axis_label}" if col_counter == 0 else None)
+            plot(ax[row_counter][col_counter], filename_without_extension, True if col_counter == 4 else False, quartiles, changes, header=header if row_counter == 0 else None, x_axis_label=x_axis_label if row_counter == len(keys) else None, y_axis_label=f"{repository_name} \n \n {y_axis_label}" if col_counter == 0 else None, secondary_y_axis_label="\nDensity of Changes" if col_counter==len(keys)-1 else None)
     
     handles, labels = ax[row_counter][col_counter].get_legend_handles_labels()
 
