@@ -71,7 +71,14 @@ def get_changes(citations):
     for k in changes:
         changes[k] = changes[k] / sum
 
-    return changes
+    pre_max = post_max = 0
+    for key, value in changes.items():
+        if key < 0:
+            pre_max = max(pre_max, value)
+        else:
+            post_max = max(post_max, value)
+
+    return changes, pre_max, post_max
 
 
 def smooth(x, y):
@@ -275,7 +282,9 @@ if __name__ == "__main__":
             citations, _, _, _, _ = get_vectors(clusters.get_group(mappings[keys[i]]))
             changes = None
             if plot_changes:
-                changes = get_changes(citations)
+                changes, pre_max, post_max = get_changes(citations)
+                print(f"\t\t* Pre-Max:\t{pre_max}")
+                print(f"\t\t* Post-Max:\t{post_max}")
             quartiles = get_quartiles(citations)
             handles, labels = plot(ax[row_counter][col_counter], filename_without_extension, True if col_counter == 4 else False, quartiles, changes, header=header if row_counter == 0 else None, x_axis_label=x_axis_label if row_counter == len(keys) else None, y_axis_label=f"{repository_name} \n \n {y_axis_label}" if col_counter == 0 else None, secondary_y_axis_label="\nDensity of Changes" if col_counter==len(keys)-1 else None)
 
