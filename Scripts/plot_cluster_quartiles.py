@@ -104,6 +104,8 @@ def get_cols(dataframe, row, cols):
 def plot(ax, filename, add_legend, quartiles, changes, header=None, x_axis_label=None, y_axis_label=None, secondary_y_axis_label=None):
     _, pre_x, post_x = pre_post_columns(quartiles)
 
+    seco_axis_handles = []
+    seco_axis_labels = []
     if changes:
         changes_x = pre_x[:-1] + post_x
         changes_y = list(changes.values())
@@ -116,6 +118,7 @@ def plot(ax, filename, add_legend, quartiles, changes, header=None, x_axis_label
         secondary_ax.fill_between(smooth_x, zeros_y, smooth_y, facecolor=fill_color, alpha=0.5)
         secondary_ax.yaxis.label.set_color(series_color)
         secondary_ax.tick_params(axis='y', colors=series_color)
+        seco_axis_handles, seco_axis_labels = secondary_ax.get_legend_handles_labels()
         if secondary_y_axis_label:
             secondary_ax.set_ylabel(secondary_y_axis_label)
 
@@ -149,6 +152,10 @@ def plot(ax, filename, add_legend, quartiles, changes, header=None, x_axis_label
 
     if y_axis_label:
         ax.set_ylabel(y_axis_label)
+
+    prim_axis_handles, prim_axis_labels = ax.get_legend_handles_labels()
+
+    return prim_axis_handles + seco_axis_handles, prim_axis_labels + seco_axis_labels
 
 
 def pre_post_columns(tools):
@@ -270,12 +277,13 @@ if __name__ == "__main__":
             if plot_changes:
                 changes = get_changes(citations)
             quartiles = get_quartiles(citations)
-            plot(ax[row_counter][col_counter], filename_without_extension, True if col_counter == 4 else False, quartiles, changes, header=header if row_counter == 0 else None, x_axis_label=x_axis_label if row_counter == len(keys) else None, y_axis_label=f"{repository_name} \n \n {y_axis_label}" if col_counter == 0 else None, secondary_y_axis_label="\nDensity of Changes" if col_counter==len(keys)-1 else None)
-    
-    handles, labels = ax[row_counter][col_counter].get_legend_handles_labels()
+            handles, labels = plot(ax[row_counter][col_counter], filename_without_extension, True if col_counter == 4 else False, quartiles, changes, header=header if row_counter == 0 else None, x_axis_label=x_axis_label if row_counter == len(keys) else None, y_axis_label=f"{repository_name} \n \n {y_axis_label}" if col_counter == 0 else None, secondary_y_axis_label="\nDensity of Changes" if col_counter==len(keys)-1 else None)
 
     # The "magical" numbers of bbox_to_anchor are determined by trial-and-error.
-    fig.legend(handles, labels, loc='center', bbox_to_anchor=(0.454, 0.03), ncol=6, framealpha=0.0)
+    if plot_changes:
+        fig.legend(handles, labels, loc='center', bbox_to_anchor=(0.480, 0.03), ncol=7, framealpha=0.0)
+    else:
+        fig.legend(handles, labels, loc='center', bbox_to_anchor=(0.454, 0.03), ncol=6, framealpha=0.0)
 
     image_file = os.path.join(inputPath, 'clustered_citation_change.png')
     if os.path.isfile(image_file):
