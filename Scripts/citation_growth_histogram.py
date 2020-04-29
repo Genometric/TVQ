@@ -20,14 +20,27 @@ import matplotlib.ticker as mticker
 GROWTH_COLUMN_HEADER = "CitationGrowthOnInputData"
 
 
+def aggregate(input, min, max):
+    # TODO: there must be some method (e.g., in numpy) to do this aggregation. 
+    aggregated = []
+    for item in input:
+        if item < min:
+            aggregated.append(min)
+        elif item > max:
+            aggregated.append(max)
+        else:
+            aggregated.append(item)
+    return aggregated
+
+
 def plot(ax, growthes, labels):
-    ax.hist(growthes, label=labels, density=True, bins=24) # setting density to False will show count, and True will show probability.
+    ax.hist(growthes, label=labels, density=True, bins=16, rwidth=0.6) # setting density to False will show count, and True will show probability.
     ax.set_yscale('log')
     #ax.yaxis.set_major_formatter(mticker.ScalarFormatter()) # comment this when density=True
     ##ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
 
 
-def set_plot_style(nrows, ncols, fig_height=6, fig_width=8):
+def set_plot_style(nrows, ncols, fig_height=4, fig_width=8):
     sns.set()
     sns.set_context("paper")
     sns.set_style("darkgrid")
@@ -55,6 +68,7 @@ if __name__ == "__main__":
 
     fig, ax = set_plot_style(1, 1)
     row_counter = -1
+    growthes_dict = {}
     all_growthes = []
     labels = []
     for filename in files:
@@ -63,7 +77,7 @@ if __name__ == "__main__":
         filename_without_extension = os.path.splitext(filename)[0]
         repository_name = filename_without_extension.replace(CLUSTERED_FILENAME_POSFIX, "")
         input_df = pd.read_csv(os.path.join(root, filename), header=0, sep='\t')
-        all_growthes.append(get_growthes(input_df))
+        all_growthes.append(aggregate(get_growthes(input_df), -500, 1000))
         labels.append(repository_name)
     
     plot(ax, all_growthes, labels)
@@ -71,9 +85,7 @@ if __name__ == "__main__":
     ax.set_xlabel(x_axis_label)
     ax.set_ylabel(y_axis_label)
 
-    #handles, labels = ax.get_legend_handles_labels()
-    plt.legend(loc="upper left")
-    #fig.legend(handles, labels, loc='center')
+    plt.legend(loc="upper right")
 
     image_file = os.path.join(inputPath, 'percentage_of_growth.png')
     if os.path.isfile(image_file):
