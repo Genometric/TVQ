@@ -21,6 +21,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="citation_growth_histogram.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="cluster.py">
       <SubType>Code</SubType>
     </Compile>
