@@ -19,10 +19,10 @@ import matplotlib.ticker as mticker
 GROWTH_COLUMN_HEADER = "GainScore"
 
 
-def get_growthes(tools):
+def get_growthes(tools, growth_column_header=GROWTH_COLUMN_HEADER):
     growthes = []
     for index, row in tools.iterrows():
-        growthes.append(row.get(GROWTH_COLUMN_HEADER))
+        growthes.append(row.get(growth_column_header))
     return growthes
 
 

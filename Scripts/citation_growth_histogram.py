@@ -19,9 +19,9 @@ from matplotlib.ticker import FormatStrFormatter, PercentFormatter
 
 
 # When the histogram plots `density`, there should not 
-# be any difference between `CitationGrowthOnNormalizedData`
+# be any significant difference between `CitationGrowthOnNormalizedData`
 # and `CitationGrowthOnInputData`.
-GROWTH_COLUMN_HEADER = "CitationGrowthOnInputData"
+GROWTH_COLUMN_HEADER = "CitationGrowthOnNormalizedData"
 
 COLOR_PALETTES = {"Bioconda": "#3498db", "Bioconductor": "#feb308", "BioTools": "#34495e", "ToolShed": "#41aa33"}
 
@@ -40,11 +40,11 @@ def aggregate(input, min, max):
 
 
 def plot(ax, growthes, labels, colors):
-    counts, bins, patches = ax.hist(growthes, label=labels, density=True, bins=12, rwidth=0.65, color = colors, align="left", histtype="bar") # setting density to False will show count, and True will show probability.
+    counts, bins, patches = ax.hist(growthes, label=labels, density=True, bins=10, rwidth=0.65, color = colors, align="left", histtype="bar") # setting density to False will show count, and True will show probability.
     ax.set_yscale('log')
     ax.set_xticks(bins)
     ax.xaxis.set_major_formatter(PercentFormatter())
-    ax.set_xlim([-575, 975])
+    ax.set_xlim([-50, 975])
     #ax.yaxis.set_major_formatter(mticker.ScalarFormatter()) # comment this when density=True
     ##ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
 
@@ -89,7 +89,7 @@ if __name__ == "__main__":
         filename_without_extension = os.path.splitext(filename)[0]
         repository_name = filename_without_extension.replace(CLUSTERED_FILENAME_POSFIX, "")
         input_df = pd.read_csv(os.path.join(root, filename), header=0, sep='\t')
-        all_growthes.append(aggregate(get_growthes(input_df), -500, 1000))
+        all_growthes.append(aggregate(get_growthes(input_df, GROWTH_COLUMN_HEADER), -500, 1000))
         labels.append(repository_name)
         colors.append(COLOR_PALETTES[repository_name])
     
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     ax.set_xlabel(x_axis_label)
     ax.set_ylabel(y_axis_label)
 
-    plt.legend(loc="upper right", ncol=2)
+    plt.legend(loc="upper right", ncol=4)
 
     image_file = os.path.join(inputPath, 'percentage_of_growth.png')
     if os.path.isfile(image_file):
