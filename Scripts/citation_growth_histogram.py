@@ -18,6 +18,9 @@ import matplotlib.ticker as mticker
 from matplotlib.ticker import FormatStrFormatter, PercentFormatter
 
 
+# When the histogram plots `density`, there should not 
+# be any difference between `CitationGrowthOnNormalizedData`
+# and `CitationGrowthOnInputData`.
 GROWTH_COLUMN_HEADER = "CitationGrowthOnInputData"
 
 COLOR_PALETTES = {"Bioconda": "#3498db", "Bioconductor": "#feb308", "BioTools": "#34495e", "ToolShed": "#41aa33"}
