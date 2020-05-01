@@ -44,6 +44,7 @@ namespace Genometric.TVQ.API.Controllers
             NormalizedBeforeAfterVector,
             BetweenRepoTTest,
             DownloadFeatures,
+            DownloadFeaturesAggByPub,
             NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository,
             Overview
         };
@@ -126,6 +127,8 @@ namespace Genometric.TVQ.API.Controllers
                     return Ok(await BetweenRepoTTest().ConfigureAwait(false));
                 case ReportTypes.DownloadFeatures:
                     return DownloadFeatures();
+                case ReportTypes.DownloadFeaturesAggByPub:
+                    return DownloadFeaturesAggByPub();
                 case ReportTypes.NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository:
                     return await NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository();
             }
@@ -752,6 +755,11 @@ namespace Genometric.TVQ.API.Controllers
             IFileInfo fileInfo = provider.GetFileInfo(zipFilename);
 
             return File(fileInfo.CreateReadStream(), contentType, zipFilename);
+        }
+
+        private FileStreamResult DownloadFeaturesAggByPub()
+        {
+            return null;
         }
 
         private FileStreamResult ToolCitationDistributionOverYears()
