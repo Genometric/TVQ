@@ -373,12 +373,15 @@ namespace Genometric.TVQ.API.Analysis
             return rtv;
         }
 
-        public Dictionary<Tool, CitationChange> GetPrePostCitationChangeVector(
-            IEnumerable<ToolRepoAssociation> associations)
+        public void GetPrePostCitationChangeVector(
+            IEnumerable<ToolRepoAssociation> associations,
+            out Dictionary<int, CitationChange> vectors, 
+            out Dictionary<int, List<Tool>> tools)
         {
             Contract.Requires(associations != null);
 
-            var rtv = new Dictionary<Tool, CitationChange>();
+            vectors = new Dictionary<int, CitationChange>();
+            tools = new Dictionary<int, List<Tool>>();
 
             // The points for in-betweens calculation; data points on x axis (i.e., days offset).
             var interpolationPoints = Generate.LinearSpaced(21, -1.0, 1.0);
@@ -390,11 +393,20 @@ namespace Genometric.TVQ.API.Analysis
                     asso.Tool.PublicationAssociations.Count == 0)
                     continue;
 
-                if (!rtv.ContainsKey(asso.Tool))
-                    rtv.Add(asso.Tool, new CitationChange());
-
                 // There are some tools that have multiple publications, we consider only the first one. 
                 var pub = asso.Tool.PublicationAssociations.First();
+
+                if (!vectors.ContainsKey(pub.ID))
+                {
+                    vectors.Add(pub.ID, new CitationChange());
+                    tools.Add(pub.ID, new List<Tool> { asso.Tool });
+                }
+                else
+                {
+                    tools[pub.ID].Add(asso.Tool);
+                    continue;
+                }
+                
 
                 if (pub.Publication.Citations != null &&
                     pub.Publication.Year >= _earliestCitationYear)
@@ -404,14 +416,12 @@ namespace Genometric.TVQ.API.Analysis
                         pub.Publication.Citations.Count < 2) // At least two items are required for interpolation.
                         continue;
 
-                    rtv[asso.Tool].AddRange(
+                    vectors[pub.ID].AddRange(
                         pub.Publication.Citations, 
                         asso.DateAddedToRepository, 
                         interpolationPoints);
                 }
             }
-
-            return rtv;
         }
 
         private void EvaluateCitationImpact(Repository repository)
