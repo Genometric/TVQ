@@ -48,6 +48,7 @@ namespace TVQ.API.Controllers
                 .ThenInclude(x => x.Author)
                 .Include(x => x.KeywordAssociations)
                 .ThenInclude(x => x.Keyword)
+                .Include(x => x.ToolAssociations)
                 .FirstOrDefaultAsync(x => x.ID == id)
                 .ConfigureAwait(false);
 
