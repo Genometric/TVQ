@@ -394,30 +394,31 @@ namespace Genometric.TVQ.API.Analysis
                     continue;
 
                 // There are some tools that have multiple publications, we consider only the first one. 
-                var pub = asso.Tool.PublicationAssociations.First();
+                var pubAsso = asso.Tool.PublicationAssociations.First();
 
-                if (!vectors.ContainsKey(pub.ID))
+                var key = pubAsso.Publication.ID;
+                if (!vectors.ContainsKey(key))
                 {
-                    vectors.Add(pub.ID, new CitationChange());
-                    tools.Add(pub.ID, new List<Tool> { asso.Tool });
+                    vectors.Add(key, new CitationChange());
+                    tools.Add(key, new List<Tool> { asso.Tool });
                 }
                 else
                 {
-                    tools[pub.ID].Add(asso.Tool);
+                    tools[key].Add(asso.Tool);
                     continue;
                 }
                 
 
-                if (pub.Publication.Citations != null &&
-                    pub.Publication.Year >= _earliestCitationYear)
+                if (pubAsso.Publication.Citations != null &&
+                    pubAsso.Publication.Year >= _earliestCitationYear)
                 {
-                    if (pub.Publication.Citations.Count == 0 ||
-                        (pub.Publication.Citations.Count == 1 && pub.Publication.Citations.First().Count == 0) ||
-                        pub.Publication.Citations.Count < 2) // At least two items are required for interpolation.
+                    if (pubAsso.Publication.Citations.Count == 0 ||
+                        (pubAsso.Publication.Citations.Count == 1 && pubAsso.Publication.Citations.First().Count == 0) ||
+                        pubAsso.Publication.Citations.Count < 2) // At least two items are required for interpolation.
                         continue;
 
-                    vectors[pub.ID].AddRange(
-                        pub.Publication.Citations, 
+                    vectors[key].AddRange(
+                        pubAsso.Publication.Citations, 
                         asso.DateAddedToRepository, 
                         interpolationPoints);
                 }
