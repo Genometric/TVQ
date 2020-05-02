@@ -55,14 +55,18 @@ def independent_ttest(x, y):
 
 
 def cohen_d(x, y=None, population_mean=0.0):
+    if len(x) < 2 or (y and len(y) < 2):
+        return float('NaN'), "NaN"
+
     if y:
         # Cohen's d is computed as explained in the following link:
         # https://stackoverflow.com/a/33002123/947889
         d = len(x) + len(y) - 2
         cohen_d = (mean(x) - mean(y)) / sqrt(((len(x) - 1) * std(x, ddof=1) ** 2 + (len(y) - 1) * std(y, ddof=1) ** 2) / d) 
-        cohen_d = abs(cohen_d)
     else:
         cohen_d = (mean(x) - population_mean)/std(x, ddof=1)
+
+    cohen_d = abs(cohen_d)
 
     # This interpretation is based on the info available on Wikipedia:
     # https://en.wikipedia.org/wiki/Effect_size#Cohen.27s_d
