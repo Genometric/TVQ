@@ -182,24 +182,14 @@ def plot(\
 
     col1.axvline(x=auto_cluster_count, color=auto_cut_color, linewidth=1.5, linestyle=auto_cut_line_style)
     col1.axvline(x=manual_cluster_count, color=manu_cut_color, linewidth=1.5, linestyle=manu_cut_line_style)
-    
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Missing input path.")
-        exit()
 
-    if len(sys.argv) == 3:
-        cluster_count = int(sys.argv[2])
-    else:
-        cluster_count = None
-
+def run(input_path, cluster_count):
     fig, ax = set_plot_style()
-    inputPath = sys.argv[1]
     plot_row = 0
     col_counter = 0
 
-    cluster_ststs_filename = os.path.join(inputPath, CLUSTERING_STATS_REPORT_FILENAME)
+    cluster_ststs_filename = os.path.join(input_path, CLUSTERING_STATS_REPORT_FILENAME)
     if os.path.isfile(cluster_ststs_filename):
         os.remove(cluster_ststs_filename)
     # Write column's headers.
@@ -213,7 +203,7 @@ if __name__ == "__main__":
             "Manually-set Dendrogram Cut Height\t" \
             "Manually-set Cluster Silhouette Score\n")
 
-    for root, dirpath, filenames in os.walk(inputPath):
+    for root, dirpath, filenames in os.walk(input_path):
         for filename in filenames:
             if os.path.splitext(filename)[1] == ".csv" and \
                not os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
@@ -226,8 +216,21 @@ if __name__ == "__main__":
 
                 plot_row += 1
 
-    image_file = os.path.join(inputPath, 'dendrogram-and-elbow.png')
+    image_file = os.path.join(input_path, 'dendrogram-and-elbow.png')
     if os.path.isfile(image_file):
         os.remove(image_file)
     plt.savefig(image_file, bbox_inches='tight')
     plt.close()
+    
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Missing input path.")
+        exit()
+
+    if len(sys.argv) == 3:
+        cluster_count = int(sys.argv[2])
+    else:
+        cluster_count = None
+
+    run(sys.argv[1], cluster_count)
