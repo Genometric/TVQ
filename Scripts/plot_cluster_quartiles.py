@@ -243,19 +243,9 @@ def set_plot_style(nrows, ncols, wspace=0.25):
     return fig, axes
 
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Missing input path.")
-        exit()
-
-    inputPath = sys.argv[1]
-
-    plot_changes = False
-    if len(sys.argv) == 3:
-        plot_changes = sys.argv[2]
-
+def run(input_path, plot_changes):
     files = []
-    for root, dirpath, filenames in os.walk(inputPath):
+    for root, dirpath, filenames in os.walk(input_path):
         for filename in filenames:
             if os.path.splitext(filename)[1] == ".csv" and \
             os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
@@ -294,8 +284,20 @@ if __name__ == "__main__":
     else:
         fig.legend(handles, labels, loc='center', bbox_to_anchor=(0.454, 0.03), ncol=6, framealpha=0.0)
 
-    image_file = os.path.join(inputPath, 'clustered_citation_change.png')
+    image_file = os.path.join(input_path, 'clustered_citation_change.png')
     if os.path.isfile(image_file):
         os.remove(image_file)
     plt.savefig(image_file, bbox_inches='tight')
     plt.close()
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Missing input path.")
+        exit()
+
+    plot_changes = False
+    if len(sys.argv) == 3:
+        plot_changes = sys.argv[2]
+
+    run(sys.argv[1], plot_changes)
