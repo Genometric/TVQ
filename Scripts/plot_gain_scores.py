@@ -51,15 +51,9 @@ def set_plot_style(nrows, ncols, fig_height=12, fig_width=12):
     return fig, axes
 
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Missing input path.")
-        exit()
-
-    inputPath = sys.argv[1]
-
+def run(input_path):
     files = []
-    for root, dirpath, filenames in os.walk(inputPath):
+    for root, dirpath, filenames in os.walk(input_path):
         for filename in filenames:
             if os.path.splitext(filename)[1] == ".csv" and \
             os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
@@ -88,7 +82,7 @@ if __name__ == "__main__":
     
     handles, labels = ax[row_counter][col_counter].get_legend_handles_labels()
 
-    image_file = os.path.join(inputPath, 'gain_scores_clustered.png')
+    image_file = os.path.join(input_path, 'gain_scores_clustered.png')
     if os.path.isfile(image_file):
         os.remove(image_file)
     plt.savefig(image_file, bbox_inches='tight')
@@ -108,9 +102,16 @@ if __name__ == "__main__":
         
     handles, labels = ax[col_counter].get_legend_handles_labels()
 
-    image_file = os.path.join(inputPath, 'gain_scores.png')
+    image_file = os.path.join(input_path, 'gain_scores.png')
     if os.path.isfile(image_file):
         os.remove(image_file)
     plt.savefig(image_file, bbox_inches='tight')
     plt.close()
 
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Missing input path.")
+        exit()
+
+    run(sys.argv[1])
