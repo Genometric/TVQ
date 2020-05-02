@@ -236,15 +236,9 @@ def get_growthes(pre, post):
     return growthes
 
 
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Missing input path.")
-        exit()
-
-    inputPath = sys.argv[1]
-
+def run(input_path):
     filenames = []
-    for root, dirpath, files in os.walk(inputPath):
+    for root, dirpath, files in os.walk(input_path):
         for filename in files:
             if os.path.splitext(filename)[1] == ".csv" and \
                os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
@@ -285,7 +279,7 @@ if __name__ == "__main__":
         ttest_by_cluster(root, filename)
 
     print(f"\n>>> Performing Welch's t-test for the null hypothesis that the two independent relative clusters of two repositories have identical average (expected) values NOT assuming equal population variance.")
-    tcc_filename = os.path.join(inputPath, 'ttest_corresponding_clusters.txt')
+    tcc_filename = os.path.join(input_path, 'ttest_corresponding_clusters.txt')
     if os.path.isfile(tcc_filename):
         os.remove(tcc_filename)
 
@@ -299,6 +293,10 @@ if __name__ == "__main__":
         for j in range(i+1, len(filenames)):
             ttest_corresponding_clusters(root, filenames[i], filenames[j], tcc_filename)
 
-    
 
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Missing input path.")
+        exit()
 
+    run(sys.argv[1])
