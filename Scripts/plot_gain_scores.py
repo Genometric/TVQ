@@ -1,19 +1,9 @@
-import numpy as np
 import os
 import sys
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-import scipy.cluster.hierarchy as shc
-import scipy.stats as st
-from sklearn.cluster import AgglomerativeClustering
 import seaborn as sns
-import itertools
-from scipy.spatial.distance import cdist 
-import sklearn
-from scipy.interpolate import make_interp_spline, BSpline
-from t_test_clustered_data import get_sorted_clusters, get_vectors, get_clusters, CLUSTERED_FILENAME_POSFIX
-import matplotlib.ticker as mticker
+from t_test_clustered_data import get_sorted_clusters, get_clusters, CLUSTERED_FILENAME_POSFIX
 
 
 GROWTH_COLUMN_HEADER = "GainScore"
@@ -78,7 +68,13 @@ def run(input_path):
             header = f"Cluster {i+1}"
             col_counter += 1
             growthes = get_growthes(clusters.get_group(mappings[keys[i]]))
-            plot(ax[row_counter][col_counter], filename_without_extension, growthes, header=header if row_counter == 0 else None, x_axis_label=x_axis_label if row_counter == len(keys) else None, y_axis_label=f"{repository_name} \n \n {y_axis_label}" if col_counter == 0 else None)
+            plot(
+                ax[row_counter][col_counter],
+                filename_without_extension,
+                growthes,
+                header=header if row_counter == 0 else None,
+                x_axis_label=x_axis_label if row_counter == len(keys) else None,
+                y_axis_label=f"{repository_name} \n \n {y_axis_label}" if col_counter == 0 else None)
     
     handles, labels = ax[row_counter][col_counter].get_legend_handles_labels()
 
@@ -98,7 +94,13 @@ def run(input_path):
 
         tools = pd.read_csv(os.path.join(root, filename), header=0, sep='\t')
         growthes = get_growthes(tools)
-        plot(ax[col_counter], filename_without_extension, growthes, header=repository_name, x_axis_label=x_axis_label, y_axis_label=f"\n {y_axis_label}" if col_counter == 0 else None)           
+        plot(
+            ax[col_counter],
+            filename_without_extension,
+            growthes,
+            header=repository_name,
+            x_axis_label=x_axis_label,
+            y_axis_label=f"\n {y_axis_label}" if col_counter == 0 else None)
         
     handles, labels = ax[col_counter].get_legend_handles_labels()
 

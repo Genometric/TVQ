@@ -23,7 +23,6 @@ def set_plot_style(nrows, ncols, fig_height=12, fig_width=12):
     return fig, axes
 
 
-
 def run(input_path):
     counts = {}
     for root, dirpath, filenames in os.walk(input_path):
@@ -31,9 +30,28 @@ def run(input_path):
             if os.path.splitext(filename)[1] == ".csv" and \
             os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 clusters = get_clusters(root, filename)
-                counts[filename] = {}
                 for k in clusters.groups:
-                    counts[filename][k] = len(clusters.groups[k])
+                    if k not in counts:
+                        counts[k] = {}
+                    counts[k][filename] = len(clusters.groups[k])
+
+    fig, ax = set_plot_style(1,1)
+    width = 0.27
+    series = []
+    x = list(range(len(counts) + 1))
+    i = 0
+    for cluster in counts:
+        y = []
+        for repo in counts[cluster]:
+            y.append(counts[cluster][repo])
+        series.append(ax.bar([j + (width * i) for j in x], y, width, color='r'))
+        i += 1
+    
+    image_file = os.path.join(input_path, 'counts.png')
+    if os.path.isfile(image_file):
+        os.remove(image_file)
+    plt.savefig(image_file, bbox_inches='tight')
+    plt.close()
 
 
 if __name__ == "__main__":
