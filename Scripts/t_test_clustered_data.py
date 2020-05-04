@@ -62,7 +62,7 @@ def cohen_d(x, y=None, population_mean=0.0):
         # Cohen's d is computed as explained in the following link:
         # https://stackoverflow.com/a/33002123/947889
         d = len(x) + len(y) - 2
-        cohen_d = (mean(x) - mean(y)) / sqrt(((len(x) - 1) * std(x, ddof=1) ** 2 + (len(y) - 1) * std(y, ddof=1) ** 2) / d) 
+        cohen_d = (mean(x) - mean(y)) / sqrt(((len(x) - 1) * std(x, ddof=1) ** 2 + (len(y) - 1) * std(y, ddof=1) ** 2) / d)
     else:
         cohen_d = (mean(x) - population_mean)/std(x, ddof=1)
 
@@ -289,7 +289,17 @@ def run(input_path):
 
     # Add column header. 
     with open(tcc_filename, "a") as f:
-        f.write(f"Repo A\tRepo B\tRepo A Cluster Number\tRepo B Cluster Number\tAverage Citation Count in Repo A Cluster\tAverage Citation Count in Repo B Cluster\tt Statistic\tp-value\tCohen's d\tCohen's d Interpretation\n")
+        f.write(
+            f"Repo A\t"
+            f"Repo B\t"
+            f"Repo A Cluster Number\t"
+            f"Repo B Cluster Number\t"
+            f"Average Citation Count in Repo A Cluster\t"
+            f"Average Citation Count in Repo B Cluster\t"
+            f"t Statistic\t"
+            f"p-value\t"
+            f"Cohen's d\tC"
+            f"ohen's d Interpretation\n")
 
     # Iterate through all the permutations of repositories,
     # and compute t-test between corresponding clusters.

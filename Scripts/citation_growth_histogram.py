@@ -1,21 +1,11 @@
-import numpy as np
 import os
 import sys
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-import scipy.cluster.hierarchy as shc
-import scipy.stats as st
-from sklearn.cluster import AgglomerativeClustering
 import seaborn as sns
-import itertools
-from scipy.spatial.distance import cdist 
-import sklearn
-from scipy.interpolate import make_interp_spline, BSpline
-from t_test_clustered_data import get_sorted_clusters, get_vectors, get_clusters, CLUSTERED_FILENAME_POSFIX
+from t_test_clustered_data import CLUSTERED_FILENAME_POSFIX
 from plot_gain_scores import get_growthes
-import matplotlib.ticker as mticker
-from matplotlib.ticker import FormatStrFormatter, PercentFormatter
+from matplotlib.ticker import PercentFormatter
 
 
 # When the histogram plots `density`, there should not 
@@ -40,7 +30,10 @@ def aggregate(input, min, max):
 
 
 def plot(ax, growthes, labels, colors):
-    counts, bins, patches = ax.hist(growthes, label=labels, density=True, bins=10, rwidth=0.65, color = colors, align="left", histtype="bar") # setting density to False will show count, and True will show probability.
+    counts, bins, patches = ax.hist(growthes, label=labels, density=True, bins=10, rwidth=0.65,
+                                    color = colors, align="left", histtype="bar")   # setting density to False will
+                                                                                    # show count, and True will show
+                                                                                    # probability.
     ax.set_yscale('log')
     ax.set_xticks(bins)
     ax.xaxis.set_major_formatter(PercentFormatter())

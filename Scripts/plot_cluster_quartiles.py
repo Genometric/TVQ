@@ -1,15 +1,9 @@
-import numpy as np
 import os
 import sys
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy.cluster.hierarchy as shc
-from sklearn.cluster import AgglomerativeClustering
 import seaborn as sns
-import itertools
-from scipy.spatial.distance import cdist 
-import sklearn
 from scipy.interpolate import make_interp_spline, BSpline
 from t_test_clustered_data import get_sorted_clusters
 
@@ -108,7 +102,8 @@ def get_cols(dataframe, row, cols):
     return y
 
 
-def plot(ax, filename, add_legend, quartiles, changes, header=None, x_axis_label=None, y_axis_label=None, secondary_y_axis_label=None):
+def plot(ax, filename, add_legend, quartiles, changes, header=None,
+         x_axis_label=None, y_axis_label=None, secondary_y_axis_label=None):
     _, pre_x, post_x = pre_post_columns(quartiles)
 
     seco_axis_handles = []
@@ -276,7 +271,16 @@ def run(input_path, plot_changes):
                 print(f"\t\t* Pre-Max:\t{pre_max}")
                 print(f"\t\t* Post-Max:\t{post_max}")
             quartiles = get_quartiles(citations)
-            handles, labels = plot(ax[row_counter][col_counter], filename_without_extension, True if col_counter == 4 else False, quartiles, changes, header=header if row_counter == 0 else None, x_axis_label=x_axis_label if row_counter == len(keys) else None, y_axis_label=f"{repository_name} \n \n {y_axis_label}" if col_counter == 0 else None, secondary_y_axis_label="\nDensity of Changes" if col_counter==len(keys)-1 else None)
+            handles, labels = plot(
+                ax[row_counter][col_counter],
+                filename_without_extension,
+                True if col_counter == 4 else False,
+                quartiles,
+                changes,
+                header=header if row_counter == 0 else None,
+                x_axis_label=x_axis_label if row_counter == len(keys) else None,
+                y_axis_label=f"{repository_name} \n \n {y_axis_label}" if col_counter == 0 else None,
+                secondary_y_axis_label="\nDensity of Changes" if col_counter==len(keys)-1 else None)
 
     # The "magical" numbers of bbox_to_anchor are determined by trial-and-error.
     if plot_changes:

@@ -43,10 +43,14 @@ def normalize_min_max(v, is_before=True):
         return np.array([(-1) * ((x - max) / (min - max)) for x in v])
     else:
         return np.array([(x - min) / (max - min) for x in v])
-    
-    
 
-def generate_plot(ax, title, xlabel, ylabel, b_x, b_y, a_x, a_y, integer_x_axix=False, before_marker = "o", after_marker = "o"):
+
+def generate_plot(
+        ax, title, xlabel, ylabel,
+        b_x, b_y, a_x, a_y,
+        integer_x_axix=False,
+        before_marker="o",
+        after_marker="o"):
     # This addes the last item of "before" to 
     # the begining of "after" vector, hence 
     # connecting them.
