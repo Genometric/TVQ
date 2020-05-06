@@ -59,13 +59,30 @@ def run(input_path):
     ax.set_xticks([i + offset for i in x])
     ax.set_xticklabels(repos)
 
+    # Show only horizontal grid lines.
+    ax.grid(axis='x', which='major')
     ax.legend(series, ("Cluster " + str(i+1) for i in counts.keys()))
+
+    for rect in series:
+        autolabel(ax, rect)
 
     image_file = os.path.join(input_path, 'num_pubs_in_clusters.png')
     if os.path.isfile(image_file):
         os.remove(image_file)
     plt.savefig(image_file, bbox_inches='tight')
     plt.close()
+
+
+def autolabel(ax, rects):
+    # This method is based on the docs of pyplot.
+    """Attach a text label above each bar in *rects*, displaying its height."""
+    for rect in rects:
+        height = rect.get_height()
+        ax.annotate('{}'.format(height),
+                    xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 3),  # 3 points vertical offset
+                    textcoords="offset points",
+                    ha='center', va='bottom')
 
 
 if __name__ == "__main__":
