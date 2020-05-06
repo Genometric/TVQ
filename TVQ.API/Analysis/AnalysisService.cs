@@ -373,6 +373,47 @@ namespace Genometric.TVQ.API.Analysis
             return rtv;
         }
 
+        public Dictionary<Tool, CitationChange> GetPrePostCitationChangeVector(
+            IEnumerable<ToolRepoAssociation> associations)
+        {
+            Contract.Requires(associations != null);
+
+            var rtv = new Dictionary<Tool, CitationChange>();
+
+            // The points for in-betweens calculation; data points on x axis (i.e., days offset).
+            var interpolationPoints = Generate.LinearSpaced(21, -1.0, 1.0);
+
+            foreach (var asso in associations)
+            {
+                // Some tools may not have any publications. 
+                if (asso.Tool.PublicationAssociations == null ||
+                    asso.Tool.PublicationAssociations.Count == 0)
+                    continue;
+
+                if (!rtv.ContainsKey(asso.Tool))
+                    rtv.Add(asso.Tool, new CitationChange());
+
+                // There are some tools that have multiple publications, we consider only the first one. 
+                var pub = asso.Tool.PublicationAssociations.First();
+
+                if (pub.Publication.Citations != null &&
+                    pub.Publication.Year >= _earliestCitationYear)
+                {
+                    if (pub.Publication.Citations.Count == 0 ||
+                        (pub.Publication.Citations.Count == 1 && pub.Publication.Citations.First().Count == 0) ||
+                        pub.Publication.Citations.Count < 2) // At least two items are required for interpolation.
+                        continue;
+
+                    rtv[asso.Tool].AddRange(
+                        pub.Publication.Citations,
+                        asso.DateAddedToRepository,
+                        interpolationPoints);
+                }
+            }
+
+            return rtv;
+        }
+
         public void GetPrePostCitationChangeVectorByPubs(
             IEnumerable<ToolRepoAssociation> associations,
             out Dictionary<int, CitationChange> vectors, 

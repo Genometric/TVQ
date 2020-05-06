@@ -43,6 +43,7 @@ namespace Genometric.TVQ.API.Controllers
             ToolCitationDistributionOverYears,
             NormalizedBeforeAfterVector,
             BetweenRepoTTest,
+            DownloadFeatures,
             DownloadFeaturesByPubs,
             NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository,
             Overview
@@ -124,6 +125,8 @@ namespace Genometric.TVQ.API.Controllers
                     return await Overview(repository).ConfigureAwait(false);
                 case ReportTypes.BetweenRepoTTest:
                     return Ok(await BetweenRepoTTest().ConfigureAwait(false));
+                case ReportTypes.DownloadFeatures:
+                    return DownloadFeatures();
                 case ReportTypes.DownloadFeaturesByPubs:
                     return DownloadFeaturesByPubs();
                 case ReportTypes.NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository:
@@ -677,6 +680,83 @@ namespace Genometric.TVQ.API.Controllers
             return File(fileInfo.CreateReadStream(), contentType, "TVQStats.csv");
         }
 
+        private FileStreamResult DownloadFeatures()
+        {
+            var tempPath = Path.Combine(
+                Path.GetFullPath(Path.GetTempPath()),
+                Utilities.GetRandomString(10));
+
+            var normalizedByDayTmpPath = Path.Combine(tempPath, "NormalizedByDays");
+            var normalizedByYearTmpPath = Path.Combine(tempPath, "NormalizedByYears");
+
+            var toolRepoAssociations = _context.ToolRepoAssociations
+                .Include(x => x.Tool).ThenInclude(x => x.CategoryAssociations)
+                .Include(x => x.Tool).ThenInclude(x => x.CategoryAssociations)
+                .Include(x => x.Tool).ThenInclude(x => x.PublicationAssociations).ThenInclude(x => x.Publication)
+                .ToList();
+
+            foreach (var repo in _context.Repositories)
+            {
+                var associations = toolRepoAssociations.Where(x => x.RepositoryID == repo.ID).ToList();
+
+                var normalizedData = _analysisService.GetPrePostCitationChangeVector(associations);
+
+                if (normalizedData.Count == 0)
+                    continue;
+
+                var growthes = normalizedData.ToDictionary(x => x.Key, x => x.Value.Growth);
+
+                // TODO: Rework the following to avoid creating two dictionaries, and instead 
+                // just pass normalizedData to the WriteToFile method.
+                WriteToFile(
+                    Path.Combine(normalizedByDayTmpPath, "CitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
+                    normalizedData.ToDictionary(
+                        x => x.Key,
+                        x => x.Value.GetCitations(CitationChange.DateNormalizationType.ByDay)),
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore),
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GrowthOnNormalizedDataByDay),
+                    growthes);
+
+                WriteToFile(
+                    Path.Combine(normalizedByDayTmpPath, "CumulativeCitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
+                    normalizedData.ToDictionary(
+                        x => x.Key,
+                        x => x.Value.GetCumulativeCitations(CitationChange.DateNormalizationType.ByDay)),
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore),
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GrowthOnNormalizedDataByDay),
+                    growthes);
+
+                WriteToFile(
+                    Path.Combine(normalizedByYearTmpPath, "CitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
+                    normalizedData.ToDictionary(
+                        x => x.Key,
+                        x => x.Value.GetCitations(CitationChange.DateNormalizationType.ByYear)),
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore),
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GrowthOnNormalizedDataByYear),
+                    growthes);
+
+                WriteToFile(
+                    Path.Combine(normalizedByYearTmpPath, "CumulativeCitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
+                    normalizedData.ToDictionary(
+                        x => x.Key,
+                        x => x.Value.GetCumulativeCitations(CitationChange.DateNormalizationType.ByYear)),
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GainScore),
+                    normalizedData.ToDictionary(x => x.Key, x => x.Value.GrowthOnNormalizedDataByYear),
+                    growthes);
+            }
+
+            var zipFileTempPath = Path.GetFullPath(Path.GetTempPath()) + Utilities.GetRandomString(10) + Path.DirectorySeparatorChar;
+            Directory.CreateDirectory(zipFileTempPath);
+            var zipFilename = $"TVQStats.zip";
+            ZipFile.CreateFromDirectory(tempPath, zipFileTempPath + zipFilename);
+
+            var contentType = "application/zip";
+            IFileProvider provider = new PhysicalFileProvider(zipFileTempPath);
+            IFileInfo fileInfo = provider.GetFileInfo(zipFilename);
+
+            return File(fileInfo.CreateReadStream(), contentType, zipFilename);
+        }
+
         private FileStreamResult DownloadFeaturesByPubs()
         {
             var tempPath = Path.Combine(
@@ -932,6 +1012,44 @@ namespace Genometric.TVQ.API.Controllers
                         .ThenInclude(x => x.Tool)
                             .ThenInclude(x => x.PublicationAssociations)
                     .First(x => x.ID == id);
+            }
+        }
+
+        private void WriteToFile(
+            string filename,
+            Dictionary<Tool, SortedDictionary<double, double>> vectors,
+            Dictionary<Tool, double> GainScores,
+            Dictionary<Tool, double> GrowesOnNormalizedData,
+            Dictionary<Tool, double> Growthes)
+        {
+            var builder = new StringBuilder();
+            Directory.CreateDirectory(Path.GetDirectoryName(filename));
+            using var writer = new StreamWriter(filename);
+
+            builder.Append("ID\tToolName\tGainScore\tCitationGrowthOnInputData\tCitationGrowthOnNormalizedData");
+            var pointsX = vectors.First().Value.Keys;
+            foreach (var x in pointsX)
+                builder.Append("\t" + x.ToString(_numberFormat, CultureInfo.InvariantCulture));
+            writer.WriteLine(builder.ToString());
+
+            foreach (var tool in vectors)
+            {
+                if (tool.Value.Count == 0)
+                    continue;
+
+                builder.Clear();
+                builder.Append(tool.Key.ToString());
+
+                builder.Append("\t" + GainScores[tool.Key]);
+
+                builder.Append("\t" + Growthes[tool.Key]);
+
+                builder.Append("\t" + GrowesOnNormalizedData[tool.Key]);
+
+                foreach (var point in tool.Value)
+                    builder.Append("\t" + point.Value.ToString(_numberFormat, CultureInfo.InvariantCulture));
+
+                writer.WriteLine(builder.ToString());
             }
         }
 
