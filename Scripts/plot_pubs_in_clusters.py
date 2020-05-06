@@ -29,32 +29,34 @@ def set_plot_style(nrows, ncols, fig_height=5, fig_width=6):
 def run(input_path):
     counts = {}
     repos = []
+    cluster_count = 0
     for root, dirpath, filenames in os.walk(input_path):
         for filename in filenames:
             if os.path.splitext(filename)[1] == ".csv" and \
             os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 repos.append(get_repo_name(filename))
                 clusters = get_clusters(root, filename)
+                cluster_count = len(clusters.groups)
                 for k in clusters.groups:
                     if k not in counts:
                         counts[k] = {}
                     counts[k][filename] = len(clusters.groups[k])
 
     fig, ax = set_plot_style(1,1)
-    width = 0.27
+    offset = 0.75 / cluster_count
     series = []
-    x = list(range(len(counts) + 1))
+    x = list(range(len(counts)))
     i = 0
     for cluster in counts:
         y = []
         for repo in counts[cluster]:
             y.append(counts[cluster][repo])
-        series.append(ax.bar([j + (width * i) for j in x], y, width, color=COLOR_PALETTE[i]))
+        series.append(ax.bar([j + (offset * i) for j in list(range(len(repos)))], y, offset, color=COLOR_PALETTE[i]))
         i += 1
     
     ax.set_yscale('log')
     ax.set_ylabel('Count\n')
-    ax.set_xticks([i + width for i in x])
+    ax.set_xticks([i + offset for i in x])
     ax.set_xticklabels(repos)
 
     ax.legend(series, ("Cluster " + str(i+1) for i in counts.keys()))

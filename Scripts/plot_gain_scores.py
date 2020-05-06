@@ -52,7 +52,10 @@ def run(input_path):
     x_axis_label = "\n Citation Growth"
     y_axis_label = "Probability \n"
 
-    fig, ax = set_plot_style(len(files), 3)
+    clusters = get_clusters(root, files[0])
+    cluster_count = len(clusters.groups)
+
+    fig, ax = set_plot_style(len(files), cluster_count)
     row_counter = -1
     for filename in files:
         print(f">>> Processing file: {filename}")

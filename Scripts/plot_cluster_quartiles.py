@@ -233,7 +233,7 @@ def set_plot_style(nrows, ncols, wspace=0.25):
     sns.set()
     sns.set_context("paper")
     sns.set_style("darkgrid")
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 12), dpi=300, sharex=True)
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(3 * nrows, 4 * ncols), dpi=300, sharex=True)
     plt.subplots_adjust(wspace=wspace, hspace=0.07)
     return fig, axes
 
@@ -246,7 +246,10 @@ def run(input_path, plot_changes):
             os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 files.append(filename)
 
-    fig, ax = set_plot_style(len(files), 3, 0.25 if not plot_changes else 0.4)
+    clusters = get_clusters(root, files[0])
+    cluster_count = len(clusters.groups)
+
+    fig, ax = set_plot_style(len(files), cluster_count, 0.25 if not plot_changes else 0.4)
 
     x_axis_label = "\n Date offset"
     y_axis_label = "Citations \n"
