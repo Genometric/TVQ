@@ -5,6 +5,7 @@ import plot_cluster_quartiles
 import t_test_clustered_data
 import citation_growth_histogram
 import plot_gain_scores
+import plot_pubs_in_clusters
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -27,3 +28,4 @@ if __name__ == "__main__":
     t_test_clustered_data.run(input_path)
     citation_growth_histogram.run(input_path)
     plot_gain_scores.run(input_path)
+    plot_pubs_in_clusters.run(input_path)
