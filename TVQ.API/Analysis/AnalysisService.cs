@@ -373,7 +373,7 @@ namespace Genometric.TVQ.API.Analysis
             return rtv;
         }
 
-        public void GetPrePostCitationChangeVector(
+        public void GetPrePostCitationChangeVectorByPubs(
             IEnumerable<ToolRepoAssociation> associations,
             out Dictionary<int, CitationChange> vectors, 
             out Dictionary<int, List<Tool>> tools)

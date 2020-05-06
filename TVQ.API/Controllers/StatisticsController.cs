@@ -43,7 +43,7 @@ namespace Genometric.TVQ.API.Controllers
             ToolCitationDistributionOverYears,
             NormalizedBeforeAfterVector,
             BetweenRepoTTest,
-            DownloadFeatures,
+            DownloadFeaturesByPubs,
             NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository,
             Overview
         };
@@ -124,8 +124,8 @@ namespace Genometric.TVQ.API.Controllers
                     return await Overview(repository).ConfigureAwait(false);
                 case ReportTypes.BetweenRepoTTest:
                     return Ok(await BetweenRepoTTest().ConfigureAwait(false));
-                case ReportTypes.DownloadFeatures:
-                    return DownloadFeatures();
+                case ReportTypes.DownloadFeaturesByPubs:
+                    return DownloadFeaturesByPubs();
                 case ReportTypes.NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository:
                     return await NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository();
             }
@@ -677,7 +677,7 @@ namespace Genometric.TVQ.API.Controllers
             return File(fileInfo.CreateReadStream(), contentType, "TVQStats.csv");
         }
 
-        private FileStreamResult DownloadFeatures()
+        private FileStreamResult DownloadFeaturesByPubs()
         {
             var tempPath = Path.Combine(
                 Path.GetFullPath(Path.GetTempPath()),
@@ -696,7 +696,7 @@ namespace Genometric.TVQ.API.Controllers
             {
                 var associations = toolRepoAssociations.Where(x => x.RepositoryID == repo.ID).ToList();
 
-                _analysisService.GetPrePostCitationChangeVector(
+                _analysisService.GetPrePostCitationChangeVectorByPubs(
                     associations, 
                     out Dictionary<int, CitationChange> vectors, 
                     out Dictionary<int, List<Tool>> tools);
@@ -708,7 +708,7 @@ namespace Genometric.TVQ.API.Controllers
 
                 // TODO: Rework the following to avoid creating two dictionaries, and instead 
                 // just pass normalizedData to the WriteToFile method.
-                WriteToFile(
+                WriteToFileByPubs(
                     Path.Combine(normalizedByDayTmpPath, "CitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
                     vectors.ToDictionary(
                         x => x.Key,
@@ -718,7 +718,7 @@ namespace Genometric.TVQ.API.Controllers
                     vectors.ToDictionary(x=>x.Key, x=>x.Value.GrowthOnNormalizedDataByDay),
                     growthes);
 
-                WriteToFile(
+                WriteToFileByPubs(
                     Path.Combine(normalizedByDayTmpPath, "CumulativeCitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
                     vectors.ToDictionary(
                         x => x.Key,
@@ -728,7 +728,7 @@ namespace Genometric.TVQ.API.Controllers
                     vectors.ToDictionary(x => x.Key, x => x.Value.GrowthOnNormalizedDataByDay),
                     growthes);
 
-                WriteToFile(
+                WriteToFileByPubs(
                     Path.Combine(normalizedByYearTmpPath, "CitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
                     vectors.ToDictionary(
                         x => x.Key,
@@ -738,7 +738,7 @@ namespace Genometric.TVQ.API.Controllers
                     vectors.ToDictionary(x => x.Key, x => x.Value.GrowthOnNormalizedDataByYear),
                     growthes);
 
-                WriteToFile(
+                WriteToFileByPubs(
                     Path.Combine(normalizedByYearTmpPath, "CumulativeCitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
                     vectors.ToDictionary(
                         x => x.Key,
@@ -935,7 +935,7 @@ namespace Genometric.TVQ.API.Controllers
             }
         }
 
-        private void WriteToFile(
+        private void WriteToFileByPubs(
             string filename,
             Dictionary<int, SortedDictionary<double, double>> vectors,
             Dictionary<int, List<Tool>> tools,
