@@ -52,22 +52,22 @@ def get_pub_tool_count(filename):
                 if name not in tools[k]:
                     tools[k][name] = 0
 
-    pubs_count = {}
+    cluster_pubs_count = {}
     for k in pubs:
-        pubs_count[k] = len(pubs[k])
+        cluster_pubs_count[k] = len(pubs[k])
     
-    tools_count = {}
+    cluster_tools_count = {}
     for k in tools:
-        tools_count[k] = len(tools[k])
+        cluster_tools_count[k] = len(tools[k])
 
-    return pubs_count, tools_count
+    return sum(cluster_pubs_count.values()), cluster_pubs_count, sum(cluster_tools_count.values()), cluster_tools_count
 
 
 
 def run(input_path):
     filenames, repositories = get_clustered_repositories(input_path)
     for filename in filenames:
-        get_pub_tool_count(filename)
+        c_pubs, ck_pubs, c_tools, ck_tools = get_pub_tool_count(filename)
 
 
 if __name__ == "__main__":
