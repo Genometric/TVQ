@@ -113,7 +113,11 @@ def get_clusters(root, filename):
     
     :rtype:  pandas.core.groupby.generic.DataFrameGroupBy
     """
-    input_df = pd.read_csv(os.path.join(root, filename), header=0, sep='\t')
+    return get_clusters(os.path.join(root, filename))
+
+
+def get_clusters(filename):
+    input_df = pd.read_csv(filename, header=0, sep='\t')
     return input_df.groupby(CLUSTER_NAME_COLUMN_LABEL)
 
 

@@ -46,6 +46,9 @@
     <Compile Include="plot_pubs_in_clusters.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="plot_tool_pub.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="run.py">
       <SubType>Code</SubType>
     </Compile>
