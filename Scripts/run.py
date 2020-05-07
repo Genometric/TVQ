@@ -15,7 +15,7 @@ if __name__ == "__main__":
     input_path = sys.argv[1]
 
     plot_changes = False
-    if len(sys.argv) == 3:
+    if len(sys.argv) >= 3:
         plot_changes = sys.argv[2]
 
     if len(sys.argv) == 4:
