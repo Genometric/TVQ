@@ -12,9 +12,21 @@ import itertools
 from scipy.spatial.distance import cdist
 import matplotlib.ticker as mticker
 from t_test_clustered_data import get_sorted_clusters, get_vectors, get_clusters, CLUSTERED_FILENAME_POSFIX, get_repo_name
+import random
 
 
 COLOR_PALETTE = ["#3498db", "#feb308", "#34495e", "#41aa33"]
+
+
+def get_color(i):
+    if i<len(COLOR_PALETTE):
+        return COLOR_PALETTE[i]
+    else:
+        color = "ffffff"
+        while color == "ffffff":
+            color = ''.join([random.choice('0123456789ABCDEF') for i in range(6)])
+        return "#" + color
+
 
 
 def set_plot_style(nrows, ncols, fig_height=5, fig_width=6):
@@ -51,7 +63,7 @@ def run(input_path):
         y = []
         for repo in counts[cluster]:
             y.append(counts[cluster][repo])
-        series.append(ax.bar([j + (offset * i) for j in list(range(len(repos)))], y, offset, color=COLOR_PALETTE[i]))
+        series.append(ax.bar([j + (offset * i) for j in list(range(len(repos)))], y, offset, color=get_color(i)))
         i += 1
     
     ax.set_yscale('log')
