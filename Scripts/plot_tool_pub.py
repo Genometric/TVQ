@@ -76,18 +76,8 @@ def get_pub_tool_count(filename):
     return sum(cluster_pubs_count.values()), cluster_pubs_count, sum(cluster_tools_count.values()), cluster_tools_count
 
 
-def set_plot_style(nrows, ncols, fig_height=5, fig_width=6):
-    sns.set()
-    sns.set_context("paper")
-    sns.set_style("darkgrid")
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(fig_width, fig_height), dpi=600)
-    plt.subplots_adjust(wspace=0.2, hspace=0.2)
-    return fig, axes
-
-
-def run(input_path):
+def plot_clustered(filenames, repositories):
     fig, ax = set_plot_style(1, 1)
-    filenames, repositories = get_clustered_repositories(input_path)
     i = 0
     max_x = 0
     max_y = 0
@@ -136,6 +126,20 @@ def run(input_path):
         os.remove(image_file)
     plt.savefig(image_file, bbox_inches='tight')
     plt.close()
+
+
+def set_plot_style(nrows, ncols, fig_height=5, fig_width=6):
+    sns.set()
+    sns.set_context("paper")
+    sns.set_style("darkgrid")
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(fig_width, fig_height), dpi=600)
+    plt.subplots_adjust(wspace=0.2, hspace=0.2)
+    return fig, axes
+
+
+def run(input_path):
+    filenames, repositories = get_clustered_repositories(input_path)
+    plot_clustered(filenames, repositories)
 
 
 if __name__ == "__main__":
