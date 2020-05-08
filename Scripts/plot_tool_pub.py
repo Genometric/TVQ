@@ -117,6 +117,8 @@ def plot_clustered(input_path, filenames, repositories):
 
     ax.set_yscale('log')
     ax.set_xscale('log')
+    ax.yaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%d'))
+    ax.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%d'))
 
     ax.set_xlabel("\nPublications Count")
     ax.set_ylabel("Tools Count\n")
