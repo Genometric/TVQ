@@ -10,7 +10,11 @@ from t_test_clustered_data import get_sorted_clusters, get_vectors, get_clusters
 from t_test_clustered_data import get_clusters
 import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib
 from plot_pubs_in_clusters import get_color
+import numpy as np
+import matplotlib.pyplot as plt
+from numpy.random import *
 
 
 PUBLICATION_ID_COLUMN = "PublicationID"
@@ -27,6 +31,7 @@ def get_marker(i):
     else:
         # TODO: there should be a better alternative.
         return "."
+
 
 def get_clustered_repositories(input_path):
     filenames = []
@@ -76,7 +81,7 @@ def get_pub_tool_count(filename):
     return sum(cluster_pubs_count.values()), cluster_pubs_count, sum(cluster_tools_count.values()), cluster_tools_count
 
 
-def plot_clustered(filenames, repositories):
+def plot_clustered(input_path, filenames, repositories):
     fig, ax = set_plot_style(1, 1)
     i = 0
     max_x = 0
@@ -121,6 +126,60 @@ def plot_clustered(filenames, repositories):
     ax.add_artist(l1)
     l2 = ax.legend(cluster_scatter.values(), cluster_scatter.keys(), scatterpoints=1, loc='upper left', ncol=2, title="Clusters")
 
+    image_file = os.path.join(input_path, 'plot_pub_tool_clustered.png')
+    if os.path.isfile(image_file):
+        os.remove(image_file)
+    plt.savefig(image_file, bbox_inches='tight')
+    plt.close()
+
+
+def plot(input_path, filenames, repositories):
+    fig, ax = set_plot_style(1, 1)
+    i = 0
+    max_x = 0
+    max_y = 0
+    repo_scatter = {}
+    cluster_scatter = {}
+    add_cluster_scatter = True
+    xs = []
+    ys = []
+    for filename in filenames:
+        add_repo_scatter = True
+        c_pubs, _, c_tools, _ = get_pub_tool_count(filename)
+        max_x = max(max_x, c_pubs)
+        max_y = max(max_y, c_tools)
+        xs.append(c_pubs)
+        ys.append(c_tools)
+        scatter = ax.scatter(c_pubs, c_tools, color=get_color(i), alpha=0.5, s=80)
+        repo_scatter[get_repo_name(filename)] = scatter
+        i += 1
+
+    #for x,y in zip(xs,ys):
+    #    plt.annotate(f"({x}, {y})",  # Label 
+    #                 (x,y),
+    #                 textcoords="offset points", # how to position the text
+    #                 xytext=(0,10), # distance from text to points (x,y)
+    #                 ha='center') # horizontal alignment can be left, right or center
+
+    # The default range of plt when `s` is set in the `scatter` 
+    # method does not keep all the points in the canvas; so their 
+    # values are overridden.
+    ax.set_ylim(bottom=128, top=max_y + (max_y * 0.5))
+    ax.set_xlim(left=128, right=max_x + (max_x * 0.5))
+
+    ax.set_xscale('log', basex=2)
+    ax.set_yscale('log', basey=2)
+    ax.yaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%d'))
+    ax.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%d'))
+
+    ax.set_xlabel("\nPublications Count")
+    ax.set_ylabel("Tools Count\n")
+
+    # It is required to add legend through `add_artist` for it not be overridden by the second legend.
+    ax.legend(repo_scatter.values(), repo_scatter.keys(), scatterpoints=1, loc='upper left', ncol=2)
+    #ax.add_artist(l1)
+    #l2 = ax.legend(cluster_scatter.values(), cluster_scatter.keys(), scatterpoints=1, loc='upper left', ncol=2, title="Clusters")
+
     image_file = os.path.join(input_path, 'plot_pub_tool.png')
     if os.path.isfile(image_file):
         os.remove(image_file)
@@ -139,7 +198,8 @@ def set_plot_style(nrows, ncols, fig_height=5, fig_width=6):
 
 def run(input_path):
     filenames, repositories = get_clustered_repositories(input_path)
-    plot_clustered(filenames, repositories)
+    plot(input_path, filenames, repositories)
+    plot_clustered(input_path, filenames, repositories)
 
 
 if __name__ == "__main__":
