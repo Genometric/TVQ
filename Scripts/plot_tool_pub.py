@@ -8,12 +8,25 @@ from statistics import mean
 from math import sqrt
 from t_test_clustered_data import get_sorted_clusters, get_vectors, get_clusters, CLUSTERED_FILENAME_POSFIX, get_repo_name
 from t_test_clustered_data import get_clusters
+import seaborn as sns
+import matplotlib.pyplot as plt
+from plot_pubs_in_clusters import get_color
 
 
 PUBLICATION_ID_COLUMN = "PublicationID"
 TOOLS_COLUMN = "Tools"
 TOOLS_SEPARATOR = ";"
 
+# This list is defined so to minimize using very similar markers as much as possible.
+MARKERS = ["o", "^", "x", "v", "1", "2", "3", "4", ">", "<", "*", "P", "+", "D", "X", "d"]
+
+
+def get_marker(i):
+    if i<len(MARKERS):
+        return MARKERS[i]
+    else:
+        # TODO: there should be a better alternative.
+        return "."
 
 def get_clustered_repositories(input_path):
     filenames = []
@@ -63,11 +76,66 @@ def get_pub_tool_count(filename):
     return sum(cluster_pubs_count.values()), cluster_pubs_count, sum(cluster_tools_count.values()), cluster_tools_count
 
 
+def set_plot_style(nrows, ncols, fig_height=5, fig_width=6):
+    sns.set()
+    sns.set_context("paper")
+    sns.set_style("darkgrid")
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(fig_width, fig_height), dpi=600)
+    plt.subplots_adjust(wspace=0.2, hspace=0.2)
+    return fig, axes
+
 
 def run(input_path):
+    fig, ax = set_plot_style(1, 1)
     filenames, repositories = get_clustered_repositories(input_path)
+    i = 0
+    max_x = 0
+    max_y = 0
+    repo_scatter = {}
+    cluster_scatter = {}
+    add_cluster_scatter = True
     for filename in filenames:
+        add_repo_scatter = True
         c_pubs, ck_pubs, c_tools, ck_tools = get_pub_tool_count(filename)
+        j = 0
+        for k in ck_pubs:
+            max_x = max(max_x, ck_pubs[k])
+            max_y = max(max_y, ck_tools[k])
+            scatter = ax.scatter(ck_pubs[k], ck_tools[k], marker=get_marker(j), color=get_color(i), alpha=0.5, s=80)
+
+            if add_repo_scatter:
+                repo_scatter[get_repo_name(filename)] = scatter
+                add_repo_scatter = False
+
+            if add_cluster_scatter:
+                cluster_scatter["Cluster " + str(k)] = scatter
+            j += 1
+
+        add_cluster_scatter = False
+        i += 1
+
+    # The default range of plt when `s` is set in the `scatter` 
+    # method does not keep all the points in the canvas; so their 
+    # values are overridden.
+    ax.set_ylim(bottom=0.5, top=max_y + (max_y * 0.5))
+    ax.set_xlim(left=0.5, right=max_x + (max_x * 0.5))
+
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+
+    ax.set_xlabel("\nPublications Count")
+    ax.set_ylabel("Tools Count\n")
+
+    # It is required to add legend through `add_artist` for it not be overridden by the second legend.
+    l1 = ax.legend(repo_scatter.values(), repo_scatter.keys(), scatterpoints=1, loc='lower right', ncol=2, title="Repositories")
+    ax.add_artist(l1)
+    l2 = ax.legend(cluster_scatter.values(), cluster_scatter.keys(), scatterpoints=1, loc='upper left', ncol=2, title="Clusters")
+
+    image_file = os.path.join(input_path, 'plot_pub_tool.png')
+    if os.path.isfile(image_file):
+        os.remove(image_file)
+    plt.savefig(image_file, bbox_inches='tight')
+    plt.close()
 
 
 if __name__ == "__main__":
