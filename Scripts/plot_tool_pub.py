@@ -103,7 +103,7 @@ def plot_clustered(input_path, filenames, repositories):
                 add_repo_scatter = False
 
             if add_cluster_scatter:
-                cluster_scatter["Cluster " + str(k)] = scatter
+                cluster_scatter["Cluster " + str(k + 1)] = scatter
             j += 1
 
         add_cluster_scatter = False
