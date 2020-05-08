@@ -416,7 +416,7 @@ namespace Genometric.TVQ.API.Analysis
 
         public void GetPrePostCitationChangeVectorByPubs(
             IEnumerable<ToolRepoAssociation> associations,
-            out Dictionary<int, CitationChange> vectors, 
+            out Dictionary<int, CitationChange> vectors,
             out Dictionary<int, List<Tool>> tools)
         {
             Contract.Requires(associations != null);
@@ -434,34 +434,31 @@ namespace Genometric.TVQ.API.Analysis
                     asso.Tool.PublicationAssociations.Count == 0)
                     continue;
 
-                // There are some tools that have multiple publications, we consider only the first one. 
-                var pubAsso = asso.Tool.PublicationAssociations.First();
-
-                var key = pubAsso.Publication.ID;
-                if (!vectors.ContainsKey(key))
+                foreach (var pubAsso in asso.Tool.PublicationAssociations)
                 {
+                    var key = pubAsso.Publication.ID;
+                    if (vectors.ContainsKey(key))
+                    {
+                        tools[key].Add(asso.Tool);
+                        continue;
+                    }
+
                     vectors.Add(key, new CitationChange());
                     tools.Add(key, new List<Tool> { asso.Tool });
-                }
-                else
-                {
-                    tools[key].Add(asso.Tool);
-                    continue;
-                }
-                
 
-                if (pubAsso.Publication.Citations != null &&
-                    pubAsso.Publication.Year >= _earliestCitationYear)
-                {
-                    if (pubAsso.Publication.Citations.Count == 0 ||
-                        (pubAsso.Publication.Citations.Count == 1 && pubAsso.Publication.Citations.First().Count == 0) ||
-                        pubAsso.Publication.Citations.Count < 2) // At least two items are required for interpolation.
-                        continue;
+                    if (pubAsso.Publication.Citations != null &&
+                        pubAsso.Publication.Year >= _earliestCitationYear)
+                    {
+                        if (pubAsso.Publication.Citations.Count == 0 ||
+                            (pubAsso.Publication.Citations.Count == 1 && pubAsso.Publication.Citations.First().Count == 0) ||
+                            pubAsso.Publication.Citations.Count < 2) // At least two items are required for interpolation.
+                            continue;
 
-                    vectors[key].AddRange(
-                        pubAsso.Publication.Citations, 
-                        asso.DateAddedToRepository, 
-                        interpolationPoints);
+                        vectors[key].AddRange(
+                            pubAsso.Publication.Citations,
+                            asso.DateAddedToRepository,
+                            interpolationPoints);
+                    }
                 }
             }
         }
