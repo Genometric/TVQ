@@ -52,7 +52,7 @@ def run(input_path):
     x_axis_label = "\n Citation Growth"
     y_axis_label = "Probability \n"
 
-    clusters = get_clusters(root, files[0])
+    clusters = get_clusters(os.path.join(root, files[0]))
     cluster_count = len(clusters.groups)
 
     fig, ax = set_plot_style(len(files), cluster_count)
@@ -62,7 +62,7 @@ def run(input_path):
         row_counter += 1
         filename_without_extension = os.path.splitext(filename)[0]
         repository_name = filename_without_extension.replace(CLUSTERED_FILENAME_POSFIX, "")
-        clusters = get_clusters(root, filename)
+        clusters = get_clusters(os.path.join(root, filename))
 
         col_counter = -1
         keys, mappings = get_sorted_clusters(clusters)

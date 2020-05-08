@@ -19,7 +19,7 @@ def get_repo_name(filename):
 
 def ttest_by_cluster(root, filename):
     print("\t- Repository: {0}".format(get_repo_name(filename)))
-    clusters = get_clusters(root, filename)
+    clusters = get_clusters(os.path.join(root, filename))
     for k in clusters.groups:
         tools = clusters.get_group(k)
         (cohen_d, cohen_d_interpretation), (t_statistic, pvalue) = paired_ttest(tools)
@@ -107,16 +107,12 @@ def pre_post_columns(tools):
     return column_headers, pre, post
 
 
-def get_clusters(root, filename):
+def get_clusters(filename):
     """
     Returns a data frame grouped-by cluster name.
     
     :rtype:  pandas.core.groupby.generic.DataFrameGroupBy
     """
-    return get_clusters(os.path.join(root, filename))
-
-
-def get_clusters(filename):
     input_df = pd.read_csv(filename, header=0, sep='\t')
     return input_df.groupby(CLUSTER_NAME_COLUMN_LABEL)
 
@@ -214,8 +210,8 @@ def ttest_corresponding_clusters(root, filename_a, filename_b, output_filename):
     repo_b = get_repo_name(filename_b)
     print(f"\t- Repositories: {repo_a} and {repo_b}")
 
-    clusters_a = get_clusters(root, filename_a)
-    clusters_b = get_clusters(root, filename_b)
+    clusters_a = get_clusters(os.path.join(root, filename_a))
+    clusters_b = get_clusters(os.path.join(root, filename_b))
     sorted_keys_a, agg_cluster_mapping_a = get_sorted_clusters(clusters_a)
     sorted_keys_b, agg_cluster_mapping_b = get_sorted_clusters(clusters_b)    
 

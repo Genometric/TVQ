@@ -47,7 +47,7 @@ def run(input_path):
             if os.path.splitext(filename)[1] == ".csv" and \
             os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 repos.append(get_repo_name(filename))
-                clusters = get_clusters(root, filename)
+                clusters = get_clusters(os.path.join(root, filename))
                 cluster_count = len(clusters.groups)
                 for k in clusters.groups:
                     if k not in counts:
