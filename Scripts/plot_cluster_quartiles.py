@@ -275,7 +275,7 @@ def run(input_path, plot_changes):
                 print(f"\t\t* Post-Max:\t{post_max}")
             quartiles = get_quartiles(citations)
             handles, labels = plot(
-                ax[row_counter][col_counter],
+                ax[row_counter] if cluster_count == 1 else ax[row_counter][col_counter],
                 filename_without_extension,
                 True if col_counter == 4 else False,
                 quartiles,

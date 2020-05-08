@@ -72,14 +72,15 @@ def run(input_path):
             col_counter += 1
             growthes = get_growthes(clusters.get_group(mappings[keys[i]]))
             plot(
-                ax[row_counter][col_counter],
+                ax[row_counter] if cluster_count == 1 else ax[row_counter][col_counter],
                 filename_without_extension,
                 growthes,
                 header=header if row_counter == 0 else None,
                 x_axis_label=x_axis_label if row_counter == len(keys) else None,
                 y_axis_label=f"{repository_name} \n \n {y_axis_label}" if col_counter == 0 else None)
     
-    handles, labels = ax[row_counter][col_counter].get_legend_handles_labels()
+    last_ax = ax[row_counter] if cluster_count == 1 else ax[row_counter][col_counter]
+    handles, labels = last_ax.get_legend_handles_labels()
 
     image_file = os.path.join(input_path, 'gain_scores_clustered.png')
     if os.path.isfile(image_file):

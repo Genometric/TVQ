@@ -20,14 +20,18 @@ CLUSTER_NAME_COLUMN_LABEL = "cluster_label"
 CLUSTERING_STATS_REPORT_FILENAME = "clustering_stats.txt"
 
 
-def get_silhouette_score(df, cluster_count):
+def get_silhouette_score(data, cluster_count):
     # Apply cluster to data.
     # It is not ideal to re-cluster data; hence, a potential improvement would be to
     # rework this and avoid send clustering.
     model = AgglomerativeClustering(n_clusters=cluster_count, affinity='euclidean', linkage='ward')
-    cluster_labels = model.fit_predict(df)
+    cluster_labels = model.fit_predict(data)
 
-    return cluster_labels, sklearn.metrics.silhouette_score(df, cluster_labels)
+    silhoutte_score = float("NaN")
+    if cluster_count > 1:
+        silhoutte_score = sklearn.metrics.silhouette_score(data, cluster_labels)
+
+    return cluster_labels, silhoutte_score
 
 
 def cluster(root, filename, cluster_count):
