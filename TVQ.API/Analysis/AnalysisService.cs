@@ -28,7 +28,15 @@ namespace Genometric.TVQ.API.Analysis
         /// we set a earliest date for citations, and any reference
         /// earlier than that will be ignored. 
         /// </summary>
-        private int _earliestCitationYear = 2000;
+        public int EarliestPublicationYear { set; get; } = 2000;
+
+        /// <summary>
+        /// Sets and gets minimum year offset (inclusive) between the 
+        /// publication year and when the tool was added to a repository. 
+        /// For instance, this ignore publications that were published
+        /// at the same year as the tool was added to the repository.
+        /// </summary>
+        public int MinPubDateAndDateAddedToRepoOffset { set; get; } = 1;
 
         public AnalysisService(
             TVQContext context,
@@ -90,7 +98,7 @@ namespace Genometric.TVQ.API.Analysis
                 {
                     //Context.Entry(pub).Collection(x => x.Publication).Load();
                     var publication = publicationAssociation.Publication;
-                    if (publication.Citations != null && publication.Year >= _earliestCitationYear)
+                    if (publication.Citations != null && publication.Year >= EarliestPublicationYear)
                     {
                         Context.Entry(publication).Collection(x => x.Citations).Load();
                         foreach (var citation in publication.Citations)
@@ -275,7 +283,7 @@ namespace Genometric.TVQ.API.Analysis
                 var tool = association.Tool;
                 Context.Entry(tool).Collection(x => x.PublicationAssociations).Load();
                 foreach (var pub in tool.PublicationAssociations)
-                    if (pub.Publication.Citations != null && pub.Publication.Year >= _earliestCitationYear)
+                    if (pub.Publication.Citations != null && pub.Publication.Year >= EarliestPublicationYear)
                     {
                         if (pub.Publication.Citations.Count == 0 ||
                             (pub.Publication.Citations.Count == 1 && pub.Publication.Citations.First().Count == 0))
@@ -397,7 +405,7 @@ namespace Genometric.TVQ.API.Analysis
                 var pub = asso.Tool.PublicationAssociations.First();
 
                 if (pub.Publication.Citations != null &&
-                    pub.Publication.Year >= _earliestCitationYear)
+                    pub.Publication.Year >= EarliestPublicationYear)
                 {
                     if (pub.Publication.Citations.Count == 0 ||
                         (pub.Publication.Citations.Count == 1 && pub.Publication.Citations.First().Count == 0) ||
@@ -431,7 +439,8 @@ namespace Genometric.TVQ.API.Analysis
             {
                 // Some tools may not have any publications. 
                 if (asso.Tool.PublicationAssociations == null ||
-                    asso.Tool.PublicationAssociations.Count == 0)
+                    asso.Tool.PublicationAssociations.Count == 0 ||
+                    asso.DateAddedToRepository == null)
                     continue;
 
                 foreach (var pubAsso in asso.Tool.PublicationAssociations)
@@ -447,7 +456,8 @@ namespace Genometric.TVQ.API.Analysis
                     tools.Add(key, new List<Tool> { asso.Tool });
 
                     if (pubAsso.Publication.Citations != null &&
-                        pubAsso.Publication.Year >= _earliestCitationYear)
+                        pubAsso.Publication.Year >= EarliestPublicationYear &&
+                        Math.Abs(Convert.ToInt32(pubAsso.Publication.Year - asso.DateAddedToRepository.Value.Year)) >= MinPubDateAndDateAddedToRepoOffset)
                     {
                         if (pubAsso.Publication.Citations.Count == 0 ||
                             (pubAsso.Publication.Citations.Count == 1 && pubAsso.Publication.Citations.First().Count == 0) ||
