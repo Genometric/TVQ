@@ -445,24 +445,24 @@ namespace Genometric.TVQ.API.Analysis
 
                 foreach (var pubAsso in asso.Tool.PublicationAssociations)
                 {
-                    var key = pubAsso.Publication.ID;
-                    if (vectors.ContainsKey(key))
-                    {
-                        tools[key].Add(asso.Tool);
-                        continue;
-                    }
-
-                    vectors.Add(key, new CitationChange());
-                    tools.Add(key, new List<Tool> { asso.Tool });
-
                     if (pubAsso.Publication.Citations != null &&
                         pubAsso.Publication.Year >= EarliestPublicationYear &&
-                        Math.Abs(Convert.ToInt32(pubAsso.Publication.Year - asso.DateAddedToRepository.Value.Year)) >= MinPubDateAndDateAddedToRepoOffset)
+                        Math.Abs((int)pubAsso.Publication.Year - asso.DateAddedToRepository.Value.Year) >= MinPubDateAndDateAddedToRepoOffset)
                     {
                         if (pubAsso.Publication.Citations.Count == 0 ||
                             (pubAsso.Publication.Citations.Count == 1 && pubAsso.Publication.Citations.First().Count == 0) ||
                             pubAsso.Publication.Citations.Count < 2) // At least two items are required for interpolation.
                             continue;
+
+                        var key = pubAsso.Publication.ID;
+                        if (vectors.ContainsKey(key))
+                        {
+                            tools[key].Add(asso.Tool);
+                            continue;
+                        }
+
+                        vectors.Add(key, new CitationChange());
+                        tools.Add(key, new List<Tool> { asso.Tool });
 
                         vectors[key].AddRange(
                             pubAsso.Publication.Citations,
