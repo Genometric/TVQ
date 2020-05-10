@@ -150,7 +150,7 @@ def plot(\
     linewidth = 1.5
 
     # Plots the hierarchical clustering as a dendrogram.
-    dend = shc.dendrogram(linkage_matrix, no_labels=True, orientation="right", ax=col0)
+    dend = shc.dendrogram(linkage_matrix, no_labels=True, orientation="right", ax=col0)  #, truncate_mode="level")
     col0.axvline(x=auto_cut_distance, color=auto_cut_color, linewidth=linewidth, linestyle=auto_cut_line_style)
     col0.axvline(x=manual_cut_distance, color=manu_cut_color, linewidth=linewidth, linestyle=manu_cut_line_style)
 
