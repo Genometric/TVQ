@@ -12,6 +12,7 @@ import itertools
 from scipy.spatial.distance import cdist
 import matplotlib.ticker as mticker
 from t_test_clustered_data import get_sorted_clusters, get_vectors, get_clusters, CLUSTERED_FILENAME_POSFIX, get_repo_name
+from plot_gain_scores import get_cluster_label
 import random
 
 
@@ -73,7 +74,7 @@ def run(input_path):
 
     # Show only horizontal grid lines.
     ax.grid(axis='x', which='major')
-    ax.legend(series, ("Cluster " + str(i+1) for i in counts.keys()))
+    ax.legend(series, (get_cluster_label(len(counts.keys()), i) for i in counts.keys()))
 
     for rect in series:
         autolabel(ax, rect)

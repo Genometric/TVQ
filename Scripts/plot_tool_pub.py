@@ -15,6 +15,7 @@ from plot_pubs_in_clusters import get_color
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy.random import *
+from plot_gain_scores import get_cluster_label
 
 
 PUBLICATION_ID_COLUMN = "PublicationID"
@@ -92,6 +93,7 @@ def plot_clustered(input_path, filenames, repositories):
     for filename in filenames:
         add_repo_scatter = True
         c_pubs, ck_pubs, c_tools, ck_tools = get_pub_tool_count(filename)
+        cluster_count = len(ck_pubs.keys())
         j = 0
         for k in ck_pubs:
             max_x = max(max_x, ck_pubs[k])
@@ -103,7 +105,7 @@ def plot_clustered(input_path, filenames, repositories):
                 add_repo_scatter = False
 
             if add_cluster_scatter:
-                cluster_scatter["Cluster " + str(k + 1)] = scatter
+                cluster_scatter[get_cluster_label(cluster_count, k)] = scatter
             j += 1
 
         add_cluster_scatter = False

@@ -9,6 +9,15 @@ from t_test_clustered_data import get_sorted_clusters, get_clusters, CLUSTERED_F
 GROWTH_COLUMN_HEADER = "GainScore"
 
 
+def get_cluster_label(cluster_count, index):
+    if cluster_count == 3:
+        return ["Low-cited Publications", "Mid-cited Publications", "Highly-cited Publications"][index]
+    elif cluster_count == 2:
+        return ["Low-cited Publications", "Highly-cited Publications"][index]
+    else:
+        return f"Cluster {i+1}"
+
+
 def get_growthes(tools, growth_column_header=GROWTH_COLUMN_HEADER):
     growthes = []
     for index, row in tools.iterrows():
@@ -68,7 +77,7 @@ def run(input_path):
         keys, mappings = get_sorted_clusters(clusters)
         for i in range(0, len(keys)):
             print(f"\t- Processing cluster {i}")
-            header = f"Cluster {i+1}"
+            header = get_cluster_label(cluster_count, i)
             col_counter += 1
             growthes = get_growthes(clusters.get_group(mappings[keys[i]]))
             plot(

@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.interpolate import make_interp_spline, BSpline
 from t_test_clustered_data import get_sorted_clusters
+from plot_gain_scores import get_cluster_label
 
 
 # THIS SCRIPT IS EXPERIMENTAL.
@@ -265,7 +266,7 @@ def run(input_path, plot_changes):
         keys, mappings = get_sorted_clusters(clusters)
         for i in range(0, len(keys)):
             print(f"\t- Processing cluster {i}")
-            header = f"Cluster {i+1}"
+            header = get_cluster_label(cluster_count, i)
             col_counter += 1
             citations, _, _, _, _ = get_vectors(clusters.get_group(mappings[keys[i]]))
             changes = None
