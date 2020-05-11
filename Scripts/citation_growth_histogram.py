@@ -54,15 +54,13 @@ def set_plot_style(nrows, ncols, fig_height=4, fig_width=8):
     return fig, axes
 
 
-def run(input_path):
+def run(input_path, plot_density):
     files = []
     for root, dirpath, filenames in os.walk(input_path):
         for filename in filenames:
             if os.path.splitext(filename)[1] == ".csv" and \
             os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 files.append(filename)
-
-    plot_density = False
 
     x_axis_label = "\n Citation growth percentage"
     y_axis_label = "Probability \n" if plot_density else "Count \n"
@@ -102,5 +100,9 @@ if __name__ == "__main__":
         print("Missing input path.")
         exit()
 
-    run(sys.argv[1])
+    plot_density = False
+    if len(sys.argv) == 3:
+        plot_density = sys.argv[2] == "True"
+
+    run(sys.argv[1], plot_density)
 
