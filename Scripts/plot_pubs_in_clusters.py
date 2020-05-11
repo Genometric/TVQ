@@ -14,6 +14,7 @@ import matplotlib.ticker as mticker
 from t_test_clustered_data import get_sorted_clusters, get_vectors, get_clusters, CLUSTERED_FILENAME_POSFIX, get_repo_name
 from plot_gain_scores import get_cluster_label
 import random
+from matplotlib.ticker import FormatStrFormatter
 
 
 COLOR_PALETTE = ["#3498db", "#feb308", "#34495e", "#41aa33"]
@@ -30,7 +31,7 @@ def get_color(i):
 
 
 
-def set_plot_style(nrows, ncols, fig_height=5, fig_width=6):
+def set_plot_style(nrows, ncols, fig_height=6, fig_width=7):
     sns.set()
     sns.set_context("paper")
     sns.set_style("darkgrid")
@@ -55,10 +56,10 @@ def run(input_path):
                         counts[k] = {}
                     counts[k][filename] = len(clusters.groups[k])
 
-    fig, ax = set_plot_style(1,1)
+    fig, ax = set_plot_style(1, 1)
     offset = 0.75 / cluster_count
     series = []
-    x = list(range(len(counts)))
+    
     i = 0
     for cluster in counts:
         y = []
@@ -67,8 +68,11 @@ def run(input_path):
         series.append(ax.bar([j + (offset * i) for j in list(range(len(repos)))], y, offset, color=get_color(i)))
         i += 1
     
+    ax.set_ylabel('Count')
     ax.set_yscale('log')
-    ax.set_ylabel('Count\n')
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
+
+    x = list(range(len(repos)))
     ax.set_xticks([i + offset for i in x])
     ax.set_xticklabels(repos)
 
