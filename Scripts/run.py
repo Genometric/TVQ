@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     plot_changes = False
     if len(sys.argv) >= 3:
-        plot_changes = sys.argv[2]
+        plot_changes = sys.argv[2] == "True"
 
     if len(sys.argv) == 4:
         cluster_count = int(sys.argv[3])

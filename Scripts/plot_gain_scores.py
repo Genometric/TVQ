@@ -1,9 +1,12 @@
 import os
 import sys
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 import seaborn as sns
 from t_test_clustered_data import get_sorted_clusters, get_clusters, CLUSTERED_FILENAME_POSFIX
+from matplotlib.ticker import FormatStrFormatter, ScalarFormatter
 
 
 GROWTH_COLUMN_HEADER = "GainScore"
@@ -25,12 +28,37 @@ def get_growthes(tools, growth_column_header=GROWTH_COLUMN_HEADER):
     return growthes
 
 
-def plot(ax, filename, growthes, header=None, x_axis_label=None, y_axis_label=None):
-    ax.hist(growthes, density=True, bins=24) # setting density to False will show count, and True will show probability.
-    ax.set_yscale('log')
-    #ax.yaxis.set_major_formatter(mticker.ScalarFormatter()) # comment this when density=True
-    ##ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
+def plot(ax, filename, growthes, header=None, x_axis_label=None, y_axis_label=None, plot_density=False):
+    histogram = ax.hist(growthes, density=plot_density, bins=24) # setting density to False will show count, and True will show probability.
 
+    # Histogram is a two dimensional array; first dimension 
+    # contains the counts/probabilities (y axis), and the 
+    # second dimension contains the binned growths (x axis).
+    values = histogram[0]
+
+    # This is a very hacky solution! 
+    # The objective is to determine if an array should be 
+    # plotted in log scale or not, based on the values. 
+    # For instance, if array contains only few values 
+    # all ~=3, then if plotted in log scale, no ticks 
+    # maybe generated for the y-axis. One way is to 
+    # control minor h-grid lines, and one way is to 
+    # ignore log scale all together. Here we cho0se 
+    # the latter.
+    values_with_no_zero = values.copy()
+    values_with_no_zero = values_with_no_zero[values_with_no_zero != 0]
+    contains_few_values = len(set(values_with_no_zero)) < 3
+
+    if contains_few_values:
+        ax.yaxis.set_major_formatter(ScalarFormatter())
+    elif (contains_few_values or plot_density and max(values) > 0.1) or (not plot_density and max(values) < 10):
+        ax.yaxis.set_major_formatter(ScalarFormatter())
+        ax.yaxis.set_minor_formatter(ScalarFormatter())
+    else:
+        ax.set_yscale('log')
+        if not plot_density:
+            ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
+    
     if header:
         ax.set_title(header)
 
@@ -50,7 +78,7 @@ def set_plot_style(nrows, ncols, fig_height=12, fig_width=12):
     return fig, axes
 
 
-def run(input_path):
+def run(input_path, plot_density):
     files = []
     for root, dirpath, filenames in os.walk(input_path):
         for filename in filenames:
@@ -59,7 +87,7 @@ def run(input_path):
                 files.append(filename)
 
     x_axis_label = "\n Citation Growth"
-    y_axis_label = "Probability \n"
+    y_axis_label = ("Probability\n" if plot_density else "Count\n")
 
     clusters = get_clusters(os.path.join(root, files[0]))
     cluster_count = len(clusters.groups)
@@ -86,7 +114,8 @@ def run(input_path):
                 growthes,
                 header=header if row_counter == 0 else None,
                 x_axis_label=x_axis_label if row_counter == len(keys) else None,
-                y_axis_label=f"{repository_name} \n \n {y_axis_label}" if col_counter == 0 else None)
+                y_axis_label=f"{repository_name} \n \n {y_axis_label}" if col_counter == 0 else None,
+                plot_density=plot_density)
     
     last_ax = ax[row_counter] if cluster_count == 1 else ax[row_counter][col_counter]
     handles, labels = last_ax.get_legend_handles_labels()
@@ -113,7 +142,8 @@ def run(input_path):
             growthes,
             header=repository_name,
             x_axis_label=x_axis_label,
-            y_axis_label=f"\n {y_axis_label}" if col_counter == 0 else None)
+            y_axis_label=f"\n {y_axis_label}" if col_counter == 0 else None,
+            plot_density=plot_density)
         
     handles, labels = ax[col_counter].get_legend_handles_labels()
 
@@ -129,4 +159,8 @@ if __name__ == "__main__":
         print("Missing input path.")
         exit()
 
-    run(sys.argv[1])
+    plot_density = False
+    if len(sys.argv) == 3:
+        plot_density = sys.argv[2] == "True"
+
+    run(sys.argv[1], plot_density)

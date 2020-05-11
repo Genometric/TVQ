@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from t_test_clustered_data import CLUSTERED_FILENAME_POSFIX
 from plot_gain_scores import get_growthes
-from matplotlib.ticker import PercentFormatter
+from matplotlib.ticker import PercentFormatter, FormatStrFormatter
 
 
 # When the histogram plots `density`, there should not 
@@ -29,12 +29,13 @@ def aggregate(input, min, max):
     return aggregated
 
 
-def plot(ax, growthes, labels, colors):
-    counts, bins, patches = ax.hist(growthes, label=labels, density=True, bins=10, rwidth=0.65,
+def plot(ax, growthes, labels, colors, plot_density):
+    counts, bins, patches = ax.hist(growthes, label=labels, density=plot_density, bins=10, rwidth=0.65,
                                     color = colors, align="left", histtype="bar")   # setting density to False will
                                                                                     # show count, and True will show
                                                                                     # probability.
     ax.set_yscale('log')
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
     ax.set_xticks(bins)
     ax.xaxis.set_major_formatter(PercentFormatter())
     ax.set_xlim([-50, 975])
@@ -61,8 +62,10 @@ def run(input_path):
             os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 files.append(filename)
 
+    plot_density = False
+
     x_axis_label = "\n Citation growth percentage"
-    y_axis_label = "Probability \n"
+    y_axis_label = "Probability \n" if plot_density else "Count \n"
 
     fig, ax = set_plot_style(1, 1)
     row_counter = -1
@@ -80,7 +83,7 @@ def run(input_path):
         labels.append(repository_name)
         colors.append(COLOR_PALETTES[repository_name])
     
-    plot(ax, all_growthes, labels, colors)
+    plot(ax, all_growthes, labels, colors, plot_density)
 
     ax.set_xlabel(x_axis_label)
     ax.set_ylabel(y_axis_label)
