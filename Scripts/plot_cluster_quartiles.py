@@ -7,6 +7,8 @@ import seaborn as sns
 from scipy.interpolate import make_interp_spline, BSpline
 from t_test_clustered_data import get_sorted_clusters
 from plot_gain_scores import get_cluster_label
+import matplotlib
+from matplotlib.ticker import PercentFormatter, FormatStrFormatter
 
 
 # THIS SCRIPT IS EXPERIMENTAL.
@@ -107,6 +109,8 @@ def plot(ax, filename, add_legend, quartiles, changes, header=None,
          x_axis_label=None, y_axis_label=None, secondary_y_axis_label=None):
     _, pre_x, post_x = pre_post_columns(quartiles)
 
+    step_count = 5
+
     seco_axis_handles = []
     seco_axis_labels = []
     if changes:
@@ -148,13 +152,21 @@ def plot(ax, filename, add_legend, quartiles, changes, header=None,
 
     start = -1
     end = 1.01
-    stepsize = 0.4
+    stepsize = 2 / step_count
     ax.xaxis.set_ticks(np.arange(start, end, stepsize))
     if x_axis_label:
         ax.set_xlabel(x_axis_label)
 
     if y_axis_label:
         ax.set_ylabel(y_axis_label)
+
+    if changes:
+        l = ax.get_ylim()
+        l2 = secondary_ax.get_ylim()
+        f = lambda x : l2[0] + (x - l[0]) / (l[1] - l[0]) * (l2[1] - l2[0])
+        ticks = f(ax.get_yticks())
+        secondary_ax.yaxis.set_major_locator(matplotlib.ticker.FixedLocator(ticks))
+        secondary_ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
     prim_axis_handles, prim_axis_labels = ax.get_legend_handles_labels()
 
@@ -305,7 +317,7 @@ if __name__ == "__main__":
         exit()
 
     plot_changes = False
-    if len(sys.argv) == 3:
-        plot_changes = sys.argv[2]
+    if len(sys.argv) > 3:
+        plot_changes = sys.argv[2] == "True"
 
     run(sys.argv[1], plot_changes)
