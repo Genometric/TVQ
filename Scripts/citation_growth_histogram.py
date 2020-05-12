@@ -11,9 +11,19 @@ from matplotlib.ticker import PercentFormatter, FormatStrFormatter, ScalarFormat
 # When the histogram plots `density`, there should not 
 # be any significant difference between `CitationGrowthOnNormalizedData`
 # and `CitationGrowthOnInputData`.
-GROWTH_COLUMN_HEADER = "CitationGrowthOnNormalizedData"
+# Possible values are: 
+# - GainScore
+# - CitationGrowthOnInputData
+# - CitationGrowthOnNormalizedData
+GROWTH_COLUMN_HEADER = "GainScore"
 
 COLOR_PALETTES = {"Bioconda": "#3498db", "Bioconductor": "#feb308", "BioTools": "#34495e", "ToolShed": "#41aa33"}
+
+MIN_AGG = -300
+
+MAX_AGG = 1500
+
+BIN_STEP = 150
 
 
 def aggregate(input, min, max):
@@ -30,7 +40,10 @@ def aggregate(input, min, max):
 
 
 def plot(ax, growthes, labels, colors, plot_density):
-    counts, bins, patches = ax.hist(growthes, label=labels, density=plot_density, bins=10, rwidth=0.65,
+
+    bins = list(range(MIN_AGG, 0, BIN_STEP)) + list(range(0, MAX_AGG + 1, BIN_STEP))
+
+    counts, bins, patches = ax.hist(growthes, label=labels, density=plot_density, bins=bins, rwidth=0.65,
                                     color = colors, align="left", histtype="bar")   # setting density to False will
                                                                                     # show count, and True will show
                                                                                     # probability.
@@ -38,11 +51,13 @@ def plot(ax, growthes, labels, colors, plot_density):
     if not plot_density:
         ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
     ax.set_xticks(bins)
-    ax.xaxis.set_major_formatter(PercentFormatter())
-    ax.set_xlim([-50, 975])
-    #ax.yaxis.set_major_formatter(mticker.ScalarFormatter()) # comment this when density=True
-    ##ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
 
+    if GROWTH_COLUMN_HEADER == "GainScore":
+        ax.xaxis.set_major_formatter(ScalarFormatter())
+    else:
+        ax.xaxis.set_major_formatter(PercentFormatter())
+    #ax.set_xlim([-50, 975])
+    
 
 def set_plot_style(nrows, ncols, fig_height=4, fig_width=8):
     sns.set()
@@ -64,7 +79,7 @@ def run(input_path, plot_density):
                 files.append(filename)
 
     x_axis_label = "\n Citation growth percentage"
-    y_axis_label = "Probability \n" if plot_density else "Count \n"
+    y_axis_label = "Probability\n" if plot_density else "Count"
 
     fig, ax = set_plot_style(1, 1)
     row_counter = -1
@@ -78,7 +93,7 @@ def run(input_path, plot_density):
         filename_without_extension = os.path.splitext(filename)[0]
         repository_name = filename_without_extension.replace(CLUSTERED_FILENAME_POSFIX, "")
         input_df = pd.read_csv(os.path.join(root, filename), header=0, sep='\t')
-        all_growthes.append(aggregate(get_growthes(input_df, GROWTH_COLUMN_HEADER), -500, 1000))
+        all_growthes.append(aggregate(get_growthes(input_df, GROWTH_COLUMN_HEADER), MIN_AGG, MAX_AGG))
         labels.append(repository_name)
         colors.append(COLOR_PALETTES[repository_name])
     
@@ -87,7 +102,7 @@ def run(input_path, plot_density):
     ax.set_xlabel(x_axis_label)
     ax.set_ylabel(y_axis_label)
 
-    plt.legend(loc="upper right", ncol=4)
+    plt.legend(loc="upper right", ncol=2)
 
     image_file = os.path.join(input_path, 'percentage_of_growth.png')
     if os.path.isfile(image_file):
