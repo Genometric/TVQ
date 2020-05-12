@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from t_test_clustered_data import CLUSTERED_FILENAME_POSFIX
 from plot_gain_scores import get_growthes
-from matplotlib.ticker import PercentFormatter, FormatStrFormatter
+from matplotlib.ticker import PercentFormatter, FormatStrFormatter, ScalarFormatter
 
 
 # When the histogram plots `density`, there should not 
@@ -35,7 +35,8 @@ def plot(ax, growthes, labels, colors, plot_density):
                                                                                     # show count, and True will show
                                                                                     # probability.
     ax.set_yscale('log')
-    ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
+    if not plot_density:
+        ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
     ax.set_xticks(bins)
     ax.xaxis.set_major_formatter(PercentFormatter())
     ax.set_xlim([-50, 975])

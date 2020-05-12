@@ -257,7 +257,7 @@ def set_plot_style(nrows, ncols, wspace=0.25):
     sns.set()
     sns.set_context("paper")
     sns.set_style("darkgrid")
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(3 * nrows, 4 * ncols), dpi=600, sharex=True)
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(3 * nrows, 4 * ncols), dpi=300, sharex=True)
     plt.subplots_adjust(wspace=wspace, hspace=0.07)
     return fig, axes
 
