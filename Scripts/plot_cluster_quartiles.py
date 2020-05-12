@@ -34,7 +34,7 @@ QUARTILES = {0.25: {PRE: {"label": "25th percentile (pre)", "linestyle": "dashed
 FILL_BETWEEN_PRE_COLOR = PRE_COLOR
 FILL_BETWEEN_POST_COLOR = POST_COLOR
 
-CITATION_CHANGE_COLOR = ([140/255, 140/255, 140/255])
+CITATION_CHANGE_COLOR = ([120/255, 120/255, 120/255])
 CITATION_CHANGE_FILL_COLOR = ([230/255, 230/255, 239/255])
 
 
@@ -119,19 +119,6 @@ def plot(ax, filename, add_legend, quartiles, changes, header=None,
 
     seco_axis_handles = []
     seco_axis_labels = []
-    if changes:
-        changes_x = pre_x[:-1] + post_x
-        changes_y = list(changes.values())
-        smooth_x, smooth_y = smooth(changes_x, changes_y)
-        zeros_y = [0] * len(smooth_y)
-        secondary_ax = ax.twinx()
-        secondary_ax.plot(smooth_x, smooth_y, label="Citation Count Change", color=CITATION_CHANGE_COLOR, alpha=0.4)
-        secondary_ax.fill_between(smooth_x, zeros_y, smooth_y, facecolor=CITATION_CHANGE_FILL_COLOR, alpha=0.5)
-        secondary_ax.yaxis.label.set_color(CITATION_CHANGE_COLOR)
-        secondary_ax.tick_params(axis='y', colors=CITATION_CHANGE_COLOR)
-        seco_axis_handles, seco_axis_labels = secondary_ax.get_legend_handles_labels()
-        if secondary_y_axis_label:
-            secondary_ax.set_ylabel(secondary_y_axis_label)
 
     idxes = quartiles.index.sort_values()
     for idx in idxes:
@@ -165,13 +152,25 @@ def plot(ax, filename, add_legend, quartiles, changes, header=None,
         ax.set_ylabel(y_axis_label)
 
     if changes:
+        changes_x = pre_x[:-1] + post_x
+        changes_y = list(changes.values())
+        smooth_x, smooth_y = smooth(changes_x, changes_y)
+        zeros_y = [0] * len(smooth_y)
+        secondary_ax = ax.twinx()
+        secondary_ax.plot(smooth_x, smooth_y, label="Citation Count Change", color=CITATION_CHANGE_COLOR, alpha=0.4)
+        secondary_ax.fill_between(smooth_x, zeros_y, smooth_y, facecolor=CITATION_CHANGE_FILL_COLOR, alpha=0.5)
+        secondary_ax.yaxis.label.set_color(CITATION_CHANGE_COLOR)
+        secondary_ax.tick_params(axis='y', colors=CITATION_CHANGE_COLOR)
+        seco_axis_handles, seco_axis_labels = secondary_ax.get_legend_handles_labels()
+        if secondary_y_axis_label:
+            secondary_ax.set_ylabel(secondary_y_axis_label)
+
         l = ax.get_ylim()
         l2 = secondary_ax.get_ylim()
         f = lambda x : l2[0] + (x - l[0]) / (l[1] - l[0]) * (l2[1] - l2[0])
         ticks = f(ax.get_yticks())
         secondary_ax.yaxis.set_major_locator(matplotlib.ticker.FixedLocator(ticks))
         secondary_ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-        secondary_ax.set_zorder(-1)
 
     prim_axis_handles, prim_axis_labels = ax.get_legend_handles_labels()
 
