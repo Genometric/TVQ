@@ -18,7 +18,7 @@ def get_cluster_label(cluster_count, index):
     elif cluster_count == 2:
         return ["Low-cited Publications", "Highly-cited Publications"][index]
     else:
-        return f"Cluster {i+1}"
+        return f"Cluster {index+1}"
 
 
 def get_growthes(tools, growth_column_header=GROWTH_COLUMN_HEADER):
