@@ -22,14 +22,20 @@ CLUSTERING_STATS_REPORT_FILENAME = "clustering_stats.txt"
 PRE = "pre"
 POST = "post"
 
+PRE_COLOR = "red"  # "#3498db"
+POST_COLOR = "green"  # "#34495e"
+
 # A list of quartiles to be computed for each column of the 
 # citations matrix (i.e., for each entry of normalized date).
-QUARTILES = {0.25: {PRE: {"label": "25th percentile (pre)", "linestyle": "dashed", "color": "red"}, POST: {"label": "25th percentile (post)", "linestyle": "dashed", "color": "green"}},
-             0.50: {PRE: {"label": "Median (pre)",          "linestyle": "solid",  "color": "red"}, POST: {"label": "Median (post)",          "linestyle": "solid",  "color": "green"}},
-             0.75: {PRE: {"label": "75th percentile (pre)", "linestyle": "dotted", "color": "red"}, POST: {"label": "75th percentile (post)", "linestyle": "dotted", "color": "green"}}}
+QUARTILES = {0.25: {PRE: {"label": "25th percentile (pre)", "linestyle": "dashed", "color": PRE_COLOR}, POST: {"label": "25th percentile (post)", "linestyle": "dashed", "color": POST_COLOR}},
+             0.50: {PRE: {"label": "Median (pre)",          "linestyle": "solid",  "color": PRE_COLOR}, POST: {"label": "Median (post)",          "linestyle": "solid",  "color": POST_COLOR}},
+             0.75: {PRE: {"label": "75th percentile (pre)", "linestyle": "dotted", "color": PRE_COLOR}, POST: {"label": "75th percentile (post)", "linestyle": "dotted", "color": POST_COLOR}}}
 
-FILL_BETWEEN_PRE_COLOR = "red"
-FILL_BETWEEN_POST_COLOR = "green"
+FILL_BETWEEN_PRE_COLOR = PRE_COLOR
+FILL_BETWEEN_POST_COLOR = POST_COLOR
+
+CITATION_CHANGE_COLOR = ([140/255, 140/255, 140/255])
+CITATION_CHANGE_FILL_COLOR = ([230/255, 230/255, 239/255])
 
 
 
@@ -118,13 +124,11 @@ def plot(ax, filename, add_legend, quartiles, changes, header=None,
         changes_y = list(changes.values())
         smooth_x, smooth_y = smooth(changes_x, changes_y)
         zeros_y = [0] * len(smooth_y)
-        fill_color = ([230/255, 230/255, 239/255])
-        series_color = ([140/255, 140/255, 140/255])
         secondary_ax = ax.twinx()
-        secondary_ax.plot(smooth_x, smooth_y, label="Citation Count Change", color=series_color, alpha=0.4)
-        secondary_ax.fill_between(smooth_x, zeros_y, smooth_y, facecolor=fill_color, alpha=0.5)
-        secondary_ax.yaxis.label.set_color(series_color)
-        secondary_ax.tick_params(axis='y', colors=series_color)
+        secondary_ax.plot(smooth_x, smooth_y, label="Citation Count Change", color=CITATION_CHANGE_COLOR, alpha=0.4)
+        secondary_ax.fill_between(smooth_x, zeros_y, smooth_y, facecolor=CITATION_CHANGE_FILL_COLOR, alpha=0.5)
+        secondary_ax.yaxis.label.set_color(CITATION_CHANGE_COLOR)
+        secondary_ax.tick_params(axis='y', colors=CITATION_CHANGE_COLOR)
         seco_axis_handles, seco_axis_labels = secondary_ax.get_legend_handles_labels()
         if secondary_y_axis_label:
             secondary_ax.set_ylabel(secondary_y_axis_label)
@@ -167,6 +171,7 @@ def plot(ax, filename, add_legend, quartiles, changes, header=None,
         ticks = f(ax.get_yticks())
         secondary_ax.yaxis.set_major_locator(matplotlib.ticker.FixedLocator(ticks))
         secondary_ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+        secondary_ax.set_zorder(-1)
 
     prim_axis_handles, prim_axis_labels = ax.get_legend_handles_labels()
 
@@ -246,7 +251,7 @@ def set_plot_style(nrows, ncols, wspace=0.25):
     sns.set()
     sns.set_context("paper")
     sns.set_style("darkgrid")
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(3 * nrows, 4 * ncols), dpi=300, sharex=True)
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(3 * nrows, 4 * ncols), dpi=600, sharex=True)
     plt.subplots_adjust(wspace=wspace, hspace=0.07)
     return fig, axes
 
