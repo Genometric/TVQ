@@ -40,7 +40,7 @@ def set_plot_style(nrows, ncols, fig_height=6, fig_width=7):
     return fig, axes
 
 
-def run(input_path):
+def get_pubs_count(input_path):
     counts = {}
     repos = []
     cluster_count = 0
@@ -56,15 +56,21 @@ def run(input_path):
                         counts[k] = {}
                     counts[k][filename] = len(clusters.groups[k])
 
+    return counts, repos, cluster_count
+
+
+def run(input_path):
+    pubs, repos, cluster_count = get_pubs_count(input_path)
+
     fig, ax = set_plot_style(1, 1)
     offset = 0.75 / cluster_count
     series = []
     
     i = 0
-    for cluster in counts:
+    for cluster in pubs:
         y = []
-        for repo in counts[cluster]:
-            y.append(counts[cluster][repo])
+        for repo in pubs[cluster]:
+            y.append(pubs[cluster][repo])
         series.append(ax.bar([j + (offset * i) for j in list(range(len(repos)))], y, offset, color=get_color(i)))
         i += 1
     
@@ -78,7 +84,7 @@ def run(input_path):
 
     # Show only horizontal grid lines.
     ax.grid(axis='x', which='major')
-    ax.legend(series, (get_cluster_label(len(counts.keys()), i) for i in counts.keys()))
+    ax.legend(series, (get_cluster_label(len(pubs.keys()), i) for i in pubs.keys()))
 
     for rect in series:
         autolabel(ax, rect)

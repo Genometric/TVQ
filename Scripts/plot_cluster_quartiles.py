@@ -9,6 +9,7 @@ from t_test_clustered_data import get_sorted_clusters
 from plot_gain_scores import get_cluster_label
 import matplotlib
 from matplotlib.ticker import PercentFormatter, FormatStrFormatter
+from plot_pubs_in_clusters import get_pubs_count
 
 
 # THIS SCRIPT IS EXPERIMENTAL.
@@ -111,7 +112,7 @@ def get_cols(dataframe, row, cols):
     return y
 
 
-def plot(ax, filename, add_legend, quartiles, changes, header=None,
+def plot(ax, filename, add_legend, quartiles, changes, pubs_count, header=None,
          x_axis_label=None, y_axis_label=None, secondary_y_axis_label=None):
     _, pre_x, post_x = pre_post_columns(quartiles)
 
@@ -171,6 +172,12 @@ def plot(ax, filename, add_legend, quartiles, changes, header=None,
         ticks = f(ax.get_yticks())
         secondary_ax.yaxis.set_major_locator(matplotlib.ticker.FixedLocator(ticks))
         secondary_ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+
+    txt_kwargs = {"x" : 0.2, "y" : 0.86, "s" : f"Pubs={pubs_count}", "horizontalalignment":'center', "verticalalignment":'center', "transform":ax.transAxes}
+    if changes:
+        secondary_ax.text(**txt_kwargs)
+    else:
+        ax.text(**txt_kwargs)
 
     prim_axis_handles, prim_axis_labels = ax.get_legend_handles_labels()
 
@@ -268,6 +275,8 @@ def run(input_path, plot_changes):
 
     fig, ax = set_plot_style(len(files), cluster_count, 0.25 if not plot_changes else 0.4)
 
+    pubs, repos, cluster_count = get_pubs_count(input_path)
+
     x_axis_label = "\n Date offset"
     y_axis_label = "Citations \n"
     row_counter = -1
@@ -297,6 +306,7 @@ def run(input_path, plot_changes):
                 True if col_counter == 4 else False,
                 quartiles,
                 changes,
+                pubs_count=pubs[i][filename],
                 header=header if row_counter == 0 else None,
                 x_axis_label=x_axis_label if row_counter == len(keys) else None,
                 y_axis_label=f"{repository_name} \n \n {y_axis_label}" if col_counter == 0 else None,
