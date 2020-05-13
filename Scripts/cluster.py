@@ -73,7 +73,7 @@ def cluster(root, filename, cluster_count):
     for i in range(0, len(sorted_keys)):
         mappings[mean_cluster_num_mappings[sorted_keys[i]]] = i
     input_df[CLUSTER_NAME_COLUMN_LABEL] = input_df[CLUSTER_NAME_COLUMN_LABEL].map(mappings)
-    
+
     # Write the DataFrame to CSV. 
     clustered_filename = os.path.join(root, repo_name + CLUSTERED_FILENAME_POSFIX + '.csv')
     if os.path.isfile(clustered_filename):

@@ -19,13 +19,13 @@ if __name__ == "__main__":
     if len(sys.argv) >= 3:
         plot_changes = sys.argv[2] == "True"
 
-    if len(sys.argv) == 4:
+    if len(sys.argv) >= 4:
         cluster_count = int(sys.argv[3])
     else:
         cluster_count = None
 
     plot_density = False
-    if len(sys.argv) == 5:
+    if len(sys.argv) >= 5:
         plot_density = sys.argv[4] == "True"
 
     cluster.run(input_path, cluster_count)
