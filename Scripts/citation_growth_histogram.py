@@ -17,6 +17,8 @@ from matplotlib.ticker import PercentFormatter, FormatStrFormatter, ScalarFormat
 # - CitationGrowthOnNormalizedData
 GROWTH_COLUMN_HEADER = "GainScore"
 
+X_AXIS_LABEL = {"GainScore": "Gain score", "CitationGrowthOnInputData": "Citation growth percentage",  "CitationGrowthOnNormalizedData": "Citation growth percentage"}
+
 COLOR_PALETTES = {"Bioconda": "#3498db", "Bioconductor": "#feb308", "BioTools": "#34495e", "ToolShed": "#41aa33"}
 
 MIN_AGG = -300
@@ -78,7 +80,7 @@ def run(input_path, plot_density):
             os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 files.append(filename)
 
-    x_axis_label = "\n Citation growth percentage"
+    x_axis_label = "\n" + X_AXIS_LABEL[GROWTH_COLUMN_HEADER]
     y_axis_label = "Probability\n" if plot_density else "Count"
 
     fig, ax = set_plot_style(1, 1)
