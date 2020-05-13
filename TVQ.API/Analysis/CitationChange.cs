@@ -106,6 +106,15 @@ namespace Genometric.TVQ.API.Analysis
             }
         }
 
+        /// <summary>
+        /// Raw values; not accumulated.
+        /// </summary>
+        public List<double> CitationsBefore { set; get; }
+        /// <summary>
+        /// Raw values; not accumulated.
+        /// </summary>
+        public List<double> CitationsAfter { set; get; }
+
         public CitationChange()
         {
             CitationCounts = new SortedSet<double>();
@@ -190,6 +199,9 @@ namespace Genometric.TVQ.API.Analysis
             double daysOffset;
             double yearsOffset;
 
+            CitationsBefore = new List<double>();
+            CitationsAfter = new List<double>();
+
             _totalPre = _totalPost = 0;
             foreach (var citation in citations)
             {
@@ -217,6 +229,11 @@ namespace Genometric.TVQ.API.Analysis
                     _totalPre = Math.Max(_totalPre, citation.AccumulatedCount);
                 else
                     _totalPost = Math.Max(_totalPost, citation.AccumulatedCount);
+
+                if (yearsOffset < 0)
+                    CitationsBefore.Add(citation.Count);
+                else
+                    CitationsAfter.Add(citation.Count);
             }
 
             if (_totalPost == 0)

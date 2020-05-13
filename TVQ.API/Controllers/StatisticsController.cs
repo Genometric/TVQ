@@ -794,8 +794,9 @@ namespace Genometric.TVQ.API.Controllers
                         x => x.Key,
                         x => x.Value.GetCitations(CitationChange.DateNormalizationType.ByDay)),
                     tools,
+                    vectors.ToDictionary(x => x.Key, x => new double[] { x.Value.CitationsBefore.Sum(), x.Value.CitationsBefore.Sum() + x.Value.CitationsAfter.Sum() }),
                     vectors.ToDictionary(x => x.Key, x => x.Value.GainScore),
-                    vectors.ToDictionary(x=>x.Key, x=>x.Value.GrowthOnNormalizedDataByDay),
+                    vectors.ToDictionary(x => x.Key, x => x.Value.GrowthOnNormalizedDataByDay),
                     growthes);
 
                 WriteToFileByPubs(
@@ -804,6 +805,7 @@ namespace Genometric.TVQ.API.Controllers
                         x => x.Key,
                         x => x.Value.GetCumulativeCitations(CitationChange.DateNormalizationType.ByDay)),
                     tools,
+                    vectors.ToDictionary(x => x.Key, x => new double[] { x.Value.CitationsBefore.Sum(), x.Value.CitationsBefore.Sum() + x.Value.CitationsAfter.Sum() }),
                     vectors.ToDictionary(x => x.Key, x => x.Value.GainScore),
                     vectors.ToDictionary(x => x.Key, x => x.Value.GrowthOnNormalizedDataByDay),
                     growthes);
@@ -814,6 +816,7 @@ namespace Genometric.TVQ.API.Controllers
                         x => x.Key,
                         x => x.Value.GetCitations(CitationChange.DateNormalizationType.ByYear)),
                     tools,
+                    vectors.ToDictionary(x => x.Key, x => new double[] { x.Value.CitationsBefore.Sum(), x.Value.CitationsBefore.Sum() + x.Value.CitationsAfter.Sum() }),
                     vectors.ToDictionary(x => x.Key, x => x.Value.GainScore),
                     vectors.ToDictionary(x => x.Key, x => x.Value.GrowthOnNormalizedDataByYear),
                     growthes);
@@ -824,6 +827,7 @@ namespace Genometric.TVQ.API.Controllers
                         x => x.Key,
                         x => x.Value.GetCumulativeCitations(CitationChange.DateNormalizationType.ByYear)),
                     tools,
+                    vectors.ToDictionary(x => x.Key, x => new double[] { x.Value.CitationsBefore.Sum(), x.Value.CitationsBefore.Sum() + x.Value.CitationsAfter.Sum() }),
                     vectors.ToDictionary(x => x.Key, x => x.Value.GainScore),
                     vectors.ToDictionary(x => x.Key, x => x.Value.GrowthOnNormalizedDataByYear),
                     growthes);
@@ -1057,6 +1061,7 @@ namespace Genometric.TVQ.API.Controllers
             string filename,
             Dictionary<int, SortedDictionary<double, double>> vectors,
             Dictionary<int, List<Tool>> tools,
+            Dictionary<int, double[]> sumBeforeAfter,
             Dictionary<int, double> GainScores,
             Dictionary<int, double> GrowesOnNormalizedData,
             Dictionary<int, double> Growthes)
@@ -1065,7 +1070,7 @@ namespace Genometric.TVQ.API.Controllers
             Directory.CreateDirectory(Path.GetDirectoryName(filename));
             using var writer = new StreamWriter(filename);
 
-            builder.Append("PublicationID\tTools\tToolIDs\tGainScore\tCitationGrowthOnInputData\tCitationGrowthOnNormalizedData");
+            builder.Append("PublicationID\tTools\tToolIDs\tGainScore\tCitationGrowthOnInputData\tCitationGrowthOnNormalizedData\tSumPreRawCitations\tSumPostRawCitations");
             var pointsX = vectors.First().Value.Keys;
             foreach (var x in pointsX)
                 builder.Append("\t" + x.ToString(_numberFormat, CultureInfo.InvariantCulture));
@@ -1093,6 +1098,9 @@ namespace Genometric.TVQ.API.Controllers
                 builder.Append("\t" + Growthes[pub.Key]);
 
                 builder.Append("\t" + GrowesOnNormalizedData[pub.Key]);
+
+                builder.Append("\t" + sumBeforeAfter[pub.Key][0]);
+                builder.Append("\t" + sumBeforeAfter[pub.Key][1]);
 
                 foreach (var point in pub.Value)
                     builder.Append("\t" + point.Value.ToString(_numberFormat, CultureInfo.InvariantCulture));
