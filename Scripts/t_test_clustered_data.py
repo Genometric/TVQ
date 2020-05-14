@@ -11,10 +11,17 @@ from math import sqrt
 CLUSTERED_FILENAME_POSFIX = "_clustered"
 CLUSTER_NAME_COLUMN_LABEL = "cluster_label"
 
+SUM_PRE_CITATIONS_COLUMN_LABEL = "SumPreRawCitations"
+SUM_POST_CITATIONS_COLUMN_LABEL = "SumPostRawCitations"
+
 
 def get_repo_name(filename):
     filename = os.path.basename(filename)
     return (os.path.splitext(filename)[0]).replace(CLUSTERED_FILENAME_POSFIX, "")
+
+
+def get_avg_pre_post(dataframe):
+    return mean(dataframe[SUM_PRE_CITATIONS_COLUMN_LABEL]), mean(dataframe[SUM_POST_CITATIONS_COLUMN_LABEL])
 
 
 def ttest_by_cluster(root, filename):
@@ -172,9 +179,10 @@ def ttest_repository(input_filename, output_filename):
     print(f"\t- Repository: {get_repo_name(input_filename)}")
     tools = pd.read_csv(input_filename, header=0, sep='\t')
     (cohen_d, cohen_d_interpretation), (t_statistic, pvalue) = paired_ttest(tools)
+    avg_pre, avg_post = get_avg_pre_post(tools)
     print_ttest_results(pvalue, t_statistic, cohen_d, cohen_d_interpretation, "\t\t")
     with open(output_filename, "a") as f:
-        f.write(f"{get_repo_name(input_filename)}\t{t_statistic}\t{pvalue}\t{cohen_d}\t{cohen_d_interpretation}\n")
+        f.write(f"{get_repo_name(input_filename)}\t{avg_pre}\t{avg_post}\t{t_statistic}\t{pvalue}\t{cohen_d}\t{cohen_d_interpretation}\n")
 
 
 def ttest_repository_delta(input_filename, output_filename):
@@ -182,9 +190,10 @@ def ttest_repository_delta(input_filename, output_filename):
     tools = pd.read_csv(input_filename, header=0, sep='\t')
     _, _, _, _, _, _, delta = get_vectors(tools)
     t_statistic, pvalue, d, d_interpretation = one_sample_ttest(delta, 0.0)
+    avg_pre, avg_post = get_avg_pre_post(tools)
     print_ttest_results(pvalue, t_statistic, d, d_interpretation, "\t\t")
     with open(output_filename, "a") as f:
-        f.write(f"{get_repo_name(input_filename)}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
+        f.write(f"{get_repo_name(input_filename)}\t{avg_pre}\t{avg_post}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
 
 
 def ttest_repositories(repo_a_filename, repo_b_filename, output_filename):
@@ -253,7 +262,7 @@ def run(input_path):
     if os.path.isfile(repo_ttest_filename):
         os.remove(repo_ttest_filename)
     with open(repo_ttest_filename, "a") as f:
-        f.write("Repository\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
+        f.write("Repository\tAverage Pre Citations\tAverage Post Citations\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
 
     for filename in filenames:
         ttest_repository(os.path.join(root, filename), repo_ttest_filename)
@@ -263,7 +272,7 @@ def run(input_path):
     if os.path.isfile(one_sample_ttest_filename):
         os.remove(one_sample_ttest_filename)
     with open(one_sample_ttest_filename, "a") as f:
-        f.write("Repository\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
+        f.write("Repository\tAverage Pre Citations\tAverage Post Citations\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
     for filename in filenames:
         ttest_repository_delta(os.path.join(root, filename), one_sample_ttest_filename)
 

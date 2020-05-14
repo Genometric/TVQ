@@ -12,7 +12,7 @@ from sklearn.cluster import AgglomerativeClustering
 import seaborn as sns
 import sklearn
 from matplotlib.lines import Line2D
-from t_test_clustered_data import get_sorted_clusters, pre_post_columns
+from t_test_clustered_data import get_sorted_clusters, pre_post_columns, get_avg_pre_post, get_clusters, get_repo_name
 
 
 CLUSTERED_FILENAME_POSFIX = "_clustered"
@@ -225,6 +225,27 @@ def run(input_path, cluster_count):
         os.remove(image_file)
     plt.savefig(image_file, bbox_inches='tight')
     plt.close()
+
+
+    # Most of the code below is duplicate, it can be greatly simplified by 
+    # methods from other scripts.
+    fNames = []
+    for root, dirpath, files in os.walk(input_path):
+        for filename in files:
+            if os.path.splitext(filename)[1] == ".csv" and \
+               os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
+                fNames.append(os.path.join(root, filename))
+
+    avgs_filename = os.path.join(root, "clustered_avg_before_after.txt")
+    if os.path.isfile(avgs_filename):
+        os.remove(avgs_filename)
+    with open(avgs_filename, "a") as f:
+        f.write("Repository\tCluster\tAverage Before\tAverage After")
+        for fName in fNames:
+            clusters = get_clusters(fName)
+            for k in clusters.groups:
+                avg_pre, avg_post = get_avg_pre_post(clusters.get_group(k))
+                f.write(f"{get_repo_name(fName)}\t{k}\t{avg_pre}\t{avg_post}\n")
     
 
 if __name__ == "__main__":
