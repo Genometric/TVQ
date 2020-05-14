@@ -240,7 +240,7 @@ def run(input_path, cluster_count):
     if os.path.isfile(avgs_filename):
         os.remove(avgs_filename)
     with open(avgs_filename, "a") as f:
-        f.write("Repository\tCluster\tAverage Before\tAverage After")
+        f.write("Repository\tCluster\tAverage Before\tAverage After\n")
         for fName in fNames:
             clusters = get_clusters(fName)
             for k in clusters.groups:
