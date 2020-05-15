@@ -794,7 +794,7 @@ namespace Genometric.TVQ.API.Controllers
                         x => x.Key,
                         x => x.Value.GetCitations(CitationChange.DateNormalizationType.ByDay)),
                     tools,
-                    vectors.ToDictionary(x => x.Key, x => new double[] { x.Value.CitationsBefore.Sum(), x.Value.CitationsBefore.Sum() + x.Value.CitationsAfter.Sum() }),
+                    vectors.ToDictionary(x => x.Key, x => new double[] { x.Value.CitationsBefore.Sum(), x.Value.CitationsAfter.Sum() }),
                     vectors.ToDictionary(x => x.Key, x => x.Value.GainScore),
                     vectors.ToDictionary(x => x.Key, x => x.Value.GrowthOnNormalizedDataByDay),
                     growthes);
@@ -805,7 +805,7 @@ namespace Genometric.TVQ.API.Controllers
                         x => x.Key,
                         x => x.Value.GetCumulativeCitations(CitationChange.DateNormalizationType.ByDay)),
                     tools,
-                    vectors.ToDictionary(x => x.Key, x => new double[] { x.Value.CitationsBefore.Sum(), x.Value.CitationsBefore.Sum() + x.Value.CitationsAfter.Sum() }),
+                    vectors.ToDictionary(x => x.Key, x => new double[] { x.Value.CitationsBefore.Sum(), x.Value.CitationsAfter.Sum() }),
                     vectors.ToDictionary(x => x.Key, x => x.Value.GainScore),
                     vectors.ToDictionary(x => x.Key, x => x.Value.GrowthOnNormalizedDataByDay),
                     growthes);
@@ -816,7 +816,7 @@ namespace Genometric.TVQ.API.Controllers
                         x => x.Key,
                         x => x.Value.GetCitations(CitationChange.DateNormalizationType.ByYear)),
                     tools,
-                    vectors.ToDictionary(x => x.Key, x => new double[] { x.Value.CitationsBefore.Sum(), x.Value.CitationsBefore.Sum() + x.Value.CitationsAfter.Sum() }),
+                    vectors.ToDictionary(x => x.Key, x => new double[] { x.Value.CitationsBefore.Sum(), x.Value.CitationsAfter.Sum() }),
                     vectors.ToDictionary(x => x.Key, x => x.Value.GainScore),
                     vectors.ToDictionary(x => x.Key, x => x.Value.GrowthOnNormalizedDataByYear),
                     growthes);
@@ -827,7 +827,7 @@ namespace Genometric.TVQ.API.Controllers
                         x => x.Key,
                         x => x.Value.GetCumulativeCitations(CitationChange.DateNormalizationType.ByYear)),
                     tools,
-                    vectors.ToDictionary(x => x.Key, x => new double[] { x.Value.CitationsBefore.Sum(), x.Value.CitationsBefore.Sum() + x.Value.CitationsAfter.Sum() }),
+                    vectors.ToDictionary(x => x.Key, x => new double[] { x.Value.CitationsBefore.Sum(), x.Value.CitationsAfter.Sum() }),
                     vectors.ToDictionary(x => x.Key, x => x.Value.GainScore),
                     vectors.ToDictionary(x => x.Key, x => x.Value.GrowthOnNormalizedDataByYear),
                     growthes);
