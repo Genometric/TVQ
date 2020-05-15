@@ -293,11 +293,6 @@ namespace Genometric.TVQ.API.Analysis
             }
         }
 
-        public void AddCitationCount(double count)
-        {
-            CitationCounts.Add(count);
-        }
-
         public void AddCitationCount(List<double> counts)
         {
             CitationCounts.UnionWith(counts);
