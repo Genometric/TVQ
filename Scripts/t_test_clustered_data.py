@@ -165,7 +165,7 @@ def get_vectors(tools):
 
         # This way of computing delta should be used when applied 
         # on cumulative citations count.
-        deltas.append(abs(np.max(post_vals) - (2 * np.max(pre_vals))))
+        deltas.append(abs(np.max(post_vals) - np.max(pre_vals)))
 
     return citations, pre_citations, post_citations, sums, avg_pre, avg_pst, deltas
 
