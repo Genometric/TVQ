@@ -49,7 +49,6 @@ def paired_ttest(tools):
 
 def one_sample_ttest(x, population_mean):
     t_statistic, pvalue = ttest_1samp(x, population_mean)
-    t_statistic = abs(t_statistic)
     d, d_interpretation = cohen_d(x, population_mean=population_mean)
     return t_statistic, pvalue, d, d_interpretation
 
