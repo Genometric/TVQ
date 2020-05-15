@@ -157,7 +157,16 @@ def get_vectors(tools):
         avg_pre.append(np.average(pre_vals))
         avg_pst.append(np.average(post_vals))
 
-        deltas.append(abs(np.average(post_vals) - np.average(pre_vals)))
+        # TODO: the following needs to be double-checked, and 
+        # implemented using a switch. 
+
+        # This way of computing delta should be used when applied 
+        # on citations per year.
+        #deltas.append(abs(np.average(post_vals) - np.average(pre_vals)))
+
+        # This way of computing delta should be used when applied 
+        # on cumulative citations count.
+        deltas.append(abs(np.max(post_vals) - (2 * np.max(pre_vals))))
 
     return citations, pre_citations, post_citations, sums, avg_pre, avg_pst, deltas
 
