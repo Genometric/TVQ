@@ -37,6 +37,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="plotting.py" />
+    <Compile Include="plot_citations_distribution.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="plot_cluster_quartiles.py">
       <SubType>Code</SubType>
     </Compile>

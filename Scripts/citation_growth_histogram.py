@@ -119,7 +119,7 @@ if __name__ == "__main__":
         exit()
 
     plot_density = False
-    if len(sys.argv) == 3:
+    if len(sys.argv) >= 3:
         plot_density = sys.argv[2] == "True"
 
     run(sys.argv[1], plot_density)
