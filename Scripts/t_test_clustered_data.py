@@ -191,7 +191,7 @@ def ttest_repository(input_filename, output_filename):
     print_ttest_results(pvalue, t_statistic, cohen_d, cohen_d_interpretation, "\t\t")
     growth = ((avg_post - avg_pre) / avg_pre) * 100.0
     with open(output_filename, "a") as f:
-        f.write(f"{get_repo_name(input_filename)}\t{avg_pre}\t{avg_post}\t{growth}\t{t_statistic}\t{pvalue}\t{cohen_d}\t{cohen_d_interpretation}\n")
+        f.write(f"{get_repo_name(input_filename)}\t{avg_pre}\t{avg_post}\t{growth}%\t{t_statistic}\t{pvalue}\t{cohen_d}\t{cohen_d_interpretation}\n")
 
 
 def ttest_repository_delta(input_filename, output_filename):
@@ -203,7 +203,7 @@ def ttest_repository_delta(input_filename, output_filename):
     print_ttest_results(pvalue, t_statistic, d, d_interpretation, "\t\t")
     growth = ((avg_post - avg_pre) / avg_pre) * 100.0
     with open(output_filename, "a") as f:
-        f.write(f"{get_repo_name(input_filename)}\t{avg_pre}\t{avg_post}\t{growth}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
+        f.write(f"{get_repo_name(input_filename)}\t{avg_pre}\t{avg_post}\t{growth}%\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
 
 
 def ttest_repositories(repo_a_filename, repo_b_filename, output_filename):

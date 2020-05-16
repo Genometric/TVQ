@@ -166,6 +166,9 @@ namespace Genometric.TVQ.API.Controllers
                     // REF: https://en.wikipedia.org/wiki/Leap_year
                     var yearsOffset = (int)Math.Round((pub.Key - toolAssociation.DateAddedToRepository).Value.TotalDays / 365.2425);
 
+                    if (Math.Abs(yearsOffset) <= _analysisService.MinPubDateAndDateAddedToRepoOffset)
+                        continue;
+
                     if (Math.Abs(yearsOffset) > maxOffset)
                         yearsOffset = (int)Math.Round(maxOffset * Math.Sign(yearsOffset));
 
