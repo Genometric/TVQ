@@ -26,6 +26,15 @@ TOOLS_SEPARATOR = ";"
 MARKERS = ["o", "^", "x", "v", "1", "2", "3", "4", ">", "<", "*", "P", "+", "D", "X", "d"]
 
 
+# It is certainly a bad practice to hard-code such information. However, without such
+# manipulations annotations may overlap, and matplotlib does not offer any feature 
+# out-of-box to address it. There are some open-source libraries developed to address
+# the overlapping annotation issue (e.g., https://github.com/Phlya/adjustText); however, 
+# their output was not satisfactory/elegant.
+# Therefore, this hard-coded modifications is used as a hacky/temporary workaround. 
+OFFSETS = {"Bioconda": (50,0), "Bioconductor": (-45, 0), "BioTools": (-50, 0), "ToolShed": (0, -35)}
+
+
 def get_marker(i):
     if i<len(MARKERS):
         return MARKERS[i]
@@ -45,6 +54,20 @@ def get_clustered_repositories(input_path):
                 repositories.append(get_repo_name(filename))
 
     return filenames, repositories
+
+
+def get_citations_count(tools):
+    _, pre_citations_vectors, post_citations_vectors, _, _, _, delta = get_vectors(tools)
+
+    pre_citations = []
+    for citation in pre_citations_vectors:
+        pre_citations.append(np.max(citation))
+
+    post_citations = []
+    for citation in post_citations_vectors:
+        post_citations.append(np.max(citation))
+
+    return pre_citations, post_citations
 
 
 def get_pub_tool_count(filename):
@@ -147,15 +170,40 @@ def plot(input_path, filenames, repositories):
     add_cluster_scatter = True
     xs = []
     ys = []
+    zs = []
     for filename in filenames:
+        repo_color = get_color(i)
         add_repo_scatter = True
         c_pubs, _, c_tools, _ = get_pub_tool_count(filename)
         max_x = max(max_x, c_pubs)
         max_y = max(max_y, c_tools)
+
+        tools = pd.read_csv(filename, header=0, sep='\t')
+        pre_citations, post_citations = get_citations_count(tools)
+
         xs.append(c_pubs)
         ys.append(c_tools)
-        scatter = ax.scatter(c_pubs, c_tools, color=get_color(i), alpha=0.5, s=80)
-        repo_scatter[get_repo_name(filename)] = scatter
+
+        # it is multiplied by 2 so to make it a bit bigger on the plot so it can 
+        # be seen more easily. 
+        z = ((sum(pre_citations) + sum(post_citations)) / c_pubs) * 2
+        zs.append(z)
+
+        scatter = ax.scatter(c_pubs, c_tools, color=repo_color, alpha=0.5, s=z)
+
+        repo_name = get_repo_name(filename)
+        z_str = '{0:.1f}'.format(z)
+        ax.annotate(\
+            f"{repo_name}\n({c_pubs}, {c_tools}, {z_str})", \
+            xy=(c_pubs, c_tools), \
+            color=repo_color,
+            textcoords="offset points", \
+            xytext=OFFSETS[repo_name], \
+            ha='center', \
+            #arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0.95', color=repo_color)
+            )
+
+        repo_scatter[repo_name] = scatter
         i += 1
 
     #for x,y in zip(xs,ys):
@@ -180,7 +228,7 @@ def plot(input_path, filenames, repositories):
     ax.set_ylabel("Tools Count\n")
 
     # It is required to add legend through `add_artist` for it not be overridden by the second legend.
-    ax.legend(repo_scatter.values(), repo_scatter.keys(), scatterpoints=1, loc='upper left', ncol=2)
+    #ax.legend(repo_scatter.values(), repo_scatter.keys(), scatterpoints=1, loc='upper left', ncol=2)
     #ax.add_artist(l1)
     #l2 = ax.legend(cluster_scatter.values(), cluster_scatter.keys(), scatterpoints=1, loc='upper left', ncol=2, title="Clusters")
 
@@ -203,7 +251,7 @@ def set_plot_style(nrows, ncols, fig_height=5, fig_width=6):
 def run(input_path):
     filenames, repositories = get_clustered_repositories(input_path)
     plot(input_path, filenames, repositories)
-    plot_clustered(input_path, filenames, repositories)
+    #plot_clustered(input_path, filenames, repositories)
 
 
 if __name__ == "__main__":

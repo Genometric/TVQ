@@ -36,4 +36,4 @@ if __name__ == "__main__":
     plot_gain_scores.run(input_path, plot_density)
     plot_pubs_in_clusters.run(input_path)
     plot_tool_pub.run(input_path)
-    plot_citations_distribution.run(input_path)
+    plot_citations_distribution.run(input_path, plot_density)
