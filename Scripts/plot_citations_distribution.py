@@ -15,23 +15,25 @@ from citation_growth_histogram import aggregate
 from t_test_clustered_data import get_repo_name
 
 
+PRE_COLOR = "#3498db"
+POST_COLOR = "#34495e"
+
+
 def plot(ax, pre_citations, post_citations, plot_density, title, ylabel):
-    counts, bins, patches = ax.hist(pre_citations, # label=labels, 
+    counts, bins, patches = ax.hist(pre_citations,
                                     label="Pre publication to repository citation count",
                                     bins = 30,
-                                    edgecolor="#3498db",
-                                    color="#3498db",
-                                    #alpha=0.1,
-                                    histtype="step",
-                                    density=plot_density) # bins=bins, rwidth=0.65,
-                                    #color = colors, align="left", histtype="bar")   # setting density to False will
-                                                                                    # show count, and True will show
-                                                                                    # probability.
-    counts, bins, patches = ax.hist(post_citations, # label=labels,
+                                    # edgecolor=PRE_COLOR,
+                                    color=PRE_COLOR,
+                                    # alpha=0.5,
+                                    histtype="bar", # options: {'bar', 'barstacked', 'step', 'stepfilled'}
+                                    density=plot_density)
+                                    
+    counts, bins, patches = ax.hist(post_citations,
                                     label="Post publication to repository citation count",
                                     bins = 30,
-                                    edgecolor="#feb308",
-                                    color="#feb308",
+                                    edgecolor=POST_COLOR,
+                                    color=POST_COLOR,
                                     fc=(0, 1, 0, 0.3),
                                     histtype="step",
                                     density=plot_density)
