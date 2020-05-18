@@ -30,7 +30,6 @@ def get_color(i):
         return "#" + color
 
 
-
 def set_plot_style(nrows, ncols, fig_height=6, fig_width=7):
     sns.set()
     sns.set_context("paper")

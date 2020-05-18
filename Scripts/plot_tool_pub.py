@@ -192,7 +192,7 @@ def plot(input_path, filenames, repositories):
         scatter = ax.scatter(c_pubs, c_tools, color=repo_color, alpha=0.5, s=z)
 
         repo_name = get_repo_name(filename)
-        z_str = '{0:.1f}'.format(z)
+        z_str = '{0:.1f}'.format(z / 2.0)
         ax.annotate(\
             f"{repo_name}\n({c_pubs}, {c_tools}, {z_str})", \
             xy=(c_pubs, c_tools), \
@@ -205,6 +205,11 @@ def plot(input_path, filenames, repositories):
 
         repo_scatter[repo_name] = scatter
         i += 1
+
+        print(repo_name)
+        print(f"\tpubs:\t{c_pubs}")
+        print(f"\ttools:\t{c_tools}")
+        print(f"\tcitations:\t{sum(pre_citations) + sum(post_citations)}")
 
     #for x,y in zip(xs,ys):
     #    plt.annotate(f"({x}, {y})",  # Label 
@@ -251,7 +256,7 @@ def set_plot_style(nrows, ncols, fig_height=5, fig_width=6):
 def run(input_path):
     filenames, repositories = get_clustered_repositories(input_path)
     plot(input_path, filenames, repositories)
-    #plot_clustered(input_path, filenames, repositories)
+    plot_clustered(input_path, filenames, repositories)
 
 
 if __name__ == "__main__":
