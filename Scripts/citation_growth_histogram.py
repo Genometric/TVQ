@@ -8,18 +8,27 @@ from plot_gain_scores import get_growthes
 from matplotlib.ticker import PercentFormatter, FormatStrFormatter, ScalarFormatter
 
 
-# When the histogram plots `density`, there should not 
+# When the histogram plots `density`, there should not
 # be any significant difference between `CitationGrowthOnNormalizedData`
 # and `CitationGrowthOnInputData`.
-# Possible values are: 
+# Possible values are:
 # - GainScore
 # - CitationGrowthOnInputData
 # - CitationGrowthOnNormalizedData
 GROWTH_COLUMN_HEADER = "GainScore"
 
-X_AXIS_LABEL = {"GainScore": "Gain score", "CitationGrowthOnInputData": "Citation growth percentage",  "CitationGrowthOnNormalizedData": "Citation growth percentage"}
+X_AXIS_LABEL = {
+    "GainScore": "Gain score",
+    "CitationGrowthOnInputData":
+    "Citation growth percentage",
+    "CitationGrowthOnNormalizedData":
+    "Citation growth percentage"}
 
-COLOR_PALETTES = {"Bioconda": "#3498db", "Bioconductor": "#feb308", "BioTools": "#34495e", "ToolShed": "#41aa33"}
+COLOR_PALETTES = {
+    "Bioconda": "#3498db",
+    "Bioconductor": "#feb308",
+    "BioTools": "#34495e",
+    "ToolShed": "#41aa33"}
 
 MIN_AGG = -300
 
@@ -45,10 +54,16 @@ def plot(ax, growthes, labels, colors, plot_density):
 
     bins = list(range(MIN_AGG, 0, BIN_STEP)) + list(range(0, MAX_AGG + 1, BIN_STEP))
 
-    counts, bins, patches = ax.hist(growthes, label=labels, density=plot_density, bins=bins, rwidth=0.65,
-                                    color = colors, align="left", histtype="bar")   # setting density to False will
-                                                                                    # show count, and True will show
-                                                                                    # probability.
+    counts, bins, patches = ax.hist(
+        growthes,
+        label=labels,
+        density=plot_density,
+        bins=bins,
+        rwidth=0.65,
+        color=colors,
+        align="left",
+        histtype="bar")  # setting density to False will show count, and True will show probability.
+
     ax.set_yscale('log')
     if not plot_density:
         ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
