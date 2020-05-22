@@ -22,41 +22,41 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="scripts/citation_growth_histogram.py">
+    <Compile Include="lib\citation_growth_histogram.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="scripts/cluster.py">
+    <Compile Include="lib\cluster.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="scripts/illustration_plot.py">
+    <Compile Include="lib\illustration_plot.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="scripts/line_plot.py">
+    <Compile Include="lib\line_plot.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="scripts/parallel_coordinates.py">
+    <Compile Include="lib\parallel_coordinates.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="scripts/plotting.py" />
-    <Compile Include="scripts/plot_citations_distribution.py">
+    <Compile Include="lib\plotting.py" />
+    <Compile Include="lib\plot_citations_distribution.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="scripts/plot_cluster_quartiles.py">
+    <Compile Include="lib\plot_cluster_quartiles.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="scripts/plot_gain_scores.py">
+    <Compile Include="lib\plot_gain_scores.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="scripts/plot_pubs_in_clusters.py">
+    <Compile Include="lib\plot_pubs_in_clusters.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="scripts/plot_tool_pub.py">
+    <Compile Include="lib\plot_tool_pub.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="scripts/run.py">
+    <Compile Include="lib\run.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="scripts/t_test_clustered_data.py">
+    <Compile Include="lib\t_test_clustered_data.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="tests\test_1.py">
@@ -70,7 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="tests\" />
-    <Folder Include="scripts\" />
+    <Folder Include="lib\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
