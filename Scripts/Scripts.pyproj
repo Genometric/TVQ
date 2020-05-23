@@ -59,13 +59,7 @@
     <Compile Include="lib\t_test_clustered_data.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="lib\__init__.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="tests\test_base.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="tests\__init__.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
