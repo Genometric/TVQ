@@ -31,12 +31,12 @@ class TestBase(object):
         (i.e., those without the cluster postfix) CSV files the given path.
 
         For instance, from a directory as the following, it should read 
-        only `aaa.csv` and `bbb.csv`:
+        only `file_1.csv` and `file_2.csv`:
 
-        ├─── aaa.csv
-        ├─── bbb.csv
-        ├─── aaa_clustered.csv
-        └─── ccc.txt
+        ├─── file_1.csv
+        ├─── file_2.csv
+        ├─── file_1_clustered.csv
+        └─── file_3.txt
 
         :type  tmpdir:  string
         :param tmpdir:  The ‘tmpdir’ fixture is a py.path.local object
@@ -45,9 +45,11 @@ class TestBase(object):
         """
 
         # Arrange
+        x = "content"
         for i in range(CSV_FILES_COUNT):
-            filename = tmpdir.join(f"{i}.csv")
-            filename.write("content")
+            tmpdir.join(f"file_{i}.csv").write(x)
+        tmpdir.join(f"file_{i}{CLUSTERED_FILENAME_POSFIX}.csv").write(x)
+        tmpdir.join(f"file_n.txt").write(x)
 
         # Act
         files = Base.get_input_files(tmpdir)
