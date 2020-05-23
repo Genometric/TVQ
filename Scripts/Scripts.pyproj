@@ -37,9 +37,6 @@
     <Compile Include="lib\line_plot.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="lib\parallel_coordinates.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="lib\plotting.py" />
     <Compile Include="lib\plot_citations_distribution.py">
       <SubType>Code</SubType>
