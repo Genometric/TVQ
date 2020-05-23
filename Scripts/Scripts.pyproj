@@ -22,6 +22,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="lib\base.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="lib\citation_growth_histogram.py">
       <SubType>Code</SubType>
     </Compile>
@@ -59,7 +62,13 @@
     <Compile Include="lib\t_test_clustered_data.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="tests\test_1.py">
+    <Compile Include="lib\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="tests\test_base.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="tests\__init__.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -69,8 +78,8 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="tests\" />
     <Folder Include="lib\" />
+    <Folder Include="tests\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
