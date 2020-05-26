@@ -3,18 +3,14 @@ TODO: Add doc string.
 """
 
 import numpy as np
-from numpy import std
 import os
 import sys
 import pandas as pd
-from scipy.stats import ttest_rel, ttest_ind, pearsonr, ttest_1samp
-from statistics import mean
-from math import sqrt
 from t_test_clustered_data import get_vectors
 from plot_tool_pub import set_plot_style
 from cluster import CLUSTERED_FILENAME_POSFIX
 import matplotlib.pyplot as plt
-from matplotlib.ticker import PercentFormatter, FormatStrFormatter, ScalarFormatter
+from matplotlib.ticker import PercentFormatter, FormatStrFormatter
 from citation_growth_histogram import aggregate
 from t_test_clustered_data import get_repo_name
 
@@ -26,16 +22,16 @@ POST_COLOR = "#34495e"
 def plot(ax, pre_citations, post_citations, plot_density, title, ylabel):
     counts, bins, patches = ax.hist(pre_citations,
                                     label="Pre publication to repository citation count",
-                                    bins = 30,
+                                    bins=30,
                                     # edgecolor=PRE_COLOR,
                                     color=PRE_COLOR,
                                     # alpha=0.5,
-                                    histtype="bar", # options: {'bar', 'barstacked', 'step', 'stepfilled'}
+                                    histtype="bar",  # options: {'bar', 'barstacked', 'step', 'stepfilled'}
                                     density=plot_density)
                                     
     counts, bins, patches = ax.hist(post_citations,
                                     label="Post publication to repository citation count",
-                                    bins = 30,
+                                    bins=30,
                                     edgecolor=POST_COLOR,
                                     color=POST_COLOR,
                                     fc=(0, 1, 0, 0.3),
