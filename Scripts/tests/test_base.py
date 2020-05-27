@@ -56,3 +56,12 @@ class TestBase(object):
 
         # Assert
         assert len(files) == CSV_FILES_COUNT
+
+
+    def test_get_input_files(self, tmpdir):
+        """
+        TODO: ... 
+        """
+        pass
+
+

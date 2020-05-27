@@ -42,3 +42,9 @@ class Base(object):
                     files.append(os.path.join(root, filename))
         return files
 
+    def get_clustered_files(input_path):
+        """
+        TODO: should return files whose filename ends with CLUSTERED_FILENAME_POSFIX
+        """
+        pass
+
