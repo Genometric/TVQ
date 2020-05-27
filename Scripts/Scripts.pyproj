@@ -62,6 +62,9 @@
     <Compile Include="lib\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="setup.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="tests\test_base.py">
       <SubType>Code</SubType>
     </Compile>
@@ -71,6 +74,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="README.md">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="tox.ini">
       <SubType>Code</SubType>
     </Content>
   </ItemGroup>
