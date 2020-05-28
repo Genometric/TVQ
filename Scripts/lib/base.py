@@ -15,6 +15,7 @@ class Base(object):
     by the derived types. 
     """
 
+    @staticmethod
     def get_repo_name(filename):
         """
         Extracts repository name from the given filename.
