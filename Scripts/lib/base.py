@@ -30,7 +30,7 @@ class Base(object):
         filename = os.path.basename(filename)
         return (os.path.splitext(filename)[0]).replace(CLUSTERED_FILENAME_POSFIX, "")
 
-
+    @staticmethod
     def get_input_files(input_path):
         """
 
