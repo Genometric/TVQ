@@ -264,8 +264,8 @@ def run(input_path):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print("Missing input path.")
-        exit()
+        exit()        
 
     run(sys.argv[1])
