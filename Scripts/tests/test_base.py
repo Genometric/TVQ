@@ -4,11 +4,14 @@ import py
 
 from lib.base import Base, CLUSTERED_FILENAME_POSFIX
 
+from .tests_base import TestsBase
+
 
 CSV_FILES_COUNT = 3
 
 
-class TestBase(object):
+
+class TestBase(TestsBase):
 
     @pytest.mark.parametrize(
         "input,expected", 
