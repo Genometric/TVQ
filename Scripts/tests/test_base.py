@@ -9,6 +9,17 @@ from .tests_base import TestsBase
 
 CSV_FILES_COUNT = 3
 
+# The number of columns in the test files that 
+# represent citation counts before a tool was 
+# added to the repository---excluding the year
+# the tool was added (i.e., the 0 normalized date).
+PRE_COL_COUNT = 10
+
+# The number of columns in the tests files that
+# represent citation counts after a tool was
+# added to the repository---including the year
+# the tool was added (i.e., the 0 normalized date).
+POST_COL_COUNT = 11
 
 
 class TestBase(TestsBase):
@@ -67,4 +78,13 @@ class TestBase(TestsBase):
         """
         pass
 
+    def test_get_citations(self, publications):
+        """
+        TODO:
+        """
+        # TODO: fix this so this test runs separately on different pubs. 
+        for pub in publications:
+            pre, post = Base.get_citations_headers(pub)
 
+            assert len(pre) == PRE_COL_COUNT
+            assert len(post) == POST_COL_COUNT

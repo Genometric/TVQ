@@ -48,3 +48,38 @@ class Base(object):
         """
         pass
 
+    def get_citations_headers(publications):
+        """
+        Extracts the headers of columns containing citations of publications 
+        from the given data frame.
+
+        This method assumes the consecutive columns with numerical headers
+        (starting from the first numerical header to the next non-numerical header)
+        contain the citation count of publications. The negative and positive
+        numerical headers are assumed to be containing citations belong to 
+        before and after the tool was added to the repository, respectively.
+
+        :type   publications:   pandas.core.frame.DataFrame
+        :param  publications:   The dataframe from which to extract citations count.
+
+        :returns:
+            - type pre: The headers of columns containing citation counts 
+                        before the tool was added to the repository.
+            - type post:    The headers of columns containing citation counts 
+                            after the tool was added to the repository.
+        """
+        headers = publications.columns.values.tolist()
+        pre = []
+        post = []
+        for header in headers:
+            try:
+                v = float(header)
+            except ValueError:
+                continue
+
+            if v < 0:
+                pre.append(header)
+            else:
+                post.append(header)
+
+        return pre, post
