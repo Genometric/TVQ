@@ -78,7 +78,7 @@
     <Compile Include="tests\stats\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="tests\tests_base.py">
+    <Compile Include="tests\base_test_case.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="tests\test_base.py">

@@ -5,7 +5,7 @@ import numpy as np
 
 from lib.base import Base, CLUSTERED_FILENAME_POSFIX
 
-from .tests_base import TestsBase
+from .base_test_case import BaseTestCase
 
 
 CSV_FILES_COUNT = 3
@@ -26,7 +26,7 @@ PRE_COL_COUNT = 10
 POST_COL_COUNT = 11
 
 
-class TestBase(TestsBase):
+class TestBase(BaseTestCase):
 
     @pytest.mark.parametrize(
         "input,expected", 

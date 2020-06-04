@@ -9,13 +9,13 @@ import py
 from lib.base import Base, CLUSTERED_FILENAME_POSFIX
 from lib.stats.base_statistics import BaseStatistics
 
-from ..tests_base import TestsBase
+from ..base_test_case import BaseTestCase
 
 # Is the number of clusters in the test data.
 TEST_DATA_CLUSTERS = 6
 
 
-class TestBaseStatistics(TestsBase):
+class TestBaseStatistics(BaseTestCase):
     """
     TODO
     """
