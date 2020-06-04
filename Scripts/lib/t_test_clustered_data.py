@@ -128,6 +128,11 @@ def get_clusters(filename):
 
 
 def get_vectors(tools):
+
+    print("\n\n\n\n\n")
+    print(type(tools))
+    print("\n\n\n\n\n")
+
     # columns: a list of all the column headers.
     # pre:  a list of headers of columns containing normalized citation counts BEFORE a tool was added to the repository.
     # post: a list of headers of columns containing normalized citation counts AFTER  a tool was added to the repository.

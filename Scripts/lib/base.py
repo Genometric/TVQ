@@ -3,6 +3,7 @@ TODO: Add doc string.
 """
 
 import os
+import numpy as np
 
 
 CLUSTERED_FILENAME_POSFIX = "_clustered"
@@ -63,10 +64,10 @@ class Base(object):
         :param  publications:   The dataframe from which to extract citations count.
 
         :returns:
-            - type pre: The headers of columns containing citation counts 
-                        before the tool was added to the repository.
-            - type post:    The headers of columns containing citation counts 
-                            after the tool was added to the repository.
+            - list<string> pre:     The headers of columns containing citation counts 
+                                    before the tool was added to the repository.
+            - list<string> post:    The headers of columns containing citation counts 
+                                    after the tool was added to the repository.
         """
         headers = publications.columns.values.tolist()
         pre = []
@@ -83,3 +84,47 @@ class Base(object):
                 post.append(header)
 
         return pre, post
+
+    def get_vectors(publications, citations_per_year=False):
+        """
+
+        :type   publications:   pandas.core.frame.DataFrame
+        :param  publications:   The dataframe from which to extract citations vectors.
+
+        :returns:
+        """
+        pre_headers, post_headers = Base.get_citations_headers(publications)
+
+        # A list of two-dimensional lists, first dimension is pre counts
+        # and second dimension contains post citation counts.
+        citations = []
+
+        sums = []
+
+        deltas = []
+
+        # Lists contain citation counts before (pre) and after (post)
+        # a tool was added to the repository.
+        avg_pre = []
+        avg_pst = []
+
+        pre_citations = []
+        post_citations = []
+        for index, row in publications.iterrows():
+            pre_vals = row.get(pre_headers).values.tolist()
+            post_vals = row.get(post_headers).values.tolist()
+
+            pre_citations.append(pre_vals)
+            post_citations.append(post_vals)
+
+            citations.append([pre_vals, post_vals])
+            sums.append(np.sum(pre_vals + post_vals))
+            avg_pre.append(np.average(pre_vals))
+            avg_pst.append(np.average(post_vals))
+
+            if citations_per_year:
+                deltas.append(abs(np.average(post_vals) - np.average(pre_vals)))
+            else:
+                deltas.append(abs(np.max(post_vals) - np.max(pre_vals)))
+
+        return citations, pre_citations, post_citations, sums, avg_pre, avg_pst, deltas
