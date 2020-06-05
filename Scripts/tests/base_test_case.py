@@ -119,3 +119,10 @@ class BaseTestCase(object):
         for filename in clustered_files:
             publications.append(pd.read_csv(filename, header=0, sep='\t'))
         return publications
+
+    @staticmethod
+    def assert_lists_equal(l1, l2):
+        """
+        Asserts if two lists are equal, returns true if they, false otherwise.
+        """
+        return all([x == y for x,y in zip(l1, l2)])

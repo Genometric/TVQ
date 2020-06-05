@@ -96,22 +96,19 @@ class TestBase(BaseTestCase):
         """
         TODO:
         """
-
         # Arrange
         input = test_publications[0]
         expected = test_publications[1]
-        def assert_lists_eqaul(l1, l2):
-            return all([x == y for x,y in zip(l1, l2)])
 
         # Act
         citations, pre, post, sums, avg_pre, avg_post, deltas = Base.get_vectors(input)
 
         # Assert
-        assert assert_lists_eqaul(citations, expected["citations"])
-        assert assert_lists_eqaul(pre, expected["pre"])
-        assert assert_lists_eqaul(post, expected["post"])
-        assert assert_lists_eqaul(sums, expected["sums"])
-        assert assert_lists_eqaul(avg_pre, expected["avg_pre"])
-        assert assert_lists_eqaul(avg_post, expected["avg_post"])
-        assert assert_lists_eqaul(deltas, expected["deltas"])
+        assert BaseTestCase.assert_lists_equal(citations, expected["citations"])
+        assert BaseTestCase.assert_lists_equal(pre, expected["pre"])
+        assert BaseTestCase.assert_lists_equal(post, expected["post"])
+        assert BaseTestCase.assert_lists_equal(sums, expected["sums"])
+        assert BaseTestCase.assert_lists_equal(avg_pre, expected["avg_pre"])
+        assert BaseTestCase.assert_lists_equal(avg_post, expected["avg_post"])
+        assert BaseTestCase.assert_lists_equal(deltas, expected["deltas"])
 
