@@ -84,17 +84,27 @@ class TestBase(BaseTestCase):
 
     def test_get_citations(self, test_publications):
         """
-        TODO:
+        Asserts a correct selection of the headers of the columns 
+        containing citation count before and after a tool was added
+        to the repository.
         """
+        # Arrange
         input = test_publications[0]
+
+        # Act
         pre, post = Base.get_citations_headers(input)
 
+        # Assert
         assert len(pre) == 2
         assert len(post) == 3
 
     def test_get_vectors(self, test_publications):
         """
-        TODO:
+        This test asserts if various vectors are correctly extracted 
+        from a given dataframe of publications (which represents a
+        repository). For instance, extract from the dataframe the 
+        citations a publication received before its tool was added 
+        to the repository.
         """
         # Arrange
         input = test_publications[0]
