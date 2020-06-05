@@ -72,12 +72,15 @@ class Base(object):
         headers = publications.columns.values.tolist()
         pre = []
         post = []
+        s = False
         for header in headers:
             try:
                 v = float(header)
             except ValueError:
-                continue
+                if s: break
+                else: continue
 
+            s = True
             if v < 0:
                 pre.append(header)
             else:
