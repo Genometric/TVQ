@@ -6,12 +6,74 @@ import pytest
 import os
 import py
 import pandas as pd
+import numpy as np
+from numpy import average
+from numpy import max
 
 from lib.base import Base, CLUSTERED_FILENAME_POSFIX
 from lib.stats.base_statistics import BaseStatistics
 
 
 class BaseTestCase(object):
+
+    def get_test_publications():
+        """
+        Returns two tuples of test publications, each tuple contains 
+        input and expected values.
+        """
+        # The _inclusive_ index of the first column containing citations 
+        # before a tool was added to the repository.
+        i = 2
+
+        # The _exclusive_ index of the last column containing citations
+        # before a tool was added to the repository. And
+        # the _inclusive_ index of the first column containing citations
+        # before a tool was added to the repository.
+        j = 4
+
+        # The _exclusive_ index of the last column containing citations
+        # after a tool was added to the repository.
+        k = 7
+
+        pubs_a = []
+        pubs_b = []
+
+        header =      ["id", "name", "-1.0", "-0.5", "0.0", "0.5", "1.0", "cluster", "temp"]
+        pubs_a.append(["01", "p1_1", 0.0000, 0.1000, 0.200, 0.300, 0.400, 1, 123])
+        pubs_a.append(["02", "p1_2", 0.1200, 0.2000, 0.300, 0.400, 0.500, 1, 456])
+        pubs_a.append(["03", "p1_3", 1.0000, 2.0000, 3.000, 4.444, 5.000, 2, 789])
+
+        pubs_b.append(["01", "p2_1", 0.1111, 0.2222, 0.333, 0.444, 0.555, 1, 888])
+        pubs_b.append(["02", "p2_2", 0.0123, 0.0456, 0.078, 0.099, 0.100, 1, 888])
+        pubs_b.append(["03", "p2_3", 2.0000, 3.0000, 4.000, 5.000, 6.000, 2, 888])
+
+        pubs_1 = pd.DataFrame(pubs_a, columns=header)
+        pubs_2 = pd.DataFrame(pubs_b, columns=header)
+
+        # The cast from a numpy array to python list in the following
+        # is used to avoid list comparison issues when comparing a list
+        # with a numpy array.
+        def get_expected_values(pubs):
+            return {
+                "citations":[x[i:k].tolist() for x in pubs],
+                "pre":      [x[i:j].tolist() for x in pubs],
+                "post":     [x[j:k].tolist() for x in pubs],
+                "sums":     [sum(x[i:k]) for x in pubs],
+                "avg_pre":  [average(x[i:j].tolist()) for x in pubs],
+                "avg_post": [average(x[j:k].tolist()) for x in pubs],
+                "deltas":   [max(x[j:k]) - max(x[i:j]) for x in pubs]}
+
+        # Each tuple in the following list is separate input and 
+        # expected value for a test. Hence, two tuples will cause 
+        # a test to run twice, once for the first tuple, and once
+        # for the second tuple.
+        return [
+            (pubs_1, get_expected_values(pubs_1.values)), 
+            (pubs_2, get_expected_values(pubs_2.values))]
+
+    @pytest.fixture(params=get_test_publications(), scope="session")
+    def test_publications(self, request):
+        return request.param
 
     @pytest.fixture(scope="session")
     def tmp_clustered_files(self, tmpdir_factory):
@@ -49,7 +111,7 @@ class BaseTestCase(object):
         return filenames
 
     @pytest.fixture(scope="session")
-    def publications(self, clustered_files):
+    def test_publications_from_files(self, clustered_files):
         """
 
         """

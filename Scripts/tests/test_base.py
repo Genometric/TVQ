@@ -82,31 +82,36 @@ class TestBase(BaseTestCase):
         """
         pass
 
-    def test_get_citations(self, publications):
+    def test_get_citations(self, test_publications):
         """
         TODO:
         """
-        # TODO: fix this so this test runs separately on different pubs. 
-        for pub in publications:
-            pre, post = Base.get_citations_headers(pub)
+        input = test_publications[0]
+        pre, post = Base.get_citations_headers(input)
 
-            assert len(pre) == PRE_COL_COUNT
-            assert len(post) == POST_COL_COUNT
+        assert len(pre) == 2
+        assert len(post) == 3
 
-    def test_get_vectors(self, publications):
-        # TODO: this test should be extended to work for every item in publications separately. 
-        pub = publications[0]
-        citations, pre_citations, post_citations, sums, avg_pre, avg_pst, deltas = Base.get_vectors(pub)
+    def test_get_vectors(self, test_publications):
+        """
+        TODO:
+        """
 
-        # TODO: is there any better way asserting results?
-        citations = np.array(citations)
-        assert citations.shape == (PUBLICATION_COUNT, 2)
-        assert citations[0][0][0] == 1.16691
-        assert citations[0][1][2] == 19.37893
-        assert np.average(citations[9][1]) == 57.985079999999996
+        # Arrange
+        input = test_publications[0]
+        expected = test_publications[1]
+        def assert_lists_eqaul(l1, l2):
+            return all([x == y for x,y in zip(l1, l2)])
 
-        pre_citations = np.array(pre_citations)
-        assert citations.shape == (PUBLICATION_COUNT, 2)
-        assert pre_citations[1][2] == 7.68509
-        assert np.average(pre_citations[5][1]) == 5.79521
+        # Act
+        citations, pre, post, sums, avg_pre, avg_post, deltas = Base.get_vectors(input)
+
+        # Assert
+        assert assert_lists_eqaul(citations, expected["citations"])
+        assert assert_lists_eqaul(pre, expected["pre"])
+        assert assert_lists_eqaul(post, expected["post"])
+        assert assert_lists_eqaul(sums, expected["sums"])
+        assert assert_lists_eqaul(avg_pre, expected["avg_pre"])
+        assert assert_lists_eqaul(avg_post, expected["avg_post"])
+        assert assert_lists_eqaul(deltas, expected["deltas"])
 

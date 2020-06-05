@@ -117,7 +117,7 @@ class Base(object):
             pre_citations.append(pre_vals)
             post_citations.append(post_vals)
 
-            citations.append([pre_vals, post_vals])
+            citations.append(pre_vals + post_vals)
             sums.append(np.sum(pre_vals + post_vals))
             avg_pre.append(np.average(pre_vals))
             avg_pst.append(np.average(post_vals))
