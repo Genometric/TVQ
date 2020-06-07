@@ -122,3 +122,11 @@ class TestBase(BaseTestCase):
         assert BaseTestCase.assert_lists_equal(avg_post, expected["avg_post"])
         assert BaseTestCase.assert_lists_equal(deltas, expected["deltas"])
 
+    def test_get_sorted_clusters(self, test_publications):
+
+        # Arrange
+        input = test_publications[0]
+        expected = test_publications[1]
+
+        # Act
+        sorted_keys, agg_cluster_mapping = Base.get_sorted_clusters(input)
