@@ -131,3 +131,15 @@ class Base(object):
                 deltas.append(abs(np.max(post_vals) - np.max(pre_vals)))
 
         return citations, pre_citations, post_citations, sums, avg_pre, avg_pst, deltas
+
+    def get_sorted_clusters(publications):
+        agg_cluster_mapping = {}
+        for k in publications.groups:
+            citations, _, _, _, _, _, _ = get_vectors(publications.get_group(k))
+            flattend = []
+            for c in citations:
+                flattend.append(c[0] + c[1])
+
+            agg_cluster_mapping[np.average(flattend)] = k
+
+        return sorted(agg_cluster_mapping), agg_cluster_mapping
