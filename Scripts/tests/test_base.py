@@ -129,4 +129,4 @@ class TestBase(BaseTestCase):
         expected = test_publications[1]
 
         # Act
-        sorted_keys, agg_cluster_mapping = Base.get_sorted_clusters(input)
+        keys, mapping = Base.get_sorted_clusters(input)
