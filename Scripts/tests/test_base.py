@@ -3,7 +3,7 @@ import os
 import py
 import numpy as np
 
-from lib.base import Base, CLUSTERED_FILENAME_POSFIX
+from lib.base import Base, CLUSTERED_FILENAME_POSFIX, CLUSTER_NAME_COLUMN_LABEL
 
 from .base_test_case import BaseTestCase
 
@@ -125,7 +125,7 @@ class TestBase(BaseTestCase):
     def test_get_sorted_clusters(self, test_publications):
 
         # Arrange
-        input = test_publications[0]
+        input = test_publications[0].groupby(CLUSTER_NAME_COLUMN_LABEL)
         expected = test_publications[1]
 
         # Act
