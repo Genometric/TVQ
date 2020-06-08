@@ -10,7 +10,7 @@ import numpy as np
 from numpy import average
 from numpy import max
 
-from lib.base import Base, CLUSTERED_FILENAME_POSFIX
+from lib.base import Base, CLUSTERED_FILENAME_POSFIX, CLUSTER_NAME_COLUMN_LABEL
 from lib.stats.base_statistics import BaseStatistics
 
 
@@ -42,7 +42,7 @@ class BaseTestCase(object):
         # numerical headers are considered as those containing citations.
         # Therefore, this column should not be read as containing citations.
 
-        header =      ["id", "name", "-1.0", "-0.5", "0.0", "0.5", "1.0", "cluster", "1.1"]
+        header =      ["id", "name", "-1.0", "-0.5", "0.0", "0.5", "1.0", CLUSTER_NAME_COLUMN_LABEL, "1.1"]
         pubs_a.append(["01", "p1_1", 0.0000, 0.1000, 0.200, 0.300, 0.400, 1, 123])
         pubs_a.append(["02", "p1_2", 0.1200, 0.2000, 0.300, 0.400, 0.500, 1, 456])
         pubs_a.append(["03", "p1_3", 1.0000, 2.0000, 3.000, 4.444, 5.000, 2, 789])
