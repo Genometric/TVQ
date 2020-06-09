@@ -58,6 +58,20 @@ class BaseTestCase(object):
         # is used to avoid list comparison issues when comparing a list
         # with a numpy array.
         def get_expected_values(pubs):
+            # The following lines create a dictionary (d) where the 
+            # key is the cluster number, and the value is the average 
+            # of all the citation counts of all the publications in
+            # that cluster.
+            g_pubs = pubs.groupby(CLUSTER_NAME_COLUMN_LABEL)
+            d = {x:
+                 # The average of the average of citations.
+                 average(
+                     # The average of citations.
+                     [average(r.get(header[i:k]).values.tolist()) 
+                     for _, r in g_pubs.get_group(x).iterrows()])
+                for x in g_pubs.groups}
+
+            pubs = pubs.values
             return {
                 "citations":[x[i:k].tolist() for x in pubs],
                 "pre":      [x[i:j].tolist() for x in pubs],
@@ -65,15 +79,16 @@ class BaseTestCase(object):
                 "sums":     [sum(x[i:k]) for x in pubs],
                 "avg_pre":  [average(x[i:j].tolist()) for x in pubs],
                 "avg_post": [average(x[j:k].tolist()) for x in pubs],
-                "deltas":   [max(x[j:k]) - max(x[i:j]) for x in pubs]}
+                "deltas":   [max(x[j:k]) - max(x[i:j]) for x in pubs],
+                "cluster_avg": d}
 
         # Each tuple in the following list is separate input and 
         # expected value for a test. Hence, two tuples will cause 
         # a test to run twice, once for the first tuple, and once
         # for the second tuple.
         return [
-            (pubs_1, get_expected_values(pubs_1.values)), 
-            (pubs_2, get_expected_values(pubs_2.values))]
+            (pubs_1, get_expected_values(pubs_1)), 
+            (pubs_2, get_expected_values(pubs_2))]
 
     @pytest.fixture(params=get_test_publications(), scope="session")
     def test_publications(self, request):
