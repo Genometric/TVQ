@@ -142,6 +142,7 @@ class BaseTestCase(object):
     @staticmethod
     def assert_lists_equal(l1, l2):
         """
-        Asserts if two lists are equal, returns true if they, false otherwise.
+        Asserts if two lists are **almost** equal, with relative 
+        tolerance of 1e-5 and absolute tolerance of 1e-8. 
         """
-        return all([x == y for x,y in zip(l1, l2)])
+        return np.allclose(l1, l2)

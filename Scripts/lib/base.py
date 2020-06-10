@@ -4,6 +4,7 @@ TODO: Add doc string.
 
 import os
 import numpy as np
+from numpy import average
 
 
 CLUSTERED_FILENAME_POSFIX = "_clustered"
@@ -139,7 +140,7 @@ class Base(object):
         mapping = {}
         for k in publications.groups:
             citations, _, _, _, _, _, _ = Base.get_vectors(publications.get_group(k))
-            mapping[k] = np.average(citations)
+            mapping[k] = average(citations)
         
         sorted_avg = sorted(mapping.values())
         return mapping, sorted_avg
