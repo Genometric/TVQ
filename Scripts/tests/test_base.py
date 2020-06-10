@@ -128,12 +128,12 @@ class TestBase(BaseTestCase):
         input = test_publications[0].groupby(CLUSTER_NAME_COLUMN_LABEL)
         expected = test_publications[1]
         exp_mapping = expected["cluster_avg"]
-        exp_keys = sorted(exp_mapping.values())
+        exp_sorted_avg = sorted(exp_mapping.values())
 
         # Act
-        keys, mapping = Base.get_sorted_clusters(input)
+        mapping, sorted_avg = Base.get_sorted_clusters(input)
 
         # Assert
-        assert BaseTestCase.assert_lists_equal(keys, exp_keys)
-        assert BaseTestCase.assert_lists_equal(list(mapping.values()),
+        assert BaseTestCase.assert_lists_equal(sorted_avg, exp_sorted_avg)
+        assert BaseTestCase.assert_lists_equal(list(mapping.keys()),
                                                list(exp_mapping.keys()))

@@ -133,10 +133,13 @@ class Base(object):
         return citations, pre_citations, post_citations, sums, avg_pre, avg_pst, deltas
 
     def get_sorted_clusters(publications):
+        """
+
+        """
         mapping = {}
         for k in publications.groups:
             citations, _, _, _, _, _, _ = Base.get_vectors(publications.get_group(k))
-            mapping[np.average(citations)] = k
+            mapping[k] = np.average(citations)
         
-        keys = sorted(mapping)
-        return keys, mapping
+        sorted_avg = sorted(mapping.values())
+        return mapping, sorted_avg
