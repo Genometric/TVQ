@@ -136,11 +136,7 @@ class Base(object):
         mapping = {}
         for k in publications.groups:
             citations, _, _, _, _, _, _ = Base.get_vectors(publications.get_group(k))
-            flattend = []
-            for c in citations:
-                flattend.append(c[0] + c[1])
-
-            mapping[np.average(flattend)] = k
+            mapping[np.average(citations)] = k
         
         keys = sorted(mapping)
         return keys, mapping
