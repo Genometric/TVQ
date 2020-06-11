@@ -81,8 +81,8 @@ class TestBase(BaseTestCase):
         """
         x = "content"
         for i in range(CSV_FILES_COUNT):
-            tmpdir.join(f"file_{i}{CLUSTERED_FILENAME_POSFIX}_{CLUSTERED_FILENAME_POSFIX}.csv").write(x)
-        tmpdir.join(f"file_{i}{CLUSTERED_FILENAME_POSFIX}.csv").write(x)
+            tmpdir.join(f"file_{i}{CLUSTERED_FILENAME_POSFIX}.csv").write(x)
+        tmpdir.join(f"file_{i}.csv").write(x)
         tmpdir.join(f"file_n.txt").write(x)
 
         # Act

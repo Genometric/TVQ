@@ -48,7 +48,13 @@ class Base(object):
         """
         TODO: should return files whose filename ends with CLUSTERED_FILENAME_POSFIX
         """
-        pass
+        files = []
+        for root, dirpath, filenames in os.walk(input_path):
+            for filename in filenames:
+                if os.path.splitext(filename)[1] == ".csv" and \
+                   os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
+                    files.append(os.path.join(root, filename))
+        return files
 
     def get_citations_headers(publications):
         """
