@@ -31,29 +31,17 @@ class Base(object):
         filename = os.path.basename(filename)
         return (os.path.splitext(filename)[0]).replace(CLUSTERED_FILENAME_POSFIX, "")
 
-
-    def get_input_files(input_path):
-        """
-
-        """
+    def get_files(path, extension="csv", include_clustered_files=False):
         files = []
-        for root, dirpath, filenames in os.walk(input_path):
+        for root, dirpath, filenames in os.walk(path):
             for filename in filenames:
-                if os.path.splitext(filename)[1] == ".csv" and \
-                   not os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
-                    files.append(os.path.join(root, filename))
-        return files
+                if os.path.splitext(filename)[1] == ".csv":
+                    is_clustered_file = \
+                        os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX)
 
-    def get_clustered_files(input_path):
-        """
-        TODO: should return files whose filename ends with CLUSTERED_FILENAME_POSFIX
-        """
-        files = []
-        for root, dirpath, filenames in os.walk(input_path):
-            for filename in filenames:
-                if os.path.splitext(filename)[1] == ".csv" and \
-                   os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
-                    files.append(os.path.join(root, filename))
+                    if (include_clustered_files and is_clustered_file) or \
+                       (not include_clustered_files and not is_clustered_file):
+                        files.append(os.path.join(root, filename))
         return files
 
     def get_citations_headers(publications):

@@ -70,7 +70,7 @@ class TestBase(BaseTestCase):
         tmpdir.join(f"file_n.txt").write(x)
 
         # Act
-        files = Base.get_input_files(tmpdir)
+        files = Base.get_files(tmpdir)
 
         # Assert
         assert len(files) == CSV_FILES_COUNT
@@ -86,7 +86,7 @@ class TestBase(BaseTestCase):
         tmpdir.join(f"file_n.txt").write(x)
 
         # Act
-        files = Base.get_clustered_files(tmpdir)
+        files = Base.get_files(tmpdir, include_clustered_files=True)
 
         # Assert
         assert len(files) == CSV_FILES_COUNT
