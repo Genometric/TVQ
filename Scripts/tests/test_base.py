@@ -75,12 +75,21 @@ class TestBase(BaseTestCase):
         # Assert
         assert len(files) == CSV_FILES_COUNT
 
-
-    def test_get_input_files(self, tmpdir):
+    def test_get_clustered_files(self, tmpdir):
         """
         TODO: ... 
         """
-        pass
+        x = "content"
+        for i in range(CSV_FILES_COUNT):
+            tmpdir.join(f"file_{i}{CLUSTERED_FILENAME_POSFIX}_{CLUSTERED_FILENAME_POSFIX}.csv").write(x)
+        tmpdir.join(f"file_{i}{CLUSTERED_FILENAME_POSFIX}.csv").write(x)
+        tmpdir.join(f"file_n.txt").write(x)
+
+        # Act
+        files = Base.get_clustered_files(tmpdir)
+
+        # Assert
+        assert len(files) == CSV_FILES_COUNT
 
     def test_get_citations(self, test_publications):
         """
