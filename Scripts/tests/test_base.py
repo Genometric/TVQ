@@ -8,6 +8,9 @@ from lib.base import Base, CLUSTERED_FILENAME_POSFIX, CLUSTER_NAME_COLUMN_LABEL
 from .base_test_case import BaseTestCase
 
 
+# Is the number of clusters in the test data.
+TEST_DATA_CLUSTERS = 6
+
 CSV_FILES_COUNT = 3
 
 # The number of publications in the input test files.
@@ -90,6 +93,21 @@ class TestBase(BaseTestCase):
 
         # Assert
         assert len(files) == CSV_FILES_COUNT
+
+    def test_get_clusters(self, clustered_files):
+        """
+        clustered_files is set using clustered_files fixture from TestsBase.
+
+        TODO: modify test so that it runs for every file in clustered files. 
+        """
+        # Arrange
+        filename = clustered_files[0]
+        
+        # Act
+        clusters = Base.get_clusters(filename)
+
+        # Assert
+        assert len(clusters.groups) == TEST_DATA_CLUSTERS
 
     def test_get_citations(self, test_publications):
         """
