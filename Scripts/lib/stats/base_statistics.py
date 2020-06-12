@@ -22,5 +22,5 @@ class BaseStatistics(Base):
         :rtype:     pandas.core.groupby.generic.DataFrameGroupBy
         :return:    A pandas data-frame grouped-by cluster name.
         """
-        dataframe = pd.read_csv(filename, header=0, sep='\t')
+        dataframe = Base.get_publications(filename)
         return dataframe.groupby(CLUSTER_NAME_COLUMN_LABEL)

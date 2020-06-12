@@ -4,6 +4,7 @@ TODO: Add doc string.
 
 import os
 import numpy as np
+import pandas as pd
 from numpy import average
 
 
@@ -43,6 +44,19 @@ class Base(object):
                        (not include_clustered_files and not is_clustered_file):
                         files.append(os.path.join(root, filename))
         return files
+
+    @staticmethod
+    def get_publications(filename):
+        """
+        Reads publications from file with the given filename.
+
+        :type   filename:   string
+        :param  filename:   The name of the file from which publications should be read from.
+
+        :rtype:     pandas.core.frame.DataFrame
+        :return:    A dataframe that contains publications read from the given file.
+        """
+        return pd.read_csv(filename, header=0, sep='\t')
 
     def get_citations_headers(publications):
         """
