@@ -129,7 +129,16 @@ class Base(object):
 
     def get_sorted_clusters(publications):
         """
+        Computes the average of all the citation counts of all the publications in every cluster.
 
+        :type   publications:   pandas.core.groupby.generic.DataFrameGroupBy
+        :param  publications:   A dataframe grouped by clusters. 
+
+        :returns:
+            -   list<float> mapping:    A sorted list of citation count average.
+            -   dictionary  sorted_avg: A dictionary where keys are the cluster numbers
+                                        and values are the average of citation count of 
+                                        publications in that cluster.
         """
         mapping = {}
         for k in publications.groups:
@@ -137,4 +146,5 @@ class Base(object):
             mapping[k] = average(citations)
         
         sorted_avg = sorted(mapping.values())
+
         return mapping, sorted_avg
