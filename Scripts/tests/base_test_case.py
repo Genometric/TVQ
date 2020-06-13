@@ -86,14 +86,16 @@ class BaseTestCase(object):
 
             pubs = pubs.values
             return {
-                "citations":[x[i:k].tolist() for x in pubs],
-                "pre":      [x[i:j].tolist() for x in pubs],
-                "post":     [x[j:k].tolist() for x in pubs],
-                "sums":     [sum(x[i:k]) for x in pubs],
-                "avg_pre":  [average(x[i:j].tolist()) for x in pubs],
-                "avg_post": [average(x[j:k].tolist()) for x in pubs],
-                "deltas":   [max(x[j:k]) - max(x[i:j]) for x in pubs],
-                "cluster_avg": d}
+                "citations":    [x[i:k].tolist() for x in pubs],
+                "pre":          [x[i:j].tolist() for x in pubs],
+                "post":         [x[j:k].tolist() for x in pubs],
+                "sums":         [sum(x[i:k]) for x in pubs],
+                "avg_pre":      [average(x[i:j].tolist()) for x in pubs],
+                "avg_post":     [average(x[j:k].tolist()) for x in pubs],
+                "deltas":       [max(x[j:k]) - max(x[i:j]) for x in pubs],
+                "cluster_avg":  d,
+                "avg_sum_pre":  average([x[6] for x in pubs]),
+                "avg_sum_post": average([x[7] for x in pubs])}
 
         # Each tuple in the following list is separate input and 
         # expected value for a test. Hence, two tuples will cause 
