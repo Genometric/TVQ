@@ -23,33 +23,46 @@ class BaseTestCase(object):
         """
         # The _inclusive_ index of the first column containing citations 
         # before a tool was added to the repository.
-        i = 2
+        i = 8
 
         # The _exclusive_ index of the last column containing citations
         # before a tool was added to the repository. And
         # the _inclusive_ index of the first column containing citations
         # before a tool was added to the repository.
-        j = 4
+        j = 10
 
         # The _exclusive_ index of the last column containing citations
         # after a tool was added to the repository.
-        k = 7
+        k = 13
 
         pubs_a = []
         pubs_b = []
 
-        # Note, the last column is used to assert if only the contiguous 
-        # numerical headers are considered as those containing citations.
-        # Therefore, this column should not be read as containing citations.
+        # Few notes:
+        # - The last column is used to assert if only the contiguous 
+        #   numerical headers are considered as those containing citations.
+        #   Therefore, this column should not be read as containing citations.
+        # - Few variables are used in the following for column headers, the 
+        #   main motivation was to make the table more visually intuitive.
+        # - All the values in the table are semi-random; i.e., they are
+        #   randomly generated so to follow the logic of each column.
 
-        header =      ["id", "name", "-1.0", "-0.5", "0.0", "0.5", "1.0", CLUSTER_NAME_COLUMN_LABEL, "1.1"]
-        pubs_a.append(["01", "p1_1", 0.0000, 0.1000, 0.200, 0.300, 0.400, 1, 123])
-        pubs_a.append(["02", "p1_2", 1.0000, 2.0000, 3.000, 4.444, 5.000, 1, 456])
-        pubs_a.append(["03", "p1_3", 0.1200, 0.2000, 0.300, 0.400, 0.500, 2, 789])
+        tids = "ToolIDs"
+        g = "GainScore"
+        ginp = "CitationGrowthOnInputData"
+        gnor = "CitationGrowthOnNormalizedData"
+        sp = "SumPreRawCitations"
+        so = "SumPostRawCitations"
+        c = CLUSTER_NAME_COLUMN_LABEL
 
-        pubs_b.append(["01", "p2_1", 0.1111, 0.2222, 0.333, 0.444, 0.555, 1, 888])
-        pubs_b.append(["02", "p2_2", 0.0123, 0.0456, 0.078, 0.099, 0.100, 1, 888])
-        pubs_b.append(["03", "p2_3", 2.0000, 3.0000, 4.000, 5.000, 6.000, 2, 888])
+        header =      ["id", "Tools", tids,    g,    ginp, gnor, sp, so, "-1.0", "-0.5", "0.0", "0.5", "1.0", c, "1.1"]
+        pubs_a.append(["01", "t1",    "11",    1.04, 11.1, 43.9, 12, 34, 0.0000, 0.1000, 0.200, 0.300, 0.400, 1, 12345])
+        pubs_a.append(["02", "t2;t3", "12;13", 5.71, 10.9, 23.2, 11, 44, 1.0000, 2.0000, 3.000, 4.444, 5.000, 1, 45678])
+        pubs_a.append(["03", "t4",    "14",    79.0, 99.9, 33.2, 56, 98, 0.1200, 0.2000, 0.300, 0.400, 0.500, 2, 78900])
+
+        pubs_b.append(["01", "t5;t6", "25;26", 2.01, 1.21, 1.33, 23, 33, 0.1111, 0.2222, 0.333, 0.444, 0.555, 1, 88800])
+        pubs_b.append(["02", "t7",    "27",    2.99, 2.33, 3.44, 12, 23, 0.0123, 0.0456, 0.078, 0.099, 0.100, 1, 88800])
+        pubs_b.append(["03", "t8",    "28",    8.99, 9.88, 2.33, 33, 44, 2.0000, 3.0000, 4.000, 5.000, 6.000, 2, 88800])
 
         pubs_1 = pd.DataFrame(pubs_a, columns=header)
         pubs_2 = pd.DataFrame(pubs_b, columns=header)
