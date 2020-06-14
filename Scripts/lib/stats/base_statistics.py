@@ -8,6 +8,10 @@ import pandas as pd
 
 from statistics import mean
 
+from scipy.stats import ttest_rel, ttest_ind, pearsonr, ttest_1samp
+from math import sqrt
+from numpy import std
+
 SUM_PRE_CITATIONS_COLUMN_LABEL = "SumPreRawCitations"
 SUM_POST_CITATIONS_COLUMN_LABEL = "SumPostRawCitations"
 
@@ -36,6 +40,21 @@ class BaseStatistics(Base):
         return mean(publications[col])
 
     @staticmethod
+    def paired_ttest(publications):
+        """
+        Calculates the t-test on average citations before and after tools were
+        added to the repository; it assumes the populations are related.
+
+        :type   publications:   pandas.core.frame.DataFrame
+        :param  publications:   A dataframe containing the publications. 
+        
+        :return returns Cohen's d, it's interpretation, t-statistic of the t-test and it's p-value.
+        """
+        citations, _, _, sums, avg_pre, avg_post, _ = Base.get_vectors(publications)
+        t_statistic, pvalue = ttest_rel(avg_pre, avg_post)
+        return (BaseStatistics.cohen_d(avg_pre, avg_post)) + (abs(t_statistic), pvalue)
+
+    @staticmethod
     def cohen_d(x, y=None, population_mean=0.0):
         if len(x) < 2 or (y and len(y) < 2):
             return float('NaN'), "NaN"
@@ -44,9 +63,9 @@ class BaseStatistics(Base):
             # Cohen's d is computed as explained in the following link:
             # https://stackoverflow.com/a/33002123/947889
             d = len(x) + len(y) - 2
-            cohen_d = (mean(x) - mean(y)) / sqrt(((len(x) - 1) * std(x, ddof=1) ** 2 + (len(y) - 1) * std(y, ddof=1) ** 2) / d)
+            cohen_d = (mean(x) - mean(y)) / sqrt(((len(x) - 1) * std(x) ** 2 + (len(y) - 1) * std(y) ** 2) / d)
         else:
-            cohen_d = (mean(x) - population_mean) / std(x, ddof=1)
+            cohen_d = (mean(x) - population_mean) / std(x)
 
         cohen_d = abs(cohen_d)
 
