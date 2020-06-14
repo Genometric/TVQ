@@ -34,3 +34,34 @@ class BaseStatistics(Base):
         """
         col = SUM_PRE_CITATIONS_COLUMN_LABEL if pre else SUM_POST_CITATIONS_COLUMN_LABEL
         return mean(publications[col])
+
+    @staticmethod
+    def cohen_d(x, y=None, population_mean=0.0):
+        if len(x) < 2 or (y and len(y) < 2):
+            return float('NaN'), "NaN"
+
+        if y:
+            # Cohen's d is computed as explained in the following link:
+            # https://stackoverflow.com/a/33002123/947889
+            d = len(x) + len(y) - 2
+            cohen_d = (mean(x) - mean(y)) / sqrt(((len(x) - 1) * std(x, ddof=1) ** 2 + (len(y) - 1) * std(y, ddof=1) ** 2) / d)
+        else:
+            cohen_d = (mean(x) - population_mean) / std(x, ddof=1)
+
+        cohen_d = abs(cohen_d)
+
+        # This interpretation is based on the info available on Wikipedia:
+        # https://en.wikipedia.org/wiki/Effect_size#Cohen.27s_d
+        if cohen_d >= 0.00 and cohen_d < 0.10:
+            msg = "Very small"
+        if cohen_d >= 0.10 and cohen_d < 0.35:
+            msg = "Small"
+        if cohen_d >= 0.35 and cohen_d < 0.65:
+            msg = "Medium"
+        if cohen_d >= 0.65 and cohen_d < 0.90:
+            msg = "Large"
+        if cohen_d >= 0.90:
+            msg = "Very large"
+
+        return cohen_d, msg + " effect size"
+
