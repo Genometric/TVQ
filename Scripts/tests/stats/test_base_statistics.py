@@ -94,7 +94,7 @@ class TestBaseStatistics(BaseTestCase):
         assert cohens_d == exp_cohens_d
         assert interpretation == exp_interpretation
 
-    def test_one_sample_ttest(self, test_publications):
+    def test_ttest_delta(self, test_publications):
         # Arrange
         input = test_publications[0]
         exp = test_publications[1]
@@ -104,7 +104,7 @@ class TestBaseStatistics(BaseTestCase):
         exp_cohens_d, exp_interpretation = self._get_cohens_d_and_interpretation(delta, theoretical_mean)
 
         # Act
-        cohens_d, interpretation, t_statistic, pvalue = BaseStatistics.one_sample_ttest(input)
+        cohens_d, interpretation, t_statistic, pvalue = BaseStatistics.ttest_delta(input)
 
         # Assert
         assert pvalue == exp_pvalue

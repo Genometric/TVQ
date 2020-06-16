@@ -48,14 +48,32 @@ class BaseStatistics(Base):
         :type   publications:   pandas.core.frame.DataFrame
         :param  publications:   A dataframe containing the publications. 
         
-        :return returns Cohen's d, it's interpretation, t-statistic of the t-test and it's p-value.
+        :return: returns Cohen's d, it's interpretation, t-statistic of the t-test and it's p-value.
         """
         citations, _, _, sums, avg_pre, avg_post, _ = Base.get_vectors(publications)
         t_statistic, pvalue = ttest_rel(avg_pre, avg_post)
         return (BaseStatistics.cohen_d(avg_pre, avg_post)) + (abs(t_statistic), pvalue)
 
     @staticmethod
-    def one_sample_ttest(publications, theoretical_mean=0.0):
+    def ttest_delta(publications, theoretical_mean=0.0):
+        """
+        Calculates the t-test for mean of differences between 
+        before and after (delta) tools were added to the repository.
+
+        This is a one-sided test (i.e., t-statistic is always positive)
+        for the null hypothesis that the mean of deltas equals to the 
+        given theoretical means.
+
+        :type   publications:   pandas.core.frame.DataFrame
+        :param  publications:   A dataframe containing the publications. 
+        
+        :type   theoretical_mean:   float
+        :param  theoretical_mean:   Population mean before treatment. The default value is 0.0,
+                                    which can be read as if the citation count has not changed
+                                    after a tool was added to a repository.
+                                    
+        :return: returns Cohen's d, it's interpretation, t-statistic of the t-test and it's p-value.
+        """
         _, _, _, _, _, _, delta = Base.get_vectors(publications)
         t_statistic, pvalue = ttest_1samp(delta, theoretical_mean)
         return (BaseStatistics.cohen_d(delta, theoretical_mean=theoretical_mean)) + (abs(t_statistic), pvalue)
