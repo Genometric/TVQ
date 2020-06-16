@@ -76,7 +76,7 @@ class TestBaseStatistics(BaseTestCase):
         assert pre == expected_pre
         assert pst == expected_pst
 
-    def test_paired_ttest(self, test_publications):
+    def test_ttest_avg_pre_post(self, test_publications):
         # Arrange
         input = test_publications[0]
         exp = test_publications[1]
@@ -86,7 +86,7 @@ class TestBaseStatistics(BaseTestCase):
         exp_cohens_d, exp_interpretation = self._get_cohens_d_and_interpretation(avg_pre, avg_post)
 
         # Act
-        cohens_d, interpretation, t_statistic, pvalue = BaseStatistics.paired_ttest(input)
+        cohens_d, interpretation, t_statistic, pvalue = BaseStatistics.ttest_avg_pre_post(input)
 
         # Assert
         assert pvalue == exp_pvalue

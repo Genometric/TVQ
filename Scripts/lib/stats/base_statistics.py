@@ -40,17 +40,19 @@ class BaseStatistics(Base):
         return mean(publications[col])
 
     @staticmethod
-    def paired_ttest(publications):
+    def ttest_avg_pre_post(publications):
         """
         Calculates the t-test on average citations before and after tools were
-        added to the repository; it assumes the populations are related.
+        added to the repository, with the null hypothesis that the two populations
+        have identical mean. This method assumes the populations are related, and 
+        the test is one-sided (i.e., t-statistic is always positive).
 
         :type   publications:   pandas.core.frame.DataFrame
         :param  publications:   A dataframe containing the publications. 
         
         :return: returns Cohen's d, it's interpretation, t-statistic of the t-test and it's p-value.
         """
-        citations, _, _, sums, avg_pre, avg_post, _ = Base.get_vectors(publications)
+        _, _, _, _, avg_pre, avg_post, _ = Base.get_vectors(publications)
         t_statistic, pvalue = ttest_rel(avg_pre, avg_post)
         return (BaseStatistics.cohen_d(avg_pre, avg_post)) + (abs(t_statistic), pvalue)
 
