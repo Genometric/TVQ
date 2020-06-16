@@ -55,6 +55,12 @@ class BaseStatistics(Base):
         return (BaseStatistics.cohen_d(avg_pre, avg_post)) + (abs(t_statistic), pvalue)
 
     @staticmethod
+    def one_sample_ttest(publications, population_mean=0.0):
+        _, _, _, _, _, _, delta = Base.get_vectors(publications)
+        t_statistic, pvalue = ttest_1samp(x, population_mean)
+        return (BaseStatistics.cohen_d(delta, population_mean=population_mean)) + (abs(t_statistic), pvalue)
+
+    @staticmethod
     def cohen_d(x, y=None, population_mean=0.0):
         if len(x) < 2 or (y and len(y) < 2):
             return float('NaN'), "NaN"
