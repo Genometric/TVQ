@@ -25,6 +25,22 @@ class TestBaseStatistics(BaseTestCase):
     """
 
     def _get_cohens_d_and_interpretation(self, x, y=None, theoretical_mean=0.0):
+        """
+        Computes Cohen's d on one or two groups.
+
+        This method is manually tested against online Cohen's d calculator.
+
+        :type  x:  list
+        :param x:  First group. 
+
+        :type  y:  list
+        :param y:  Second group (optional).
+
+        :type  theoretical_mean:  float
+        :param theoretical_mean:  Population mean before treatment. Used when y is not given. 
+
+        :return returns Cohen's d, it's interpretation, t-statistic of the t-test and it's p-value.
+        """
         if y:
             # pooled standard deviation.
             pooled_std = sqrt((pow(std(y), 2) + pow(std(x), 2))/2.0)
