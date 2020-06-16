@@ -23,6 +23,28 @@ class TestBaseStatistics(BaseTestCase):
     """
     TODO
     """
+
+    def _get_cohens_d_and_interpretation(self, x, y=None, theoretical_mean=0.0):
+        if y:
+            # pooled standard deviation.
+            pooled_std = sqrt((pow(std(y), 2) + pow(std(x), 2))/2.0)
+            d = (mean(y) - mean(x)) / pooled_std
+        else:
+            d = (mean(x) - theoretical_mean) / std(x)
+
+        if d >= 0.00 and d < 0.10:
+            msg = "Very small"
+        if d >= 0.10 and d < 0.35:
+            msg = "Small"
+        if d >= 0.35 and d < 0.65:
+            msg = "Medium"
+        if d >= 0.65 and d < 0.90:
+            msg = "Large"
+        if d >= 0.90:
+            msg = "Very large"
+
+        return d, msg + " effect size"
+
     
     def test_get_mean_of_raw_citations(self, test_publications):
         # Arrange
@@ -45,30 +67,15 @@ class TestBaseStatistics(BaseTestCase):
         avg_pre = exp["avg_pre"]
         avg_post = exp["avg_post"]
         exp_t_statistic, exp_pvalue = ttest_rel(avg_pre, avg_post)
-
-        # pooled standard deviation.
-        pooled_sd = sqrt((pow(std(avg_post), 2) + pow(std(avg_pre), 2))/2.0)
-        exp_cohens_d = (mean(avg_post) - mean(avg_pre)) / pooled_sd
-
-        if exp_cohens_d >= 0.00 and exp_cohens_d < 0.10:
-            msg = "Very small"
-        if exp_cohens_d >= 0.10 and exp_cohens_d < 0.35:
-            msg = "Small"
-        if exp_cohens_d >= 0.35 and exp_cohens_d < 0.65:
-            msg = "Medium"
-        if exp_cohens_d >= 0.65 and exp_cohens_d < 0.90:
-            msg = "Large"
-        if exp_cohens_d >= 0.90:
-            msg = "Very large"
-        exp_interpretation = msg +  " effect size"
+        exp_cohens_d, exp_interpretation = self._get_cohens_d_and_interpretation(avg_pre, avg_post)
 
         # Act
         cohens_d, interpretation, t_statistic, pvalue = BaseStatistics.paired_ttest(input)
 
         # Assert
         assert pvalue == exp_pvalue
-        assert cohens_d == exp_cohens_d
         assert t_statistic == abs(exp_t_statistic)
+        assert cohens_d == exp_cohens_d
         assert interpretation == exp_interpretation
 
     def test_one_sample_ttest(self, test_publications):
@@ -76,7 +83,9 @@ class TestBaseStatistics(BaseTestCase):
         input = test_publications[0]
         exp = test_publications[1]
         delta = exp["deltas"]
-        exp_t_statistic, exp_pvalue = ttest_1samp(delta, 0.0)
+        theoretical_mean=0.0
+        exp_t_statistic, exp_pvalue = ttest_1samp(delta, theoretical_mean)
+        exp_cohens_d, exp_interpretation = self._get_cohens_d_and_interpretation(delta, theoretical_mean)
 
         # Act
         cohens_d, interpretation, t_statistic, pvalue = BaseStatistics.one_sample_ttest(input)
@@ -84,4 +93,6 @@ class TestBaseStatistics(BaseTestCase):
         # Assert
         assert pvalue == exp_pvalue
         assert t_statistic == exp_t_statistic
+        assert cohens_d == exp_cohens_d
+        assert interpretation == exp_interpretation
 
