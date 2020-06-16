@@ -57,7 +57,7 @@ class BaseStatistics(Base):
     @staticmethod
     def one_sample_ttest(publications, population_mean=0.0):
         _, _, _, _, _, _, delta = Base.get_vectors(publications)
-        t_statistic, pvalue = ttest_1samp(x, population_mean)
+        t_statistic, pvalue = ttest_1samp(delta, population_mean)
         return (BaseStatistics.cohen_d(delta, population_mean=population_mean)) + (abs(t_statistic), pvalue)
 
     @staticmethod

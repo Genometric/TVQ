@@ -70,3 +70,18 @@ class TestBaseStatistics(BaseTestCase):
         assert cohens_d == exp_cohens_d
         assert t_statistic == abs(exp_t_statistic)
         assert interpretation == exp_interpretation
+
+    def test_one_sample_ttest(self, test_publications):
+        # Arrange
+        input = test_publications[0]
+        exp = test_publications[1]
+        delta = exp["deltas"]
+        exp_t_statistic, exp_pvalue = ttest_1samp(delta, 0.0)
+
+        # Act
+        cohens_d, interpretation, t_statistic, pvalue = BaseStatistics.one_sample_ttest(input)
+
+        # Assert
+        assert pvalue == exp_pvalue
+        assert t_statistic == exp_t_statistic
+
