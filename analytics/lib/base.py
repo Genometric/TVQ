@@ -18,6 +18,9 @@ class Base(object):
     by the derived types. 
     """
 
+    def run(self, input_path):
+        raise NotImplementedError()
+
     def get_repo_name(filename):
         """
         Extracts repository name from the given filename.

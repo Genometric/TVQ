@@ -109,4 +109,3 @@ class BaseStatistics(Base):
             msg = "Very large"
 
         return cohen_d, msg + " effect size"
-

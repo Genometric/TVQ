@@ -61,6 +61,9 @@
     <Compile Include="lib\stats\base_statistics.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="lib\stats\ttest.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="lib\stats\__init__.py">
       <SubType>Code</SubType>
     </Compile>
