@@ -113,13 +113,6 @@ class BaseTestCase(object):
     def tmp_clustered_files(self, tmpdir_factory):
         """
         Use this method to create temporary test files. 
-        For this, first create a tmp path as:
-
-            tmpdir = tmpdir_factory.mktemp("clustered_files")
-
-        then create as many files needed inside that path. 
-        These files will be available for all the test
-        methods of this class. 
         """
         tmpdir = tmpdir_factory.mktemp("clustered_files")
 
