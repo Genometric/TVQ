@@ -61,7 +61,6 @@ class TestBaseStatistics(BaseTestCase):
 
         return d, msg + " effect size"
 
-    
     def test_get_mean_of_raw_citations(self, test_publications):
         # Arrange
         input = test_publications[0]
@@ -111,4 +110,3 @@ class TestBaseStatistics(BaseTestCase):
         assert t_statistic == exp_t_statistic
         assert cohens_d == exp_cohens_d
         assert interpretation == exp_interpretation
-

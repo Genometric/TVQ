@@ -121,7 +121,19 @@ class BaseTestCase(object):
         These files will be available for all the test
         methods of this class. 
         """
-        pass
+        tmpdir = tmpdir_factory.mktemp("clustered_files")
+
+        test_pubs = BaseTestCase.get_test_publications()
+        c = 0
+        rtv = []
+        for repo in test_pubs:
+            c += 1
+            filename = os.path.join(tmpdir, f"repo_{c}{CLUSTERED_FILENAME_POSFIX}.csv")
+            repo[0].to_csv(filename, sep="\t", encoding='utf-8')
+            rtv.append((filename, repo[1]))
+
+        return tmpdir, rtv
+
 
     @pytest.fixture(scope="session")
     def clustered_files(self, tmpdir_factory):
