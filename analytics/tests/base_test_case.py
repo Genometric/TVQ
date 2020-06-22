@@ -127,7 +127,6 @@ class BaseTestCase(object):
 
         return tmpdir, rtv
 
-
     @pytest.fixture(scope="session")
     def clustered_files(self, tmpdir_factory):
         """

@@ -29,7 +29,9 @@ class TTest(BaseStatistics):
             f.write("Repository\tAverage Pre Citations\tAverage Post Citations\tGrowth\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
 
         for filename in filenames:
-            self.ttest_repository(os.path.join(input_path, filename), repo_ttest_filename)
+            repository = Base.get_repo_name(filename)
+            publications = Base.get_publications(os.path.join(input_path, filename))
+            self.ttest_repository(repository, publications, repo_ttest_filename)
 
         print("\n>>> Performing t-test on citations delta (post - pre) for the null hypothesis that the mean equals zero.")
         one_sample_ttest_filename = os.path.join(input_path, "one_sample_ttest.txt")
@@ -80,14 +82,13 @@ class TTest(BaseStatistics):
             for j in range(i+1, len(filenames)):
                 ttest_corresponding_clusters(input_path, filenames[i], filenames[j], tcc_filename)
 
-    def ttest_repository(self, input_filename, output_filename):
-        tools = pd.read_csv(input_filename, header=0, sep='\t')
-        (cohen_d, cohen_d_interpretation), (t_statistic, pvalue) = self.paired_ttest(tools)
-        avg_pre, avg_post = get_avg_pre_post(tools)
-        print_ttest_results(pvalue, t_statistic, cohen_d, cohen_d_interpretation, "\t\t")
+    def ttest_repository(self, repository, publications, output_filename):
+        d, d_interpretation, t_statistic, pvalue = BaseStatistics.ttest_avg_pre_post(publications)
+        avg_pre, avg_post = get_avg_pre_post(publications)
+        print_ttest_results(pvalue, t_statistic, d, d_interpretation, "\t\t")
         growth = ((avg_post - avg_pre) / avg_pre) * 100.0
         with open(output_filename, "a") as f:
-            f.write(f"{get_repo_name(input_filename)}\t{avg_pre}\t{avg_post}\t{growth}%\t{t_statistic}\t{pvalue}\t{cohen_d}\t{cohen_d_interpretation}\n")
+            f.write(f"{repository}\t{avg_pre}\t{avg_post}\t{growth}%\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
 
     def paired_ttest(self, tools):
         citations, _, _, sums, avg_pre, avg_post, _ = get_vectors(tools)

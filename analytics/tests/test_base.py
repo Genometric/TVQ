@@ -45,7 +45,6 @@ class TestBase(BaseTestCase):
         # Arrange, Act, Assert
         assert expected == Base.get_repo_name(input)
 
-
     def test_get_input_files(self, tmpdir):
         """
         Asserts if the `get_input_files` method reads only **input**
