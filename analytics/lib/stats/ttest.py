@@ -1,7 +1,7 @@
 
 import os
 
-from .base_statistics import BaseStatistics
+from .base_statistics import BaseStatistics, SUM_PRE_CITATIONS_COLUMN_LABEL, SUM_POST_CITATIONS_COLUMN_LABEL
 from ..base import Base
 
 import numpy as np
@@ -15,21 +15,19 @@ from math import sqrt
 
 class TTest(BaseStatistics):
 
+    def __init__(self):
+        input_path = None
+
     def run(self, input_path):
         """
         Executes a pre-defined flow of computing t-test on
         files available from the input path.
         """
+        self.input_path = input_path
+
         filenames = Base.get_files(input_path, include_clustered_files=True)
 
-        repo_ttest_filename = os.path.join(input_path, "paired_ttest_avg_pre_post.txt")
-        with open(repo_ttest_filename, "w") as f:
-            f.write("Repository\tAverage Pre Citations\tAverage Post Citations\tGrowth\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
-
-        for filename in filenames:
-            repository = Base.get_repo_name(filename)
-            publications = Base.get_publications(os.path.join(input_path, filename))
-            self.ttest_repository(repository, publications, repo_ttest_filename)
+        self.ttest_avg_pre_post(filenames, os.path.join(input_path, "paired_ttest_avg_pre_post.txt"))
 
         print("\n>>> Performing t-test on citations delta (post - pre) for the null hypothesis that the mean equals zero.")
         one_sample_ttest_filename = os.path.join(input_path, "one_sample_ttest.txt")
@@ -76,16 +74,26 @@ class TTest(BaseStatistics):
             for j in range(i+1, len(filenames)):
                 ttest_corresponding_clusters(input_path, filenames[i], filenames[j], tcc_filename)
 
-    def ttest_repository(self, repository, publications, output_filename):
-        d, d_interpretation, t_statistic, pvalue = BaseStatistics.ttest_avg_pre_post(publications)
-        avg_pre, avg_post = get_avg_pre_post(publications)
-        print_ttest_results(pvalue, t_statistic, d, d_interpretation, "\t\t")
-        growth = ((avg_post - avg_pre) / avg_pre) * 100.0
-        with open(output_filename, "a") as f:
-            f.write(f"{repository}\t{avg_pre}\t{avg_post}\t{growth}%\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
+    def ttest_avg_pre_post(self, input_filenames, output_filename):
+        with open(output_filename, "w") as f:
+            f.write("Repository\tAverage Pre Citations\tAverage Post Citations\tGrowth\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
+
+        for filename in input_filenames:
+            repository = Base.get_repo_name(filename)
+            publications = Base.get_publications(os.path.join(self.input_path, filename))
+
+            d, d_interpretation, t_statistic, pvalue = BaseStatistics.ttest_avg_pre_post(publications)
+            avg_pre, avg_post = self.get_avg_pre_post(publications)
+            growth = ((avg_post - avg_pre) / avg_pre) * 100.0
+            with open(output_filename, "a") as f:
+                f.write(f"{repository}\t{avg_pre}\t{avg_post}\t{growth}%\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
 
     def paired_ttest(self, tools):
         citations, _, _, sums, avg_pre, avg_post, _ = get_vectors(tools)
         t_statistic, pvalue = ttest_rel(avg_pre, avg_post)
         return cohen_d(avg_pre, avg_post), (abs(t_statistic), pvalue)
+
+    # TDOO: move this method to BaseStatistics
+    def get_avg_pre_post(self, publications):
+        return mean(publications[SUM_PRE_CITATIONS_COLUMN_LABEL]), mean(publications[SUM_POST_CITATIONS_COLUMN_LABEL])
 
