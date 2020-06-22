@@ -23,9 +23,7 @@ class TTest(BaseStatistics):
         filenames = Base.get_files(input_path, include_clustered_files=True)
 
         repo_ttest_filename = os.path.join(input_path, "paired_ttest_avg_pre_post.txt")
-        if os.path.isfile(repo_ttest_filename):
-            os.remove(repo_ttest_filename)
-        with open(repo_ttest_filename, "a") as f:
+        with open(repo_ttest_filename, "w") as f:
             f.write("Repository\tAverage Pre Citations\tAverage Post Citations\tGrowth\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
 
         for filename in filenames:
@@ -35,18 +33,14 @@ class TTest(BaseStatistics):
 
         print("\n>>> Performing t-test on citations delta (post - pre) for the null hypothesis that the mean equals zero.")
         one_sample_ttest_filename = os.path.join(input_path, "one_sample_ttest.txt")
-        if os.path.isfile(one_sample_ttest_filename):
-            os.remove(one_sample_ttest_filename)
-        with open(one_sample_ttest_filename, "a") as f:
+        with open(one_sample_ttest_filename, "w") as f:
             f.write("Repository\tAverage Pre Citations\tAverage Post Citations\tGrowth\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
         for filename in filenames:
             ttest_repository_delta(os.path.join(input_path, filename), one_sample_ttest_filename)
 
         print(f"\n>>> Performing Welch's t-test for the null hypothesis that the two repositories have identical average values of pre-post delta, NOT assuming equal population variance.")
         repos_ttest_filename = os.path.join(input_path, "ttest_repositories.txt")
-        if os.path.isfile(repos_ttest_filename):
-            os.remove(repos_ttest_filename)
-        with open(repos_ttest_filename, "a") as f:
+        with open(repos_ttest_filename, "w") as f:
             f.write("Repository A\tRepository B\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
 
         for i in range(0, len(filenames)-1):
