@@ -47,8 +47,8 @@ class TestBase(BaseTestCase):
 
     def test_get_input_files(self, tmpdir):
         """
-        Asserts if the `get_input_files` method reads only **input**
-        (i.e., those without the cluster postfix) CSV files the given path.
+        Asserts if the `get_files` method reads only **input** files by default
+        (i.e., those without the cluster postfix).
 
         For instance, from a directory as the following, it should read 
         only `file_1.csv` and `file_2.csv`:
@@ -76,10 +76,27 @@ class TestBase(BaseTestCase):
 
         # Assert
         assert len(files) == CSV_FILES_COUNT
+        # checks if files are returned with their absolute path.
+        for file in files:
+            assert os.path.isabs(file) == True
 
     def test_get_clustered_files(self, tmpdir):
         """
-        TODO: ... 
+        Asserts if the `get_files` method reads only **clustered** files 
+        when its flag is set (i.e., those with the cluster postfix).
+
+        For instance, from a directory as the following, it should read 
+        only `file_1_clustered.csv`:
+
+        ├─── file_1.csv
+        ├─── file_2.csv
+        ├─── file_1_clustered.csv
+        └─── file_3.txt
+
+        :type  tmpdir:  string
+        :param tmpdir:  The ‘tmpdir’ fixture is a py.path.local object
+                        which will provide a temporary directory unique 
+                        to the test invocation.
         """
         x = "content"
         for i in range(CSV_FILES_COUNT):
@@ -92,6 +109,9 @@ class TestBase(BaseTestCase):
 
         # Assert
         assert len(files) == CSV_FILES_COUNT
+        # checks if files are returned with their absolute path.
+        for file in files:
+            assert os.path.isabs(file) == True
 
     def test_get_clusters(self, clustered_files):
         """

@@ -36,6 +36,24 @@ class Base(object):
         return (os.path.splitext(filename)[0]).replace(CLUSTERED_FILENAME_POSFIX, "")
 
     def get_files(path, extension="csv", include_clustered_files=False):
+        """
+        Gets a list of absolute paths to files with given `extension` in the given `path`.
+
+        :type   path:   string
+        :param  path:   The path in which to search for the files.
+
+        :type   extension:  string
+        :param  extension:  Sets the extension of the files to search for in the given path.
+
+        :type   include_clustered_files:    boolean
+        :param  include_clustered_files:    If set to True, it will return only the files 
+                                            with given extension whose filename ends with 
+                                            `CLUSTERED_FILENAME_POSFIX`, otherwise if set
+                                            to False (default).
+
+        :rtype:     list<string>
+        :return:    A list of absolute paths to files in the given path that match given criteria. 
+        """
         files = []
         for root, dirpath, filenames in os.walk(path):
             for filename in filenames:
