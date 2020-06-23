@@ -20,7 +20,7 @@ class TTest(BaseStatistics):
 
     def run(self, input_path):
         """
-        Executes a pre-defined flow of computing t-test on
+        Executes a flow of computing t-test on
         files available from the input path.
         """
         self.input_path = input_path
@@ -28,13 +28,7 @@ class TTest(BaseStatistics):
         filenames = Base.get_files(input_path, include_clustered_files=True)
 
         self.ttest_avg_pre_post(filenames, os.path.join(input_path, "paired_ttest_avg_pre_post.txt"))
-
-        print("\n>>> Performing t-test on citations delta (post - pre) for the null hypothesis that the mean equals zero.")
-        one_sample_ttest_filename = os.path.join(input_path, "one_sample_ttest.txt")
-        with open(one_sample_ttest_filename, "w") as f:
-            f.write("Repository\tAverage Pre Citations\tAverage Post Citations\tGrowth\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
-        for filename in filenames:
-            ttest_repository_delta(os.path.join(input_path, filename), one_sample_ttest_filename)
+        self.ttest_delta(filenames, os.path.join(input_path, "one_sample_ttest.txt"))
 
         print(f"\n>>> Performing Welch's t-test for the null hypothesis that the two repositories have identical average values of pre-post delta, NOT assuming equal population variance.")
         repos_ttest_filename = os.path.join(input_path, "ttest_repositories.txt")
@@ -83,6 +77,20 @@ class TTest(BaseStatistics):
             publications = Base.get_publications(os.path.join(self.input_path, filename))
 
             d, d_interpretation, t_statistic, pvalue = BaseStatistics.ttest_avg_pre_post(publications)
+            avg_pre, avg_post = self.get_avg_pre_post(publications)
+            growth = ((avg_post - avg_pre) / avg_pre) * 100.0
+            with open(output_filename, "a") as f:
+                f.write(f"{repository}\t{avg_pre}\t{avg_post}\t{growth}%\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
+
+    def ttest_delta(self, input_filenames, output_filename):
+        with open(output_filename, "w") as f:
+            f.write("Repository\tAverage Pre Citations\tAverage Post Citations\tGrowth\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
+
+        for filename in input_filenames:
+            repository = Base.get_repo_name(filename)
+            publications = Base.get_publications(os.path.join(self.input_path, filename))
+
+            d, d_interpretation, t_statistic, pvalue = BaseStatistics.ttest_delta(publications)
             avg_pre, avg_post = self.get_avg_pre_post(publications)
             growth = ((avg_post - avg_pre) / avg_pre) * 100.0
             with open(output_filename, "a") as f:
