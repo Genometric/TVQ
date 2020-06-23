@@ -29,15 +29,7 @@ class TTest(BaseStatistics):
 
         self.ttest_avg_pre_post(filenames, os.path.join(input_path, "paired_ttest_avg_pre_post.txt"))
         self.ttest_delta(filenames, os.path.join(input_path, "one_sample_ttest.txt"))
-
-        print(f"\n>>> Performing Welch's t-test for the null hypothesis that the two repositories have identical average values of pre-post delta, NOT assuming equal population variance.")
-        repos_ttest_filename = os.path.join(input_path, "ttest_repositories.txt")
-        with open(repos_ttest_filename, "w") as f:
-            f.write("Repository A\tRepository B\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
-
-        for i in range(0, len(filenames)-1):
-            for j in range(i+1, len(filenames)):
-                ttest_repositories(os.path.join(input_path, filenames[i]), os.path.join(input_path, filenames[j]), repos_ttest_filename)
+        self.ttest_deltas(filenames, os.path.join(input_path, "ttest_repositories.txt"))
 
         print("\n>>> Performing t-test on pre and post citations of tools in different clusters for the null hypothesis that the two have identical average values.")
         for filename in filenames:
@@ -95,6 +87,28 @@ class TTest(BaseStatistics):
             growth = ((avg_post - avg_pre) / avg_pre) * 100.0
             with open(output_filename, "a") as f:
                 f.write(f"{repository}\t{avg_pre}\t{avg_post}\t{growth}%\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
+
+    def ttest_deltas(self, input_filenames, output_filename):
+        """
+        Performing Welch's t-test for the null hypothesis that the two 
+        repositories have identical average values of pre-post delta, 
+        NOT assuming equal population variance.
+        """
+        with open(repos_ttest_filename, "w") as f:
+            f.write("Repository A\tRepository B\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
+
+        for i in range(0, len(filenames)-1):
+            for j in range(i+1, len(filenames)):
+                repository_a = Base.get_repo_name(filenames[i])
+                publications_a = Base.get_publications(os.path.join(self.input_path, filenames[i]))
+
+                repository_b = Base.get_repo_name(filenames[j])
+                publications_b = Base.get_publications(os.path.join(self.input_path, filenames[j]))
+
+                d, d_interpretation, t_statistic, pvalue = BaseStatistics.ttest_deltas(publications_a, publications_b)
+
+                with open(output_filename, "a") as f:
+                    f.write(f"{repository_a}\t{repository_b}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
 
     def paired_ttest(self, tools):
         citations, _, _, sums, avg_pre, avg_post, _ = get_vectors(tools)
