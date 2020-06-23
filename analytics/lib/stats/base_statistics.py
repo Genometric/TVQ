@@ -81,6 +81,14 @@ class BaseStatistics(Base):
         return (BaseStatistics.cohen_d(delta, theoretical_mean=theoretical_mean)) + (abs(t_statistic), pvalue)
 
     @staticmethod
+    def ttest_deltas(publications_a, publications_b):
+        _, _, _, _, _, _, delta = Base.get_vectors(publications_a)
+        _, _, _, _, _, _, delta = Base.get_vectors(publications_b)
+
+        t_statistic, pvalue = ttest_ind(x, y, equal_var=False)
+        return (BaseStatistics.cohen_d(delta)) + (abs(t_statistic), pvalue)
+
+    @staticmethod
     def cohen_d(x, y=None, theoretical_mean=0.0):
         if len(x) < 2 or (y and len(y) < 2):
             return float('NaN'), "NaN"
