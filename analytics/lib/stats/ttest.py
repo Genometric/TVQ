@@ -30,8 +30,9 @@ class TTest(BaseStatistics):
         self.ttest_avg_pre_post(filenames, os.path.join(input_path, "paired_ttest_avg_pre_post.txt"))
         self.ttest_delta(filenames, os.path.join(input_path, "one_sample_ttest.txt"))
         self.ttest_deltas(filenames, os.path.join(input_path, "ttest_repositories.txt"))
+        self.ttest_clusters(filenames)
 
-        print("\n>>> Performing t-test on pre and post citations of tools in different clusters for the null hypothesis that the two have identical average values.")
+        print("\n>>> ")
         for filename in filenames:
             ttest_by_cluster(root, filename)
 
@@ -114,6 +115,21 @@ class TTest(BaseStatistics):
         citations, _, _, sums, avg_pre, avg_post, _ = get_vectors(tools)
         t_statistic, pvalue = ttest_rel(avg_pre, avg_post)
         return cohen_d(avg_pre, avg_post), (abs(t_statistic), pvalue)
+
+    def ttest_clusters(self, filenames):
+        """
+        Performing t-test on pre and post citations of tools in 
+        different clusters for the null hypothesis that the two 
+        have identical average values.
+        """
+        for filename in filenames:
+            clusters = get_clusters(os.path.join(root, filename))
+            for k in clusters.groups:
+                tools = clusters.get_group(k)
+                (cohen_d, cohen_d_interpretation), (t_statistic, pvalue) = paired_ttest(tools)
+                print(f"\t\t- Cluster number:\t{k}")
+                print(f"\t\t\t* Tools count:\t{len(tools)}")
+                print_ttest_results(pvalue, t_statistic, cohen_d, cohen_d_interpretation, "\t\t\t")
 
     # TDOO: move this method to BaseStatistics
     def get_avg_pre_post(self, publications):
