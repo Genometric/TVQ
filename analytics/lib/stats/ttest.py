@@ -94,16 +94,16 @@ class TTest(BaseStatistics):
         repositories have identical average values of pre-post delta, 
         NOT assuming equal population variance.
         """
-        with open(repos_ttest_filename, "w") as f:
+        with open(output_filename, "w") as f:
             f.write("Repository A\tRepository B\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
 
-        for i in range(0, len(filenames)-1):
-            for j in range(i+1, len(filenames)):
-                repository_a = Base.get_repo_name(filenames[i])
-                publications_a = Base.get_publications(os.path.join(self.input_path, filenames[i]))
+        for i in range(0, len(input_filenames)-1):
+            for j in range(i+1, len(input_filenames)):
+                repository_a = Base.get_repo_name(input_filenames[i])
+                publications_a = Base.get_publications(os.path.join(self.input_path, input_filenames[i]))
 
-                repository_b = Base.get_repo_name(filenames[j])
-                publications_b = Base.get_publications(os.path.join(self.input_path, filenames[j]))
+                repository_b = Base.get_repo_name(input_filenames[j])
+                publications_b = Base.get_publications(os.path.join(self.input_path, input_filenames[j]))
 
                 d, d_interpretation, t_statistic, pvalue = BaseStatistics.ttest_deltas(publications_a, publications_b)
 

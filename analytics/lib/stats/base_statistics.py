@@ -82,11 +82,11 @@ class BaseStatistics(Base):
 
     @staticmethod
     def ttest_deltas(publications_a, publications_b):
-        _, _, _, _, _, _, delta = Base.get_vectors(publications_a)
-        _, _, _, _, _, _, delta = Base.get_vectors(publications_b)
+        _, _, _, _, _, _, delta_a = Base.get_vectors(publications_a)
+        _, _, _, _, _, _, delta_b = Base.get_vectors(publications_b)
 
-        t_statistic, pvalue = ttest_ind(x, y, equal_var=False)
-        return (BaseStatistics.cohen_d(delta)) + (abs(t_statistic), pvalue)
+        t_statistic, pvalue = ttest_ind(delta_a, delta_b, equal_var=False)
+        return (BaseStatistics.cohen_d(delta_a, delta_b)) + (abs(t_statistic), pvalue)
 
     @staticmethod
     def cohen_d(x, y=None, theoretical_mean=0.0):
