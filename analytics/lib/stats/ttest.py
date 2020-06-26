@@ -122,10 +122,11 @@ class TTest(BaseStatistics):
                     for i in range(0, len(sorted_avg_a)):
                         cluster_a_num = mapping_a[sorted_avg_a[i]]
                         cluster_b_num = mapping_b[sorted_avg_b[i]]
-                        _, _, _, sums_a, _, _, _ = Base.get_vectors(clusters_a.get_group(cluster_a_num))
-                        _, _, _, sums_b, _, _, _ = Base.get_vectors(clusters_b.get_group(cluster_b_num))
 
-                        t_statistic, pvalue, d, d_interpretation = self.independent_ttest(sums_a, sums_b)
+                        d, d_interpretation, t_statistic, pvalue =\
+                            BaseStatistics.ttest_total_citations(
+                                clusters_a.get_group(cluster_a_num), 
+                                clusters_b.get_group(cluster_b_num))
 
                         f.write(
                             f"{repo_a}\t"
@@ -138,13 +139,6 @@ class TTest(BaseStatistics):
                             f"{pvalue}\t"
                             f"{d}\t"
                             f"{d_interpretation}\n")
-
-    # TODO: move to base.
-    def independent_ttest(self, x, y):
-        t_statistic, pvalue = ttest_ind(x, y, equal_var=False)
-        t_statistic = abs(t_statistic)
-        d, d_interpretation = BaseStatistics.cohen_d(x, y)
-        return t_statistic, pvalue, d, d_interpretation
 
     # TODO: move to base.
     def paired_ttest(self, tools):

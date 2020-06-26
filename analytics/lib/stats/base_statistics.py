@@ -89,6 +89,22 @@ class BaseStatistics(Base):
         return (BaseStatistics.cohen_d(delta_a, delta_b)) + (abs(t_statistic), pvalue)
 
     @staticmethod
+    def ttest_total_citations(publications_x, publications_y):
+        """
+
+        :type   publications_x: pandas.core.frame.DataFrame
+        :param  publications_x: 
+
+        :type   publications_y: pandas.core.frame.DataFrame
+        :param  publications_y: 
+
+        """
+        _, _, _, sums_x, _, _, _ = Base.get_vectors(publications_x)
+        _, _, _, sums_y, _, _, _ = Base.get_vectors(publications_y)
+        t_statistic, pvalue = ttest_ind(sums_x, sums_y, equal_var=False)
+        return (BaseStatistics.cohen_d(sums_x, sums_y)) + (abs(t_statistic), pvalue)
+
+    @staticmethod
     def cohen_d(x, y=None, theoretical_mean=0.0):
         if len(x) < 2 or (y and len(y) < 2):
             return float('NaN'), "NaN"
