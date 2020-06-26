@@ -21,6 +21,7 @@ class BaseTestCase(object):
         Returns two tuples of test publications, each tuple contains 
         input and expected values.
         """
+
         # The _inclusive_ index of the first column containing citations 
         # before a tool was added to the repository.
         i = 8
@@ -101,12 +102,17 @@ class BaseTestCase(object):
         # expected value for a test. Hence, two tuples will cause 
         # a test to run twice, once for the first tuple, and once
         # for the second tuple.
-        return [
-            (pubs_1, get_expected_values(pubs_1)), 
-            (pubs_2, get_expected_values(pubs_2))]
+        return \
+            (pubs_1, get_expected_values(pubs_1)),\
+            (pubs_2, get_expected_values(pubs_2))
 
     @pytest.fixture(params=get_test_publications(), scope="session")
     def test_publications(self, request):
+        repo_a, repo_b = request.param
+        return [repo_a, repo_b]
+
+    @pytest.fixture(params=get_test_publications(), scope="session")
+    def test_repositories(self, request):
         return request.param
 
     @pytest.fixture(scope="session")
