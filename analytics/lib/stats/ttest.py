@@ -30,31 +30,7 @@ class TTest(BaseStatistics):
         self.ttest_avg_pre_post(filenames, os.path.join(input_path, "paired_ttest_avg_pre_post.txt"))
         self.ttest_delta(filenames, os.path.join(input_path, "one_sample_ttest.txt"))
         self.ttest_deltas(filenames, os.path.join(input_path, "ttest_repositories.txt"))
-
-        print(f"\n>>> Performing Welch's t-test for the null hypothesis that the two independent relative clusters of two repositories have identical average (expected) values NOT assuming equal population variance.")
-        tcc_filename = os.path.join(input_path, 'ttest_corresponding_clusters.txt')
-        if os.path.isfile(tcc_filename):
-            os.remove(tcc_filename)
-
-        # Add column header. 
-        with open(tcc_filename, "a") as f:
-            f.write(
-                f"Repo A\t"
-                f"Repo B\t"
-                f"Repo A Cluster Number\t"
-                f"Repo B Cluster Number\t"
-                f"Average Citation Count in Repo A Cluster\t"
-                f"Average Citation Count in Repo B Cluster\t"
-                f"t Statistic\t"
-                f"p-value\t"
-                f"Cohen's d\tC"
-                f"ohen's d Interpretation\n")
-
-        # Iterate through all the permutations of repositories,
-        # and compute t-test between corresponding clusters.
-        for i in range(0, len(filenames)-1):
-            for j in range(i+1, len(filenames)):
-                ttest_corresponding_clusters(input_path, filenames[i], filenames[j], tcc_filename)
+        self.ttest_corresponding_clusters(filenames, os.path.join(input_path, 'ttest_corresponding_clusters.txt'))
 
     def ttest_avg_pre_post(self, input_filenames, output_filename):
         with open(output_filename, "w") as f:
@@ -106,6 +82,71 @@ class TTest(BaseStatistics):
                 with open(output_filename, "a") as f:
                     f.write(f"{repository_a}\t{repository_b}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
 
+    def ttest_corresponding_clusters(self, input_filenames, output_filename):
+        """
+        Performing Welch's t-test for the null hypothesis that the two 
+        independent relative clusters of two repositories have identical 
+        average (expected) values NOT assuming equal population variance.
+        """
+
+        # Add column header. 
+        with open(output_filename, "a") as f:
+            f.write(
+                f"Repo A\t"
+                f"Repo B\t"
+                f"Repo A Cluster Number\t"
+                f"Repo B Cluster Number\t"
+                f"Average Citation Count in Repo A Cluster\t"
+                f"Average Citation Count in Repo B Cluster\t"
+                f"t Statistic\t"
+                f"p-value\t"
+                f"Cohen's d\tC"
+                f"ohen's d Interpretation\n")
+
+        # Iterate through all the permutations of repositories,
+        # and compute t-test between corresponding clusters.
+        for i in range(0, len(input_filenames)-1):
+            for j in range(i+1, len(input_filenames)):
+                file_a = input_filenames[i]
+                file_b = input_filenames[j]
+
+                repo_a = Base.get_repo_name(file_a)
+                repo_b = Base.get_repo_name(file_b)
+
+                clusters_a = Base.get_clusters(file_a)
+                clusters_b = Base.get_clusters(file_b)
+                _, mapping_a, sorted_avg_a = Base.get_sorted_clusters(clusters_a)
+                _, mapping_b, sorted_avg_b = Base.get_sorted_clusters(clusters_b)
+
+                with open(output_filename, "a") as f:
+                    for i in range(0, len(sorted_avg_a)):
+                        cluster_a_num = mapping_a[sorted_avg_a[i]]
+                        cluster_b_num = mapping_b[sorted_avg_b[i]]
+                        _, _, _, sums_a, _, _, _ = Base.get_vectors(clusters_a.get_group(cluster_a_num))
+                        _, _, _, sums_b, _, _, _ = Base.get_vectors(clusters_b.get_group(cluster_b_num))
+
+                        t_statistic, pvalue, d, d_interpretation = self.independent_ttest(sums_a, sums_b)
+
+                        f.write(
+                            f"{repo_a}\t"
+                            f"{repo_b}\t"
+                            f"{i}\t"
+                            f"{i}\t"
+                            f"{sorted_avg_a[i]}\t"
+                            f"{sorted_avg_b[i]}\t"
+                            f"{t_statistic}\t"
+                            f"{pvalue}\t"
+                            f"{d}\t"
+                            f"{d_interpretation}\n")
+
+    # TODO: move to base.
+    def independent_ttest(self, x, y):
+        t_statistic, pvalue = ttest_ind(x, y, equal_var=False)
+        t_statistic = abs(t_statistic)
+        d, d_interpretation = BaseStatistics.cohen_d(x, y)
+        return t_statistic, pvalue, d, d_interpretation
+
+    # TODO: move to base.
     def paired_ttest(self, tools):
         citations, _, _, sums, avg_pre, avg_post, _ = get_vectors(tools)
         t_statistic, pvalue = ttest_rel(avg_pre, avg_post)
@@ -114,4 +155,3 @@ class TTest(BaseStatistics):
     # TDOO: move this method to BaseStatistics
     def get_avg_pre_post(self, publications):
         return mean(publications[SUM_PRE_CITATIONS_COLUMN_LABEL]), mean(publications[SUM_POST_CITATIONS_COLUMN_LABEL])
-
