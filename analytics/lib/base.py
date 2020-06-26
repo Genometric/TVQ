@@ -185,15 +185,25 @@ class Base(object):
 
         :returns:
             -   list<float> mapping:    A sorted list of citation count average.
-            -   dictionary  sorted_avg: A dictionary where keys are the cluster numbers
+
+            -   dictionary  cluster_avg_mapping: 
+                                        A dictionary where keys are the cluster numbers
                                         and values are the average of citation count of 
                                         publications in that cluster.
+
+            -   dictionary  avg_cluster_mapping: 
+                                        A dictionary where keys are the average of 
+                                        citation count of publications in a cluster
+                                        which is given by the value of that entry.
         """
-        mapping = {}
+        cluster_avg_mapping = {}
+        avg_cluster_mapping = {}
         for k in publications.groups:
             citations, _, _, _, _, _, _ = Base.get_vectors(publications.get_group(k))
-            mapping[k] = average(citations)
+            avg = average(citations)
+            cluster_avg_mapping[k] = avg
+            avg_cluster_mapping[avg] = k
         
-        sorted_avg = sorted(mapping.values())
+        sorted_avg = sorted(cluster_avg_mapping.values())
 
-        return mapping, sorted_avg
+        return cluster_avg_mapping, avg_cluster_mapping, sorted_avg

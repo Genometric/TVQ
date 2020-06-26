@@ -177,7 +177,7 @@ class TestBase(BaseTestCase):
         exp_sorted_avg = sorted(exp_mapping.values())
 
         # Act
-        mapping, sorted_avg = Base.get_sorted_clusters(input)
+        mapping, _, sorted_avg = Base.get_sorted_clusters(input)
 
         # Assert
         assert BaseTestCase.assert_lists_equal(sorted_avg, exp_sorted_avg)
