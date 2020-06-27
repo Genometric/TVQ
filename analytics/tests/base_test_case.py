@@ -108,11 +108,6 @@ class BaseTestCase(object):
 
     @pytest.fixture(params=get_test_publications(), scope="session")
     def test_publications(self, request):
-        repo_a, repo_b = request.param
-        return [repo_a, repo_b]
-
-    @pytest.fixture(params=get_test_publications(), scope="session")
-    def test_repositories(self, request):
         return request.param
 
     @pytest.fixture(scope="session")

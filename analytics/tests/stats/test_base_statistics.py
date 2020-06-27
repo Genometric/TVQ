@@ -110,3 +110,31 @@ class TestBaseStatistics(BaseTestCase):
         assert t_statistic == exp_t_statistic
         assert cohens_d == exp_cohens_d
         assert interpretation == exp_interpretation
+
+    
+    def test_ttest_total_citations(self):
+        # TODO: how could this method be called like other fixtures 
+        # in the test method's signature.
+
+        # Arrange
+        input_x, input_y = BaseTestCase.get_test_publications()
+
+        repo_x = input_x[0]
+        repo_y = input_y[0]
+
+        sums_x = input_x[1]["sums"]
+        sums_y = input_y[1]["sums"]
+
+        exp_t_statistic, exp_pvalue = ttest_ind(sums_x, sums_y, equal_var=False)
+        exp_t_statistic = abs(exp_t_statistic)
+        exp_cohens_d, exp_interpretation = BaseStatistics.cohen_d(sums_x, sums_y)
+
+        # Act
+        cohens_d, interpretation, t_statistic, pvalue = BaseStatistics.ttest_total_citations(repo_x, repo_y)
+
+        # Assert
+        assert pvalue == exp_pvalue
+        assert t_statistic == exp_t_statistic
+        assert cohens_d == exp_cohens_d
+        assert interpretation == exp_interpretation
+
