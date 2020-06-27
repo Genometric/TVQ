@@ -41,7 +41,8 @@ class TTest(BaseStatistics):
             publications = Base.get_publications(os.path.join(self.input_path, filename))
 
             d, d_interpretation, t_statistic, pvalue = BaseStatistics.ttest_avg_pre_post(publications)
-            avg_pre, avg_post = self.get_avg_pre_post(publications)
+            avg_pre = BaseStatistics.get_mean_of_raw_citations(publications, True)
+            avg_post = BaseStatistics.get_mean_of_raw_citations(publications, False)
             growth = ((avg_post - avg_pre) / avg_pre) * 100.0
             with open(output_filename, "a") as f:
                 f.write(f"{repository}\t{avg_pre}\t{avg_post}\t{growth}%\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
@@ -55,7 +56,8 @@ class TTest(BaseStatistics):
             publications = Base.get_publications(os.path.join(self.input_path, filename))
 
             d, d_interpretation, t_statistic, pvalue = BaseStatistics.ttest_delta(publications)
-            avg_pre, avg_post = self.get_avg_pre_post(publications)
+            avg_pre = BaseStatistics.get_mean_of_raw_citations(publications, True)
+            avg_post = BaseStatistics.get_mean_of_raw_citations(publications, False)
             growth = ((avg_post - avg_pre) / avg_pre) * 100.0
             with open(output_filename, "a") as f:
                 f.write(f"{repository}\t{avg_pre}\t{avg_post}\t{growth}%\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
@@ -139,7 +141,3 @@ class TTest(BaseStatistics):
                             f"{pvalue}\t"
                             f"{d}\t"
                             f"{d_interpretation}\n")
-
-    # TDOO: move this method to BaseStatistics
-    def get_avg_pre_post(self, publications):
-        return mean(publications[SUM_PRE_CITATIONS_COLUMN_LABEL]), mean(publications[SUM_POST_CITATIONS_COLUMN_LABEL])
