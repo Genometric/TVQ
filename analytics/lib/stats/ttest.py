@@ -140,12 +140,6 @@ class TTest(BaseStatistics):
                             f"{d}\t"
                             f"{d_interpretation}\n")
 
-    # TODO: move to base.
-    def paired_ttest(self, tools):
-        citations, _, _, sums, avg_pre, avg_post, _ = get_vectors(tools)
-        t_statistic, pvalue = ttest_rel(avg_pre, avg_post)
-        return cohen_d(avg_pre, avg_post), (abs(t_statistic), pvalue)
-
     # TDOO: move this method to BaseStatistics
     def get_avg_pre_post(self, publications):
         return mean(publications[SUM_PRE_CITATIONS_COLUMN_LABEL]), mean(publications[SUM_POST_CITATIONS_COLUMN_LABEL])
