@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TVQ.API", "TVQ.API\TVQ.API.csproj", "{B90B5E60-70AF-434E-99E1-902A27278EB0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TVQ.API", "webapp\TVQ\TVQ.API.csproj", "{B90B5E60-70AF-434E-99E1-902A27278EB0}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{44E9C443-0341-4A5D-A160-495121C51FFB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "UnitTests\UnitTests.csproj", "{EECE8342-2185-4C0B-87E3-64EE1717823D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "webapp\UnitTests\UnitTests.csproj", "{EECE8342-2185-4C0B-87E3-64EE1717823D}"
 EndProject
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Scripts", "Scripts\Scripts.pyproj", "{BA478CB8-4B83-49A1-A478-AF0F6F7BD69F}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Analytics", "analytics\Analytics.pyproj", "{BA478CB8-4B83-49A1-A478-AF0F6F7BD69F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{551A6CEA-FB71-42E6-8B0E-287119EEFD1D}"
 	ProjectSection(SolutionItems) = preProject

@@ -306,6 +306,7 @@ OpenCover/
 /.sonarlint
 
 *.env
+*env
 venv
 
 *.tox

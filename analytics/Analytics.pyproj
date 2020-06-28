@@ -3,15 +3,17 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>ba478cb8-4b83-49a1-a478-af0f6f7bd69f</ProjectGuid>
-    <ProjectHome>.</ProjectHome>
+    <ProjectHome>
+    </ProjectHome>
     <StartupFile>plotting.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
-    <Name>Scripts</Name>
+    <Name>Analytics</Name>
     <RootNamespace>Scripts</RootNamespace>
     <TestFramework>Pytest</TestFramework>
+    <InterpreterId>MSBuild|.venv|$(MSBuildProjectFullPath)</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -56,6 +58,15 @@
     <Compile Include="lib\run.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="lib\stats\base_statistics.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="lib\stats\ttest.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="lib\stats\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="lib\t_test_clustered_data.py">
       <SubType>Code</SubType>
     </Compile>
@@ -63,6 +74,18 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="setup.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="tests\stats\test_base_statistics.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="tests\stats\test_ttest.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="tests\stats\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="tests\base_test_case.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="tests\test_base.py">
@@ -76,13 +99,33 @@
     <Content Include="README.md">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="test-data\repo_a.csv">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="test-data\repo_a_clustered.csv">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="tox.ini">
       <SubType>Code</SubType>
     </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="lib\" />
+    <Folder Include="lib\stats\" />
+    <Folder Include="test-data\" />
     <Folder Include="tests\" />
+    <Folder Include="tests\stats\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Interpreter Include=".venv\">
+      <Id>.venv</Id>
+      <Version>3.8</Version>
+      <Description>.venv (Python 3.8 (64-bit))</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X64</Architecture>
+    </Interpreter>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

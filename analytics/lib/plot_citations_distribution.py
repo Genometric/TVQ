@@ -78,7 +78,11 @@ def run(input_path, plot_density):
             post_citations.append(np.max(citation))
         post_citations = aggregate(post_citations, 0, 500)
 
-        plot(axes[col_counter], pre_citations, post_citations, plot_density, get_repo_name(file), ylabel if col_counter == 0 else None)
+        plot(axes[col_counter],
+             pre_citations, post_citations,
+             plot_density, get_repo_name(file),
+             ylabel if col_counter == 0 else None)
+
         col_counter += 1
 
     handles, labels = axes[-1].get_legend_handles_labels()

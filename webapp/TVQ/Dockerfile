@@ -8,13 +8,13 @@ WORKDIR /app
 # copy csproj and restore as distinct layers
 COPY *.sln .
 COPY docker-compose* .
-COPY TVQ.API/*.csproj ./TVQ.API/
-COPY UnitTests/*.csproj ./UnitTests/
+COPY webapp/TVQ/*.csproj ./webapp/TVQ/
+COPY webapp/UnitTests/*.csproj ./webapp/UnitTests/
 RUN dotnet restore TVQ.sln
 
 # copy everything else and build app
-COPY TVQ.API/. ./TVQ.API/
-WORKDIR /app/TVQ.API
+COPY webapp/TVQ/. ./webapp/TVQ/
+WORKDIR /app/webapp/TVQ
 RUN dotnet publish -c Release -o out
 
 
@@ -26,5 +26,5 @@ RUN apk add icu-libs
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 WORKDIR /app
-COPY --from=build /app/TVQ.API/out ./
+COPY --from=build /app/webapp/TVQ/out ./
 ENTRYPOINT ["dotnet", "Genometric.TVQ.API.dll"]
