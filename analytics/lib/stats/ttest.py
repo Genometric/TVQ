@@ -15,22 +15,20 @@ from math import sqrt
 
 class TTest(BaseStatistics):
 
-    def __init__(self):
-        input_path = None
+    def __init__(self, input_path):
+        self.input_path = input_path
 
-    def run(self, input_path):
+    def run(self):
         """
         Executes a flow of computing t-test on
         files available from the input path.
         """
-        self.input_path = input_path
+        filenames = Base.get_files(self.input_path, include_clustered_files=True)
 
-        filenames = Base.get_files(input_path, include_clustered_files=True)
-
-        self.ttest_avg_pre_post(filenames, os.path.join(input_path, "paired_ttest_avg_pre_post.txt"))
-        self.ttest_delta(filenames, os.path.join(input_path, "one_sample_ttest.txt"))
-        self.ttest_deltas(filenames, os.path.join(input_path, "ttest_repositories.txt"))
-        self.ttest_corresponding_clusters(filenames, os.path.join(input_path, 'ttest_corresponding_clusters.txt'))
+        self.ttest_avg_pre_post(filenames, os.path.join(self.input_path, "paired_ttest_avg_pre_post.txt"))
+        self.ttest_delta(filenames, os.path.join(self.input_path, "one_sample_ttest.txt"))
+        self.ttest_deltas(filenames, os.path.join(self.input_path, "ttest_repositories.txt"))
+        self.ttest_corresponding_clusters(filenames, os.path.join(self.input_path, 'ttest_corresponding_clusters.txt'))
 
     def ttest_avg_pre_post(self, input_filenames, output_filename):
         with open(output_filename, "w") as f:
