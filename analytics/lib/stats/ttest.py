@@ -16,15 +16,13 @@ from math import sqrt
 class TTest(BaseStatistics):
 
     def __init__(self):
-        input_path = None
+        pass
 
     def run(self, input_path):
         """
         Executes a flow of computing t-test on
         files available from the input path.
         """
-        self.input_path = input_path
-
         filenames = Base.get_files(input_path, include_clustered_files=True)
 
         self.ttest_avg_pre_post(filenames, os.path.join(input_path, "paired_ttest_avg_pre_post.txt"))
@@ -38,7 +36,7 @@ class TTest(BaseStatistics):
 
         for filename in input_filenames:
             repository = Base.get_repo_name(filename)
-            publications = Base.get_publications(os.path.join(self.input_path, filename))
+            publications = Base.get_publications(filename)
 
             d, d_interpretation, t_statistic, pvalue = BaseStatistics.ttest_avg_pre_post(publications)
             avg_pre = BaseStatistics.get_mean_of_raw_citations(publications, True)
@@ -53,7 +51,7 @@ class TTest(BaseStatistics):
 
         for filename in input_filenames:
             repository = Base.get_repo_name(filename)
-            publications = Base.get_publications(os.path.join(self.input_path, filename))
+            publications = Base.get_publications(filename)
 
             d, d_interpretation, t_statistic, pvalue = BaseStatistics.ttest_delta(publications)
             avg_pre = BaseStatistics.get_mean_of_raw_citations(publications, True)
@@ -74,10 +72,10 @@ class TTest(BaseStatistics):
         for i in range(0, len(input_filenames)-1):
             for j in range(i+1, len(input_filenames)):
                 repository_a = Base.get_repo_name(input_filenames[i])
-                publications_a = Base.get_publications(os.path.join(self.input_path, input_filenames[i]))
+                publications_a = Base.get_publications(input_filenames[i])
 
                 repository_b = Base.get_repo_name(input_filenames[j])
-                publications_b = Base.get_publications(os.path.join(self.input_path, input_filenames[j]))
+                publications_b = Base.get_publications(input_filenames[j])
 
                 d, d_interpretation, t_statistic, pvalue = BaseStatistics.ttest_deltas(publications_a, publications_b)
 

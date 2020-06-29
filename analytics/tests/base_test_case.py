@@ -113,6 +113,9 @@ class BaseTestCase(object):
     @pytest.fixture(scope="session")
     def tmp_clustered_files(self, tmpdir_factory):
         """
+        Returns absolute path to files that contain publications as
+        defined in `get_test_publications`. 
+
         Use this method to create temporary test files. 
         """
         tmpdir = tmpdir_factory.mktemp("clustered_files")
