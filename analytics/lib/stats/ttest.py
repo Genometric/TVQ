@@ -15,20 +15,20 @@ from math import sqrt
 
 class TTest(BaseStatistics):
 
-    def __init__(self, input_path):
-        self.input_path = input_path
+    def __init__(self):
+        pass
 
-    def run(self):
+    def run(self, input_path):
         """
         Executes a flow of computing t-test on
         files available from the input path.
         """
-        filenames = Base.get_files(self.input_path, include_clustered_files=True)
+        filenames = Base.get_files(input_path, include_clustered_files=True)
 
-        self.ttest_avg_pre_post(filenames, os.path.join(self.input_path, "paired_ttest_avg_pre_post.txt"))
-        self.ttest_delta(filenames, os.path.join(self.input_path, "one_sample_ttest.txt"))
-        self.ttest_deltas(filenames, os.path.join(self.input_path, "ttest_repositories.txt"))
-        self.ttest_corresponding_clusters(filenames, os.path.join(self.input_path, 'ttest_corresponding_clusters.txt'))
+        self.ttest_avg_pre_post(filenames, os.path.join(input_path, "paired_ttest_avg_pre_post.txt"))
+        self.ttest_delta(filenames, os.path.join(input_path, "one_sample_ttest.txt"))
+        self.ttest_deltas(filenames, os.path.join(input_path, "ttest_repositories.txt"))
+        self.ttest_corresponding_clusters(filenames, os.path.join(input_path, 'ttest_corresponding_clusters.txt'))
 
     def ttest_avg_pre_post(self, input_filenames, output_filename):
         with open(output_filename, "w") as f:
@@ -36,7 +36,7 @@ class TTest(BaseStatistics):
 
         for filename in input_filenames:
             repository = Base.get_repo_name(filename)
-            publications = Base.get_publications(os.path.join(self.input_path, filename))
+            publications = Base.get_publications(filename)
 
             d, d_interpretation, t_statistic, pvalue = BaseStatistics.ttest_avg_pre_post(publications)
             avg_pre = BaseStatistics.get_mean_of_raw_citations(publications, True)
@@ -51,7 +51,7 @@ class TTest(BaseStatistics):
 
         for filename in input_filenames:
             repository = Base.get_repo_name(filename)
-            publications = Base.get_publications(os.path.join(self.input_path, filename))
+            publications = Base.get_publications(filename)
 
             d, d_interpretation, t_statistic, pvalue = BaseStatistics.ttest_delta(publications)
             avg_pre = BaseStatistics.get_mean_of_raw_citations(publications, True)
@@ -72,10 +72,10 @@ class TTest(BaseStatistics):
         for i in range(0, len(input_filenames)-1):
             for j in range(i+1, len(input_filenames)):
                 repository_a = Base.get_repo_name(input_filenames[i])
-                publications_a = Base.get_publications(os.path.join(self.input_path, input_filenames[i]))
+                publications_a = Base.get_publications(input_filenames[i])
 
                 repository_b = Base.get_repo_name(input_filenames[j])
-                publications_b = Base.get_publications(os.path.join(self.input_path, input_filenames[j]))
+                publications_b = Base.get_publications(input_filenames[j])
 
                 d, d_interpretation, t_statistic, pvalue = BaseStatistics.ttest_deltas(publications_a, publications_b)
 

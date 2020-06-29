@@ -15,8 +15,8 @@ class TestTTest(BaseTestCase):
         tmpdir = tmp_clustered_files[0]
         repos = tmp_clustered_files[1]
         
-        ttest = TTest(tmpdir)
-        ttest.run()
+        ttest = TTest()
+        ttest.run(tmpdir)
 
     def test_ttest_delta(self, tmp_clustered_files):
         # Arrange
@@ -29,7 +29,7 @@ class TestTTest(BaseTestCase):
         assert os.path.exists(output_file) == False
         
         # Act
-        ttest = TTest(tmpdir)
+        ttest = TTest()
         ttest.ttest_delta(input_files, output_file)
 
         # Assert
