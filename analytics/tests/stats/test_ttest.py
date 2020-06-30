@@ -42,6 +42,10 @@ class TestTTest(BaseTestCase):
         assert os.path.exists(output_file)
 
         output_info = Base.get_publications(output_file)
+
+        # Check if files have header
+        assert BaseTestCase.assert_str_list_equal(list(output_info), TTest.TTEST_HEADER)
+
         assert BaseTestCase.assert_lists_equal(output_info["Average Pre Citations"], exp_avg_pre)
 
         # ... TODO: more assertion ... 
