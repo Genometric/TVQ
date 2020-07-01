@@ -64,9 +64,9 @@ def print_ttest_results(pvalue, t_statistic, cohen_d, cohen_d_interpretation, in
 
 
 def paired_ttest(tools):
-    citations, _, _, sums, avg_pre, avg_post, _ = get_vectors(tools)
-    t_statistic, pvalue = ttest_rel(avg_pre, avg_post)
-    return cohen_d(avg_pre, avg_post), (abs(t_statistic), pvalue)
+    pre_citations, post_citations, _ = get_raw_citations(tools)
+    t_statistic, pvalue = ttest_rel(pre_citations, post_citations)
+    return cohen_d(pre_citations, post_citations), (abs(t_statistic), pvalue)
 
 
 def one_sample_ttest(x, population_mean):
@@ -219,8 +219,8 @@ def ttest_repository(input_filename, output_filename):
 def ttest_repository_delta(input_filename, output_filename):
     print(f"\t- Repository: {get_repo_name(input_filename)}")
     tools = pd.read_csv(input_filename, header=0, sep='\t')
-    _, _, _, _, _, _, delta = get_vectors(tools)
-    t_statistic, pvalue, d, d_interpretation = one_sample_ttest(delta, 0.0)
+    _, _, deltas = get_raw_citations(tools)
+    t_statistic, pvalue, d, d_interpretation = one_sample_ttest(deltas, 0.0)
     avg_pre, avg_post = get_avg_pre_post(tools)
     print_ttest_results(pvalue, t_statistic, d, d_interpretation, "\t\t")
     growth = ((avg_post - avg_pre) / avg_pre) * 100.0
@@ -322,7 +322,6 @@ def violin_plot(input_path, input_filenames):
         os.remove(image_file)
     plt.savefig(image_file, bbox_inches='tight')
     plt.close()
-    exit()
 
 def run(input_path):
     filenames = []
@@ -335,7 +334,7 @@ def run(input_path):
     violin_plot(input_path, filenames)
 
     print("\n>>> Performing t-test on pre and post citations for the null hypothesis that the two have identical average values.")
-    repo_ttest_filename = os.path.join(root, "paired_ttest_avg_pre_post.txt")
+    repo_ttest_filename = os.path.join(root, "paired_ttest_pre_post.txt")
     if os.path.isfile(repo_ttest_filename):
         os.remove(repo_ttest_filename)
     with open(repo_ttest_filename, "a") as f:
