@@ -317,7 +317,6 @@ def run(input_path):
                 filenames.append(filename)
 
     violin_plot(input_path, filenames)
-    exit()
 
     print("\n>>> Performing t-test on pre and post citations for the null hypothesis that the two have identical average values.")
     repo_ttest_filename = os.path.join(root, "paired_ttest_avg_pre_post.txt")
