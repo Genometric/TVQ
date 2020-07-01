@@ -6,7 +6,7 @@ import os
 from ..base_test_case import BaseTestCase
 from lib.stats.ttest import TTest
 from lib.base import Base
-
+import math
 
 class TestTTest(BaseTestCase):
     """
@@ -46,11 +46,20 @@ class TestTTest(BaseTestCase):
         # Check if files have header
         assert BaseTestCase.assert_str_list_equal(list(output_info), TTest.TTEST_HEADER)
 
+        # check the value of avg pre citations
         assert BaseTestCase.assert_lists_equal(output_info["Average Pre Citations"], exp_avg_pre)
 
-        # ... TODO: more assertion ... 
-        # ... (1) check if files have header
-        # ... (2) check the value of avg post citations
-        # ... (3) check t-statistic and other columns; no need to check 
-        #         for actual values, only check if the values exist and 
-        #         are not 0.0 or NaN.
+
+        # check the value of avg post citations
+        assert BaseTestCase.assert_lists_equal(output_info["Average Post Citations"], exp_avg_post)
+
+        # for actual values, only check if the values exist and 
+        # are not 0.0 or NaN.
+        for column in output_info:
+            if column in ["Repository", "Interpretation", "Growth"]:
+                continue
+            assert output_info[column].dtype == 'float64'
+            for cell in output_info[column]:
+                assert cell > 0.0
+                assert not math.isnan(cell)
+                assert not math.isinf(cell)
