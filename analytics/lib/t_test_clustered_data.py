@@ -278,7 +278,9 @@ def violin_plot(input_path, input_filenames):
     citations_col = "Citations (log10)"
     prepost_col = "prepost"
     repo_col = "Repository"
+    delta_col = "Delta"
     avg_df = pd.DataFrame(columns=[citations_col, prepost_col, repo_col])
+    delta_df = pd.DataFrame(columns=[delta_col, repo_col])
     for input_filename in input_filenames:
         tools = pd.read_csv(os.path.join(input_path, input_filename), header=0, sep='\t')
         _, _, _, _, avg_pre, avg_post, delta = get_vectors(tools)
@@ -287,10 +289,20 @@ def violin_plot(input_path, input_filenames):
             avg_df = avg_df.append({citations_col: np.log10(abs(x)) if x!=0 else 0.0, prepost_col: "Before", repo_col: reponame}, ignore_index=True)
         for x in avg_post:
             avg_df = avg_df.append({citations_col: np.log10(abs(x)) if x!=0 else 0.0, prepost_col: "After", repo_col: reponame}, ignore_index=True)
+        for x in delta:
+            delta_df = delta_df.append({delta_col: np.log10(abs(x)) if x!=0 else 0.0, repo_col: reponame}, ignore_index=True)
 
-    ax = sns.violinplot(x=repo_col, y=citations_col, hue=prepost_col, data=avg_df, palette="Paired", split=True, legend=False)
-    image_file = os.path.join(input_path, 'avg_pre_post_violin.png')
+    ax = sns.violinplot(x=repo_col, y=citations_col, hue=prepost_col, data=avg_df, palette="Paired", split=True, legend=False, scale="area")
+    image_file = os.path.join(input_path, 'violin_avg_pre_post.png')
     plt.legend(loc='lower right')
+    if os.path.isfile(image_file):
+        os.remove(image_file)
+    plt.savefig(image_file, bbox_inches='tight')
+    plt.close()
+
+    fig, ax = set_plot_style()
+    ax = sns.violinplot(x=repo_col, y=delta_col, data=delta_df, palette="Set2", split=False, legend=False, scale="area")
+    image_file = os.path.join(input_path, 'violin_delta.png')
     if os.path.isfile(image_file):
         os.remove(image_file)
     plt.savefig(image_file, bbox_inches='tight')
@@ -305,6 +317,7 @@ def run(input_path):
                 filenames.append(filename)
 
     violin_plot(input_path, filenames)
+    exit()
 
     print("\n>>> Performing t-test on pre and post citations for the null hypothesis that the two have identical average values.")
     repo_ttest_filename = os.path.join(root, "paired_ttest_avg_pre_post.txt")
