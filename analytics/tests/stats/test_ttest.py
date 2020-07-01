@@ -63,3 +63,4 @@ class TestTTest(BaseTestCase):
                 assert cell > 0.0
                 assert not math.isnan(cell)
                 assert not math.isinf(cell)
+             
