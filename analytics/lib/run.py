@@ -19,7 +19,6 @@ if __name__ == "__main__":
         exit()
 
     input_path = sys.argv[1]
-
     plot_changes = False
     if len(sys.argv) >= 3:
         plot_changes = sys.argv[2] == "True"

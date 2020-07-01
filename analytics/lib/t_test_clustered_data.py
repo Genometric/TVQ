@@ -11,6 +11,9 @@ from scipy.stats import ttest_rel, ttest_ind, pearsonr, ttest_1samp
 from statistics import mean
 from math import sqrt
 
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 
 CLUSTERED_FILENAME_POSFIX = "_clustered"
 CLUSTER_NAME_COLUMN_LABEL = "cluster_label"
@@ -26,6 +29,21 @@ def get_repo_name(filename):
 
 def get_avg_pre_post(dataframe):
     return mean(dataframe[SUM_PRE_CITATIONS_COLUMN_LABEL]), mean(dataframe[SUM_POST_CITATIONS_COLUMN_LABEL])
+
+def get_raw_citations(publications):
+    deltas = []
+    pre_citations = []
+    post_citations = []
+    for index, row in publications.iterrows():
+        pre = row.get(SUM_PRE_CITATIONS_COLUMN_LABEL)
+        post = row.get(SUM_POST_CITATIONS_COLUMN_LABEL)
+
+        pre_citations.append(pre)
+        post_citations.append(post)
+        deltas.append(post-pre)
+
+    return pre_citations, post_citations, deltas
+
 
 
 def ttest_by_cluster(root, filename):
@@ -46,9 +64,9 @@ def print_ttest_results(pvalue, t_statistic, cohen_d, cohen_d_interpretation, in
 
 
 def paired_ttest(tools):
-    citations, _, _, sums, avg_pre, avg_post, _ = get_vectors(tools)
-    t_statistic, pvalue = ttest_rel(avg_pre, avg_post)
-    return cohen_d(avg_pre, avg_post), (abs(t_statistic), pvalue)
+    pre_citations, post_citations, _ = get_raw_citations(tools)
+    t_statistic, pvalue = ttest_rel(pre_citations, post_citations)
+    return cohen_d(pre_citations, post_citations), (abs(t_statistic), pvalue)
 
 
 def one_sample_ttest(x, population_mean):
@@ -201,8 +219,8 @@ def ttest_repository(input_filename, output_filename):
 def ttest_repository_delta(input_filename, output_filename):
     print(f"\t- Repository: {get_repo_name(input_filename)}")
     tools = pd.read_csv(input_filename, header=0, sep='\t')
-    _, _, _, _, _, _, delta = get_vectors(tools)
-    t_statistic, pvalue, d, d_interpretation = one_sample_ttest(delta, 0.0)
+    _, _, deltas = get_raw_citations(tools)
+    t_statistic, pvalue, d, d_interpretation = one_sample_ttest(deltas, 0.0)
     avg_pre, avg_post = get_avg_pre_post(tools)
     print_ttest_results(pvalue, t_statistic, d, d_interpretation, "\t\t")
     growth = ((avg_post - avg_pre) / avg_pre) * 100.0
@@ -250,7 +268,6 @@ def ttest_corresponding_clusters(root, filename_a, filename_b, output_filename):
 
             f.write(f"{repo_a}\t{repo_b}\t{i}\t{i}\t{sorted_keys_a[i]}\t{sorted_keys_b[i]}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
 
-
 def get_growthes(pre, post):
     growthes = []
     for i in range(0, len(pre)):
@@ -262,6 +279,49 @@ def get_growthes(pre, post):
             growthes.append(((total_pst_citations - total_pre_citations) / total_pre_citations) * 100.0)
     return growthes
 
+def set_plot_style():
+    sns.set()
+    sns.set_context("paper")
+    sns.set_style("darkgrid")
+    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(4, 4), dpi=600)
+
+    return fig, axes
+
+def violin_plot(input_path, input_filenames):
+    fig, ax = set_plot_style()
+
+    citations_col = "Citations (log10)"
+    prepost_col = "prepost"
+    repo_col = "Repository"
+    delta_col = "Delta"
+    prepost_df = pd.DataFrame(columns=[citations_col, prepost_col, repo_col])
+    delta_df = pd.DataFrame(columns=[delta_col, repo_col])
+    for input_filename in input_filenames:
+        tools = pd.read_csv(os.path.join(input_path, input_filename), header=0, sep='\t')
+        pre_citations, post_citations, deltas = get_raw_citations(tools)
+        reponame = get_repo_name(input_filename)
+        for x in pre_citations:
+            prepost_df = prepost_df.append({citations_col: np.log10(abs(x)) if x!=0 else 0.0, prepost_col: "Before", repo_col: reponame}, ignore_index=True)
+        for x in post_citations:
+            prepost_df = prepost_df.append({citations_col: np.log10(abs(x)) if x!=0 else 0.0, prepost_col: "After", repo_col: reponame}, ignore_index=True)
+        for x in deltas:
+            delta_df = delta_df.append({delta_col: np.log10(abs(x)) if x!=0 else 0.0, repo_col: reponame}, ignore_index=True)
+
+    ax = sns.violinplot(x=repo_col, y=citations_col, hue=prepost_col, data=prepost_df, palette="Paired", split=True, legend=False)
+    image_file = os.path.join(input_path, 'violin_pre_post.png')
+    plt.legend(loc='lower right')
+    if os.path.isfile(image_file):
+        os.remove(image_file)
+    plt.savefig(image_file, bbox_inches='tight')
+    plt.close()
+
+    fig, ax = set_plot_style()
+    ax = sns.violinplot(x=repo_col, y=delta_col, data=delta_df, palette="Set2", split=False, legend=False)
+    image_file = os.path.join(input_path, 'violin_delta.png')
+    if os.path.isfile(image_file):
+        os.remove(image_file)
+    plt.savefig(image_file, bbox_inches='tight')
+    plt.close()
 
 def run(input_path):
     filenames = []
@@ -271,8 +331,10 @@ def run(input_path):
                os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 filenames.append(filename)
 
+    violin_plot(input_path, filenames)
+
     print("\n>>> Performing t-test on pre and post citations for the null hypothesis that the two have identical average values.")
-    repo_ttest_filename = os.path.join(root, "paired_ttest_avg_pre_post.txt")
+    repo_ttest_filename = os.path.join(root, "paired_ttest_pre_post.txt")
     if os.path.isfile(repo_ttest_filename):
         os.remove(repo_ttest_filename)
     with open(repo_ttest_filename, "a") as f:
