@@ -11,6 +11,9 @@ from scipy.stats import ttest_rel, ttest_ind, pearsonr, ttest_1samp
 from statistics import mean
 from math import sqrt
 
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 
 CLUSTERED_FILENAME_POSFIX = "_clustered"
 CLUSTER_NAME_COLUMN_LABEL = "cluster_label"
@@ -250,7 +253,6 @@ def ttest_corresponding_clusters(root, filename_a, filename_b, output_filename):
 
             f.write(f"{repo_a}\t{repo_b}\t{i}\t{i}\t{sorted_keys_a[i]}\t{sorted_keys_b[i]}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
 
-
 def get_growthes(pre, post):
     growthes = []
     for i in range(0, len(pre)):
@@ -262,6 +264,37 @@ def get_growthes(pre, post):
             growthes.append(((total_pst_citations - total_pre_citations) / total_pre_citations) * 100.0)
     return growthes
 
+def set_plot_style():
+    sns.set()
+    sns.set_context("paper")
+    sns.set_style("darkgrid")
+    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(4, 4), dpi=600)
+
+    return fig, axes
+
+def violin_plot(input_path, input_filenames):
+    fig, ax = set_plot_style()
+
+    citations_col = "Citations (log10)"
+    prepost_col = "prepost"
+    repo_col = "Repository"
+    avg_df = pd.DataFrame(columns=[citations_col, prepost_col, repo_col])
+    for input_filename in input_filenames:
+        tools = pd.read_csv(os.path.join(input_path, input_filename), header=0, sep='\t')
+        _, _, _, _, avg_pre, avg_post, delta = get_vectors(tools)
+        reponame = get_repo_name(input_filename)
+        for x in avg_pre:
+            avg_df = avg_df.append({citations_col: np.log10(abs(x)) if x!=0 else 0.0, prepost_col: "Before", repo_col: reponame}, ignore_index=True)
+        for x in avg_post:
+            avg_df = avg_df.append({citations_col: np.log10(abs(x)) if x!=0 else 0.0, prepost_col: "After", repo_col: reponame}, ignore_index=True)
+
+    ax = sns.violinplot(x=repo_col, y=citations_col, hue=prepost_col, data=avg_df, palette="Paired", split=True, legend=False)
+    image_file = os.path.join(input_path, 'avg_pre_post_violin.png')
+    plt.legend(loc='lower right')
+    if os.path.isfile(image_file):
+        os.remove(image_file)
+    plt.savefig(image_file, bbox_inches='tight')
+    plt.close()
 
 def run(input_path):
     filenames = []
@@ -270,6 +303,8 @@ def run(input_path):
             if os.path.splitext(filename)[1] == ".csv" and \
                os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 filenames.append(filename)
+
+    violin_plot(input_path, filenames)
 
     print("\n>>> Performing t-test on pre and post citations for the null hypothesis that the two have identical average values.")
     repo_ttest_filename = os.path.join(root, "paired_ttest_avg_pre_post.txt")
