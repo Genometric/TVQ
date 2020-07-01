@@ -127,7 +127,7 @@ class BaseTestCase(object):
             c += 1
             filename = os.path.join(tmpdir, f"repo_{c}{CLUSTERED_FILENAME_POSFIX}.csv")
             repo[0].to_csv(filename, sep="\t", encoding='utf-8')
-            rtv.append((filename, repo[1]))
+            rtv.append({"filename": filename, "exp_values": repo[1]})
 
         return tmpdir, rtv
 
@@ -148,7 +148,7 @@ class BaseTestCase(object):
         for root, dirpath, files in os.walk(input_path):
             for filename in files:
                 if os.path.splitext(filename)[1] == ".csv" and \
-                   os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
+                        os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                     filenames.append(os.path.join(input_path, filename))
         return filenames
 
@@ -169,3 +169,10 @@ class BaseTestCase(object):
         tolerance of 1e-5 and absolute tolerance of 1e-8. 
         """
         return np.allclose(l1, l2)
+
+    @staticmethod
+    def assert_str_list_equal(l1, l2):
+        for i in range(len(l1)):
+            if l1[i] != l2[i]:
+                return False
+        return True
