@@ -283,17 +283,17 @@ def set_plot_style():
     sns.set()
     sns.set_context("paper")
     sns.set_style("darkgrid")
-    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(4, 4), dpi=600)
+    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(5, 4), dpi=600)
 
     return fig, axes
 
 def violin_plot(input_path, input_filenames):
     fig, ax = set_plot_style()
 
-    citations_col = "Citations (log10)"
+    citations_col = "Citations (log10)\n"
     prepost_col = "prepost"
     repo_col = "Repository"
-    delta_col = "Delta"
+    delta_col = "Delta (log10)\n"
     prepost_df = pd.DataFrame(columns=[citations_col, prepost_col, repo_col])
     delta_df = pd.DataFrame(columns=[delta_col, repo_col])
     for input_filename in input_filenames:
@@ -308,8 +308,10 @@ def violin_plot(input_path, input_filenames):
             delta_df = delta_df.append({delta_col: np.log10(abs(x)) if x!=0 else 0.0, repo_col: reponame}, ignore_index=True)
 
     ax = sns.violinplot(x=repo_col, y=citations_col, hue=prepost_col, data=prepost_df, palette="Paired", split=True, legend=False)
+    ax.set_xlabel("")
     image_file = os.path.join(input_path, 'violin_pre_post.png')
-    plt.legend(loc='lower right')
+    plt.legend(loc='upper right', bbox_to_anchor=(1., 1.02) , borderaxespad=0., ncol=2)
+
     if os.path.isfile(image_file):
         os.remove(image_file)
     plt.savefig(image_file, bbox_inches='tight')
@@ -317,6 +319,7 @@ def violin_plot(input_path, input_filenames):
 
     fig, ax = set_plot_style()
     ax = sns.violinplot(x=repo_col, y=delta_col, data=delta_df, palette="Set2", split=False, legend=False)
+    ax.set_xlabel("")
     image_file = os.path.join(input_path, 'violin_delta.png')
     if os.path.isfile(image_file):
         os.remove(image_file)
@@ -334,7 +337,7 @@ def run(input_path):
     violin_plot(input_path, filenames)
 
     print("\n>>> Performing t-test on pre and post citations for the null hypothesis that the two have identical average values.")
-    repo_ttest_filename = os.path.join(root, "paired_ttest_pre_post.txt")
+    repo_ttest_filename = os.path.join(root, "ttest_raw_pre_post.txt")
     if os.path.isfile(repo_ttest_filename):
         os.remove(repo_ttest_filename)
     with open(repo_ttest_filename, "a") as f:
@@ -344,7 +347,7 @@ def run(input_path):
         ttest_repository(os.path.join(root, filename), repo_ttest_filename)
 
     print("\n>>> Performing t-test on citations delta (post - pre) for the null hypothesis that the mean equals zero.")
-    one_sample_ttest_filename = os.path.join(root, "one_sample_ttest.txt")
+    one_sample_ttest_filename = os.path.join(root, "ttest_delta.txt")
     if os.path.isfile(one_sample_ttest_filename):
         os.remove(one_sample_ttest_filename)
     with open(one_sample_ttest_filename, "a") as f:
