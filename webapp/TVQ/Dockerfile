@@ -15,7 +15,7 @@ RUN dotnet restore TVQ.sln
 # copy everything else and build app
 COPY webapp/TVQ/. ./webapp/TVQ/
 WORKDIR /app/webapp/TVQ
-RUN dotnet publish -c Release -o out
+RUN dotnet publish TVQ.API.csproj -c Release -o out
 
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.0-alpine AS runtime
