@@ -234,6 +234,9 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             foreach (var association in info.CategoryRepoAssociations)
             {
                 var asso = EnsureEntity(association);
+                if (asso == null)
+                    continue;
+
                 info.ToolRepoAssociation.Tool.CategoryAssociations
                     .Add(new ToolCategoryAssociation()
                     {
