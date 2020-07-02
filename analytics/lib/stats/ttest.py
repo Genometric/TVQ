@@ -14,7 +14,7 @@ from statistics import mean
 from math import sqrt
 
 class TTest(BaseStatistics):
-
+    TTEST_HEADER = ["Repository", "Average Pre Citations", "Average Post Citations", "Growth", "t-Statistic", "p-value", "Cohen's d", "Interpretation"]
     def __init__(self):
         pass
 
@@ -47,7 +47,7 @@ class TTest(BaseStatistics):
 
     def ttest_delta(self, input_filenames, output_filename):
         with open(output_filename, "w") as f:
-            f.write("Repository\tAverage Pre Citations\tAverage Post Citations\tGrowth\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
+            f.write("\t".join(TTest.TTEST_HEADER) + "\n")
 
         for filename in input_filenames:
             repository = Base.get_repo_name(filename)
