@@ -116,7 +116,14 @@ namespace Genometric.TVQ.API.Crawlers.ToolRepos
             var rtv = association;
             foreach (var key in keys)
                 if (!_categoryRepoAssociations.TryGetValue(key, out rtv))
+                {
                     _categoryRepoAssociations.Add(key, association);
+
+                    // This assignment is necessary because if `key`
+                    // does not exist in `_categoryRepoAssociations` then 
+                    // rtv will be set to null. 
+                    rtv = association;
+                }
 
             return rtv;
         }
