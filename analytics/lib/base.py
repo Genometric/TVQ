@@ -176,6 +176,21 @@ class Base(object):
 
         return citations, pre_citations, post_citations, sums, avg_pre, avg_pst, deltas
 
+    @staticmethod
+    def get_raw_citations(publications):
+        deltas = []
+        pre_citations = []
+        post_citations = []
+        for index, row in publications.iterrows():
+            pre = row.get(SUM_PRE_CITATIONS_COLUMN_LABEL)
+            post = row.get(SUM_POST_CITATIONS_COLUMN_LABEL)
+
+            pre_citations.append(pre)
+            post_citations.append(post)
+            deltas.append(post-pre)
+
+    return pre_citations, post_citations, deltas
+
     def get_sorted_clusters(publications):
         """
         Computes the average of all the citation counts of all the publications in every cluster.
