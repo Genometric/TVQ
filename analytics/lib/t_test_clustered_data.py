@@ -294,28 +294,13 @@ def violin_plot(input_path, input_filenames):
     prepost_col = "prepost"
     repo_col = "Repository"
     delta_col = "Delta (log10)\n"
-    prepost_df = pd.DataFrame(columns=[citations_col, prepost_col, repo_col])
     delta_df = pd.DataFrame(columns=[delta_col, repo_col])
     for input_filename in input_filenames:
         tools = pd.read_csv(os.path.join(input_path, input_filename), header=0, sep='\t')
         pre_citations, post_citations, deltas = get_raw_citations(tools)
         reponame = get_repo_name(input_filename)
-        for x in pre_citations:
-            prepost_df = prepost_df.append({citations_col: np.log10(abs(x)) if x!=0 else 0.0, prepost_col: "Before", repo_col: reponame}, ignore_index=True)
-        for x in post_citations:
-            prepost_df = prepost_df.append({citations_col: np.log10(abs(x)) if x!=0 else 0.0, prepost_col: "After", repo_col: reponame}, ignore_index=True)
         for x in deltas:
             delta_df = delta_df.append({delta_col: np.log10(abs(x)) if x!=0 else 0.0, repo_col: reponame}, ignore_index=True)
-
-    ax = sns.violinplot(x=repo_col, y=citations_col, hue=prepost_col, data=prepost_df, palette="Paired", split=True, legend=False)
-    ax.set_xlabel("")
-    image_file = os.path.join(input_path, 'violin_pre_post.png')
-    plt.legend(loc='upper right', bbox_to_anchor=(1., 1.02) , borderaxespad=0., ncol=2)
-
-    if os.path.isfile(image_file):
-        os.remove(image_file)
-    plt.savefig(image_file, bbox_inches='tight')
-    plt.close()
 
     fig, ax = set_plot_style()
     ax = sns.violinplot(x=repo_col, y=delta_col, data=delta_df, palette="Set2", split=False, legend=False)
