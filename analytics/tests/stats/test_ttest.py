@@ -49,15 +49,15 @@ class TestTTest(BaseTestCase):
         # check the value of avg pre citations
         assert BaseTestCase.assert_lists_equal(output_info["Average Pre Citations"], exp_avg_pre)
 
-
         # check the value of avg post citations
         assert BaseTestCase.assert_lists_equal(output_info["Average Post Citations"], exp_avg_post)
 
-        # for actual values, only check if the values exist and 
-        # are not 0.0 or NaN.
+        # Check if the values exist and are not 0.0 or NaN;
+        # the correctness of their values is asserted via other tests.
         for column in output_info:
             if column in ["Repository", "Interpretation", "Growth"]:
                 continue
+
             assert output_info[column].dtype == 'float64'
             for cell in output_info[column]:
                 assert cell > 0.0
