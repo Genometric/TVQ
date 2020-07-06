@@ -111,6 +111,19 @@ class BaseTestCase(object):
         return request.param
 
     @pytest.fixture(scope="session")
+    def tmp_files(self, tmpdir_factory):
+        """
+
+        """
+        test_pubs = BaseTestCase.get_test_publications()
+        for repo in test_pubs:
+            repo[0] = repo[0].drop(CLUSTER_NAME_COLUMN_LABEL, 1)
+
+        tmpdir, filenames = self._write_tmp_files(test_pubs, tmpdir_factory)
+        return tmpdir, filenames
+
+
+    @pytest.fixture(scope="session")
     def tmp_clustered_files(self, tmpdir_factory):
         """
         Returns absolute path to files that contain publications as
@@ -118,18 +131,22 @@ class BaseTestCase(object):
 
         Use this method to create temporary test files. 
         """
+        test_pubs = BaseTestCase.get_test_publications()
+        tmpdir, filenames = self._write_tmp_files(test_pubs, tmpdir_factory)
+        return tmpdir, filenames
+
+    def _write_tmp_files(self, publications, tmpdir_factory):
         tmpdir = tmpdir_factory.mktemp("clustered_files")
 
-        test_pubs = BaseTestCase.get_test_publications()
         c = 0
-        rtv = []
-        for repo in test_pubs:
+        filenames = []
+        for repo in publications:
             c += 1
             filename = os.path.join(tmpdir, f"repo_{c}{CLUSTERED_FILENAME_POSFIX}.csv")
             repo[0].to_csv(filename, sep="\t", encoding='utf-8')
-            rtv.append({"filename": filename, "exp_values": repo[1]})
+            filenames.append({"filename": filename, "exp_values": repo[1]})
 
-        return tmpdir, rtv
+        return tmpdir, filenames
 
     @pytest.fixture(scope="session")
     def clustered_files(self, tmpdir_factory):

@@ -189,7 +189,7 @@ class Base(object):
             post_citations.append(post)
             deltas.append(post-pre)
 
-    return pre_citations, post_citations, deltas
+        return pre_citations, post_citations, deltas
 
     def get_sorted_clusters(publications):
         """
