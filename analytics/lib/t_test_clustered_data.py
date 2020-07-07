@@ -45,7 +45,6 @@ def get_raw_citations(publications):
     return pre_citations, post_citations, deltas
 
 
-
 def ttest_by_cluster(root, filename):
     print("\t- Repository: {0}".format(get_repo_name(filename)))
     clusters = get_clusters(os.path.join(root, filename))
@@ -228,6 +227,16 @@ def ttest_repository_delta(input_filename, output_filename):
         f.write(f"{get_repo_name(input_filename)}\t{avg_pre}\t{avg_post}\t{growth}%\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
 
 
+def ttest_repository_delta_cluster(input_filename, output_filename):
+    tools = get_clusters(input_filename)
+
+    for k in tools.groups:
+        _, _, deltas = get_raw_citations(tools.get_group(k))
+        t_statistic, pvalue, d, d_interpretation = one_sample_ttest(deltas, 0.0)
+        with open(output_filename, "a") as f:
+            f.write(f"{get_repo_name(input_filename)}\t{k}\t{t_statistic}\t{pvalue}\t{d}\t{d_interpretation}\n")
+
+
 def ttest_repositories(repo_a_filename, repo_b_filename, output_filename):
     repo_a = get_repo_name(repo_a_filename)
     repo_b = get_repo_name(repo_b_filename)
@@ -320,6 +329,14 @@ def run(input_path):
                 filenames.append(filename)
 
     violin_plot(input_path, filenames)
+
+    one_sample_ttest_clusters_filename = os.path.join(root, "ttest_delta_clusters.txt")
+    if os.path.isfile(one_sample_ttest_clusters_filename):
+        os.remove(one_sample_ttest_clusters_filename)
+    with open(one_sample_ttest_clusters_filename, "a") as f:
+        f.write("Repository\tCluster\tt-Statistic\tp-value\tCohen's d\tInterpretation\n")
+    for filename in filenames:
+        ttest_repository_delta_cluster(os.path.join(root, filename), one_sample_ttest_clusters_filename)
 
     print("\n>>> Performing t-test on pre and post citations for the null hypothesis that the two have identical average values.")
     repo_ttest_filename = os.path.join(root, "ttest_raw_pre_post.txt")
