@@ -320,6 +320,38 @@ def violin_plot(input_path, input_filenames):
     plt.savefig(image_file, bbox_inches='tight')
     plt.close()
 
+
+def violin_plot_clusters(input_path, input_filenames):
+    sns.set()
+    sns.set_context("paper")
+    sns.set_style("darkgrid")
+    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(15, 5), dpi=600)
+
+    citations_col = "Citations (log10)\n"
+    prepost_col = "prepost"
+    repo_col = "Repository"
+    delta_col = "Delta (log10)\n"
+    delta_df = pd.DataFrame(columns=[delta_col, repo_col])
+
+    # this is experimental and needs to be reimplemented in a much better way.
+    for cluster in range(0, 3):
+        for input_filename in input_filenames:
+            tools = get_clusters(os.path.join(input_path, input_filename))
+            _, _, deltas = get_raw_citations(tools.get_group(cluster))
+            reponame = get_repo_name(input_filename)
+            for x in deltas:
+                delta_df = delta_df.append({delta_col: np.log10(abs(x)) if x!=0 else 0.0, repo_col: reponame}, ignore_index=True)
+        
+        sns.violinplot(x=repo_col, y=delta_col, data=delta_df, palette="Set2", split=False, legend=False, ax=axes[cluster])
+        axes[cluster].set_xlabel("")
+
+    image_file = os.path.join(input_path, 'violin_delta_cluster.png')
+    if os.path.isfile(image_file):
+        os.remove(image_file)
+    plt.savefig(image_file, bbox_inches='tight')
+    plt.close()
+
+
 def run(input_path):
     filenames = []
     for root, dirpath, files in os.walk(input_path):
@@ -328,6 +360,7 @@ def run(input_path):
                os.path.splitext(filename)[0].endswith(CLUSTERED_FILENAME_POSFIX):
                 filenames.append(filename)
 
+    violin_plot_clusters(input_path, filenames)
     violin_plot(input_path, filenames)
 
     one_sample_ttest_clusters_filename = os.path.join(root, "ttest_delta_clusters.txt")
