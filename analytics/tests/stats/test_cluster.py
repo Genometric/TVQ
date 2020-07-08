@@ -4,7 +4,7 @@
 
 import os
 from ..base_test_case import BaseTestCase
-from lib.stats.ttest import TTest
+from lib.stats.cluster import Cluster
 from lib.base import Base
 import math
 
@@ -18,6 +18,6 @@ class TestCluster(BaseTestCase):
         repos = tmp_clustered_files[1]
 
         # Act
-        TTest().run(tmpdir)
+        Cluster().run(tmpdir)
 
         # Assert
