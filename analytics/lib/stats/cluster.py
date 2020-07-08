@@ -27,7 +27,7 @@ class Cluster(BaseStatistics):
         in files available from the given input path.
         """
         self.cluster_count = cluster_count
-        input_files = Base.get_files(input_path, include_clustered_files=False)
+        input_files = Base.get_files(input_path, include_clustered_files=True)
 
         for filename in input_files:
             clustered_publications = self._cluster(filename)
@@ -45,7 +45,7 @@ class Cluster(BaseStatistics):
         variance, dist_growth_acceleration, \
             auto_cluster_count, auto_cut_distance, \
             manual_cluster_count, manual_cut_distance = \
-            self._get_cluster_count(linkage_matrix, cluster_count)
+            self._get_cluster_count(linkage_matrix, self.cluster_count)
 
         _, auto_silhouette_score = self._get_silhouette_score(citations, auto_cluster_count)
         cluster_labels, manual_silhouette_score = get_silhouette_score(citations, manual_cluster_count)

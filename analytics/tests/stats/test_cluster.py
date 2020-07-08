@@ -7,6 +7,7 @@ from ..base_test_case import BaseTestCase
 from lib.stats.cluster import Cluster
 from lib.base import Base
 import math
+from os import listdir
 
 class TestCluster(BaseTestCase):
     """
@@ -16,8 +17,10 @@ class TestCluster(BaseTestCase):
         # Arrange
         tmpdir = tmp_clustered_files[0]
         repos = tmp_clustered_files[1]
+        clustered_files = len(repos)
 
         # Act
         Cluster().run(tmpdir)
 
         # Assert
+        assert listdir(tmpdir) == clustered_files * 2
