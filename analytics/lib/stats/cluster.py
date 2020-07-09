@@ -48,28 +48,57 @@ class Cluster(BaseStatistics):
             self._get_cluster_count(linkage_matrix, self.cluster_count)
 
         _, auto_silhouette_score = self._get_silhouette_score(citations, auto_cluster_count)
-        cluster_labels, manual_silhouette_score = get_silhouette_score(citations, manual_cluster_count)
+        cluster_labels, manual_silhouette_score = self._get_silhouette_score(citations, manual_cluster_count)
 
         # Add cluster information to original data.
         input_df[CLUSTER_NAME_COLUMN_LABEL] = cluster_labels
 
         return input_df
 
-    def _get_cluster_count(self, Z, cluster_count):
+    def _get_cluster_count(self, linkage_matrix, cluster_count):
+        """
+        TODO: some tweaks has been made to compute cluster count
+        even when less than four publications are given. However, 
+        its correctness is not checked! either double-check it,
+        or raise an exception instead of attempting to determining 
+        cluster count for less than four pubs.
+        """
         # This method is implemented based on info available from the following link.
         # https://joernhees.de/blog/2015/08/26/scipy-hierarchical-clustering-and-dendrogram-tutorial/#Elbow-Method
-        last = Z[-10:, 2]
+        last = linkage_matrix[-10:, 2]
         last_rev = last[::-1]
         idxs = np.arange(1, len(last) + 1)
         variance = pd.DataFrame(last_rev, idxs)
 
+        # n is the number of times values are differenced. 
+        # If zero, the input is returned as-is.
+        n = 0
+
+        # This condition should be met when the size of
+        # linkage matrix is larger than two, or when clustering
+        # at least four publications. 
+        # Therefore, this condition will be met most of
+        # the time. Only when clustering less than three 
+        # publications it is not met, which results in
+        # setting `n=0` and not modifying `idxs`. 
+        if len(last) > 2:
+            n = 2
+            idxs = idxs[:-2] + 1
+
         # 2nd derivative of the distances
-        acceleration = np.diff(last, 2)  
+        acceleration = np.diff(last, n)  
         acceleration_rev = acceleration[::-1]
-        dist_growth_acceleration = pd.DataFrame(acceleration_rev, idxs[:-2] + 1)
+
+        dist_growth_acceleration = pd.DataFrame(acceleration_rev, idxs)
 
         auto_index = int(acceleration_rev[1:].argmax()) + 3
         manual_index = auto_index if cluster_count is None else cluster_count
+
+        if auto_index > len(last_rev):
+            auto_index = len(last_rev)
+        if manual_index > len(last_rev):
+            manual_index = len(last_rev)
+
         return \
             variance, dist_growth_acceleration, \
             auto_index, float(last_rev[auto_index - 1]), \
