@@ -41,12 +41,15 @@ class BaseTestCase(object):
 
         # Few notes:
         # - The last column is used to assert if only the contiguous 
-        #   numerical headers are considered as those containing citations.
-        #   Therefore, this column should not be read as containing citations.
+        #   numerical headers are considered as the columns containing citations.
+        #   Therefore, this column should not be read as a column that contains citations.
         # - Few variables are used in the following for column headers, the 
         #   main motivation was to make the table more visually intuitive.
         # - All the values in the table are semi-random; i.e., they are
         #   randomly generated so to follow the logic of each column.
+        # - The cluster labels assigned to each publication are determined
+        #   using hierarchical clustering with single linkage and Euclidean 
+        #   distance.
 
         tids = "ToolIDs"
         g = "GainScore"
