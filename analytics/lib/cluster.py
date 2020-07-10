@@ -18,6 +18,7 @@ from t_test_clustered_data import get_sorted_clusters, pre_post_columns, get_avg
 CLUSTERED_FILENAME_POSFIX = "_clustered"
 CLUSTER_NAME_COLUMN_LABEL = "cluster_label"
 CLUSTERING_STATS_REPORT_FILENAME = "clustering_stats.txt"
+GAIN_SCORE_COLUMN = "GainScore"
 
 
 def get_silhouette_score(data, cluster_count):
@@ -34,7 +35,7 @@ def get_silhouette_score(data, cluster_count):
     return cluster_labels, silhoutte_score
 
 
-def cluster(root, filename, cluster_count):
+def cluster(root, filename, cluster_count, cluster_source="citations"):
     repo_name = os.path.splitext(filename)[0]
     print(">>> Clustering repository: {0}".format(repo_name))
     input_df = pd.read_csv(os.path.join(root, filename), header=0, sep='\t')
@@ -42,7 +43,10 @@ def cluster(root, filename, cluster_count):
     # Because we would like to cluster only based on the pre and post
     # citation counts, then we drop all the other columns.
     column_headers, pre, post = pre_post_columns(input_df)
-    columns_to_drop = [x for x in column_headers if (x not in pre and x not in post)]
+    if cluster_source == "citations":
+        columns_to_drop = [x for x in column_headers if (x not in pre and x not in post)]
+    else:
+        columns_to_drop = [x for x in column_headers if x != GAIN_SCORE_COLUMN]
     df = input_df.drop(columns_to_drop, 1)
 
     # Perform hierarchical/agglomerative clustering and 
@@ -188,7 +192,7 @@ def plot(\
     col1.axvline(x=manual_cluster_count, color=manu_cut_color, linewidth=1.5, linestyle=manu_cut_line_style)
 
 
-def run(input_path, cluster_count):
+def run(input_path, cluster_count, cluster_source="citations"):
     fig, ax = set_plot_style()
     plot_row = 0
     col_counter = 0
@@ -216,7 +220,7 @@ def run(input_path, cluster_count):
                 plot(\
                     ax[plot_row], filename_without_extension, \
                     True if col_counter == 4 else False, \
-                    *cluster(root, filename, cluster_count))
+                    *cluster(root, filename, cluster_count, cluster_source=cluster_source))
 
                 plot_row += 1
 
@@ -253,9 +257,14 @@ if __name__ == "__main__":
         print("Missing input path.")
         exit()
 
-    if len(sys.argv) == 3:
+    if len(sys.argv) >= 3:
         cluster_count = int(sys.argv[2])
     else:
         cluster_count = None
 
-    run(sys.argv[1], cluster_count)
+    if len(sys.argv) >= 4:
+        cluster_source = sys.argv[3]
+    else:
+        cluster_source = "citations"
+
+    run(sys.argv[1], cluster_count, cluster_source)

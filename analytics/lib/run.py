@@ -32,7 +32,12 @@ if __name__ == "__main__":
     if len(sys.argv) >= 5:
         plot_density = sys.argv[4] == "True"
 
-    cluster.run(input_path, cluster_count)
+    if len(sys.argv) >= 6:
+        cluster_source = sys.argv[5]
+    else:
+        cluster_source = "citations"
+
+    cluster.run(input_path, cluster_count, cluster_source)
     plot_cluster_quartiles.run(input_path, plot_changes)
     t_test_clustered_data.run(input_path)
     citation_growth_histogram.run(input_path, plot_density)
