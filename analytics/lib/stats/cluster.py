@@ -31,6 +31,7 @@ class Cluster(BaseStatistics):
 
         for filename in input_files:
             clustered_publications = self._cluster(filename)
+            clustered_publications = self._sort_clusters(clustered_publications)
 
     def _cluster(self, filename):
         repo_name = Base.get_repo_name(filename)
@@ -58,7 +59,7 @@ class Cluster(BaseStatistics):
     def _get_cluster_count(self, linkage_matrix, cluster_count):
         """
         TODO: some tweaks has been made to compute cluster count
-        even when less than four publications are given. However, 
+        when less than four publications are given. However, 
         its correctness is not checked! either double-check it,
         or raise an exception instead of attempting to determining 
         cluster count for less than four pubs.
@@ -116,3 +117,21 @@ class Cluster(BaseStatistics):
             silhoutte_score = sklearn.metrics.silhouette_score(data, cluster_labels)
 
         return cluster_labels, silhoutte_score
+
+    def _sort_clusters(self, clustered_pubs):
+        """
+        Sort cluster labels based on the mean value of tools in each cluster.
+        For instance, a group of tools might be clustered as cluster `0` and 
+        another group as cluster `1`. If the mean of the second group is less
+        than the mean of the first group, then the following code will update 
+        cluster labels of the tools so that all clustered as cluster `0` are 
+        clustered as cluster `1`, and those clustered as `1` are clustered as 
+        cluster `0`.
+        """
+        mappings = {}
+        _, mean_cluster_num_mappings, sorted_keys = Base.get_sorted_clusters(clustered_pubs.groupby(CLUSTER_NAME_COLUMN_LABEL))
+        for i in range(0, len(sorted_keys)):
+            mappings[mean_cluster_num_mappings[sorted_keys[i]]] = i
+        clustered_pubs[CLUSTER_NAME_COLUMN_LABEL] = clustered_pubs[CLUSTER_NAME_COLUMN_LABEL].map(mappings)
+
+        return clustered_pubs
