@@ -3,7 +3,7 @@
 """
 
 from .base_statistics import BaseStatistics
-from ..base import Base, CLUSTER_NAME_COLUMN_LABEL
+from ..base import Base, CLUSTER_NAME_COLUMN_LABEL, CLUSTERED_FILENAME_POSFIX
 
 import numpy as np
 import os
@@ -32,6 +32,10 @@ class Cluster(BaseStatistics):
         for filename in input_files:
             clustered_publications = self._cluster(filename)
             clustered_publications = self._sort_clusters(clustered_publications)
+            clustered_filename = os.path.join(input_path, Base.get_repo_name(filename) + CLUSTERED_FILENAME_POSFIX + '.csv')
+            if os.path.isfile(clustered_filename):
+                os.remove(clustered_filename)
+            clustered_publications.to_csv(clustered_filename, sep='\t', encoding='utf-8', index=False)
 
     def _cluster(self, filename):
         repo_name = Base.get_repo_name(filename)
