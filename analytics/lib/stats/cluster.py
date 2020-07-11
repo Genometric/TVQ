@@ -19,20 +19,28 @@ from matplotlib.lines import Line2D
 class Cluster(BaseStatistics):
     
     def __init__(self):
+        self.input_path = None
         self.cluster_count = None
+        self.clustering_stats_filename = "clustering_stats.txt"
 
     def run(self, input_path, cluster_count=None):
         """
         Executes a flow of clustering publications
         in files available from the given input path.
         """
+        self.input_path = input_path
         self.cluster_count = cluster_count
-        input_files = Base.get_files(input_path, include_clustered_files=True)
 
+        # Creates a file for clustering stats,
+        # and initializes it with column headers.
+        self._write_cluster_stats()
+
+        input_files = Base.get_files(self.input_path, include_clustered_files=True)
         for filename in input_files:
-            clustered_publications = self._cluster(filename)
+            clustered_publications, stats = self._cluster(filename)
+            self._write_cluster_stats(stats)
             clustered_publications = self._sort_clusters(clustered_publications)
-            clustered_filename = os.path.join(input_path, Base.get_repo_name(filename) + CLUSTERED_FILENAME_POSFIX + '.csv')
+            clustered_filename = os.path.join(self.input_path, Base.get_repo_name(filename) + CLUSTERED_FILENAME_POSFIX + '.csv')
             if os.path.isfile(clustered_filename):
                 os.remove(clustered_filename)
             clustered_publications.to_csv(clustered_filename, sep='\t', encoding='utf-8', index=False)
@@ -58,7 +66,16 @@ class Cluster(BaseStatistics):
         # Add cluster information to original data.
         input_df[CLUSTER_NAME_COLUMN_LABEL] = cluster_labels
 
-        return input_df
+        formatted_stats =\
+                f"{repo_name}\t" \
+                f"{auto_cluster_count}\t" \
+                f"{auto_cut_distance}\t" \
+                f"{auto_silhouette_score}\t" \
+                f"{manual_cluster_count}\t" \
+                f"{manual_cut_distance}\t" \
+                f"{manual_silhouette_score}\n"
+
+        return input_df, formatted_stats
 
     def _get_cluster_count(self, linkage_matrix, cluster_count):
         """
@@ -139,3 +156,28 @@ class Cluster(BaseStatistics):
         clustered_pubs[CLUSTER_NAME_COLUMN_LABEL] = clustered_pubs[CLUSTER_NAME_COLUMN_LABEL].map(mappings)
 
         return clustered_pubs
+
+    def _write_cluster_stats(self, stats=None):
+        """
+        Writes clustering status to a file. 
+
+        :type   stats:  string
+        :param  stats:  Serialized clustering statistics to a single string.
+                        If not given, this method creates a statistics file
+                        and initialize it with column headers.
+                        If given, the stats are written to clustering stats file.
+        """
+        filename = os.path.join(self.input_path, self.clustering_stats_filename)
+        if stats:
+            with open(filename, "a") as f:
+                f.write(stats)
+        else:
+            with open(filename, "w") as f:
+                f.write(
+                    "Filename\t" \
+                    "Auto-determined Cluster Count\t" \
+                    "Auto-determined Dendrogram Cut Height\t" \
+                    "Auto-determined Cluster Silhouette Score\t" \
+                    "Manually-set Cluster Count\t" \
+                    "Manually-set Dendrogram Cut Height\t" \
+                    "Manually-set Cluster Silhouette Score\n")
