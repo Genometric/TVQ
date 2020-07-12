@@ -23,4 +23,6 @@ class TestCluster(BaseTestCase):
         Cluster().run(tmpdir)
 
         # Assert
-        assert listdir(tmpdir) == clustered_files * 2
+        # There should be one file for each repository, and
+        # one another file that contains the clustering stats.
+        assert len(listdir(tmpdir)) == clustered_files + 1
