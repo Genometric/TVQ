@@ -11,6 +11,9 @@ from numpy import average
 CLUSTERED_FILENAME_POSFIX = "_clustered"
 CLUSTER_NAME_COLUMN_LABEL = "cluster_label"
 
+SUM_PRE_CITATIONS_COLUMN_LABEL = "SumPreRawCitations"
+SUM_POST_CITATIONS_COLUMN_LABEL = "SumPostRawCitations"
+
 
 class Base(object):
     """
