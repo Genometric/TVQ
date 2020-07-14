@@ -38,7 +38,7 @@ class TestCluster(BaseTestCase):
         files = Base.get_files(tmpdir, include_clustered_files=True)
 
         # Assert
-        # This assertion is anti-pattern; must be re-implemented in a much better way.
+        # TODO: This assertion is anti-pattern; must be re-implemented in a much better way.
         for file in files:
             publications = Base.get_publications(file)
             
