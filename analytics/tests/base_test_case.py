@@ -125,7 +125,6 @@ class BaseTestCase(object):
         tmpdir, filenames = self._write_tmp_files(test_pubs, tmpdir_factory)
         return tmpdir, filenames
 
-
     @pytest.fixture(scope="session")
     def tmp_clustered_files(self, tmpdir_factory):
         """
