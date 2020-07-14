@@ -105,10 +105,10 @@
     <Content Include="README.md">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="test-data\repo_a.csv">
+    <Content Include="test_data\repo_a.csv">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="test-data\repo_a_clustered.csv">
+    <Content Include="test_data\repo_a_clustered.csv">
       <SubType>Code</SubType>
     </Content>
     <Content Include="tox.ini">
@@ -118,7 +118,7 @@
   <ItemGroup>
     <Folder Include="lib\" />
     <Folder Include="lib\stats\" />
-    <Folder Include="test-data\" />
+    <Folder Include="test_data\" />
     <Folder Include="tests\" />
     <Folder Include="tests\stats\" />
   </ItemGroup>

@@ -154,14 +154,14 @@ class BaseTestCase(object):
     @pytest.fixture(scope="session")
     def clustered_files(self, tmpdir_factory):
         """
-        Gets persisted test files in the `test-data` path.
+        Gets persisted test files in the `test_data` path.
         """
 
         # The goal is to get the absolute path to the 
         # directory that contains test data. So first
         # it gets the absolute path to the project root 
-        # and then appends `test-data` to it. 
-        input_path = os.path.join(os.path.abspath(os.curdir), "test-data")
+        # and then appends `test_data` to it. 
+        input_path = os.path.join(os.path.abspath(os.getcwd()), "analytics", "test_data", "")
         
         filenames = []
         # TODO: replace this with the method from base that returns clustered files.
