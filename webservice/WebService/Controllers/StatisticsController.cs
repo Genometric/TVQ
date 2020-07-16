@@ -133,13 +133,13 @@ namespace Genometric.TVQ.WebService.Controllers
                 case ReportTypes.NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository:
                     return await NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository();
                 case ReportTypes.MostBenefited:
-                    return Ok(await MostBenefited().ConfigureAwait(false));
+                    return MostBenefited();
             }
 
             return BadRequest();
         }
 
-        private async Task<IEnumerable<string>> MostBenefited()
+        private FileStreamResult MostBenefited()
         {
             var rtv = new List<string>
             {
@@ -204,7 +204,15 @@ namespace Genometric.TVQ.WebService.Controllers
                 }
             }
 
-            return rtv;
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            foreach (var d in rtv)
+                writer.WriteLine(d);
+
+            var contentType = "APPLICATION/octet-stream";
+            var fileName = "most_benefited.csv";
+            stream.Seek(0, SeekOrigin.Begin);
+            return File(stream, contentType, fileName);
         }
 
         private async Task<IActionResult> NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository(int windowLength = 20)
