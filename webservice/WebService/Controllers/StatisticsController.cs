@@ -46,6 +46,7 @@ namespace Genometric.TVQ.WebService.Controllers
             DownloadFeatures,
             DownloadFeaturesByPubs,
             NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository,
+            MostBenefited,
             Overview
         };
 
@@ -131,9 +132,79 @@ namespace Genometric.TVQ.WebService.Controllers
                     return DownloadFeaturesByPubs();
                 case ReportTypes.NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository:
                     return await NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository();
+                case ReportTypes.MostBenefited:
+                    return Ok(await MostBenefited().ConfigureAwait(false));
             }
 
             return BadRequest();
+        }
+
+        private async Task<IEnumerable<string>> MostBenefited()
+        {
+            var rtv = new List<string>
+            {
+                "Repo\tToolID\tPubYear\tDateAddedToRepo\tSumPre\tSumPost\tChange"
+            };
+
+            var tools = _context.Tools.Include(x => x.RepoAssociations)
+                                      .ThenInclude(x => x.Repository)
+                                      .Include(x => x.PublicationAssociations)
+                                      .ThenInclude(x => x.Publication)
+                                      .ThenInclude(x => x.Citations)
+                                      .ToList();
+
+            foreach (var tool in tools)
+            {
+                if (tool.RepoAssociations.Count > 1)
+                    continue;
+
+                var dateAddToRepo = tool.RepoAssociations.First().DateAddedToRepository.Value.Year;
+
+                int pubYear = int.MaxValue;
+                Publication pub = null;
+                foreach (var pubAsso in tool.PublicationAssociations)
+                {
+                    var tYear = pubAsso.Publication.Year ?? int.MaxValue;
+                    if (tYear < pubYear)
+                    {
+                        pubYear = Math.Min(pubYear, tYear);
+                        pub = pubAsso.Publication;
+                    }
+                }
+
+                if (pubYear == 0)
+                    continue;
+
+                if (dateAddToRepo - pubYear < 3)
+                    continue;
+
+                double sumPreC = 0.0, sumPstC = 0.0;
+
+                foreach (var citation in pub.Citations)
+                {
+                    if (citation.Date.Year < dateAddToRepo)
+                        sumPreC += citation.Count;
+                    else
+                        sumPstC += citation.Count;
+                }
+
+                if (sumPstC == 0)
+                    continue;
+
+                if (sumPstC >= sumPreC * 6)
+                {
+                    rtv.Add(
+                        $"{tool.RepoAssociations.First().Repository.Name}\t" +
+                        $"{tool.ID}\t" +
+                        $"{pubYear}\t" +
+                        $"{dateAddToRepo}\t" +
+                        $"{sumPreC}\t" +
+                        $"{sumPstC}\t" +
+                        $"{((sumPstC - sumPreC) / sumPreC) * 100.0}");
+                }
+            }
+
+            return rtv;
         }
 
         private async Task<IActionResult> NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository(int windowLength = 20)
