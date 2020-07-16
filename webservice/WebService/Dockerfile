@@ -15,7 +15,7 @@ RUN dotnet restore TVQ.sln
 # copy everything else and build app
 COPY webservice/WebService/. ./webservice/WebService/
 WORKDIR /app/webservice/WebService
-RUN dotnet publish TVQ.Service.csproj -c Release -o out
+RUN dotnet publish WebService.csproj -c Release -o out
 
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.0-alpine AS runtime
