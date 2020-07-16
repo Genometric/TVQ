@@ -22,6 +22,6 @@ services:
     image: ${DOCKER_REGISTRY-}tvq
     build:
       context: .
-      dockerfile: webapp/TVQ/Dockerfile
+      dockerfile: webservice/WebService/Dockerfile
     depends_on:
       - sql.data
