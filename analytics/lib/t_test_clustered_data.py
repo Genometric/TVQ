@@ -76,7 +76,7 @@ def one_sample_ttest(x, population_mean):
 
 def independent_ttest(x, y):
     t_statistic, pvalue = ttest_ind(x, y, equal_var=False)
-    t_statistic = abs(t_statistic)
+    #t_statistic = abs(t_statistic)
     d, d_interpretation = cohen_d(x, y)
     return t_statistic, pvalue, d, d_interpretation
 
