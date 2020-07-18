@@ -134,6 +134,8 @@ namespace Genometric.TVQ.WebService.Controllers
                     return await NumberOfToolsPublishedNYearsBeforeAfterAddedToRepository();
                 case ReportTypes.MostBenefited:
                     return MostBenefited();
+                default:
+                    break;
             }
 
             return BadRequest();
@@ -390,10 +392,10 @@ namespace Genometric.TVQ.WebService.Controllers
                 var changes = _analysisService.GetPrePostCitationCountNormalizedYear(repository, new HashSet<int>(tools));
 
                 var filename = tempPath + Utilities.SafeFilename(category.Name + ".csv");
-                using (var writer = new StreamWriter(filename))
-                    foreach (var tool in changes)
-                        foreach (var change in tool.Value)
-                            writer.WriteLine($"{category.Name}\t{tool.Key}\t{change.DaysOffset}\t{change.CitationCount}");
+                using var writer = new StreamWriter(filename);
+                foreach (var tool in changes)
+                    foreach (var change in tool.Value)
+                        writer.WriteLine($"{category.Name}\t{tool.Key}\t{change.DaysOffset}\t{change.CitationCount}");
             }
 
             var zipFileTempPath = Path.GetFullPath(Path.GetTempPath()) + Utilities.GetRandomString(10) + Path.DirectorySeparatorChar;

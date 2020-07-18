@@ -16,7 +16,7 @@ namespace Genometric.TVQ.WebService.Infrastructure
         public static async Task SeedAsync(
             TVQContext context,
             IWebHostEnvironment env,
-            IOptions<TVQSettings> settings,
+            IOptions<Settings> settings,
             ILogger<TVQContextSeed> logger)
         {
             var policy = CreatePolicy(logger, nameof(TVQContextSeed));

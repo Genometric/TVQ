@@ -29,7 +29,7 @@ namespace Genometric.TVQ.WebService
                 host.MigrateDbContext<TVQContext>((context, services) =>
                 {
                     var env = services.GetService<IWebHostEnvironment>();
-                    var settings = services.GetService<IOptions<TVQSettings>>();
+                    var settings = services.GetService<IOptions<Settings>>();
                     var logger = services.GetService<ILogger<TVQContextSeed>>();
 
                     TVQContextSeed.SeedAsync(context, env, settings, logger).Wait();

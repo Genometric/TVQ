@@ -1,6 +1,6 @@
 ﻿namespace Genometric.TVQ.WebService
 {
-    public class TVQSettings
+    public class Settings
     {
         public bool UseCustomizationData { get; set; }
     }
