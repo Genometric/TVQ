@@ -2,6 +2,7 @@
 TODO: Add doc string.
 """
 
+import argparse
 import os
 import sys
 import cluster
@@ -13,7 +14,27 @@ import plot_pubs_in_clusters
 import plot_tool_pub
 import plot_citations_distribution
 
+
+def dir_path(path):
+    if os.path.isdir(path):
+        return path
+    else:
+        raise argparse.ArgumentTypeError(f"Invalid path: {path}")
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="A command-line interface to the scripts implemented " + 
+                    "for analyzing the TVQ-generated citation data.")
+
+    subparsers = parser.add_subparsers(help="Commands")
+
+    exe_all = subparsers.add_parser("exe_all", help="Executes all the scripts in a predefined order.")
+    exe_all.add_argument("input", type=dir_path, help="Path to directory containing input data.")
+
+    args = parser.parse_args()
+
+
+
     if len(sys.argv) < 2:
         print("Missing input path.")
         exit()
