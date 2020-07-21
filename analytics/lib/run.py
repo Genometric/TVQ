@@ -41,27 +41,25 @@ if __name__ == "__main__":
                          "If not provided, the cluster count is determined " +
                          "automatically using the Elbow method.")
 
+    exe_all.add_argument("-s", "--source", type=str, default="citations",
+                         help="Sets the cluster source.")
+
+    exe_all.add_argument("-g", "--plot_changes", action="store_true", 
+                         help="If set, plots changes on clustered citation counts. " +
+                         "By default the changes are not plotted.")
+
+    exe_all.add_argument("-d", "--plot_density", action="store_true", 
+                         help="If set, plots probability instead of absolute values. Default is False.")
+
+
     args = parser.parse_args()
 
     if args.command == EXE_ALL_CMD:
         input_path = args.input
-        plot_changes = False
-        if len(sys.argv) >= 3:
-            plot_changes = sys.argv[2] == "True"
-
-        if len(sys.argv) >= 4:
-            cluster_count = int(sys.argv[3])
-        else:
-            cluster_count = None
-
-        plot_density = False
-        if len(sys.argv) >= 5:
-            plot_density = sys.argv[4] == "True"
-
-        if len(sys.argv) >= 6:
-            cluster_source = sys.argv[5]
-        else:
-            cluster_source = "citations"
+        plot_changes = args.plot_changes
+        cluster_count = args.cluster_count
+        plot_density = args.plot_density
+        cluster_source = args.source
 
         cluster.run(input_path, cluster_count, cluster_source)
         plot_cluster_quartiles.run(input_path, plot_changes)
