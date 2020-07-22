@@ -63,9 +63,15 @@ if __name__ == "__main__":
 
     subparsers = parser.add_subparsers(help="Commands", dest="command")
 
-    EXE_ALL_CMD = "exe_all"
+    EXE_ALL_CMD = "exe-all"
     CLUSTER_CMD = "cluster"
-    PLT_CLS_CMD = "plot_cluster"
+    PLT_CLS_CMD = "plot-cluster"
+    TTEST_CMD = "t-test"
+    G_HIST_CMD = "growth-hist"
+    GAIN_SC_CMD = "gain-score"
+    PUBS_IN_C_CMD = "pubs-in-clusters"
+    TOOL_PUB_CMD = "tool-pub"
+    C_DIST_CMD = "citation-dist"
 
     exe_all = subparsers.add_parser(EXE_ALL_CMD, help="Executes all the scripts in a predefined order.")
     exe_all = add_input_arg(exe_all)
@@ -82,6 +88,27 @@ if __name__ == "__main__":
     plot_cluster_parser = subparsers.add_parser(PLT_CLS_CMD, help="Plot clusters and citation counts in quartiles.")
     plot_cluster_parser = add_input_arg(plot_cluster_parser)
     plot_cluster_parser = add_plot_changes(plot_cluster_parser)
+
+    ttest_parser = subparsers.add_parser(TTEST_CMD, help="Performs t-test on the citation count of publications.")
+    ttest_parser = add_input_arg(plot_cluster_parser)
+
+    growth_histogram_parser = subparsers.add_parser(G_HIST_CMD, help="Plots a histogram of the citation count growth.")
+    growth_histogram_parser = add_input_arg(growth_histogram_parser)
+    growth_histogram_parser = add_plot_density(growth_histogram_parser)
+
+    gain_score_parser = subparsers.add_parser(GAIN_SC_CMD, help="Plots gain score.")
+    gain_score_parser = add_input_arg(gain_score_parser)
+    gain_score_parser = add_plot_density(gain_score_parser)
+
+    pubs_in_clusters_parser = subparsers.add_parser(PUBS_IN_C_CMD, help="Plots publications in clusters.")
+    pubs_in_clusters_parser = add_input_arg(pubs_in_clusters_parser)
+
+    tool_pub_parser = subparsers.add_parser(TOOL_PUB_CMD, help="Plots tools in publications.")
+    tool_pub_parser = add_input_arg(tool_pub_parser)
+
+    plot_citation_dist_parser = subparsers.add_parser(C_DIST_CMD, help="Plots citations distribution.")
+    plot_citation_dist_parser = add_input_arg(plot_citation_dist_parser)
+    plot_citation_dist_parser = add_plot_density(plot_citation_dist_parser)
 
     args = parser.parse_args()
 
