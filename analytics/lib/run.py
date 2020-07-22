@@ -65,6 +65,7 @@ if __name__ == "__main__":
 
     EXE_ALL_CMD = "exe_all"
     CLUSTER_CMD = "cluster"
+    PLT_CLS_CMD = "plot_cluster"
 
     exe_all = subparsers.add_parser(EXE_ALL_CMD, help="Executes all the scripts in a predefined order.")
     exe_all = add_input_arg(exe_all)
@@ -77,6 +78,10 @@ if __name__ == "__main__":
     cluster_parser = add_input_arg(cluster_parser)
     cluster_parser = add_cluster_count_arg(cluster_parser)
     cluster_parser = add_cluster_source(cluster_parser)
+
+    plot_cluster_parser = subparsers.add_parser(PLT_CLS_CMD, help="Plot clusters and citation counts in quartiles.")
+    plot_cluster_parser = add_input_arg(plot_cluster_parser)
+    plot_cluster_parser = add_plot_changes(plot_cluster_parser)
 
     args = parser.parse_args()
 
