@@ -127,3 +127,41 @@ if __name__ == "__main__":
         plot_pubs_in_clusters.run(input_path)
         plot_tool_pub.run(input_path)
         plot_citations_distribution.run(input_path, plot_density)
+
+    elif args.command == CLUSTER_CMD:
+        input_path = args.input
+        cluster_count = args.cluster_count
+        cluster_source = args.source
+        cluster.run(input_path, cluster_count, cluster_source)
+
+    elif args.command == PLT_CLS_CMD:
+        input_path = args.input
+        plot_changes = args.plot_changes
+        plot_cluster_quartiles.run(input_path, plot_changes)
+
+    elif args.command == TTEST_CMD:
+        input_path = args.input
+        t_test_clustered_data.run(input_path)
+
+    elif args.command == G_HIST_CMD:
+        input_path = args.input
+        plot_density = args.plot_density
+        citation_growth_histogram.run(input_path, plot_density)
+
+    elif args.command == GAIN_SC_CMD:
+        input_path = args.input
+        plot_density = args.plot_density
+        plot_gain_scores.run(input_path, plot_density)
+
+    elif args.command == PUBS_IN_C_CMD:
+        input_path = args.input
+        plot_pubs_in_clusters.run(input_path)
+
+    elif args.command == TOOL_PUB_CMD:
+        input_path = args.input
+        plot_tool_pub.run(input_path)
+
+    elif args.command == C_DIST_CMD:
+        input_path = args.input
+        plot_density = args.plot_density
+        plot_citations_distribution.run(input_path, plot_density)
