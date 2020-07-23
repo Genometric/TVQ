@@ -130,16 +130,3 @@ def run(input_path, plot_density):
         os.remove(image_file)
     plt.savefig(image_file, bbox_inches='tight')
     plt.close()
-
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Missing input path.")
-        exit()
-
-    plot_density = False
-    if len(sys.argv) >= 3:
-        plot_density = sys.argv[2] == "True"
-
-    run(sys.argv[1], plot_density)
-

@@ -109,11 +109,3 @@ def autolabel(ax, rects):
                     xytext=(0, 3),  # 3 points vertical offset
                     textcoords="offset points",
                     ha='center', va='bottom')
-
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Missing input path.")
-        exit()
-
-    run(sys.argv[1])

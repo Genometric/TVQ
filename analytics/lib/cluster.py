@@ -250,21 +250,3 @@ def run(input_path, cluster_count, cluster_source="citations"):
             for k in clusters.groups:
                 avg_pre, avg_post = get_avg_pre_post(clusters.get_group(k))
                 f.write(f"{get_repo_name(fName)}\t{k}\t{avg_pre}\t{avg_post}\n")
-    
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Missing input path.")
-        exit()
-
-    if len(sys.argv) >= 3:
-        cluster_count = int(sys.argv[2])
-    else:
-        cluster_count = None
-
-    if len(sys.argv) >= 4:
-        cluster_source = sys.argv[3]
-    else:
-        cluster_source = "citations"
-
-    run(sys.argv[1], cluster_count, cluster_source)

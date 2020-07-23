@@ -261,11 +261,3 @@ def run(input_path):
     filenames, repositories = get_clustered_repositories(input_path)
     plot(input_path, filenames, repositories)
     plot_clustered(input_path, filenames, repositories)
-
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Missing input path.")
-        exit()        
-
-    run(sys.argv[1])

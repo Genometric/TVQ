@@ -463,11 +463,3 @@ def run(input_path):
     for i in range(0, len(filenames)-1):
         for j in range(i+1, len(filenames)):
             ttest_corresponding_clusters(root, filenames[i], filenames[j], tcc_filename)
-
-
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Missing input path.")
-        exit()
-
-    run(sys.argv[1])
