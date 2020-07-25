@@ -39,6 +39,12 @@
     <Compile Include="lib\line_plot.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="lib\plots\base_plot.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="lib\plots\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="lib\plotting.py" />
     <Compile Include="lib\plot_citations_distribution.py">
       <SubType>Code</SubType>
@@ -117,6 +123,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="lib\" />
+    <Folder Include="lib\plots\" />
     <Folder Include="lib\stats\" />
     <Folder Include="test_data\" />
     <Folder Include="tests\" />
