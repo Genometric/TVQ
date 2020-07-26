@@ -20,7 +20,7 @@ class BasePlot(object):
     def __init__(self):
         pass
 
-    def set_plot_style(nrows, ncols, width=None, height=None, wspace=0.15, hspace=0.35, dpi=300, sharex=False, width_ratios=[2, 1]):
+    def set_plot_style(self, nrows, ncols, width=None, height=None, wspace=0.15, hspace=0.35, dpi=300, sharex=False, width_ratios=[2, 1]):
         sns.set()
         sns.set_context("paper")
         sns.set_style("darkgrid")

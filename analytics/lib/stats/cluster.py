@@ -65,7 +65,7 @@ class Cluster(BaseStatistics, BasePlot):
         # The `ward` linkage minimizes the variance of the clusters being merged.
         self.linkage_matrix = shc.linkage(citations, method='ward')
 
-        self._get_cluster_count(self.linkage_matrix, self.cluster_count)
+        self._get_cluster_count(self.cluster_count)
 
         _, self.auto_silhouette_score = self._get_silhouette_score(citations, self.auto_cluster_count)
         cluster_labels, self.manual_silhouette_score = self._get_silhouette_score(citations, self.manual_cluster_count)
@@ -170,7 +170,7 @@ class Cluster(BaseStatistics, BasePlot):
                     f"{repo_name}\t" \
                     f"{self.auto_cluster_count}\t" \
                     f"{self.auto_cut_distance}\t" \
-                    f"{auto_silhouette_score}\t" \
+                    f"{self.auto_silhouette_score}\t" \
                     f"{self.manual_cluster_count}\t" \
                     f"{self.manual_cut_distance}\t" \
                     f"{self.manual_silhouette_score}\n")
@@ -209,7 +209,7 @@ class Cluster(BaseStatistics, BasePlot):
 
         col0.text(\
             0.82, 0.1, \
-            "Silhouette Score={:.4f}".format(manual_silhouette_score), \
+            "Silhouette Score={:.4f}".format(self.manual_silhouette_score), \
             horizontalalignment='center', \
             verticalalignment='center', \
             transform=col0.transAxes)
