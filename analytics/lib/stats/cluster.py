@@ -46,7 +46,7 @@ class Cluster(BaseStatistics, BasePlot):
             repo_name = Base.get_repo_name(filename)
             self._cluster(filename)
             self._write_cluster_stats(repo_name)
-            self.clustered_publications = self._sort_clusters(self.clustered_publications)
+            self._sort_clusters()
             clustered_repo_filename = os.path.join(self.input_path, repo_name + CLUSTERED_FILENAME_POSFIX + '.csv')
             if os.path.isfile(clustered_repo_filename):
                 os.remove(clustered_repo_filename)
@@ -135,7 +135,7 @@ class Cluster(BaseStatistics, BasePlot):
 
         return cluster_labels, silhoutte_score
 
-    def _sort_clusters(self, clustered_pubs):
+    def _sort_clusters(self):
         """
         Sort cluster labels based on the mean value of tools in each cluster.
         For instance, a group of tools might be clustered as cluster `0` and 
@@ -146,12 +146,10 @@ class Cluster(BaseStatistics, BasePlot):
         cluster `0`.
         """
         mappings = {}
-        _, mean_cluster_num_mappings, sorted_keys = Base.get_sorted_clusters(clustered_pubs.groupby(CLUSTER_NAME_COLUMN_LABEL))
+        _, mean_cluster_num_mappings, sorted_keys = Base.get_sorted_clusters(self.clustered_publications.groupby(CLUSTER_NAME_COLUMN_LABEL))
         for i in range(0, len(sorted_keys)):
             mappings[mean_cluster_num_mappings[sorted_keys[i]]] = i
-        clustered_pubs[CLUSTER_NAME_COLUMN_LABEL] = clustered_pubs[CLUSTER_NAME_COLUMN_LABEL].map(mappings)
-
-        return clustered_pubs
+        self.clustered_publications[CLUSTER_NAME_COLUMN_LABEL] = self.clustered_publications[CLUSTER_NAME_COLUMN_LABEL].map(mappings)
 
     def _write_cluster_stats(self, repo_name=None):
         """
