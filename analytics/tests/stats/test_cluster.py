@@ -51,3 +51,35 @@ class TestCluster(BaseTestCase):
                             checked = True
             
             assert checked == True
+
+    def test_cluster_stats_file(self, tmp_clustered_files):
+        """
+        This test assert if the file containing the statistics of
+        the clustering operation is created and contains expected 
+        content.
+
+        The test does not assert if the content is accurate (e.g., 
+        the value of silhouette score is correct), rather it checks
+        if the expected number of lines and columns exist in the file.
+        """
+        # Arrange
+        tmpdir = tmp_clustered_files[0]
+        repos = tmp_clustered_files[1]
+        test_pubs = BaseTestCase.get_test_publications()
+        cluster = Cluster()
+        stats_filename = os.path.join(tmpdir, cluster.clustering_stats_filename)
+
+        # Act
+        cluster.run(tmpdir)
+
+        # Assert
+        with open(stats_filename) as f:
+            lines = f.readlines()
+            
+            # One header line plus one line per repository.
+            assert len(lines) == 1 + len(repos)
+
+            # Check if each lines contains the 7 expected columns.
+            for line in lines:
+                columns = line.split("\t")
+                assert len(columns) == 7
