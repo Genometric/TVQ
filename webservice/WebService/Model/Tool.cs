@@ -5,13 +5,29 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 
 namespace Genometric.TVQ.WebService.Model
 {
     [JsonConverter(typeof(BaseJsonConverter))]
     public class Tool : BaseModel, IEquatable<Tool>
     {
-        public string Name { set; get; }
+        private string _name;
+        public string Name
+        {
+            get { return _name; }
+            set
+            {
+                if (value == null)
+                {
+                    _name = null;
+                }
+                else
+                {
+                    _name = RemoveNamePrePostFix(value);
+                }
+            }
+        }
 
         public string Homepage { set; get; }
 
@@ -64,6 +80,32 @@ namespace Genometric.TVQ.WebService.Model
         public override string ToString()
         {
             return ID + "\t" + Name;
+        }
+
+        /// <summary>
+        /// Removes some common pre- and post-fixes from tool name.
+        /// </summary>
+        /// <param name="name">Tool name.</param>
+        /// <returns>Tool name with trimmed pre- and postfixes.</returns>
+        public static string RemoveNamePrePostFix(string name)
+        {
+            Contract.Requires(name != null);
+
+            name = name.Trim();
+
+            /// The following code removes some common prefixes, 
+            /// in order to better match tools between repositories using their names.
+            name = Utilities.RemovePrefix(name, "bioconductor-");
+            name = Utilities.RemovePrefix(name, "r-");
+            name = Utilities.RemovePrefix(name, "perl-");
+            name = Utilities.RemovePrefix(name, "ucsc-");
+
+            /// The following code removes version postfix.
+            var index = name.LastIndexOf('\\');
+            if (index != -1)
+                name = name.Remove(index, name.Length);
+
+            return name;
         }
     }
 }

@@ -62,14 +62,16 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
                 var columns = line.Split('\t');
                 if (!_addedDates.ContainsKey(columns[0]))
                 {
+                    var toolName = Tool.RemoveNamePrePostFix(columns[1]);
+
                     DateTimeOffset.TryParseExact(
-                        columns[1].Trim(),
+                        toolName,
                         "ddd MMM d HH:mm:ss yyyy K",
                         CultureInfo.InvariantCulture,
                         DateTimeStyles.None,
                         out DateTimeOffset dateTimeOffset);
 
-                    _addedDates.Add(columns[0].Trim(), dateTimeOffset.DateTime);
+                    _addedDates.Add(toolName, dateTimeOffset.DateTime);
                 }
             }
         }

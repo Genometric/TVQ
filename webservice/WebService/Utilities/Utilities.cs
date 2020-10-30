@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 
@@ -30,6 +31,17 @@ namespace Genometric.TVQ.WebService.Model
             invalidFileNameChars.Add(' ');
 
             return new string(filename.Select(ch => invalidFileNameChars.Contains(ch) ? '_' : ch).ToArray());
+        }
+
+        public static string RemovePrefix(string input, string prefix)
+        {
+            Contract.Requires(input != null);
+            Contract.Requires(prefix != null);
+
+            if (input.StartsWith(prefix, StringComparison.InvariantCultureIgnoreCase))
+                return input.Remove(0, prefix.Length);
+            else
+                return input;
         }
     }
 }
