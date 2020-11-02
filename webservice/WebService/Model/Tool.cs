@@ -103,7 +103,7 @@ namespace Genometric.TVQ.WebService.Model
             /// The following code removes version postfix.
             var index = name.LastIndexOf('\\');
             if (index != -1)
-                name = name.Remove(index, name.Length);
+                name = name.Remove(index);
 
             return name;
         }
