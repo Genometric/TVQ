@@ -60,12 +60,13 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
             while ((line = reader.ReadLine()) != null)
             {
                 var columns = line.Split('\t');
-                if (!_addedDates.ContainsKey(columns[0]))
-                {
-                    var toolName = Tool.RemoveNamePrePostFix(columns[1]);
+                var toolName = Tool.RemoveNamePrePostFix(columns[0]);
+                var timestamp = columns[1].Trim();
 
+                if (!_addedDates.ContainsKey(toolName))
+                {
                     DateTimeOffset.TryParseExact(
-                        toolName,
+                        timestamp,
                         "ddd MMM d HH:mm:ss yyyy K",
                         CultureInfo.InvariantCulture,
                         DateTimeStyles.None,
