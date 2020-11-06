@@ -10,17 +10,17 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - ${APPDATA}/TVQ/Database/mssql:/var/opt/mssql
+      - ./Deployment/Database/mssql:/var/opt/mssql
 
   tvq:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:443;http://+:80
-      - ASPNETCORE_HTTPS_PORT=44376
+      - ASPNETCORE_URLS=http://+:80
+      #- ASPNETCORE_HTTPS_PORT=44376
       - SCOPUS_API_KEY=${SCOPUS_API_KEY}
     ports:
-      - "61936:80"
-      - "44376:443"
+      - 8000:80
+#      - "44376:443"
     volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      - ./Deployment/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ./Deployment/ASP.NET/Https:/root/.aspnet/https:ro
