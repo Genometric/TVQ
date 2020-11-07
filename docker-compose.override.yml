@@ -1,4 +1,4 @@
-version: '3.4'
+version: '3.8'
 
 services:
 
@@ -19,7 +19,7 @@ services:
       #- ASPNETCORE_HTTPS_PORT=44376
       - SCOPUS_API_KEY=${SCOPUS_API_KEY}
     ports:
-      - 8000:80
+      - "8000:80"
 #      - "44376:443"
     volumes:
       - ./Deployment/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro

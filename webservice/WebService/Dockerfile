@@ -27,4 +27,11 @@ ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 WORKDIR /app
 COPY --from=build /app/webservice/WebService/out ./
-ENTRYPOINT ["dotnet", "Genometric.TVQ.WebService.dll"]
+COPY --from=build /app/webservice/WebService/entrypoint.sh ./
+
+EXPOSE 80/tcp
+
+RUN chmod +x ./entrypoint.sh
+CMD /bin/bash ./entrypoint.sh
+
+# ENTRYPOINT ["dotnet", "Genometric.TVQ.WebService.dll"]
