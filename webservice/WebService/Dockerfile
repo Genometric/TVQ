@@ -1,7 +1,7 @@
 # This docker file first creates a container to build the
 # project, and then copies the built data to a runtime 
 # container (which does not have .NET SDK, hence creating
-a smaller image.) 
+# a smaller image.) 
 
 # -----------------------
 # | Building the Webapp |

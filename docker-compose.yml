@@ -18,7 +18,7 @@ services:
       # on the host.
 
   tvq:
-    container_name: tvq_container
+    container_name: tvq_service
     image: ${DOCKER_REGISTRY-}tvq
     build:
       context: .
