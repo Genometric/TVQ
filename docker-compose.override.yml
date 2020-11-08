@@ -18,7 +18,7 @@ services:
       - ASPNETCORE_URLS=http://+:80
       #- ASPNETCORE_HTTPS_PORT=44376
       - SCOPUS_API_KEY=${SCOPUS_API_KEY}
-    entrypoint: ["./wait-for-it.sh", "sql.data:1433", "-t", "120", "--", "dotnet", "Genometric.TVQ.WebService.dll"]
+    entrypoint: ["./wait_for_it.sh", "sql.data:1433", "-t", "120", "--", "dotnet", "Genometric.TVQ.WebService.dll"]
     ports:
       - "8000:80"
 #      - "44376:443"

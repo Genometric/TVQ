@@ -33,11 +33,11 @@ RUN apk add bash
 WORKDIR /app
 COPY --from=build /app/webservice/WebService/out ./
 COPY --from=build /app/webservice/WebService/entrypoint.sh ./
-COPY --from=build /app/webservice/WebService/wait-for-it.sh ./
+COPY --from=build /app/webservice/WebService/wait_for_it.sh ./
 
 EXPOSE 80/tcp
 
-RUN chmod +x ./wait-for-it.sh
+RUN chmod +x ./wait_for_it.sh
 RUN chmod +x ./entrypoint.sh
 CMD /bin/sh ./entrypoint.sh
 
