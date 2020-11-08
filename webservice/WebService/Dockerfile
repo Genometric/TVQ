@@ -2,7 +2,7 @@
 # project, and then copies the built data to a runtime 
 # container (which does not have .NET SDK). 
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine AS build
 WORKDIR /app
 
 # copy csproj and restore as distinct layers
@@ -18,20 +18,27 @@ WORKDIR /app/webservice/WebService
 RUN dotnet publish WebService.csproj -c Release -o out
 
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.0-alpine AS runtime
+# FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine AS runtime
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine AS runtime
 
 # The following commands are required because of breaking 
 # changes introduced in .NET Core 3 and SQL docker container. 
 RUN apk add icu-libs
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
+RUN apk update
+RUN apk upgrade
+RUN apk add bash
+
 WORKDIR /app
 COPY --from=build /app/webservice/WebService/out ./
 COPY --from=build /app/webservice/WebService/entrypoint.sh ./
+COPY --from=build /app/webservice/WebService/wait-for-it.sh ./
 
 EXPOSE 80/tcp
 
+RUN chmod +x ./wait-for-it.sh
 RUN chmod +x ./entrypoint.sh
-CMD /bin/bash ./entrypoint.sh
+CMD /bin/sh ./entrypoint.sh
 
 # ENTRYPOINT ["dotnet", "Genometric.TVQ.WebService.dll"]
