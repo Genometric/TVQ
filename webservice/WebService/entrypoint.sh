@@ -1,14 +1,13 @@
 #!/bin/sh
 
-# set -e
+# Expected args: 
+# 1. Database endpoint in the following format: {Service Name}:{Port Number}
+# 2. Maximum wait time for the database to be ready.
 
-# run_cmd="dotnet run --server.urls http://*:80"
+# Exit immediately if a command exits with a non-zero status.
+set -e
 
-# until dotnet ef database update; do
-# >&2 echo "SQL Server is starting up"
-# sleep 1
-# done
+DB_ENDPOINT="$1"
+DB_WAIT_TIME="$2"
 
-# >&2 echo "SQL Server is up - executing command"
-
-# exec $run_cmd
+./wait_for_it.sh $DB_ENDPOINT -t $DB_WAIT_TIME -- dotnet Genometric.TVQ.WebService.dll
