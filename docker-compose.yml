@@ -1,4 +1,4 @@
-version: '3.4'
+version: '3.8'
 
 services:
 
@@ -18,7 +18,7 @@ services:
       # on the host.
 
   tvq:
-    container_name: tvq_container
+    container_name: tvq_service
     image: ${DOCKER_REGISTRY-}tvq
     build:
       context: .

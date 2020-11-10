@@ -312,3 +312,5 @@ venv
 *.tox
 *.egg-info
 *.mypy_*
+
+Deployment/*
