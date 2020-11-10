@@ -36,12 +36,12 @@ ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 # Bash is needed for the wait_for_it script.
 RUN apk update
 RUN apk upgrade
-RUN apk add bash
+RUN apk add --no-cache bash
 
 WORKDIR /app
 COPY --from=build /app/webservice/WebService/out ./
 COPY --from=build /app/webservice/WebService/entrypoint.sh ./
 COPY --from=build /app/webservice/WebService/wait_for_it.sh ./
 
-RUN chmod +x ./wait_for_it.sh
-RUN chmod +x ./entrypoint.sh
+RUN chmod +x wait_for_it.sh
+RUN chmod +x entrypoint.sh

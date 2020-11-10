@@ -9,7 +9,7 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - ./Deployment/Database/mssql:/var/opt/mssql
+      - ./Deployment/Database/mssql:/var/opt/mssql/data
 
   tvq:
     ports:
