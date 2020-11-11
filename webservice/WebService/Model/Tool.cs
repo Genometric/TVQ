@@ -99,6 +99,7 @@ namespace Genometric.TVQ.WebService.Model
             name = Utilities.RemovePrefix(name, "r-");
             name = Utilities.RemovePrefix(name, "perl-");
             name = Utilities.RemovePrefix(name, "ucsc-");
+            name = Utilities.RemovePrefix(name, "package_");
 
             /// The following code removes version postfix.
             var index = name.LastIndexOf('\\');
