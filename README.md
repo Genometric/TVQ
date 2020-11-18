@@ -4,6 +4,6 @@ The objective of this project is to study the impact of publishing tools to pack
 
 The study is performed using the following components: 
 
-- [TVQ Service](https://github.com/Genometric/TVQ/tree/master/webservice/WebService). A containerized ASP.NET Web application. This service collects the data required for the study. This service crawls Bioconda, Bioconductor, BioTools, and ToolShed for all the packages they host and collects their metadata such as tool name, scholarly references, and date added to the package management system. It then queries the Scopus for the citation count of the scholarly references of each tool.
+- [TVQ Service](https://github.com/Genometric/TVQ/tree/master/webservice/WebService). A containerized ASP.NET Web application. This service collects the data required for the study; it crawls Bioconda, Bioconductor, BioTools, and ToolShed for all the packages they host and collects their metadata such as tool name, scholarly references, and date added to the package management system. It then queries the Scopus for the citation count of the scholarly references of each tool.
 
 - [Python Scripts](https://github.com/Genometric/TVQ/tree/master/analytics) for statistical analysis and plotting. These scripts perform statistical tests on the data collected by the TVQ Service and report results in tables and plots.  
