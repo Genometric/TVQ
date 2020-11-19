@@ -14,8 +14,16 @@ WORKDIR /app
 COPY *.sln .
 COPY docker-compose* .
 COPY webservice/WebService/*.csproj ./webservice/WebService/
-COPY webservice/UnitTests/*.csproj ./webservice/UnitTests/
-RUN dotnet restore TVQ.sln
+
+# Two options to restore the project:
+# Option 1: restore only the webservice project.
+RUN dotnet restore webservice/WebService/WebService.csproj
+
+# Option 2: restore the entire solutions. In this case, 
+# every project should be copied to the container for the 
+# solution to restore correctly; like:
+#   COPY webservice/UnitTests/*.csproj ./webservice/UnitTests/
+#   RUN dotnet restore TVQ.sln
 
 # copy everything else and build app
 COPY webservice/WebService/. ./webservice/WebService/
