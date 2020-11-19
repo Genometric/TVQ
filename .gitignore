@@ -314,3 +314,6 @@ venv
 *.mypy_*
 
 Deployment/*
+
+/yarn.lock
+website/yarn.lock

@@ -9,6 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
+using System.Reflection;
+using System.IO;
+using Microsoft.OpenApi.Models;
 
 namespace Genometric.TVQ.WebService
 {
@@ -51,6 +55,29 @@ namespace Genometric.TVQ.WebService
             services.AddScoped<RepoCrawlingService>();
             services.AddScoped<LiteratureCrawlingService>();
             services.AddScoped<AnalysisService>();
+
+            // Register the Swagger generator, defining 1 or more Swagger documents
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "TVQ API",
+                    Description = "The API documentation of the TVQ Web service. " +
+                    "The documentation adheres to OpenAPI specifications (OAS) version 3.",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Support",
+                        Email = string.Empty,
+                        Url = new Uri("https://github.com/Genometric/TVQ/issues"),
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "MIT License",
+                        Url = new Uri("https://github.com/Genometric/TVQ/blob/master/LICENSE"),
+                    }
+                });
+            });
         }
 
         /// <summary>
@@ -67,6 +94,19 @@ namespace Genometric.TVQ.WebService
             {
                 //app.UseHsts();
             }
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+            // specifying the Swagger JSON endpoint.
+            var description = "TVQ Web service API v1";
+            var endpoint = "/swagger/v1/swagger";
+            app.UseSwaggerUI(x =>
+            {
+                x.SwaggerEndpoint(endpoint + ".json", description);
+                x.SwaggerEndpoint(endpoint + ".yaml", description);
+            });
 
             //app.UseHttpsRedirection();
             app.UseMvc();
