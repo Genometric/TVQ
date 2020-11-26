@@ -16,16 +16,53 @@
 </p>
 
 
-The objective of this project is to study the impact of publishing tools to package management systems on their scholarly recognition and adoption. For instance, how much the citation count of a paper increase after its respective software is added to Bioconductor? Currently, the study is focused on tools published to package management systems primarily used by the bioinformatics community: [Bioconda](https://bioconda.github.io), [Bioconductor](https://www.bioconductor.org), [BioTools](https://github.com/bio-tools), and [ToolShed](https://toolshed.g2.bx.psu.edu). 
+The objective of this project is to study the impact of publishing tools 
+to package management systems on their scholarly recognition and adoption. 
+For instance, how much the citation count of a scholarly paper increase after its 
+respective software is added to Bioconductor. Currently, the study is 
+focused on tools published to package management systems primarily used 
+by the Bioinformatics community: 
+[Bioconda](https://bioconda.github.io), 
+[Bioconductor](https://www.bioconductor.org), 
+[BioTools](https://github.com/bio-tools), and 
+[ToolShed](https://toolshed.g2.bx.psu.edu). 
 
-The study is performed using the following components: 
+## Project Structure
 
-- [TVQ Service](https://github.com/Genometric/TVQ/tree/master/webservice/WebService). A containerized ASP.NET Web application. This service collects the data required for the study; it crawls Bioconda, Bioconductor, BioTools, and ToolShed for all the packages they host and collects their metadata such as tool name, scholarly references, and date added to the package management system. It then queries the Scopus for the citation count of the scholarly references of each tool.
+The project consists of three major components (see the following figure):
 
-- [Python Scripts](https://github.com/Genometric/TVQ/tree/master/analytics) for statistical analysis and plotting. These scripts perform statistical tests on the data collected by the TVQ Service and report results in tables and plots.
+- [**Offline Crawlers**](https://genometric.github.io/TVQ/docs/offline_crawlers/about): 
+Scripts to retrieve those package metadata that require 
+extensive time or resource consuming operations. These scripts are not run frequently, 
+and their generated data is cached under the 
+[`data`](https://github.com/Genometric/TVQ/tree/master/data) 
+folder to be used by the _Webservice_ 
+(read [details]((https://genometric.github.io/TVQ/docs/offline_crawlers/about))).
+
+- [**Webservice**](https://genometric.github.io/TVQ/docs/webservice/about):
+Collects all the required metadata about software packages, it uses the cached 
+data and queries the package management systems for the "cheap-to-retrieve" data.
+It then aggregates the information collected from different package management systems,
+and queries Scopus for the citation count of every scholarly paper. The service
+generates descriptive statistics about the packages and their citation count, and
+outputs raw data to be used for detailed statistical inferences by _analytical scripts_ 
+(read webservice [details](https://genometric.github.io/TVQ/docs/webservice/about)).  
+
+- [**Analytics Scripts**](): 
+[Python Scripts](https://github.com/Genometric/TVQ/tree/master/analytics) 
+for statistical analysis and plotting. These scripts perform statistical tests 
+on the data collected by the _webservice_ and report results in tables and plots
+(read [detail](https://genometric.github.io/TVQ/docs/analytics/about) about 
+these scripts).
+
+<p align="center">
+  <a href="https://genometric.github.io/TVQ/docs/">
+    <img src="https://raw.githubusercontent.com/Genometric/TVQ/docs/static/img/overview.svg?raw=true" alt="TVQ" />
+  </a>
+</p>
 
 
-## Contributing
+## 💖 Contributing
 
 When it comes to open-source, every contribution you 
 make, makes the software better for everyone, and 

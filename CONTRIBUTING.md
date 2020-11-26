@@ -7,7 +7,7 @@ by the community. To express our gratitude for your
 contribution, we do our best to provide you with 
 easy-to-follow steps to get started. 
 
-##Repository Structure
+## Repository Structure
 This repository has three main branches:
 
 - [master](https://github.com/Genometric/TVQ/tree/master);
@@ -22,7 +22,7 @@ branch. The content of this branch is auto-generated
 once a commit is pushed to the [docs](https://github.com/Genometric/TVQ/tree/docs)
 branch. 
 
-##Basics of git
+## Basics of git
 
 _If you are familiar with the basics of `git` you may skip this section;
 if you are not, this section provides you with few steps you may take to get
@@ -101,7 +101,7 @@ to send them to Github, you may run the following:
 6. [Submit a pull request](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request). 
    
 
-##Getting Started
+## Getting Started
 
 This repository contains multiple projects written in different 
 programming languages (e.g., ASP.NET/C#, Python, and R), and each 
