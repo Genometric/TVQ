@@ -57,7 +57,7 @@ these scripts).
 
 <p align="center">
   <a href="https://genometric.github.io/TVQ/docs/">
-    <img src="https://raw.githubusercontent.com/Genometric/TVQ/docs/static/img/overview.svg?raw=true" alt="TVQ" />
+    <img src="https://raw.githubusercontent.com/Genometric/TVQ/docs/static/img/overview.svg?raw=true"/>
   </a>
 </p>
 
