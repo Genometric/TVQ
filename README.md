@@ -48,19 +48,20 @@ generates descriptive statistics about the packages and their citation count, an
 outputs raw data to be used for detailed statistical inferences by _analytical scripts_ 
 (read webservice [details](https://genometric.github.io/TVQ/docs/webservice/about)).  
 
-- [**Analytics Scripts**](): 
+- [**Analytics Scripts**](https://genometric.github.io/TVQ/docs/analytics/about): 
 [Python Scripts](https://github.com/Genometric/TVQ/tree/master/analytics) 
 for statistical analysis and plotting. These scripts perform statistical tests 
 on the data collected by the _webservice_ and report results in tables and plots
 (read [detail](https://genometric.github.io/TVQ/docs/analytics/about) about 
 these scripts).
 
+<br/>
 <p align="center">
   <a href="https://genometric.github.io/TVQ/docs/">
     <img src="https://raw.githubusercontent.com/Genometric/TVQ/docs/static/img/overview.svg?raw=true"/>
   </a>
 </p>
-
+<br/>
 
 ## 💖 Contributing
 
