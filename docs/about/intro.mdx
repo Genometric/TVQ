@@ -1,0 +1,39 @@
+---
+id: intro
+title: Introduction
+sidebar_label: Introduction
+slug: /
+---
+
+export const Highlight = ({children, color}) => ( <span style={{
+      backgroundColor: color,
+      borderRadius: '6px',
+      color: '#0000ff',
+      padding: '0.2rem',
+    }}>{children}</span> );
+
+A growing number of biomedical methods and protocols
+are being disseminated as open-source software packages.
+When put in concert with other packages, they can execute
+in-depth and comprehensive computational pipelines.
+Therefore, their integration with other software packages
+plays a prominent role in their adoption in addition to
+their availability. Accordingly, package management systems
+are developed to standardize the discovery and integration
+of software packages. Here we <Highlight color="#00eaff">
+study the impact of package management systems on software
+dissemination and their scholarly recognition.</Highlight>
+We study the citation pattern of
+more than 18,000 scholarly papers referenced by more than
+23,000 software packages hosted by Bioconda, Bioconductor,
+BioTools, and ToolShed—the package management systems
+primarily used by the Bioinformatics community. Our
+results suggest that there is significant evidence that
+the scholarly papers’ citation count increases after their
+respective software was published to package management
+systems. Additionally, our results show that the impact
+of different package management systems on the scholarly papers’
+recognition is of the same magnitude. These results may motivate
+scientists to distribute their software via package management
+systems, facilitating the composition of computational
+pipelines and helping reduce redundancy in package development.

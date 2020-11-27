@@ -57,25 +57,32 @@ function Feature({imageUrl, title, description}) {
   );
 }
 
+// To include site tittle and subtitile on the banner,
+// use the following tags after `<div className="container">
+//
+// <h1 className="hero__title">{siteConfig.title}</h1>
+// <p className="hero__subtitle">{siteConfig.tagline}</p>
+//
+
 function Home() {
   const context = useDocusaurusContext();
   const {siteConfig = {}} = context;
   return (
     <Layout
-      title= {'TVQ'} // {`${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      title= {'TVQ'}
+      description="Documentation for the Tool Visibility Quantifier (TVQ) project.">
       <header className={clsx('hero hero--primary', styles.heroBanner)}>
         <div className="container">
-          <h1 className="hero__title">{siteConfig.title}</h1>
-          <p className="hero__subtitle">{siteConfig.tagline}</p>
+          <img src="logo/logo_w_txt_banner.svg" alt="logo" height="40%" width="40%"/>
+          <p className="hero__subtitle"></p>
           <div className={styles.buttons}>
             <Link
               className={clsx(
                 'button button--outline button--secondary button--lg',
                 styles.getStarted,
               )}
-              to={useBaseUrl('docs/')}>
-              Get Started
+              to={useBaseUrl('docs/getting_started/quickstart')}>
+              Quick Start
             </Link>
           </div>
         </div>

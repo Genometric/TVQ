@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://genometric.github.io/TVQ/docs/">
-    <img src="https://raw.githubusercontent.com/Genometric/TVQ/docs/static/img/logo_w_txt.png?raw=true" alt="TVQ" width="300" />
+    <img src="https://raw.githubusercontent.com/Genometric/TVQ/docs/static/logo/logo_w_txt.png?raw=true" alt="TVQ" width="300" />
   </a>
 </p>
 

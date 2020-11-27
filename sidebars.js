@@ -1,8 +1,9 @@
 module.exports = {
   someSidebar: {
-    'TVQ': ['tvq/intro'],
+    'About': ['about/intro', 'about/overview'],
 	'Quick Start': ['getting_started/quickstart'],
-	'Web Service': ['webservice/bigpic'],
-	'Analytics': ['analytics/bigpic'],
+	'Analytics': ['analytics/about'],
+	'Web Service': ['webservice/about'],
+	'Offline Crawlers': ['offline_crawlers/about'],
   },
 };

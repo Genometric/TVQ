@@ -1,0 +1,38 @@
+---
+title: About
+---
+
+Getting some information about tools from package management systems (PMS)
+may require executing an operation that when run for every package, it will
+take an extensive amount of time to conclude.
+
+For instance, in order to get citation information for a bioconductor package,
+we need to run the
+[`citation()`](https://astrostatistics.psu.edu/su07/R/library/utils/html/citation.html)
+command, which requires the package to be installed.
+Therefore, to the citation information for all the Bioconductor
+packages, we need to install all the packages. This will take
+a significant amount of time (on our machine it takes about 2 days),
+and will put a high volume of demand on the Bioconductor packages.
+Therefore, we run this command once and store its results on
+Github. Any instance of Webservice will use the information
+on Github instead of retrieving it from Bioconductor.
+
+Similar challenge applies to ToolShed, where to citation
+information is available in tool wrapper; hence it requires
+downloading archive of every tool and extracting their wrapper
+and parsing it to extract citation information. (ToolShed's
+offline crawler is a work-in-progress, and currently Webservice
+downloads every package every time it scans ToolShed.)
+
+Another example is getting the date when a tool was
+added to Bioconda. Currently, the only was to get this
+information is to parse Bioconda's git history for the
+date of the first commit that adds a package. This is
+a computationally extensive operation, hence it is executed
+once, results are cached on Github, and every instance
+of Webservice can use this information.
+
+The offline crawlers are available at: https://github.com/Genometric/TVQ/tree/master/Crawlers/
+
+Their cached data is available from: https://github.com/Genometric/TVQ/tree/master/data

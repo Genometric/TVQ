@@ -1,0 +1,112 @@
+---
+title: About
+---
+
+Webservice collects tool metadata and search Scopus for citation
+information. It also generates descriptive statistics about the
+tools and their citation count, and exports data to be used as
+input for the analytical scripts.
+
+Webservice is written in an ASP.NET web application, written
+in C# .NET Core. Currently, the only way to interact with the
+service is via it's API; its Swagger documentation is available
+[at this link](https://genometric.github.io/TVQ/api).
+The webservice stores its data on a database; it uses
+[Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/get-started/overview/first-app?tabs=netcore-cli)
+as its object–relational mapping (ORM), hence it can
+use different database system if its
+[connection string](https://github.com/Genometric/TVQ/blob/b241ba75637fbc7721eb1fe2cf89a0aec749184d/webservice/WebService/appsettings.json#L1-L4)
+is set correctly. By default it runs on SQL Server.
+
+Webservice is containerized and comes with a
+[`docker-compose`](https://github.com/Genometric/TVQ/blob/master/docker-compose.yml)
+and [`Dockerfile`](https://github.com/Genometric/TVQ/blob/master/webservice/WebService/Dockerfile).
+The `docker-compose` starts Webservice and SQL Server,
+and establishes a connection between them.
+
+To start Webservice, run the following command at the
+root of the project path:
+
+```shell
+$ docker-compose up
+```
+
+The service will be listening on port `8000`. You can access
+its API at the following address:
+
+```
+http://localhost:8000/api/v1/
+```
+
+The API is RESTful and comes with a Swagger documentation.
+You can access the public instance at
+[this link](https://genometric.github.io/TVQ/api), or,
+once the Webservice is running, you may go to the following
+address to access your local Swagger documentation:
+
+```
+http://localhost:8000/swagger/index.html
+```
+
+Or you may access Swagger `JSON` or `YAML` description at:
+
+```
+http://localhost:8000/swagger/v1/swagger.json
+http://localhost:8000/swagger/v1/swagger.yaml
+```
+
+Note that every crawling request you submit (e.g.,
+[`POST LieratureCrawlingJob`](https://genometric.github.io/TVQ/api/#/Publications/post_api_v1_Publications) or
+[`POST RepoCrawlingJobs`](https://genometric.github.io/TVQ/api/#/RepoCrawlingJobs/post_api_v1_RepoCrawlingJobs))
+will be executed as a [`job`](https://en.wikipedia.org/wiki/Job_(computing)).
+Therefore, when you `POST` a request to these API endpoints, Webservice will respond
+with the information of the job created (see the following example), and it will
+schedule and execute the job in background.
+
+Send a repository (Package management systems such as Bioconda and Bioconductor) crawling request:
+
+```shell
+curl -H "Content-Type: application/json" -X POST http://localhost:8000/api/v1/RepoCrawlingJobs -d "{Repository:{\"ID\":4}}"
+```
+which will respond with the created crawling job:
+
+```json
+{
+    "ID": 1,
+    "RepositoryID": 4,
+    "Status": "Queued",
+    "UpdatedDate": "Friday, 27 November 2020 04:06:01",
+    "CreatedDate": "Friday, 27 November 2020 04:06:01",
+    "Repository": {
+        "ID": 4,
+        "Name": "Bioconda",
+        "URI": "https://github.com/VJalili/bioconda-recipes/archive/cheetah_template.zip",
+        "UpdatedDate": "Friday, 27 November 2020 03:35:56",
+        "CreatedDate": "Friday, 27 November 2020 03:35:56"
+    }
+}
+```
+
+You can get the status of all the submitted jobs sending a `GET` request
+to `api/v1/RepoCrawlingJobs` endpoint, which responds with a JSON object
+as the following.
+
+```json
+[
+    {
+        "ID": 1,
+        "RepositoryID": 4,
+        "Status": "Running",
+        "UpdatedDate": "Friday, 27 November 2020 04:06:02",
+        "CreatedDate": "Friday, 27 November 2020 04:06:01",
+        "Repository": {
+            "ID": 4,
+            "Name": "Bioconda",
+            "URI": "https://github.com/VJalili/bioconda-recipes/archive/cheetah_template.zip",
+            "UpdatedDate": "Friday, 27 November 2020 03:35:56",
+            "CreatedDate": "Friday, 27 November 2020 03:35:56"
+        }
+    }
+]
+```
+

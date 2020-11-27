@@ -5,7 +5,7 @@ module.exports = {
   baseUrl: '/TVQ/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/favicon.ico',
+  favicon: 'logo/favicon.ico',
   organizationName: 'Genometric',
   projectName: 'TVQ',
   themeConfig: {
@@ -13,8 +13,8 @@ module.exports = {
       title: 'TVQ',
       logo: {
         alt: 'logo',
-        src: '/img/logo.svg',
-		srcDark: 'img/logo.svg',
+        src: '/logo/logo.svg',
+		srcDark: 'logo/logo.svg',
         target: '_self', // By default, this value is calculated based on the `href` attribute (the external link will open in a new tab, all others in the current one).
       },
       items: [
@@ -44,18 +44,18 @@ module.exports = {
         {
           title: 'Docs',
           items: [
-		    //{
-         //     label: 'Web service',
-          //    to: 'docs/analytics/bigpic.mdx',
-          //  },
-            //{
-            //  label: 'API Documentation',
-            //  to: 'docs/',
-           // },
-		    //{
-          //    label: 'Analytics',
-          //    to: 'docs/analytics/',
-          //  }, 
+		    {
+              label: 'Web service',
+              to: 'https://genometric.github.io/TVQ/docs/webservice/about',
+            },
+		    {
+              label: 'Analytics',
+              to: 'https://genometric.github.io/TVQ/docs/analytics/about.mdx',
+            },
+            {
+              label: 'Swagger API Documentation',
+              to: 'https://genometric.github.io/TVQ/api',
+            },
           ],
         },
         {
