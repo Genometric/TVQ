@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://genometric.github.io/TVQ/docs/">
-    <img src="https://raw.githubusercontent.com/Genometric/TVQ/docs/static/img/logo_w_txt.png?raw=true" alt="TVQ" width="300" />
+    <img src="https://raw.githubusercontent.com/Genometric/TVQ/docs/static/logo/logo_w_txt.png?raw=true" alt="TVQ" width="300" />
   </a>
 </p>
 
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://genometric.github.io/TVQ/docs/tvq/intro">Documentation</a> |
-  <a href="https://genometric.github.io/TVQ/docs">Quick Start</a> |
+  <a href="https://genometric.github.io/TVQ/">Documentation</a> |
+  <a href="https://genometric.github.io/TVQ/docs/getting_started/quickstart">Quick Start</a> |
   <a href="https://genometric.github.io/TVQ/api/">Swagger API Documentation</a>
 </p>
 
@@ -45,7 +45,7 @@ data and queries the package management systems for the "cheap-to-retrieve" data
 It then aggregates the information collected from different package management systems,
 and queries Scopus for the citation count of every scholarly paper. The service
 generates descriptive statistics about the packages and their citation count, and
-outputs raw data to be used for detailed statistical inferences by _analytical scripts_ 
+outputs raw data to be used for detailed statistical inferences by _analytics scripts_ 
 (read webservice [details](https://genometric.github.io/TVQ/docs/webservice/about)).  
 
 - [**Analytics Scripts**](https://genometric.github.io/TVQ/docs/analytics/about): 
@@ -58,7 +58,7 @@ these scripts).
 <br/>
 <p align="center">
   <a href="https://genometric.github.io/TVQ/docs/">
-    <img src="https://raw.githubusercontent.com/Genometric/TVQ/docs/static/img/overview.svg?raw=true"/>
+    <img src="https://raw.githubusercontent.com/Genometric/TVQ/docs/static/img/overview_wbg.svg?raw=true"/>
   </a>
 </p>
 <br/>
@@ -69,5 +69,5 @@ When it comes to open-source, every contribution you
 make, makes the software better for everyone, and 
 that is extensively valuable and warmly appreciated 
 by the community. We have a 
-[contributing guide](https://github.com/genometric/tvq/blob/master/CONTRIBUTING.md) t
-o help guide you.
+[contributing guide](https://github.com/genometric/tvq/blob/master/CONTRIBUTING.md) 
+to help guide you.
