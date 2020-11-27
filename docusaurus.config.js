@@ -50,7 +50,7 @@ module.exports = {
             },
 		    {
               label: 'Analytics',
-              to: 'https://genometric.github.io/TVQ/docs/analytics/about.mdx',
+              to: 'https://genometric.github.io/TVQ/docs/analytics/about',
             },
             {
               label: 'Swagger API Documentation',
