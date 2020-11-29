@@ -73,7 +73,7 @@ function Home() {
       description="Documentation for the Tool Visibility Quantifier (TVQ) project.">
       <header className={clsx('hero hero--primary', styles.heroBanner)}>
         <div className="container">
-          <img src="logo/logo_w_txt_banner.svg" alt="logo" height="40%" width="40%"/>
+          <img src="logo/logo_hero_banner.svg" alt="logo" height="40%" width="40%"/>
           <p className="hero__subtitle"></p>
           <div className={styles.buttons}>
             <Link

@@ -15,6 +15,9 @@
   --ifm-color-primary-lighter: #38c9ff;
   --ifm-color-primary-lightest: #67d6ff;
   --ifm-code-font-size: 95%;
+
+  /*Background color of the banner and alternative rows */
+  --ifm-background-color-banner: #222629; /*#002A41;*/
 }
 
 .docusaurus-highlight-code-line {
@@ -22,4 +25,15 @@
   display: block;
   margin: 0 calc(-1 * var(--ifm-pre-padding));
   padding: 0 var(--ifm-pre-padding);
+}
+
+.button.button--secondary.button--outline:not(.button--active):not(:hover) {
+      color: var(--ifm-color-primary); /*var(--ifm-font-color-base);*/
+}
+
+.navbar__brand {
+  color: var(--ifm-color-primary);
+}
+.navbar__brand:hover {
+  color: inherit;
 }
