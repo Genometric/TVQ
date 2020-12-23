@@ -13,7 +13,7 @@ services:
 
   tvq:
     ports:
-      - "8000:80"
+      - "3030:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
