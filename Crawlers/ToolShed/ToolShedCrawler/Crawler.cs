@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using Genometric.BibitemParser;
 using System.Xml.Linq;
+using System.Collections.Concurrent;
 
 namespace ToolShedCrawler
 {
@@ -24,9 +25,9 @@ namespace ToolShedCrawler
 
         private static string SessionTempPath { set; get; }
 
-        private static int _maxParallelDownloads = 3;
-        private static int _maxParallelActions = Environment.ProcessorCount * 3;
-        private static int _boundedCapacity = Environment.ProcessorCount * 3;
+        private static int _maxParallelDownloads = 1;//3;
+        private static int _maxParallelActions = 1;//Environment.ProcessorCount * 3;
+        private static int _boundedCapacity = 1;//Environment.ProcessorCount * 3;
 
         private static JsonSerializerSettings ToolJsonSerializerSettings { set; get; }
         private static JsonSerializerSettings ToolRepoAssoJsonSerializerSettings { set; get; }
@@ -38,10 +39,13 @@ namespace ToolShedCrawler
         private static ExecutionDataflowBlockOptions _xmlExtractExeOptions;
         private static ExecutionDataflowBlockOptions _pubExtractExeOptions;
 
-        private static Parser<ParsedPublication, Author, Keyword> BibitemParser { get; }
+        private static ConcurrentDictionary<string, List<Publication>> _publications { set; get; }
+
+        private static Parser<ParsedPublication, Author, Keyword> BibitemParser { set; get; }
 
         private static string _catogiresFilename { get; } = "Categories.json";
         private static string _toolsFilename { get; } = "Tools.json";
+        private static string _publicationsFilename { get; } = "Publications.json";
 
 
         static void Main(string[] args)
@@ -109,11 +113,25 @@ namespace ToolShedCrawler
                     new CategoryRepoAssoJsonConverter())
             };
 
-            //UpdateCategories();
-            var tools = GetTools();
-            tools.Wait();
+            BibitemParser = new Parser<ParsedPublication, Author, Keyword>(
+                new ParsedPublicationConstructor(),
+                new AuthorConstructor(),
+                new KeywordConstructor());
+
+            _publications = new ConcurrentDictionary<string, List<Publication>>();
+
+            UpdateCategories();
+            var tools = GetTools().Result;
             if (tools != null)
-                GetPublications(tools.Result);
+            {
+                foreach (var tool in tools)
+                {
+                    var toolID = tool.ToolRepoAssociation.IDinRepo;
+                    if (!_publications.ContainsKey(toolID))
+                        _publications.TryAdd(toolID, new List<Publication>());
+                }
+                GetPublications(tools);
+            }
         }
 
         private static void UpdateCategories()
@@ -132,8 +150,7 @@ namespace ToolShedCrawler
             var associations = JsonConvert.DeserializeObject<List<CategoryRepoAssociation>>(
                 content, _categoryJsonSerializerSettings);
 
-            string json = JsonConvert.SerializeObject(associations.ToArray(), Formatting.Indented, _categoryJsonSerializerSettings);
-            File.WriteAllText(_catogiresFilename, json);
+            WriteToJson(content, _catogiresFilename);
         }
 
         private static async Task<List<DeserializedInfo>> GetTools()
@@ -147,6 +164,9 @@ namespace ToolShedCrawler
                 /// TODO: replace with an exception.
                 return null;
 
+            WriteToJson(content, _toolsFilename);
+            File.WriteAllText(_toolsFilename, content);
+
             DeserializedInfo.TryDeserialize(
                 content,
                 ToolJsonSerializerSettings,
@@ -155,6 +175,17 @@ namespace ToolShedCrawler
             foreach (var info in deserializedInfos)
                 info.SetStagingArea(SessionTempPath);
             return deserializedInfos;
+        }
+
+        private static void WriteToJson(string content, string filename)
+        {
+            var json = JsonConvert.DeserializeObject<object>(content);
+            using StreamWriter writer = new StreamWriter(filename);
+            JsonSerializer serializer = new JsonSerializer
+            {
+                Formatting = Formatting.Indented
+            };
+            serializer.Serialize(writer, json);
         }
 
         /// <summary>
@@ -185,10 +216,15 @@ namespace ToolShedCrawler
             extractPublications.LinkTo(cleanup, linkOptions);
 
             foreach (var info in ToolsInfo)
+            {
                 downloader.Post(info);
+            }
             downloader.Complete();
 
             cleanup.Completion.Wait();
+
+            var json = JsonConvert.SerializeObject(_publications);
+            WriteToJson(json, _publicationsFilename);
         }
 
         private static DeserializedInfo Downloader(DeserializedInfo info)
@@ -285,6 +321,7 @@ namespace ToolShedCrawler
                             switch (item.Attribute("type").Value.Trim().ToUpperInvariant())
                             {
                                 case "DOI":
+                                    _publications[info.ToolRepoAssociation.IDinRepo].Add(new Publication() { DOI = item.Value });
                                     pubAssociations.Add(
                                         new ToolPublicationAssociation()
                                         {
@@ -304,8 +341,11 @@ namespace ToolShedCrawler
                                     try
                                     {
                                         if (TryParseBibitem(item.Value, out Publication pub))
+                                        {
+                                            _publications[info.ToolRepoAssociation.IDinRepo].Add(pub);
                                             pubAssociations.Add(
                                                 new ToolPublicationAssociation() { Publication = pub });
+                                        }
                                     }
                                     catch (ArgumentException e)
                                     {
