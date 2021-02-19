@@ -41,7 +41,7 @@ namespace ToolShedCrawler
 
         private static ConcurrentDictionary<string, List<Publication>> _publications { set; get; }
 
-        private static Parser<ParsedPublication, Author, Keyword> BibitemParser { set; get; }
+        private static Parser<Publication, Author, Keyword> BibitemParser { set; get; }
 
         private static string _catogiresFilename { get; } = "Categories.json";
         private static string _toolsFilename { get; } = "Tools.json";
@@ -113,8 +113,8 @@ namespace ToolShedCrawler
                     new CategoryRepoAssoJsonConverter())
             };
 
-            BibitemParser = new Parser<ParsedPublication, Author, Keyword>(
-                new ParsedPublicationConstructor(),
+            BibitemParser = new Parser<Publication, Author, Keyword>(
+                new PublicationConstructor(),
                 new AuthorConstructor(),
                 new KeywordConstructor());
 
@@ -215,8 +215,12 @@ namespace ToolShedCrawler
             extractXMLs.LinkTo(extractPublications, linkOptions);
             extractPublications.LinkTo(cleanup, linkOptions);
 
+            var temp = 0;
             foreach (var info in ToolsInfo)
             {
+                temp++;
+                if (temp > 10)
+                    break;
                 downloader.Post(info);
             }
             downloader.Complete();
@@ -322,14 +326,6 @@ namespace ToolShedCrawler
                             {
                                 case "DOI":
                                     _publications[info.ToolRepoAssociation.IDinRepo].Add(new Publication() { DOI = item.Value });
-                                    pubAssociations.Add(
-                                        new ToolPublicationAssociation()
-                                        {
-                                            Publication = new Publication()
-                                            {
-                                                DOI = item.Value
-                                            }
-                                        });
                                     /// Some tools have one BibItem that contains only DOI, and 
                                     /// another BibItem that contains publication info. There should
                                     /// be only one BibItem per publication contains both DOI and 
@@ -343,8 +339,6 @@ namespace ToolShedCrawler
                                         if (TryParseBibitem(item.Value, out Publication pub))
                                         {
                                             _publications[info.ToolRepoAssociation.IDinRepo].Add(pub);
-                                            pubAssociations.Add(
-                                                new ToolPublicationAssociation() { Publication = pub });
                                         }
                                     }
                                     catch (ArgumentException e)
@@ -383,12 +377,10 @@ namespace ToolShedCrawler
 
         private static bool TryParseBibitem(string bibitem, out Publication publication)
         {
-            if (BibitemParser.TryParse(bibitem, out ParsedPublication parsedPublication) &&
-                (parsedPublication.DOI != null ||
-                parsedPublication.PubMedID != null ||
-                parsedPublication.Title != null))
+            if (BibitemParser.TryParse(bibitem, out Publication pub) &&
+                (pub.DOI != null || pub.PubMedID != null || pub.Title != null))
             {
-                publication = new Publication(parsedPublication);
+                publication = pub;
                 return true;
             }
             else
