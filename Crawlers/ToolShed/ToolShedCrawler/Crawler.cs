@@ -24,24 +24,21 @@ namespace ToolShedCrawler
 
         private static string SessionTempPath { set; get; }
 
-        private static int _maxParallelDownloads = 1;//3;
-        private static int _maxParallelActions = 1;//Environment.ProcessorCount * 3;
-        private static int _boundedCapacity = 1;//Environment.ProcessorCount * 3;
-
-        private static JsonSerializerSettings _categoryJsonSerializerSettings { set; get; }
+        private static readonly int _maxParallelDownloads = 3;
+        private static readonly int _maxParallelActions = Environment.ProcessorCount * 3;
+        private static readonly int _boundedCapacity = Environment.ProcessorCount * 3;
 
         private static ExecutionDataflowBlockOptions _downloadExeOptions;
         private static ExecutionDataflowBlockOptions _xmlExtractExeOptions;
         private static ExecutionDataflowBlockOptions _pubExtractExeOptions;
 
-        private static ConcurrentDictionary<string, List<Publication>> _publications { set; get; }
-
+        private static string CatogiresFilename { get; } = "Categories.json";
+        private static string ToolsFilename { get; } = "Tools.json";
+        private static string PublicationsFilename { get; } = "Publications.json";
+        private static JsonSerializerSettings SerializerSettings { set; get; }
+        private static ConcurrentDictionary<string, List<Publication>> Publications { set; get; }
         private static Parser<Publication, Author, Keyword> BibitemParser { set; get; }
-
-        private static string _catogiresFilename { get; } = "Categories.json";
-        private static string _toolsFilename { get; } = "Tools.json";
-        private static string _publicationsFilename { get; } = "Publications.json";
-
+        private static JsonSerializerSettings CategoryJsonSerializerSettings { set; get; }
 
         static void Main(string[] args)
         {
@@ -72,7 +69,7 @@ namespace ToolShedCrawler
                 MaxDegreeOfParallelism = _maxParallelActions
             };
 
-            _categoryJsonSerializerSettings = new JsonSerializerSettings
+            CategoryJsonSerializerSettings = new JsonSerializerSettings
             {
                 ContractResolver = new CustomContractResolver(
                     typeof(CategoryRepoAssociation),
@@ -84,15 +81,21 @@ namespace ToolShedCrawler
                 new AuthorConstructor(),
                 new KeywordConstructor());
 
-            _publications = new ConcurrentDictionary<string, List<Publication>>();
+            Publications = new ConcurrentDictionary<string, List<Publication>>();
+
+            SerializerSettings = new JsonSerializerSettings()
+            {
+                Formatting = Formatting.Indented,
+                NullValueHandling = NullValueHandling.Ignore
+            };
 
             UpdateCategories();
             var tools = GetTools().Result;
             if (tools != null)
             {
                 foreach (var tool in tools)
-                    if (!_publications.ContainsKey(tool.ID))
-                        _publications.TryAdd(tool.ID, new List<Publication>());
+                    if (!Publications.ContainsKey(tool.ID))
+                        Publications.TryAdd(tool.ID, new List<Publication>());
 
                 GetPublications(tools);
             }
@@ -112,9 +115,9 @@ namespace ToolShedCrawler
 
             //Logger.LogDebug("Received Categories from ToolShed, deserializing them.");
             var associations = JsonConvert.DeserializeObject<List<CategoryRepoAssociation>>(
-                content, _categoryJsonSerializerSettings);
+                content, CategoryJsonSerializerSettings);
 
-            WriteToJson(content, _catogiresFilename);
+            WriteToJson(content, CatogiresFilename);
         }
 
         private static async Task<List<Tool>> GetTools()
@@ -128,8 +131,8 @@ namespace ToolShedCrawler
                 /// TODO: replace with an exception.
                 return null;
 
-            WriteToJson(content, _toolsFilename);
-            File.WriteAllText(_toolsFilename, content);
+            WriteToJson(content, ToolsFilename);
+            File.WriteAllText(ToolsFilename, content);
 
             var tools = JsonConvert.DeserializeObject<List<Tool>>(content);
             foreach (var tool in tools)
@@ -140,12 +143,9 @@ namespace ToolShedCrawler
 
         private static void WriteToJson(string content, string filename)
         {
-            var json = JsonConvert.DeserializeObject<object>(content);
+            var json = JsonConvert.DeserializeObject<object>(content, SerializerSettings);
             using StreamWriter writer = new StreamWriter(filename);
-            JsonSerializer serializer = new JsonSerializer
-            {
-                Formatting = Formatting.Indented
-            };
+            var serializer = JsonSerializer.Create(SerializerSettings);
             serializer.Serialize(writer, json);
         }
 
@@ -176,20 +176,14 @@ namespace ToolShedCrawler
             extractXMLs.LinkTo(extractPublications, linkOptions);
             extractPublications.LinkTo(cleanup, linkOptions);
 
-            var temp = 0;
             foreach (var info in tools)
-            {
-                temp++;
-                if (temp > 10)
-                    break;
                 downloader.Post(info);
-            }
+            
             downloader.Complete();
 
             cleanup.Completion.Wait();
 
-            var json = JsonConvert.SerializeObject(_publications);
-            WriteToJson(json, _publicationsFilename);
+            WriteToJson(JsonConvert.SerializeObject(Publications, SerializerSettings), PublicationsFilename);
         }
 
         private static Tool Downloader(Tool info)
@@ -286,7 +280,7 @@ namespace ToolShedCrawler
                             switch (item.Attribute("type").Value.Trim().ToUpperInvariant())
                             {
                                 case "DOI":
-                                    _publications[info.ID].Add(new Publication() { DOI = item.Value });
+                                    Publications[info.ID].Add(new Publication() { DOI = item.Value });
                                     /// Some tools have one BibItem that contains only DOI, and 
                                     /// another BibItem that contains publication info. There should
                                     /// be only one BibItem per publication contains both DOI and 
@@ -299,7 +293,7 @@ namespace ToolShedCrawler
                                     {
                                         if (TryParseBibitem(item.Value, out Publication pub))
                                         {
-                                            _publications[info.ID].Add(pub);
+                                            Publications[info.ID].Add(pub);
                                         }
                                     }
                                     catch (ArgumentException e)
