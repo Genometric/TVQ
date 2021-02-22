@@ -24,25 +24,25 @@ namespace ToolShedCrawler
         private const string _repositoriesEndpoint = "repositories";
         private const string _categoriesEndpoint = "categories";
 
-        private static string SessionTempPath { set; get; }
+        private string SessionTempPath { set; get; }
 
-        private static ILogger<Crawler> Logger { set; get; }
+        private ILogger<Crawler> Logger { set; get; }
 
-        private static readonly int _maxParallelDownloads = 3;
-        private static readonly int _maxParallelActions = Environment.ProcessorCount * 3;
-        private static readonly int _boundedCapacity = Environment.ProcessorCount * 3;
+        private readonly int _maxParallelDownloads = 3;
+        private readonly int _maxParallelActions = Environment.ProcessorCount * 3;
+        private readonly int _boundedCapacity = Environment.ProcessorCount * 3;
 
-        private static ExecutionDataflowBlockOptions _downloadExeOptions;
-        private static ExecutionDataflowBlockOptions _xmlExtractExeOptions;
-        private static ExecutionDataflowBlockOptions _pubExtractExeOptions;
+        private ExecutionDataflowBlockOptions _downloadExeOptions;
+        private ExecutionDataflowBlockOptions _xmlExtractExeOptions;
+        private ExecutionDataflowBlockOptions _pubExtractExeOptions;
 
-        private static string CatogiresFilename { get; } = "Categories.json";
-        private static string ToolsFilename { get; } = "Tools.json";
-        private static string PublicationsFilename { get; } = "Publications.json";
-        private static JsonSerializerSettings SerializerSettings { set; get; }
-        private static ConcurrentDictionary<string, List<Publication>> Publications { set; get; }
-        private static Parser<Publication, Author, Keyword> BibitemParser { set; get; }
-        private static JsonSerializerSettings CategoryJsonSerializerSettings { set; get; }
+        private string CatogiresFilename { get; } = "Categories.json";
+        private string ToolsFilename { get; } = "Tools.json";
+        private string PublicationsFilename { get; } = "Publications.json";
+        private JsonSerializerSettings SerializerSettings { set; get; }
+        private ConcurrentDictionary<string, List<Publication>> Publications { set; get; }
+        private Parser<Publication, Author, Keyword> BibitemParser { set; get; }
+        private JsonSerializerSettings CategoryJsonSerializerSettings { set; get; }
 
         public Crawler(ILogger<Crawler> logger)
         {
@@ -110,7 +110,7 @@ namespace ToolShedCrawler
             }
         }
 
-        private static void UpdateCategories()
+        private void UpdateCategories()
         {
             Logger.LogDebug("Getting Categories list from ToolShed.");
             using var client = new HttpClient();
@@ -129,7 +129,7 @@ namespace ToolShedCrawler
             WriteToJson(content, CatogiresFilename);
         }
 
-        private static async Task<List<Tool>> GetTools()
+        private async Task<List<Tool>> GetTools()
         {
             using var client = new HttpClient();
             HttpResponseMessage response = await client.GetAsync(new Uri(_uri + _repositoriesEndpoint)).ConfigureAwait(false);
@@ -150,7 +150,7 @@ namespace ToolShedCrawler
             return tools;
         }
 
-        private static void WriteToJson(string content, string filename)
+        private void WriteToJson(string content, string filename)
         {
             var json = JsonConvert.DeserializeObject<object>(content, SerializerSettings);
             using StreamWriter writer = new StreamWriter(filename);
@@ -162,7 +162,7 @@ namespace ToolShedCrawler
         /// This method is implemented using the Task Parallel Library (TPL).
         //. https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-parallel-library-tpl
         /// </summary>
-        private static void GetPublications(List<Tool> tools)
+        private void GetPublications(List<Tool> tools)
         {
             var linkOptions = new DataflowLinkOptions
             {
@@ -195,7 +195,7 @@ namespace ToolShedCrawler
             WriteToJson(JsonConvert.SerializeObject(Publications, SerializerSettings), PublicationsFilename);
         }
 
-        private static Tool Downloader(Tool info)
+        private Tool Downloader(Tool info)
         {
             try
             {
@@ -218,7 +218,7 @@ namespace ToolShedCrawler
             }
         }
 
-        private static Tool WrapperExtractor(Tool info)
+        private Tool WrapperExtractor(Tool info)
         {
             if (info == null)
                 return null;
@@ -267,7 +267,7 @@ namespace ToolShedCrawler
             }
         }
 
-        private static Tool ExtractPublications(Tool info)
+        private Tool ExtractPublications(Tool info)
         {
             if (info == null)
                 return null;
@@ -336,7 +336,7 @@ namespace ToolShedCrawler
             return info;
         }
 
-        private static bool TryParseBibitem(string bibitem, out Publication publication)
+        private bool TryParseBibitem(string bibitem, out Publication publication)
         {
             if (BibitemParser.TryParse(bibitem, out Publication pub) &&
                 (pub.DOI != null || pub.PubMedID != null || pub.Title != null))
@@ -351,18 +351,13 @@ namespace ToolShedCrawler
             }
         }
 
-        private static void Cleanup(Tool info)
+        private void Cleanup(Tool info)
         {
             if (info == null)
                 return;
             Logger.LogDebug($"Deleting temporary files of tool {info.Name}.");
             Directory.Delete(info.StagingArea, true);
             Logger.LogDebug($"Deleted temporary files of tool {info.Name}.");
-        }
-
-        private static void ConfigureServices(IServiceCollection services)
-        {
-            services.AddLogging(configure => configure.AddConsole()).AddTransient<Crawler>();
         }
     }
 }
