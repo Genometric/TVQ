@@ -1,6 +1,4 @@
-﻿using Autofac;
-using Autofac.Extensions.DependencyInjection;
-using Genometric.BibitemParser;
+﻿using Genometric.BibitemParser;
 using Genometric.TVQ.WebService.Model;
 using Genometric.TVQ.WebService.Model.Associations;
 using Genometric.TVQ.WebService.Model.JsonConverters;
@@ -20,7 +18,7 @@ using System.Xml.Linq;
 
 namespace ToolShedCrawler
 {
-    class Crawler
+    public class Crawler
     {
         private const string _uri = "https://toolshed.g2.bx.psu.edu/api/";
         private const string _repositoriesEndpoint = "repositories";
@@ -46,26 +44,12 @@ namespace ToolShedCrawler
         private static Parser<Publication, Author, Keyword> BibitemParser { set; get; }
         private static JsonSerializerSettings CategoryJsonSerializerSettings { set; get; }
 
-        private static void ConfigureLogging(ILoggingBuilder log)
+        public Crawler(ILogger<Crawler> logger)
         {
-            log.ClearProviders();
-            log.SetMinimumLevel(LogLevel.Error);
-            log.AddConsole();
+            Logger = logger;
         }
 
-        private static void ConfigureContainer(ContainerBuilder builder)
-        {
-            builder.Register(handler => LoggerFactory.Create(ConfigureLogging))
-                .As<ILoggerFactory>()
-                .SingleInstance()
-                .AutoActivate();
-
-            builder.RegisterGeneric(typeof(Logger<>))
-                .As(typeof(ILogger<>))
-                .SingleInstance();
-        }
-
-        static void Main(string[] args)
+        public void Crawl()
         {
             do
             {
@@ -76,14 +60,6 @@ namespace ToolShedCrawler
             }
             while (Directory.Exists(SessionTempPath));
             Directory.CreateDirectory(SessionTempPath);
-
-
-            var containerBuilder = new ContainerBuilder();
-            ConfigureContainer(containerBuilder);
-
-            var container = containerBuilder.Build();
-            var serviceProvider = new AutofacServiceProvider(container);
-            Logger = serviceProvider.GetService<ILogger<Crawler>>();
 
             _downloadExeOptions = new ExecutionDataflowBlockOptions
             {
