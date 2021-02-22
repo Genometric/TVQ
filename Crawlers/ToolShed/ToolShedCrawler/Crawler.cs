@@ -1,7 +1,11 @@
-﻿using Genometric.BibitemParser;
+﻿using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using Genometric.BibitemParser;
 using Genometric.TVQ.WebService.Model;
 using Genometric.TVQ.WebService.Model.Associations;
 using Genometric.TVQ.WebService.Model.JsonConverters;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -24,6 +28,8 @@ namespace ToolShedCrawler
 
         private static string SessionTempPath { set; get; }
 
+        private static ILogger<Crawler> Logger { set; get; }
+
         private static readonly int _maxParallelDownloads = 3;
         private static readonly int _maxParallelActions = Environment.ProcessorCount * 3;
         private static readonly int _boundedCapacity = Environment.ProcessorCount * 3;
@@ -40,6 +46,25 @@ namespace ToolShedCrawler
         private static Parser<Publication, Author, Keyword> BibitemParser { set; get; }
         private static JsonSerializerSettings CategoryJsonSerializerSettings { set; get; }
 
+        private static void ConfigureLogging(ILoggingBuilder log)
+        {
+            log.ClearProviders();
+            log.SetMinimumLevel(LogLevel.Error);
+            log.AddConsole();
+        }
+
+        private static void ConfigureContainer(ContainerBuilder builder)
+        {
+            builder.Register(handler => LoggerFactory.Create(ConfigureLogging))
+                .As<ILoggerFactory>()
+                .SingleInstance()
+                .AutoActivate();
+
+            builder.RegisterGeneric(typeof(Logger<>))
+                .As(typeof(ILogger<>))
+                .SingleInstance();
+        }
+
         static void Main(string[] args)
         {
             do
@@ -51,6 +76,14 @@ namespace ToolShedCrawler
             }
             while (Directory.Exists(SessionTempPath));
             Directory.CreateDirectory(SessionTempPath);
+
+
+            var containerBuilder = new ContainerBuilder();
+            ConfigureContainer(containerBuilder);
+
+            var container = containerBuilder.Build();
+            var serviceProvider = new AutofacServiceProvider(container);
+            Logger = serviceProvider.GetService<ILogger<Crawler>>();
 
             _downloadExeOptions = new ExecutionDataflowBlockOptions
             {
@@ -103,7 +136,7 @@ namespace ToolShedCrawler
 
         private static void UpdateCategories()
         {
-            //Logger.LogDebug("Getting Categories list from ToolShed.");
+            Logger.LogDebug("Getting Categories list from ToolShed.");
             using var client = new HttpClient();
             HttpResponseMessage response = client.GetAsync(new Uri(_uri + _categoriesEndpoint)).GetAwaiter().GetResult();
             string content;
@@ -113,7 +146,7 @@ namespace ToolShedCrawler
                 /// TODO: replace with an exception.
                 return;
 
-            //Logger.LogDebug("Received Categories from ToolShed, deserializing them.");
+            Logger.LogDebug("Received Categories from ToolShed, deserializing them.");
             var associations = JsonConvert.DeserializeObject<List<CategoryRepoAssociation>>(
                 content, CategoryJsonSerializerSettings);
 
@@ -178,7 +211,7 @@ namespace ToolShedCrawler
 
             foreach (var info in tools)
                 downloader.Post(info);
-            
+
             downloader.Complete();
 
             cleanup.Completion.Wait();
@@ -199,12 +232,12 @@ namespace ToolShedCrawler
                         $"{info.Owner}/{info.Name}/" +
                         $"archive/tip.zip"),
                     fileName: info.ArchiveFilename);
-                //Logger.LogDebug($"Successfully downloaded archive of {info.ToolRepoAssociation.Tool.Name}.");
+                Logger.LogDebug($"Successfully downloaded archive of {info.Name}.");
                 return info;
             }
             catch (WebException e)
             {
-                //Logger.LogDebug($"Failed downloading archive of {info.ToolRepoAssociation.Tool.Name}: {e.Message}");
+                Logger.LogDebug($"Failed downloading archive of {info.Name}: {e.Message}");
                 return null;
             }
         }
@@ -265,10 +298,10 @@ namespace ToolShedCrawler
 
             foreach (var filename in info.XMLFiles)
             {
-                /*Logger.LogDebug(
+                Logger.LogDebug(
                     $"Extracting publication info from XML file " +
                     $"{Path.GetFileNameWithoutExtension(filename)} " +
-                    $"of tool {info.ToolRepoAssociation.Tool.Name}.");*/
+                    $"of tool {info.Name}.");
 
                 try
                 {
@@ -298,30 +331,27 @@ namespace ToolShedCrawler
                                     }
                                     catch (ArgumentException e)
                                     {
-                                        /*Logger.LogDebug(
+                                        Logger.LogDebug(
                                             $"Error extracting publication from XML file of tool " +
-                                            $"{info.ToolRepoAssociation.Tool.Name}:{e.Message}");*/
+                                            $"{info.Name}:{e.Message}");
                                     }
                                     break;
                             }
                     }
 
-                    /*Logger.LogDebug(
+                    Logger.LogDebug(
                         $"Successfully extract publication info from XML file " +
                         $"{Path.GetFileNameWithoutExtension(filename)} " +
-                        $"of tool {info.ToolRepoAssociation.Tool.Name}.");*/
-
-                    //info.ToolPubAssociations = pubAssociations;
-                    //TryAddEntities(info);
+                        $"of tool {info.Name}.");
                 }
                 catch (System.Xml.XmlException e)
                 {
                     /// This exception may happen if the XML 
                     /// file has multiple roots.
-                   /* Logger.LogDebug(
-                        $"Failed extracting publication info from XML file " +
-                        $"{Path.GetFileNameWithoutExtension(filename)}" +
-                        $" of tool {info.ToolRepoAssociation.Tool.Name}: {e.Message}");*/
+                    Logger.LogDebug(
+                         $"Failed extracting publication info from XML file " +
+                         $"{Path.GetFileNameWithoutExtension(filename)}" +
+                         $" of tool {info.Name}: {e.Message}");
 
                     return null;
                 }
@@ -349,9 +379,14 @@ namespace ToolShedCrawler
         {
             if (info == null)
                 return;
-            //Logger.LogDebug($"Deleting temporary files of tool {info.ToolRepoAssociation.Tool.Name}.");
+            Logger.LogDebug($"Deleting temporary files of tool {info.Name}.");
             Directory.Delete(info.StagingArea, true);
-            //Logger.LogDebug($"Deleted temporary files of tool {info.ToolRepoAssociation.Tool.Name}.");
+            Logger.LogDebug($"Deleted temporary files of tool {info.Name}.");
+        }
+
+        private static void ConfigureServices(IServiceCollection services)
+        {
+            services.AddLogging(configure => configure.AddConsole()).AddTransient<Crawler>();
         }
     }
 }
