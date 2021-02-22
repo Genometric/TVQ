@@ -1,9 +1,10 @@
-﻿using Genometric.TVQ.WebService.Crawlers.ToolRepos.HelperTypes;
+﻿using Genometric.BibitemParser;
 using Genometric.TVQ.WebService.Model;
 using Genometric.TVQ.WebService.Model.Associations;
 using Genometric.TVQ.WebService.Model.JsonConverters;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -11,9 +12,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using Genometric.BibitemParser;
 using System.Xml.Linq;
-using System.Collections.Concurrent;
 
 namespace ToolShedCrawler
 {
@@ -29,10 +28,6 @@ namespace ToolShedCrawler
         private static int _maxParallelActions = 1;//Environment.ProcessorCount * 3;
         private static int _boundedCapacity = 1;//Environment.ProcessorCount * 3;
 
-        private static JsonSerializerSettings ToolJsonSerializerSettings { set; get; }
-        private static JsonSerializerSettings ToolRepoAssoJsonSerializerSettings { set; get; }
-        private static JsonSerializerSettings PublicationSerializerSettings { set; get; }
-        private static JsonSerializerSettings CategorySerializerSettings { set; get; }
         private static JsonSerializerSettings _categoryJsonSerializerSettings { set; get; }
 
         private static ExecutionDataflowBlockOptions _downloadExeOptions;
@@ -77,35 +72,6 @@ namespace ToolShedCrawler
                 MaxDegreeOfParallelism = _maxParallelActions
             };
 
-            ToolJsonSerializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new CustomContractResolver(
-                    typeof(Tool),
-                    new BaseJsonConverter(
-                        propertyMappings: new Dictionary<string, string>
-                        {
-                            { "name", nameof(Tool.Name) },
-                            { "homepage_url", nameof(Tool.Homepage) },
-                            { "remote_repository_url", nameof(Tool.CodeRepo) },
-                            { "description", nameof(Tool.Description) }
-                        }))
-            };
-
-            ToolRepoAssoJsonSerializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new CustomContractResolver(
-                    typeof(ToolRepoAssociation),
-                    new BaseJsonConverter(
-                        propertyMappings: new Dictionary<string, string>
-                        {
-                            { "times_downloaded", nameof(ToolRepoAssociation.TimesDownloaded) },
-                            { "owner", nameof(ToolRepoAssociation.Owner) },
-                            { "user_id", nameof(ToolRepoAssociation.UserID) },
-                            { "id", nameof(ToolRepoAssociation.IDinRepo) },
-                            { "create_time", nameof(ToolRepoAssociation.DateAddedToRepository) }
-                        }))
-            };
-
             _categoryJsonSerializerSettings = new JsonSerializerSettings
             {
                 ContractResolver = new CustomContractResolver(
@@ -125,11 +91,9 @@ namespace ToolShedCrawler
             if (tools != null)
             {
                 foreach (var tool in tools)
-                {
-                    var toolID = tool.ToolRepoAssociation.IDinRepo;
-                    if (!_publications.ContainsKey(toolID))
-                        _publications.TryAdd(toolID, new List<Publication>());
-                }
+                    if (!_publications.ContainsKey(tool.ID))
+                        _publications.TryAdd(tool.ID, new List<Publication>());
+
                 GetPublications(tools);
             }
         }
@@ -153,7 +117,7 @@ namespace ToolShedCrawler
             WriteToJson(content, _catogiresFilename);
         }
 
-        private static async Task<List<DeserializedInfo>> GetTools()
+        private static async Task<List<Tool>> GetTools()
         {
             using var client = new HttpClient();
             HttpResponseMessage response = await client.GetAsync(new Uri(_uri + _repositoriesEndpoint)).ConfigureAwait(false);
@@ -167,14 +131,11 @@ namespace ToolShedCrawler
             WriteToJson(content, _toolsFilename);
             File.WriteAllText(_toolsFilename, content);
 
-            DeserializedInfo.TryDeserialize(
-                content,
-                ToolJsonSerializerSettings,
-                ToolRepoAssoJsonSerializerSettings,
-                out List<DeserializedInfo> deserializedInfos);
-            foreach (var info in deserializedInfos)
-                info.SetStagingArea(SessionTempPath);
-            return deserializedInfos;
+            var tools = JsonConvert.DeserializeObject<List<Tool>>(content);
+            foreach (var tool in tools)
+                tool.EnsureStagingArea(SessionTempPath);
+
+            return tools;
         }
 
         private static void WriteToJson(string content, string filename)
@@ -192,23 +153,23 @@ namespace ToolShedCrawler
         /// This method is implemented using the Task Parallel Library (TPL).
         //. https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-parallel-library-tpl
         /// </summary>
-        private static void GetPublications(List<DeserializedInfo> ToolsInfo)
+        private static void GetPublications(List<Tool> tools)
         {
             var linkOptions = new DataflowLinkOptions
             {
                 PropagateCompletion = true
             };
 
-            var downloader = new TransformBlock<DeserializedInfo, DeserializedInfo>(
-                new Func<DeserializedInfo, DeserializedInfo>(Downloader), _downloadExeOptions);
+            var downloader = new TransformBlock<Tool, Tool>(
+                new Func<Tool, Tool>(Downloader), _downloadExeOptions);
 
-            var extractXMLs = new TransformBlock<DeserializedInfo, DeserializedInfo>(
-                new Func<DeserializedInfo, DeserializedInfo>(WrapperExtractor), _xmlExtractExeOptions);
+            var extractXMLs = new TransformBlock<Tool, Tool>(
+                new Func<Tool, Tool>(WrapperExtractor), _xmlExtractExeOptions);
 
-            var extractPublications = new TransformBlock<DeserializedInfo, DeserializedInfo>(
-                new Func<DeserializedInfo, DeserializedInfo>(ExtractPublications), _pubExtractExeOptions);
+            var extractPublications = new TransformBlock<Tool, Tool>(
+                new Func<Tool, Tool>(ExtractPublications), _pubExtractExeOptions);
 
-            var cleanup = new ActionBlock<DeserializedInfo>(
+            var cleanup = new ActionBlock<Tool>(
                 input => { Cleanup(input); });
 
             downloader.LinkTo(extractXMLs, linkOptions);
@@ -216,7 +177,7 @@ namespace ToolShedCrawler
             extractPublications.LinkTo(cleanup, linkOptions);
 
             var temp = 0;
-            foreach (var info in ToolsInfo)
+            foreach (var info in tools)
             {
                 temp++;
                 if (temp > 10)
@@ -231,7 +192,7 @@ namespace ToolShedCrawler
             WriteToJson(json, _publicationsFilename);
         }
 
-        private static DeserializedInfo Downloader(DeserializedInfo info)
+        private static Tool Downloader(Tool info)
         {
             try
             {
@@ -241,7 +202,7 @@ namespace ToolShedCrawler
                 client.DownloadFile(
                     address: new Uri(
                         $"https://toolshed.g2.bx.psu.edu/repos/" +
-                        $"{info.ToolRepoAssociation.Owner}/{info.ToolRepoAssociation.Tool.Name}/" +
+                        $"{info.Owner}/{info.Name}/" +
                         $"archive/tip.zip"),
                     fileName: info.ArchiveFilename);
                 //Logger.LogDebug($"Successfully downloaded archive of {info.ToolRepoAssociation.Tool.Name}.");
@@ -254,7 +215,7 @@ namespace ToolShedCrawler
             }
         }
 
-        private static DeserializedInfo WrapperExtractor(DeserializedInfo info)
+        private static Tool WrapperExtractor(Tool info)
         {
             if (info == null)
                 return null;
@@ -303,7 +264,7 @@ namespace ToolShedCrawler
             }
         }
 
-        private static DeserializedInfo ExtractPublications(DeserializedInfo info)
+        private static Tool ExtractPublications(Tool info)
         {
             if (info == null)
                 return null;
@@ -325,7 +286,7 @@ namespace ToolShedCrawler
                             switch (item.Attribute("type").Value.Trim().ToUpperInvariant())
                             {
                                 case "DOI":
-                                    _publications[info.ToolRepoAssociation.IDinRepo].Add(new Publication() { DOI = item.Value });
+                                    _publications[info.ID].Add(new Publication() { DOI = item.Value });
                                     /// Some tools have one BibItem that contains only DOI, and 
                                     /// another BibItem that contains publication info. There should
                                     /// be only one BibItem per publication contains both DOI and 
@@ -338,7 +299,7 @@ namespace ToolShedCrawler
                                     {
                                         if (TryParseBibitem(item.Value, out Publication pub))
                                         {
-                                            _publications[info.ToolRepoAssociation.IDinRepo].Add(pub);
+                                            _publications[info.ID].Add(pub);
                                         }
                                     }
                                     catch (ArgumentException e)
@@ -356,7 +317,7 @@ namespace ToolShedCrawler
                         $"{Path.GetFileNameWithoutExtension(filename)} " +
                         $"of tool {info.ToolRepoAssociation.Tool.Name}.");*/
 
-                    info.ToolPubAssociations = pubAssociations;
+                    //info.ToolPubAssociations = pubAssociations;
                     //TryAddEntities(info);
                 }
                 catch (System.Xml.XmlException e)
@@ -390,7 +351,7 @@ namespace ToolShedCrawler
             }
         }
 
-        private static void Cleanup(DeserializedInfo info)
+        private static void Cleanup(Tool info)
         {
             if (info == null)
                 return;
