@@ -11,6 +11,11 @@ namespace ToolShedCrawler
     {
         static void Main(string[] args)
         {
+            var options = new CommandLineOptions();
+            options.Parse(args, out bool helpIsDisplayed);
+            if (helpIsDisplayed)
+                return;
+
             var services = new ServiceCollection();
             ConfigureServices(services);
 
@@ -18,7 +23,7 @@ namespace ToolShedCrawler
             {
                 var serviceProvider = services.BuildServiceProvider();
                 var crawler = serviceProvider.GetService<Crawler>();
-                crawler.Crawl();
+                crawler.Crawl(options.CategoriesFilename, options.ToolsFilename, options.PublicationsFilename);
                 Log.Debug("Crawler finished crawling successfully.");
             }
             catch(Exception e)

@@ -35,9 +35,10 @@ namespace ToolShedCrawler
         private ExecutionDataflowBlockOptions _xmlExtractExeOptions;
         private ExecutionDataflowBlockOptions _pubExtractExeOptions;
 
-        private string CatogiresFilename { get; } = "Categories.json";
-        private string ToolsFilename { get; } = "Tools.json";
-        private string PublicationsFilename { get; } = "Publications.json";
+        private string _catogiresFilename;
+        private string _toolsFilename;
+        private string _publicationsFilename;
+
         private JsonSerializerSettings SerializerSettings { set; get; }
         private ConcurrentDictionary<string, List<Publication>> Publications { set; get; }
         private Parser<Publication, Author, Keyword> BibitemParser { set; get; }
@@ -48,7 +49,7 @@ namespace ToolShedCrawler
             Logger = logger;
         }
 
-        public void Crawl()
+        public void Crawl(string categoriesFilename, string toolsFilename, string publicationsFilename)
         {
             do
             {
@@ -59,6 +60,10 @@ namespace ToolShedCrawler
             }
             while (Directory.Exists(SessionTempPath));
             Directory.CreateDirectory(SessionTempPath);
+
+            _catogiresFilename = categoriesFilename;
+            _toolsFilename = toolsFilename;
+            _publicationsFilename = publicationsFilename;
 
             _downloadExeOptions = new ExecutionDataflowBlockOptions
             {
@@ -125,9 +130,9 @@ namespace ToolShedCrawler
                 return;
             }
 
-            Logger.LogDebug($"Serializing the received Categories to `{CatogiresFilename}`");
-            WriteToJson(content, CatogiresFilename);
-            Logger.LogInformation($"Serialized Categories to `{CatogiresFilename}`");
+            Logger.LogDebug($"Serializing the received Categories to `{_catogiresFilename}`");
+            WriteToJson(content, _catogiresFilename);
+            Logger.LogInformation($"Serialized Categories to `{_catogiresFilename}`");
         }
 
         private async Task<List<Tool>> GetTools()
@@ -146,10 +151,10 @@ namespace ToolShedCrawler
                 return null;
             }
 
-            Logger.LogDebug($"Serializing the received Tools to `{ToolsFilename}`");
-            WriteToJson(content, ToolsFilename);
-            File.WriteAllText(ToolsFilename, content);
-            Logger.LogInformation($"Serialized Tools to `{ToolsFilename}`");
+            Logger.LogDebug($"Serializing the received Tools to `{_toolsFilename}`");
+            WriteToJson(content, _toolsFilename);
+            File.WriteAllText(_toolsFilename, content);
+            Logger.LogInformation($"Serialized Tools to `{_toolsFilename}`");
 
             Logger.LogDebug($"Creating staging area per tool in: {SessionTempPath}");
             var tools = JsonConvert.DeserializeObject<List<Tool>>(content);
@@ -202,8 +207,8 @@ namespace ToolShedCrawler
 
             cleanup.Completion.Wait();
 
-            Logger.LogDebug($"Serializing extract bibliographies to `{PublicationsFilename}`");
-            WriteToJson(JsonConvert.SerializeObject(Publications, SerializerSettings), PublicationsFilename);
+            Logger.LogDebug($"Serializing extract bibliographies to `{_publicationsFilename}`");
+            WriteToJson(JsonConvert.SerializeObject(Publications, SerializerSettings), _publicationsFilename);
             Logger.LogDebug($"Serialized extracted bibliographies.");
         }
 
