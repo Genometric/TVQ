@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
@@ -38,12 +37,6 @@ namespace Genometric.TVQ.Crawlers.ToolShedCrawler
 
         private static void ConfigureServices(IServiceCollection services)
         {
-            // Build configuration
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(AppContext.BaseDirectory)
-                .AddJsonFile("appsettings.json", false)
-                .Build();
-
             // Add logging
             services.AddLogging(loggingBuilder =>
             {
@@ -59,7 +52,6 @@ namespace Genometric.TVQ.Crawlers.ToolShedCrawler
                  .CreateLogger();
 
             // Add access to generic IConfigurationRoot
-            services.AddSingleton(configuration);
             services.AddTransient<Crawler>();
         }
     }

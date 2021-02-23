@@ -1,5 +1,4 @@
-﻿using Genometric.TVQ.WebService.Model;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 
 namespace Genometric.TVQ.Crawlers.ToolShedCrawler

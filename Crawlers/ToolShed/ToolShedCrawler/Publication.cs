@@ -1,8 +1,6 @@
 ﻿using Genometric.BibitemParser;
 using Genometric.BibitemParser.Interfaces;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Genometric.TVQ.Crawlers.ToolShedCrawler
 {

@@ -1,7 +1,4 @@
 ﻿using Genometric.BibitemParser;
-using Genometric.TVQ.WebService.Model;
-using Genometric.TVQ.WebService.Model.Associations;
-using Genometric.TVQ.WebService.Model.JsonConverters;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
@@ -42,7 +39,6 @@ namespace Genometric.TVQ.Crawlers.ToolShedCrawler
         private JsonSerializerSettings SerializerSettings { set; get; }
         private ConcurrentDictionary<string, List<Publication>> Publications { set; get; }
         private Parser<Publication, Author, Keyword> BibitemParser { set; get; }
-        private JsonSerializerSettings CategoryJsonSerializerSettings { set; get; }
 
         public Crawler(ILogger<Crawler> logger)
         {
@@ -80,13 +76,6 @@ namespace Genometric.TVQ.Crawlers.ToolShedCrawler
             {
                 BoundedCapacity = _boundedCapacity,
                 MaxDegreeOfParallelism = _maxParallelActions
-            };
-
-            CategoryJsonSerializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new CustomContractResolver(
-                    typeof(CategoryRepoAssociation),
-                    new CategoryRepoAssoJsonConverter())
             };
 
             BibitemParser = new Parser<Publication, Author, Keyword>(
@@ -301,7 +290,6 @@ namespace Genometric.TVQ.Crawlers.ToolShedCrawler
                 try
                 {
                     XElement toolDoc = XElement.Load(filename);
-                    var pubAssociations = new List<ToolPublicationAssociation>();
                     foreach (var item in toolDoc.Elements("citations").Descendants())
                     {
                         if (item.Attribute("type") != null)
