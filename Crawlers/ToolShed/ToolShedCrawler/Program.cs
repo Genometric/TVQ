@@ -5,7 +5,7 @@ using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using System;
 
-namespace ToolShedCrawler
+namespace Genometric.TVQ.Crawlers.ToolShedCrawler
 {
     public class Program
     {

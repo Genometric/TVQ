@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ToolShedCrawler
+namespace Genometric.TVQ.Crawlers.ToolShedCrawler
 {
     public class KeywordConstructor : IKeywordConstructor<Keyword>
     {

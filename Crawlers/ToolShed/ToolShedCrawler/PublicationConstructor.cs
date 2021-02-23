@@ -2,7 +2,7 @@
 using Genometric.BibitemParser.Interfaces;
 using System.Collections.Generic;
 
-namespace ToolShedCrawler
+namespace Genometric.TVQ.Crawlers.ToolShedCrawler
 {
     class PublicationConstructor : IPublicationConstructor<Author, Keyword, Publication>
     {

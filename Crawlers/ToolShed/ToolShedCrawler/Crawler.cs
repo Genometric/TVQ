@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Xml.Linq;
 
-namespace ToolShedCrawler
+namespace Genometric.TVQ.Crawlers.ToolShedCrawler
 {
     public class Crawler
     {

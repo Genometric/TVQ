@@ -10,7 +10,7 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Reflection;
 
-namespace ToolShedCrawler
+namespace Genometric.TVQ.Crawlers.ToolShedCrawler
 {
     public class CategoryRepoAssoJsonConverter : JsonConverter
     {

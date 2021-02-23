@@ -1,6 +1,6 @@
 ﻿using Genometric.BibitemParser.Interfaces;
 
-namespace ToolShedCrawler
+namespace Genometric.TVQ.Crawlers.ToolShedCrawler
 {
     public class Keyword: IKeyword
     {
