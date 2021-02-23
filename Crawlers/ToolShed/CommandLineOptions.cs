@@ -60,31 +60,37 @@ namespace Genometric.TVQ.Crawlers.ToolShedCrawler
 
         public void Parse(string[] args, out bool helpIsDisplayed)
         {
-            _cla.OnExecute(() =>
-            {
-                var missingRequiredArgs = new List<string>();
-                if (!_categories.HasValue())
-                    missingRequiredArgs.Add(_categories.LongName);
-                if (!_tools.HasValue())
-                    missingRequiredArgs.Add(_tools.LongName);
-                if (!_publications.HasValue())
-                    missingRequiredArgs.Add(_publications.LongName);
-
-                if (missingRequiredArgs.Count > 0)
-                {
-                    var msgBuilder = new StringBuilder("the following required arguments are missing: ");
-                    foreach (var arg in missingRequiredArgs)
-                        msgBuilder.Append(arg);
-                    throw new ArgumentException(msgBuilder.ToString());
-                }
-                else
-                {
-                    return 1;
-                }
-            });
+            Func<int> assertArguments = AssertArguments;
+            _cla.OnExecute(assertArguments);
 
             var status = _cla.Execute(args);
             helpIsDisplayed = status != 1;
+        }
+
+        private int AssertArguments()
+        {
+            var missingRequiredArgs = new List<string>();
+            if (!_categories.HasValue())
+                missingRequiredArgs.Add(_categories.LongName);
+            if (!_tools.HasValue())
+                missingRequiredArgs.Add(_tools.LongName);
+            if (!_publications.HasValue())
+                missingRequiredArgs.Add(_publications.LongName);
+
+            if (missingRequiredArgs.Count > 0)
+            {
+                var msgBuilder = new StringBuilder("The following required arguments are missing: [");
+                for (int i = 0; i < missingRequiredArgs.Count - 1; i++)
+                    msgBuilder.Append(missingRequiredArgs[i] + ", ");
+                msgBuilder.Append(missingRequiredArgs[^1] + "]");
+
+                msgBuilder.Append($"\n\rYou may use help using: {HelpOption}");
+                throw new ArgumentException(msgBuilder.ToString());
+            }
+            else
+            {
+                return 1;
+            }
         }
     }
 }

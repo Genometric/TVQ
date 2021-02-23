@@ -10,20 +10,25 @@ namespace Genometric.TVQ.Crawlers.ToolShedCrawler
     {
         static void Main(string[] args)
         {
-            var options = new CommandLineOptions();
-            options.Parse(args, out bool helpIsDisplayed);
-            if (helpIsDisplayed)
-                return;
-
             var services = new ServiceCollection();
             ConfigureServices(services);
 
             try
             {
                 var serviceProvider = services.BuildServiceProvider();
+
+                var options = new CommandLineOptions();
+                options.Parse(args, out bool helpIsDisplayed);
+                if (helpIsDisplayed)
+                    return;
+
                 var crawler = serviceProvider.GetService<Crawler>();
                 crawler.Crawl(options.CategoriesFilename, options.ToolsFilename, options.PublicationsFilename);
                 Log.Debug("Crawler finished crawling successfully.");
+            }
+            catch(ArgumentException e)
+            {
+                Log.Fatal(e.Message);
             }
             catch(Exception e)
             {
