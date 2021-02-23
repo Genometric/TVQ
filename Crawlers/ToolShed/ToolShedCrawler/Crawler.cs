@@ -1,4 +1,6 @@
 ﻿using Genometric.BibitemParser;
+using Genometric.BibitemParser.Constructors;
+using Genometric.BibitemParser.Model;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
