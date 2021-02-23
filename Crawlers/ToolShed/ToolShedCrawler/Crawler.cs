@@ -1,5 +1,4 @@
 ﻿using Genometric.BibitemParser;
-using Genometric.BibitemParser.Constructors;
 using Genometric.BibitemParser.Model;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -40,28 +39,14 @@ namespace Genometric.TVQ.Crawlers.ToolShedCrawler
 
         private JsonSerializerSettings SerializerSettings { set; get; }
         private ConcurrentDictionary<string, List<Publication>> Publications { set; get; }
-        private Parser<Publication, Author, Keyword> BibitemParser { set; get; }
+        private Parser BibitemParser { set; get; }
 
         public Crawler(ILogger<Crawler> logger)
         {
             Logger = logger;
-        }
 
-        public void Crawl(string categoriesFilename, string toolsFilename, string publicationsFilename)
-        {
-            do
-            {
-                SessionTempPath =
-                    Path.GetFullPath(Path.GetTempPath()) +
-                    Utilities.GetRandomString(10) +
-                    Path.DirectorySeparatorChar;
-            }
-            while (Directory.Exists(SessionTempPath));
-            Directory.CreateDirectory(SessionTempPath);
-
-            _catogiresFilename = categoriesFilename;
-            _toolsFilename = toolsFilename;
-            _publicationsFilename = publicationsFilename;
+            BibitemParser = new Parser();
+            Publications = new ConcurrentDictionary<string, List<Publication>>();
 
             _downloadExeOptions = new ExecutionDataflowBlockOptions
             {
@@ -80,18 +65,30 @@ namespace Genometric.TVQ.Crawlers.ToolShedCrawler
                 MaxDegreeOfParallelism = _maxParallelActions
             };
 
-            BibitemParser = new Parser<Publication, Author, Keyword>(
-                new PublicationConstructor(),
-                new AuthorConstructor(),
-                new KeywordConstructor());
-
-            Publications = new ConcurrentDictionary<string, List<Publication>>();
-
             SerializerSettings = new JsonSerializerSettings()
             {
                 Formatting = Formatting.Indented,
                 NullValueHandling = NullValueHandling.Ignore
             };
+        }
+
+        public void Crawl(string categoriesFilename, string toolsFilename, string publicationsFilename)
+        {
+            do
+            {
+                SessionTempPath =
+                    Path.GetFullPath(Path.GetTempPath()) +
+                    Utilities.GetRandomString(10) +
+                    Path.DirectorySeparatorChar;
+            }
+            while (Directory.Exists(SessionTempPath));
+            Directory.CreateDirectory(SessionTempPath);
+
+            _catogiresFilename = categoriesFilename;
+            _toolsFilename = toolsFilename;
+            _publicationsFilename = publicationsFilename;
+
+            Publications.Clear();
 
             UpdateCategories();
             var tools = GetTools().Result;
@@ -185,14 +182,8 @@ namespace Genometric.TVQ.Crawlers.ToolShedCrawler
             extractPublications.LinkTo(cleanup, linkOptions);
 
             Logger.LogDebug($"Starting to process (download archive, extract XML, extract citation) {tools.Count} tools *asynchronously*.");
-            int t = 0;
             foreach (var info in tools)
-            {
-                t++;
-                if (t > 3)
-                    break;
                 downloader.Post(info);
-            }
 
             downloader.Complete();
 
