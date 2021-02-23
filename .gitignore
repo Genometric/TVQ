@@ -317,3 +317,6 @@ Deployment/*
 
 /yarn.lock
 website/yarn.lock
+
+Crawlers/ToolShed/publish
+Crawlers/ToolShed/build
