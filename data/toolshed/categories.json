@@ -1,0 +1,416 @@
+[
+  {
+    "model_class": "Category",
+    "id": "3c4a991608b4c8dd",
+    "name": "Assembly",
+    "description": "Tools for working with assemblies",
+    "deleted": false,
+    "url": "/api/categories/3c4a991608b4c8dd",
+    "repositories": 151
+  },
+  {
+    "model_class": "Category",
+    "id": "c840411c973d0a31",
+    "name": "ChIP-seq",
+    "description": "Tools for analyzing and manipulating ChIP-seq data.",
+    "deleted": false,
+    "url": "/api/categories/c840411c973d0a31",
+    "repositories": 75
+  },
+  {
+    "model_class": "Category",
+    "id": "857acdfcf0273d54",
+    "name": "Climate Analysis",
+    "description": "Tools for analyzing climate data",
+    "deleted": false,
+    "url": "/api/categories/857acdfcf0273d54",
+    "repositories": 5
+  },
+  {
+    "model_class": "Category",
+    "id": "0d7cf109abd20e00",
+    "name": "Combinatorial Selections",
+    "description": "Tools for combinatorial selection",
+    "deleted": false,
+    "url": "/api/categories/0d7cf109abd20e00",
+    "repositories": 9
+  },
+  {
+    "model_class": "Category",
+    "id": "bdfa208f0cf6504e",
+    "name": "Computational chemistry",
+    "description": "Tools for use in computational chemistry",
+    "deleted": false,
+    "url": "/api/categories/bdfa208f0cf6504e",
+    "repositories": 159
+  },
+  {
+    "model_class": "Category",
+    "id": "589548af7e391bcf",
+    "name": "Constructive Solid Geometry",
+    "description": "Tools for constructing and analyzing 3-dimensional shapes and their properties",
+    "deleted": false,
+    "url": "/api/categories/589548af7e391bcf",
+    "repositories": 11
+  },
+  {
+    "model_class": "Category",
+    "id": "e4de88c47079d971",
+    "name": "Convert Formats",
+    "description": "Tools for converting data formats",
+    "deleted": false,
+    "url": "/api/categories/e4de88c47079d971",
+    "repositories": 124
+  },
+  {
+    "model_class": "Category",
+    "id": "fafc098a908feea9",
+    "name": "Data Export",
+    "description": "Tools for exporting data to various destinations",
+    "deleted": false,
+    "url": "/api/categories/fafc098a908feea9",
+    "repositories": 10
+  },
+  {
+    "model_class": "Category",
+    "id": "ea2b33c52b8166c2",
+    "name": "Data Managers",
+    "description": "Utilities for Managing Galaxy's built-in data cache",
+    "deleted": false,
+    "url": "/api/categories/ea2b33c52b8166c2",
+    "repositories": 79
+  },
+  {
+    "model_class": "Category",
+    "id": "2498224736779bdb",
+    "name": "Data Source",
+    "description": "Tools for retrieving data from external data sources",
+    "deleted": false,
+    "url": "/api/categories/2498224736779bdb",
+    "repositories": 89
+  },
+  {
+    "model_class": "Category",
+    "id": "b4146bb7fe9b8726",
+    "name": "Ecology",
+    "description": "Tools related to ecological studies",
+    "deleted": false,
+    "url": "/api/categories/b4146bb7fe9b8726",
+    "repositories": 46
+  },
+  {
+    "model_class": "Category",
+    "id": "d1d181ed6af7f959",
+    "name": "Entomology",
+    "description": "Tools that involve insect studies",
+    "deleted": false,
+    "url": "/api/categories/d1d181ed6af7f959",
+    "repositories": 4
+  },
+  {
+    "model_class": "Category",
+    "id": "5427df610f6d85d5",
+    "name": "Epigenetics",
+    "description": "Tools for analyzing Epigenetic/Epigenomic datasets",
+    "deleted": false,
+    "url": "/api/categories/5427df610f6d85d5",
+    "repositories": 33
+  },
+  {
+    "model_class": "Category",
+    "id": "652f5dd81838e917",
+    "name": "Fasta Manipulation",
+    "description": "Tools for manipulating fasta data",
+    "deleted": false,
+    "url": "/api/categories/652f5dd81838e917",
+    "repositories": 116
+  },
+  {
+    "model_class": "Category",
+    "id": "310ff67d4caf6531",
+    "name": "Fastq Manipulation",
+    "description": "Tools for manipulating fastq data",
+    "deleted": false,
+    "url": "/api/categories/310ff67d4caf6531",
+    "repositories": 97
+  },
+  {
+    "model_class": "Category",
+    "id": "2dd0b8bba1828473",
+    "name": "Flow Cytometry Analysis",
+    "description": "Tools for manipulating and analyzing FCS files",
+    "deleted": false,
+    "url": "/api/categories/2dd0b8bba1828473",
+    "repositories": 37
+  },
+  {
+    "model_class": "Category",
+    "id": "c6dafba9ea5df1a8",
+    "name": "Genome annotation",
+    "description": "Tools for annotating genomic information",
+    "deleted": false,
+    "url": "/api/categories/c6dafba9ea5df1a8",
+    "repositories": 46
+  },
+  {
+    "model_class": "Category",
+    "id": "faf52b7a99ec14da",
+    "name": "Genome editing",
+    "description": "Tools for analyzing genome editing data",
+    "deleted": false,
+    "url": "/api/categories/faf52b7a99ec14da",
+    "repositories": 7
+  },
+  {
+    "model_class": "Category",
+    "id": "cc3d5f37351f3f46",
+    "name": "Genome-Wide Association Study",
+    "description": "Utilities to support Genome-wide association studies",
+    "deleted": false,
+    "url": "/api/categories/cc3d5f37351f3f46",
+    "repositories": 22
+  },
+  {
+    "model_class": "Category",
+    "id": "34c57577a6fb492b",
+    "name": "Genomic Interval Operations",
+    "description": "Tools for operating on genomic intervals",
+    "deleted": false,
+    "url": "/api/categories/34c57577a6fb492b",
+    "repositories": 66
+  },
+  {
+    "model_class": "Category",
+    "id": "cd0d8ada19d98f27",
+    "name": "GIS",
+    "description": "Tools related to Geographic Information Systems",
+    "deleted": false,
+    "url": "/api/categories/cd0d8ada19d98f27",
+    "repositories": 3
+  },
+  {
+    "model_class": "Category",
+    "id": "26f26c7aa084d325",
+    "name": "Graphics",
+    "description": "Tools producing images ",
+    "deleted": false,
+    "url": "/api/categories/26f26c7aa084d325",
+    "repositories": 82
+  },
+  {
+    "model_class": "Category",
+    "id": "f32bb8f087d8a30d",
+    "name": "Imaging",
+    "description": "Utilities to support imaging",
+    "deleted": false,
+    "url": "/api/categories/f32bb8f087d8a30d",
+    "repositories": 93
+  },
+  {
+    "model_class": "Category",
+    "id": "521231119a61cff1",
+    "name": "Machine Learning",
+    "description": "Tools for machine learning",
+    "deleted": false,
+    "url": "/api/categories/521231119a61cff1",
+    "repositories": 50
+  },
+  {
+    "model_class": "Category",
+    "id": "c1df3132f6334b0e",
+    "name": "Metabolomics",
+    "description": "Tools for use in the study of Metabolomics",
+    "deleted": false,
+    "url": "/api/categories/c1df3132f6334b0e",
+    "repositories": 125
+  },
+  {
+    "model_class": "Category",
+    "id": "13b9894bdf1bf60c",
+    "name": "Metagenomics",
+    "description": "Tools enabling the study of metagenomes",
+    "deleted": false,
+    "url": "/api/categories/13b9894bdf1bf60c",
+    "repositories": 336
+  },
+  {
+    "model_class": "Category",
+    "id": "83f763caf629aa54",
+    "name": "Micro-array Analysis",
+    "description": "Tools for performing micro-array analysis",
+    "deleted": false,
+    "url": "/api/categories/83f763caf629aa54",
+    "repositories": 33
+  },
+  {
+    "model_class": "Category",
+    "id": "0b749b7b18926978",
+    "name": "Molecular Dynamics",
+    "description": "Tools for studying the physical movements of atoms and molecules",
+    "deleted": false,
+    "url": "/api/categories/0b749b7b18926978",
+    "repositories": 28
+  },
+  {
+    "model_class": "Category",
+    "id": "fe9ae4f69e31ee78",
+    "name": "Nanopore",
+    "description": "Tools for analyzing Nanopore data",
+    "deleted": false,
+    "url": "/api/categories/fe9ae4f69e31ee78",
+    "repositories": 10
+  },
+  {
+    "model_class": "Category",
+    "id": "c9715d71689bf781",
+    "name": "Next Gen Mappers",
+    "description": "Tools for the analysis and handling of Next Gen sequencing data",
+    "deleted": false,
+    "url": "/api/categories/c9715d71689bf781",
+    "repositories": 129
+  },
+  {
+    "model_class": "Category",
+    "id": "7b5e428b668b9ff4",
+    "name": "Ontology Manipulation",
+    "description": "Tools for manipulating ontologies",
+    "deleted": false,
+    "url": "/api/categories/7b5e428b668b9ff4",
+    "repositories": 34
+  },
+  {
+    "model_class": "Category",
+    "id": "5141774efbefaf3e",
+    "name": "Phylogenetics",
+    "description": "Tools for performing phylogenetic analysis",
+    "deleted": false,
+    "url": "/api/categories/5141774efbefaf3e",
+    "repositories": 79
+  },
+  {
+    "model_class": "Category",
+    "id": "4963efc937542d6d",
+    "name": "Proteomics",
+    "description": "Tools enabling the study of proteins",
+    "deleted": false,
+    "url": "/api/categories/4963efc937542d6d",
+    "repositories": 394
+  },
+  {
+    "model_class": "Category",
+    "id": "5ec5cd01c08a1944",
+    "name": "RNA",
+    "description": "Utilities for RNA",
+    "deleted": false,
+    "url": "/api/categories/5ec5cd01c08a1944",
+    "repositories": 401
+  },
+  {
+    "model_class": "Category",
+    "id": "006f4bd910cb3717",
+    "name": "SAM",
+    "description": "Tools for manipulating alignments in the SAM format",
+    "deleted": false,
+    "url": "/api/categories/006f4bd910cb3717",
+    "repositories": 108
+  },
+  {
+    "model_class": "Category",
+    "id": "c0b55599c0b094b7",
+    "name": "Sequence Analysis",
+    "description": "Tools for performing Protein and DNA/RNA analysis",
+    "deleted": false,
+    "url": "/api/categories/c0b55599c0b094b7",
+    "repositories": 1024
+  },
+  {
+    "model_class": "Category",
+    "id": "175d7d5ddeeb1d43",
+    "name": "Statistics",
+    "description": "Tools for generating statistics",
+    "deleted": false,
+    "url": "/api/categories/175d7d5ddeeb1d43",
+    "repositories": 248
+  },
+  {
+    "model_class": "Category",
+    "id": "4c8d49ef284b7a1f",
+    "name": "Structural Materials Analysis",
+    "description": "Tools for High Energy X-ray Imaging, Diffraction, and Modeling of Microstructures",
+    "deleted": false,
+    "url": "/api/categories/4c8d49ef284b7a1f",
+    "repositories": 1
+  },
+  {
+    "model_class": "Category",
+    "id": "afcb6456d8e300ed",
+    "name": "Systems Biology",
+    "description": "Systems biology tools",
+    "deleted": false,
+    "url": "/api/categories/afcb6456d8e300ed",
+    "repositories": 16
+  },
+  {
+    "model_class": "Category",
+    "id": "175812cd7caaf439",
+    "name": "Text Manipulation",
+    "description": "Tools for manipulating data",
+    "deleted": false,
+    "url": "/api/categories/175812cd7caaf439",
+    "repositories": 161
+  },
+  {
+    "model_class": "Category",
+    "id": "5483924c34f005f2",
+    "name": "Tool Dependency Packages",
+    "description": "Repositories that contain third-party tool dependency package installation definitions",
+    "deleted": false,
+    "url": "/api/categories/5483924c34f005f2",
+    "repositories": 657
+  },
+  {
+    "model_class": "Category",
+    "id": "0bbfef2771c2ff2a",
+    "name": "Tool Generators",
+    "description": "Tools that make or help make new tools",
+    "deleted": false,
+    "url": "/api/categories/0bbfef2771c2ff2a",
+    "repositories": 6
+  },
+  {
+    "model_class": "Category",
+    "id": "f6d7b0037d901d9b",
+    "name": "Transcriptomics",
+    "description": "Tools for use in the study of Transcriptomics.",
+    "deleted": false,
+    "url": "/api/categories/f6d7b0037d901d9b",
+    "repositories": 331
+  },
+  {
+    "model_class": "Category",
+    "id": "f9cad7b01a472135",
+    "name": "Variant Analysis",
+    "description": "Tools for single nucleotide polymorphism data such as WGA",
+    "deleted": false,
+    "url": "/api/categories/f9cad7b01a472135",
+    "repositories": 290
+  },
+  {
+    "model_class": "Category",
+    "id": "ed01147b4aa1e8de",
+    "name": "Visualization",
+    "description": "Tools for visualizing data",
+    "deleted": false,
+    "url": "/api/categories/ed01147b4aa1e8de",
+    "repositories": 209
+  },
+  {
+    "model_class": "Category",
+    "id": "952fa104d5d2271a",
+    "name": "Web Services",
+    "description": "Tools enabling access to web services",
+    "deleted": false,
+    "url": "/api/categories/952fa104d5d2271a",
+    "repositories": 115
+  }
+]
