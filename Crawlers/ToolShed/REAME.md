@@ -1,6 +1,6 @@
-## WIP
+# ToolShed Offline Crawler
 
-# Build
+## Build
 
 There are multiple options to build/compile the crawler. 
 The simplest option is to compile a host-dependant version, 
@@ -34,7 +34,7 @@ see [this page](https://docs.microsoft.com/en-us/dotnet/core/rid-catalog).
 For a complete list of the `publish` arguments, 
 [see this page](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish).
 
-# Run
+## Run
 
 ```shell
 $ cd publish
