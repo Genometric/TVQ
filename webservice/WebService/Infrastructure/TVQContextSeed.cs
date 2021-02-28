@@ -49,7 +49,7 @@ namespace Genometric.TVQ.WebService.Infrastructure
             var toolshed = new Repository()
             {
                 Name = Repository.Repo.ToolShed,
-                URI = "https://toolshed.g2.bx.psu.edu/api/"
+                URI = "https://github.com/Genometric/TVQ/raw/master/data/toolshed/"
             };
             toolshed.Statistics = new Statistics() { Repository = toolshed };
 
