@@ -93,13 +93,7 @@ namespace Genometric.TVQ.Crawlers.ToolShedCrawler
             UpdateCategories();
             var tools = GetTools().Result;
             if (tools != null)
-            {
-                foreach (var tool in tools)
-                    if (!Publications.ContainsKey(tool.ID))
-                        Publications.TryAdd(tool.ID, new List<Publication>());
-
                 GetPublications(tools);
-            }
         }
 
         private void UpdateCategories()
@@ -289,6 +283,8 @@ namespace Genometric.TVQ.Crawlers.ToolShedCrawler
                             switch (item.Attribute("type").Value.Trim().ToUpperInvariant())
                             {
                                 case "DOI":
+                                    if (!Publications.ContainsKey(info.ID))
+                                        Publications.TryAdd(info.ID, new List<Publication>());
                                     Publications[info.ID].Add(new Publication() { DOI = item.Value });
                                     /// Some tools have one BibItem that contains only DOI, and 
                                     /// another BibItem that contains publication info. There should
@@ -301,7 +297,11 @@ namespace Genometric.TVQ.Crawlers.ToolShedCrawler
                                     try
                                     {
                                         if (TryParseBibitem(item.Value, out Publication pub))
+                                        {
+                                            if (!Publications.ContainsKey(info.ID))
+                                                Publications.TryAdd(info.ID, new List<Publication>());
                                             Publications[info.ID].Add(pub);
+                                        }
                                     }
                                     catch (ArgumentException e)
                                     {
