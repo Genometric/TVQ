@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 
 namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
 {
@@ -18,11 +17,6 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
         private const string _toolsFilename = "tools.json";
         private const string _categoriesFilename = "categories.json";
         private const string _publicationsFilename = "publications.json";
-
-        private readonly int _maxParallelDownloads = 3;
-        private readonly int _maxParallelActions = Environment.ProcessorCount * 3;
-        private readonly int _boundedCapacity = Environment.ProcessorCount * 3;
-
         
         private readonly JsonSerializerSettings _categoryJsonSerializerSettings;
 
@@ -137,24 +131,20 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
             var toolPublications = JsonConvert.DeserializeObject<Dictionary<string, List<Publication>>>(content);
             foreach (var publications in toolPublications)
             {
-                // TODO: remove this check after the offline parser is updated. 
-                if (publications.Value.Count > 0)
+                foreach (var tool in toolsInfo)
                 {
-                    foreach(var tool in toolsInfo)
+                    if (tool.ToolRepoAssociation.IDinRepo == publications.Key)
                     {
-                        if (tool.ToolRepoAssociation.IDinRepo == publications.Key)
-                        {
-                            var pubAssociations = new List<ToolPublicationAssociation>();
-                            foreach (var pub in publications.Value)
-                                pubAssociations.Add(new ToolPublicationAssociation()
-                                {
-                                    Publication = pub
-                                });
+                        var pubAssociations = new List<ToolPublicationAssociation>();
+                        foreach (var pub in publications.Value)
+                            pubAssociations.Add(new ToolPublicationAssociation()
+                            {
+                                Publication = pub
+                            });
 
-                            tool.ToolPubAssociations = pubAssociations;
-                            TryAddEntities(tool);
-                            break;
-                        }
+                        tool.ToolPubAssociations = pubAssociations;
+                        TryAddEntities(tool);
+                        break;
                     }
                 }
             }
