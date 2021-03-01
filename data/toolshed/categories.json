@@ -6,7 +6,7 @@
     "description": "Tools for working with assemblies",
     "deleted": false,
     "url": "/api/categories/3c4a991608b4c8dd",
-    "repositories": 151
+    "repositories": 159
   },
   {
     "model_class": "Category",
@@ -204,7 +204,7 @@
     "description": "Utilities to support imaging",
     "deleted": false,
     "url": "/api/categories/f32bb8f087d8a30d",
-    "repositories": 93
+    "repositories": 97
   },
   {
     "model_class": "Category",
@@ -213,7 +213,7 @@
     "description": "Tools for machine learning",
     "deleted": false,
     "url": "/api/categories/521231119a61cff1",
-    "repositories": 50
+    "repositories": 49
   },
   {
     "model_class": "Category",
@@ -312,7 +312,7 @@
     "description": "Tools for manipulating alignments in the SAM format",
     "deleted": false,
     "url": "/api/categories/006f4bd910cb3717",
-    "repositories": 108
+    "repositories": 110
   },
   {
     "model_class": "Category",
@@ -321,7 +321,7 @@
     "description": "Tools for performing Protein and DNA/RNA analysis",
     "deleted": false,
     "url": "/api/categories/c0b55599c0b094b7",
-    "repositories": 1024
+    "repositories": 1031
   },
   {
     "model_class": "Category",
@@ -384,7 +384,7 @@
     "description": "Tools for use in the study of Transcriptomics.",
     "deleted": false,
     "url": "/api/categories/f6d7b0037d901d9b",
-    "repositories": 331
+    "repositories": 333
   },
   {
     "model_class": "Category",
