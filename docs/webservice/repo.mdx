@@ -1,0 +1,143 @@
+---
+title: Repositories
+---
+
+
+
+## List Defined Repositories
+
+You can get a list of defined repositories by sending
+a GET request as the following:
+
+```
+curl -X GET http://localhost:3030/api/v1/Repositories/
+```
+
+The API endpoint will return a JSON object containing
+the defined repositories. For instance, the following
+are the list of the default repositories:
+
+```json
+[
+    {
+        "ID": 1,
+        "Name": "ToolShed",
+        "URI": "https://github.com/Genometric/TVQ/raw/master/data/toolshed/",
+        "UpdatedDate": "Sunday, 28 February 2021 16:18:19",
+        "CreatedDate": "Sunday, 28 February 2021 16:18:19",
+        "Statistics": {
+            "ID": 1,
+            "RepositoryID": 1,
+            "UpdatedDate": "Sunday, 28 February 2021 16:18:19",
+            "CreatedDate": "Sunday, 28 February 2021 16:18:19",
+            "Repository": null
+        }
+    },
+    {
+        "ID": 2,
+        "Name": "BioTools",
+        "URI": "https://github.com/bio-tools/content/archive/master.zip",
+        "UpdatedDate": "Sunday, 28 February 2021 16:18:19",
+        "CreatedDate": "Sunday, 28 February 2021 16:18:19",
+        "Statistics": {
+            "ID": 2,
+            "RepositoryID": 2,
+            "UpdatedDate": "Sunday, 28 February 2021 16:18:19",
+            "CreatedDate": "Sunday, 28 February 2021 16:18:19",
+            "Repository": null
+        }
+    },
+    {
+        "ID": 3,
+        "Name": "Bioconductor",
+        "URI": "https://github.com/Genometric/TVQ/raw/master/data/bioconductor/",
+        "UpdatedDate": "Sunday, 28 February 2021 16:18:19",
+        "CreatedDate": "Sunday, 28 February 2021 16:18:19",
+        "Statistics": {
+            "ID": 3,
+            "RepositoryID": 3,
+            "UpdatedDate": "Sunday, 28 February 2021 16:18:19",
+            "CreatedDate": "Sunday, 28 February 2021 16:18:19",
+            "Repository": null
+        }
+    },
+    {
+        "ID": 4,
+        "Name": "Bioconda",
+        "URI": "https://github.com/VJalili/bioconda-recipes/archive/cheetah_template.zip",
+        "UpdatedDate": "Sunday, 28 February 2021 16:18:19",
+        "CreatedDate": "Sunday, 28 February 2021 16:18:19",
+        "Statistics": {
+            "ID": 4,
+            "RepositoryID": 4,
+            "UpdatedDate": "Sunday, 28 February 2021 16:18:19",
+            "CreatedDate": "Sunday, 28 February 2021 16:18:19",
+            "Repository": null
+        }
+    }
+]
+```
+
+## Tools in Repositories
+
+TVQ implements _crawlers_ to collect information
+about repositories. In order to invoke a crawler,
+send a POST request as the following:
+
+```
+curl -H "Content-Type: application/json" \
+     -X POST http://localhost:8000/api/v1/RepoCrawlingJobs \
+     -d "{Repository:{\"ID\":4}}"
+```
+
+This is a request to collect information about Bioconductor, and
+TVQ will respond with the respective crawling job it created:
+
+```json
+{
+    "ID": 5,
+    "RepositoryID": 3,
+    "Status": "Queued",
+    "UpdatedDate": "Wednesday, 10 March 2021 20:35:23",
+    "CreatedDate": "Wednesday, 10 March 2021 20:35:23",
+    "Repository": {
+        "ID": 3,
+        "Name": "Bioconductor",
+        "URI": "https://github.com/Genometric/TVQ/raw/master/data/bioconductor/",
+        "UpdatedDate": "Sunday, 28 February 2021 16:18:19",
+        "CreatedDate": "Sunday, 28 February 2021 16:18:19"
+    }
+}
+```
+
+The `Status` of the job can be either of the following:
+`{Queued, Running, Completed, Failed}`.
+
+To check the status of a cralwer, you may send
+a GET request as the following:
+
+```
+curl -X GET http://localhost:3030/api/v1/RepoCrawlingJobs/
+```
+
+which will respond with a JSON object containing all the
+submitted repository crawling jobs as the following:
+
+```json
+[
+    {
+        "ID": 1,
+        "RepositoryID": 1,
+        "Status": "Completed",
+        "UpdatedDate": "Sunday, 28 February 2021 20:43:55",
+        "CreatedDate": "Sunday, 28 February 2021 16:19:06",
+        "Repository": {
+            "ID": 1,
+            "Name": "ToolShed",
+            "URI": "https://github.com/Genometric/TVQ/raw/master/data/toolshed/",
+            "UpdatedDate": "Sunday, 28 February 2021 16:18:19",
+            "CreatedDate": "Sunday, 28 February 2021 16:18:19"
+        }
+    }
+]
+```
