@@ -17,22 +17,22 @@ namespace Genometric.TVQ.WebService.Analysis
     public class AnalysisService : BaseService<AnalysisJob>
     {
         // -------------------------------------------------
-        // All the methods of this service are experimental, 
-        // possibly with poor performance. All would benefit 
+        // All the methods of this service are experimental,
+        // possibly with poor performance. All would benefit
         // from a re-implementation.
         // -------------------------------------------------
 
         /// <summary>
         /// There are many articles that cite very old "related"
-        /// works, which can bias the statistics. As a patch, 
+        /// works, which can bias the statistics. As a patch,
         /// we set a earliest date for citations, and any reference
-        /// earlier than that will be ignored. 
+        /// earlier than that will be ignored.
         /// </summary>
         public int EarliestPublicationYear { set; get; } = 2000;
 
         /// <summary>
-        /// Sets and gets minimum year offset (inclusive) between the 
-        /// publication year and when the tool was added to a repository. 
+        /// Sets and gets minimum year offset (inclusive) between the
+        /// publication year and when the tool was added to a repository.
         /// For instance, this ignore publications that were published
         /// at the same year as the tool was added to the repository.
         /// </summary>
@@ -49,8 +49,8 @@ namespace Genometric.TVQ.WebService.Analysis
             if (job == null)
                 return;
 
-            /// TODO: the following should be broken down into multiple 	
-            /// separate LINQ queries to avoid the Cartesian explosion problem.	
+            /// TODO: the following should be broken down into multiple
+            /// separate LINQ queries to avoid the Cartesian explosion problem.
             job = Context.AnalysisJobs.Include(x => x.Repository)
                                         .ThenInclude(x => x.ToolAssociations)
                                             .ThenInclude(x => x.Tool)
@@ -127,7 +127,7 @@ namespace Genometric.TVQ.WebService.Analysis
             }
 
 
-            // First normalize citation count w.r.t to date. 
+            // First normalize citation count w.r.t to date.
             var toolIDs = changes.Keys.ToList();
 
             minCitationCount = int.MaxValue;
@@ -148,7 +148,7 @@ namespace Genometric.TVQ.WebService.Analysis
             }
 
 
-            // Second, normalize citation count and date to using min-max normalization. 
+            // Second, normalize citation count and date to using min-max normalization.
             foreach (var id in toolIDs)
             {
                 var tool = changes[id];
@@ -393,7 +393,7 @@ namespace Genometric.TVQ.WebService.Analysis
 
             foreach (var asso in associations)
             {
-                // Some tools may not have any publications. 
+                // Some tools may not have any publications.
                 if (asso.Tool.PublicationAssociations == null ||
                     asso.Tool.PublicationAssociations.Count == 0)
                     continue;
@@ -401,7 +401,7 @@ namespace Genometric.TVQ.WebService.Analysis
                 if (!rtv.ContainsKey(asso.Tool))
                     rtv.Add(asso.Tool, new CitationChange());
 
-                // There are some tools that have multiple publications, we consider only the first one. 
+                // There are some tools that have multiple publications, we consider only the first one.
                 var pub = asso.Tool.PublicationAssociations.First();
 
                 if (pub.Publication.Citations != null &&
@@ -437,7 +437,7 @@ namespace Genometric.TVQ.WebService.Analysis
 
             foreach (var asso in associations)
             {
-                // Some tools may not have any publications. 
+                // Some tools may not have any publications.
                 if (asso.Tool.PublicationAssociations == null ||
                     asso.Tool.PublicationAssociations.Count == 0 ||
                     asso.DateAddedToRepository == null)

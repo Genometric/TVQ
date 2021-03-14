@@ -76,9 +76,9 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
         {
             var citationsFileName = SessionTempPath + Utilities.GetRandomString();
 
-            /// Use a new WebClient instance for downloads, because 
+            /// Use a new WebClient instance for downloads, because
             /// an instance of WebClient does not support concurrent
-            /// downloads. 
+            /// downloads.
             using var client = new WebClient();
             client.DownloadFileTaskAsync(Repo.GetURI() + _citationsFileName, citationsFileName).Wait();
 

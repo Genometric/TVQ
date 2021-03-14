@@ -120,8 +120,8 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
                     _categoryRepoAssociations.Add(key, association);
 
                     // This assignment is necessary because if `key`
-                    // does not exist in `_categoryRepoAssociations` then 
-                    // rtv will be set to null. 
+                    // does not exist in `_categoryRepoAssociations` then
+                    // rtv will be set to null.
                     rtv = association;
                 }
 
@@ -157,7 +157,7 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
 
             foreach (var association in associations)
             {
-                // Does a publication (according to the publication hash key) as the 
+                // Does a publication (according to the publication hash key) as the
                 // given one has already been defined?
                 // If no, then keep the parsed publication and add it to the dictionary.
                 if (!TryAddPublication(association.Publication))
@@ -165,10 +165,10 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
                     // Yes, then replaced the parsed publication with the one that already exists.
                     /// Note:
                     /// -----
-                    /// Alternative to this is to merge the information in two citations. 
+                    /// Alternative to this is to merge the information in two citations.
                     /// However, since the one already in PublicationsDict may have more complete
                     /// information because it may have been updated by the info from Scopus, this
-                    /// approach is used. Also, merging two publications comes with many corner 
+                    /// approach is used. Also, merging two publications comes with many corner
                     /// cases to be addressed.
                     association.Publication = GetPublication(association.Publication);
                 }
@@ -205,7 +205,7 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
 
         protected bool TryAddEntities(DeserializedInfo info)
         {
-            // Checks if the association and the tool 
+            // Checks if the association and the tool
             // contains the required information.
             if (info == null ||
                 info.ToolRepoAssociation.Tool == null)
@@ -227,7 +227,7 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
             if (!Tools.TryAdd(toolName, info.ToolRepoAssociation.Tool))
                 info.ToolRepoAssociation.Tool = Tools[toolName];
 
-            // TODO: there could be a better way of associating categories with 
+            // TODO: there could be a better way of associating categories with
             // repository if the tool association was successful than this method.
             var categoryRepoAssoToRegister = new List<CategoryRepoAssociation>();
 

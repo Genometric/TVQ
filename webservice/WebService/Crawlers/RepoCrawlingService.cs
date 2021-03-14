@@ -26,7 +26,7 @@ namespace Genometric.TVQ.WebService.Crawlers
             CancellationToken cancellationToken)
         {
             // TODO: each of the following loads has performance penalty;
-            // hence they should be limited to only the needed ones. Carefully 
+            // hence they should be limited to only the needed ones. Carefully
             // check which ones are required, and remove the unessential ones.
             Context.Entry(job).Reference(x => x.Repository).Load();
 

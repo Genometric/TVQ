@@ -1,7 +1,7 @@
 # This docker file first creates a container to build the
-# project, and then copies the built data to a runtime 
+# project, and then copies the built data to a runtime
 # container (which does not have .NET SDK, hence creating
-# a smaller image.) 
+# a smaller image.)
 
 # -----------------------
 # | Building the Webapp |
@@ -19,8 +19,8 @@ COPY webservice/WebService/*.csproj ./webservice/WebService/
 # Option 1: restore only the webservice project.
 RUN dotnet restore webservice/WebService/WebService.csproj
 
-# Option 2: restore the entire solutions. In this case, 
-# every project should be copied to the container for the 
+# Option 2: restore the entire solutions. In this case,
+# every project should be copied to the container for the
 # solution to restore correctly; like:
 #   COPY webservice/UnitTests/*.csproj ./webservice/UnitTests/
 #   RUN dotnet restore TVQ.sln
@@ -36,8 +36,8 @@ RUN dotnet publish WebService.csproj -c Release -o out
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine AS runtime
 
-# The following commands are required because of breaking 
-# changes introduced in .NET Core 3 and SQL docker container. 
+# The following commands are required because of breaking
+# changes introduced in .NET Core 3 and SQL docker container.
 RUN apk add icu-libs
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 

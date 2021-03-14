@@ -25,16 +25,16 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos.HelperTypes
                 {"category_ids", nameof(DeserializedInfo.CategoryIDs)},
 
                 /// Why not reading Bio.Tools Publication.Metadata?
-                /// A JSON object from Bio.Tools contains a field named "meta-data" for 
-                /// each publication. This field (at the time of writing this) is not 
-                /// set for every publication. Hence, it can be more reliable to 
-                /// capture only DOI and/or PubMedID and query details of each 
-                /// publication from Scopus. 
+                /// A JSON object from Bio.Tools contains a field named "meta-data" for
+                /// each publication. This field (at the time of writing this) is not
+                /// set for every publication. Hence, it can be more reliable to
+                /// capture only DOI and/or PubMedID and query details of each
+                /// publication from Scopus.
             };
         }
 
         public ExternalToolModelJsonConverter(
-            JsonSerializerSettings toolSerializerSettings, 
+            JsonSerializerSettings toolSerializerSettings,
             JsonSerializerSettings toolRepoAssoSerializerSettings,
             JsonSerializerSettings publicationSerializerSettings,
             JsonSerializerSettings categorySerializerSettings) : this()
@@ -67,14 +67,14 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos.HelperTypes
 
                 if (name == "publication")
                 {
-                    instance.Publications = 
+                    instance.Publications =
                         JsonConvert.DeserializeObject<List<Publication>>(
                             jsonProperty.Value.ToString(), _publicationSerializerSettings);
                     continue;
                 }
                 else if (name == "topic")
                 {
-                    instance.CategoryRepoAssociations = 
+                    instance.CategoryRepoAssociations =
                         JsonConvert.DeserializeObject<List<CategoryRepoAssociation>>(
                             jsonProperty.Value.ToString(), _categorySerializerSettings);
                     continue;
@@ -88,11 +88,11 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos.HelperTypes
                     jsonProperty.Value.ToObject(prop.PropertyType, serializer));
             }
 
-            instance.ToolRepoAssociation = 
+            instance.ToolRepoAssociation =
                 JsonConvert.DeserializeObject<ToolRepoAssociation>(
                     obj.ToString(), _toolRepoAssoSerializerSettings);
 
-            instance.ToolRepoAssociation.Tool = 
+            instance.ToolRepoAssociation.Tool =
                 JsonConvert.DeserializeObject<Tool>(
                     obj.ToString(), _toolSerializerSettings);
 

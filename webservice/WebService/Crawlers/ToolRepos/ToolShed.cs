@@ -17,7 +17,7 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
         private const string _toolsFilename = "tools.json";
         private const string _categoriesFilename = "categories.json";
         private const string _publicationsFilename = "publications.json";
-        
+
         private readonly JsonSerializerSettings _categoryJsonSerializerSettings;
 
         public ToolShed(
@@ -38,7 +38,7 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
                             { "name", nameof(Tool.Name) },
                             { "homepage_url", nameof(Tool.Homepage) },
                             { "remote_repository_url", nameof(Tool.CodeRepo) },
-                            { "description", nameof(Tool.Description) } 
+                            { "description", nameof(Tool.Description) }
                         }))
             };
 
@@ -107,9 +107,9 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
 
             Logger.LogDebug("Received tools from ToolShed, deserializing them.");
             DeserializedInfo.TryDeserialize(
-                content, 
-                ToolJsonSerializerSettings, 
-                ToolRepoAssoJsonSerializerSettings, 
+                content,
+                ToolJsonSerializerSettings,
+                ToolRepoAssoJsonSerializerSettings,
                 out List<DeserializedInfo> deserializedInfos);
             foreach (var info in deserializedInfos)
                 info.SetStagingArea(SessionTempPath);

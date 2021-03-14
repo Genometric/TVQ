@@ -21,7 +21,7 @@ namespace Genometric.TVQ.WebService.Controllers
     public class StatisticsController : ControllerBase
     {
         // ----------------------------------------------------
-        // All the methods of this controller are experimental. 
+        // All the methods of this controller are experimental.
         // ----------------------------------------------------
 
         private readonly TVQContext _context;
@@ -226,7 +226,7 @@ namespace Genometric.TVQ.WebService.Controllers
                                         .ThenInclude(x => x.PublicationAssociations)
                                         .ThenInclude(x => x.Publication);
 
-            // Order of ints: Year, repo ID, then count. 
+            // Order of ints: Year, repo ID, then count.
             var distributions = new SortedDictionary<int, Dictionary<int, double>>();
 
             var repoIDs = repositories.Select(x => x.ID).ToList();
@@ -369,7 +369,7 @@ namespace Genometric.TVQ.WebService.Controllers
 
             var fileNames = new List<string>();
 
-            // This method is certainly very sub-optimal; it should be re-implemented. 
+            // This method is certainly very sub-optimal; it should be re-implemented.
             foreach (var category in _context.Categories.ToList())
             {
                 var tools = new List<int>();
@@ -504,7 +504,7 @@ namespace Genometric.TVQ.WebService.Controllers
             return distributions.Values;
         }
 
-        // This method generates an output that can be as input to the UpSet plot shiny app (https://gehlenborglab.shinyapps.io/upsetr/). 
+        // This method generates an output that can be as input to the UpSet plot shiny app (https://gehlenborglab.shinyapps.io/upsetr/).
         private async Task<string> ToolDistributionAmongRepositoriesExpression()
         {
             var toolRepoDis = await ToolDistributionAmongRepositories().ConfigureAwait(false);
@@ -790,7 +790,7 @@ namespace Genometric.TVQ.WebService.Controllers
 
                 var growthes = normalizedData.ToDictionary(x => x.Key, x => x.Value.Growth);
 
-                // TODO: Rework the following to avoid creating two dictionaries, and instead 
+                // TODO: Rework the following to avoid creating two dictionaries, and instead
                 // just pass normalizedData to the WriteToFile method.
                 WriteToFile(
                     Path.Combine(normalizedByDayTmpPath, "CitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
@@ -861,8 +861,8 @@ namespace Genometric.TVQ.WebService.Controllers
                 var associations = toolRepoAssociations.Where(x => x.RepositoryID == repo.ID).ToList();
 
                 _analysisService.GetPrePostCitationChangeVectorByPubs(
-                    associations, 
-                    out Dictionary<int, CitationChange> vectors, 
+                    associations,
+                    out Dictionary<int, CitationChange> vectors,
                     out Dictionary<int, List<Tool>> tools);
 
                 if (vectors.Count == 0)
@@ -870,7 +870,7 @@ namespace Genometric.TVQ.WebService.Controllers
 
                 var growthes = vectors.ToDictionary(x => x.Key, x => x.Value.Growth);
 
-                // TODO: Rework the following to avoid creating two dictionaries, and instead 
+                // TODO: Rework the following to avoid creating two dictionaries, and instead
                 // just pass normalizedData to the WriteToFile method.
                 WriteToFileByPubs(
                     Path.Combine(normalizedByDayTmpPath, "CitationsCount", Utilities.SafeFilename(repo.Name + ".csv")),
@@ -936,8 +936,8 @@ namespace Genometric.TVQ.WebService.Controllers
                                                     .ThenInclude(x => x.PublicationAssociations)
                                                     .ThenInclude(x => x.Publication);
 
-            // int[] is of length two; first item is tool count, and second item is citations count. 
-            // TODO: instead of int[] it might be better to use a Struct. 
+            // int[] is of length two; first item is tool count, and second item is citations count.
+            // TODO: instead of int[] it might be better to use a Struct.
             var distributions = new SortedDictionary<int, Dictionary<int, int[]>>();
 
             var repoIDs = repositories.Select(x => x.ID).ToList();
@@ -961,8 +961,8 @@ namespace Genometric.TVQ.WebService.Controllers
 
                     var publication = toolAssociation.Tool.GetSortedPublications().LastOrDefault();
 
-                    // This can be true when the given tool has only citations 
-                    // with invalid date. 
+                    // This can be true when the given tool has only citations
+                    // with invalid date.
                     if (publication.Value == null)
                         continue;
 

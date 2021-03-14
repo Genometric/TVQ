@@ -22,7 +22,7 @@ namespace Genometric.TVQ.WebService.Model.JsonConverters
             JsonObjectContract contract = base.CreateObjectContract(objectType);
             if (_converters.TryGetValue(objectType, out JsonConverter converter))
                 contract.Converter = converter;
-            
+
             return contract;
         }
     }

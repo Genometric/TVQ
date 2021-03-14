@@ -46,8 +46,8 @@ namespace Genometric.TVQ.WebService.Controllers
             }
 
             /// Instead of `Include(...).FirstOrDefaultAsync(...)` in the following,
-            /// we could have used `FindAsync` which checks context before sending 
-            /// a query to the database. However, when using `FindAsync` we cannot ask 
+            /// we could have used `FindAsync` which checks context before sending
+            /// a query to the database. However, when using `FindAsync` we cannot ask
             /// to include Publication info of a citation.
             var citation = await
                 _context.Citations

@@ -71,7 +71,7 @@ namespace Genometric.TVQ.WebService.Analysis
 
 
         /// <summary>
-        /// Paired t-test. 
+        /// Paired t-test.
         /// </summary>
         public static bool? ComputeTTest(
             List<double> deltas,

@@ -50,7 +50,7 @@ namespace Genometric.TVQ.WebService.Infrastructure.BackgroundTasks
             while (!cancellationToken.IsCancellationRequested)
             {
                 var id = await Queue.DequeueAsync(cancellationToken).ConfigureAwait(false);
-                
+
                 try
                 {
                     scope = ScopeFactory.CreateScope();

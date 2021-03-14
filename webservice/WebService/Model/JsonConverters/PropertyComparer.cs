@@ -12,10 +12,10 @@ namespace Genometric.TVQ.WebService.Model.JsonConverters
         {
             if (x == null)
                 return 1;
-            
+
             if (y == null)
                 return -1;
-            
+
             if (x == null && y == null)
                 return 0;
 

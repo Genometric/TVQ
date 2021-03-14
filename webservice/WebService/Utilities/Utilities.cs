@@ -8,8 +8,8 @@ namespace Genometric.TVQ.WebService.Model
     public static class Utilities
     {
         /// <summary>
-        /// Generates a random string of alphanumeric characters, 
-        /// starting with a alphabetic character, and using all 
+        /// Generates a random string of alphanumeric characters,
+        /// starting with a alphabetic character, and using all
         /// capital letters.
         /// </summary>
         public static string GetRandomString(int length = 25)

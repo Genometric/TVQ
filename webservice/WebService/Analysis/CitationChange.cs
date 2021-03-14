@@ -367,13 +367,13 @@ namespace Genometric.TVQ.WebService.Analysis
             {
                 normalizedDate = ZeroOneNormalize(point.Key);
 
-                // Multiply citation count by _logit_ of 0-1 normalized date; 
-                // hence citation counts of when the tool was NOT added to the 
-                // repository will decrease the score (which decreases more as 
-                // the citation count belongs to a time older date as when the 
-                // tool was added to the repository) and citation counts of 
-                // after when the tool was added to the repository, increase the 
-                // score (effect of which increase the date of citation is more 
+                // Multiply citation count by _logit_ of 0-1 normalized date;
+                // hence citation counts of when the tool was NOT added to the
+                // repository will decrease the score (which decreases more as
+                // the citation count belongs to a time older date as when the
+                // tool was added to the repository) and citation counts of
+                // after when the tool was added to the repository, increase the
+                // score (effect of which increase the date of citation is more
                 // current.
                 score += point.Value.Count * (-Math.Log((1 / normalizedDate) - 1, Math.E));
             }

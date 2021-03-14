@@ -55,27 +55,27 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos.HelperTypes
 
         /// <summary>
         /// Sets and gets the filename of the downloaded
-        /// archive file. For instance, the archive filename 
-        /// of a repository downloaded from ToolShed. 
+        /// archive file. For instance, the archive filename
+        /// of a repository downloaded from ToolShed.
         /// </summary>
         public string ArchiveFilename { set; get; }
 
         /// <summary>
-        /// Sets and gets path to a folder where the 
+        /// Sets and gets path to a folder where the
         /// contents of the downloaded archive are extracted.
         /// </summary>
         public string ArchiveExtractionPath { set; get; }
 
         /// <summary>
         /// Sets and gets the filenames of the XML files
-        /// extracted from the downloaded archive file. 
+        /// extracted from the downloaded archive file.
         /// </summary>
         public List<string> XMLFiles { set; get; }
 
         public DeserializedInfo()
         {
             /// An archive downloaded from ToolShed generally
-            /// encompasses less than 5 XML files. 
+            /// encompasses less than 5 XML files.
             XMLFiles = new List<string>(capacity: 5);
 
             CategoryRepoAssociations = new List<CategoryRepoAssociation>();
@@ -114,8 +114,8 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos.HelperTypes
 
             ArchiveFilename = StagingArea + Utilities.GetRandomString(8);
 
-            /// To avoid `path traversal attacks` from malicious software, 
-            /// there must be a trailing path separator at the end of the path. 
+            /// To avoid `path traversal attacks` from malicious software,
+            /// there must be a trailing path separator at the end of the path.
             ArchiveExtractionPath =
                 StagingArea + Utilities.GetRandomString(8) +
                 Path.DirectorySeparatorChar;

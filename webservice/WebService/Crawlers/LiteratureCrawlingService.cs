@@ -45,19 +45,19 @@ namespace Genometric.TVQ.WebService.Crawlers
             using var scopusCrawler = new Scopus(publications, Logger);
             await scopusCrawler.CrawlAsync().ConfigureAwait(false);
 
-            // TODO: There must a much better way of doing this; e.g., an approach 
-            // that automatically reflects changes in the database. 
+            // TODO: There must a much better way of doing this; e.g., an approach
+            // that automatically reflects changes in the database.
             Context.Publications.RemoveRange(scopusCrawler.PublicationsToBeDeleted);
 
-            /// It is better to let the scheduler to set the status and 
-            /// save the changes. However, since the scheduler is in a 
-            /// different database context, it wont see the changes 
-            /// in this context, hence cannot save the citations. 
+            /// It is better to let the scheduler to set the status and
+            /// save the changes. However, since the scheduler is in a
+            /// different database context, it wont see the changes
+            /// in this context, hence cannot save the citations.
             /// Also, if we let citations to be saved in this context
-            /// and job status set in the scheduler, in that case, 
+            /// and job status set in the scheduler, in that case,
             /// if any error occurs in scheduler before setting/saving
-            /// job status, then it will corrupt database (citations 
-            /// saved, but job either erred or pending; in violation of 
+            /// job status, then it will corrupt database (citations
+            /// saved, but job either erred or pending; in violation of
             /// ACID).
             job.Status = State.Completed;
             await Context.SaveChangesAsync().ConfigureAwait(false);

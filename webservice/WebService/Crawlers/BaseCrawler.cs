@@ -25,18 +25,18 @@ namespace Genometric.TVQ.WebService.Crawlers
         {
             "{", "}",
 
-            // Scopus fails to find the article when its title contains `?`. 
+            // Scopus fails to find the article when its title contains `?`.
             "?",
 
             // Open and close parenthesis are Scopus query segment delimiters;
             // hence, having them as part of a publication title will a malformed
-            // request (i.e., BAD REQUEST). They cannot be escaped, doing so 
+            // request (i.e., BAD REQUEST). They cannot be escaped, doing so
             // will cause Scopus fail to find a match.
             "(", ")",
 
             // Some publication titles may have LaTeX formatting, it is better
             // to remove them more appropriately. Meanwhile, removing the following
-            // strings seems reasonable. 
+            // strings seems reasonable.
             "\\it"
         };
 
@@ -179,7 +179,7 @@ namespace Genometric.TVQ.WebService.Crawlers
             if (publication == null)
                 return null;
 
-            if (publication.DOI != null && 
+            if (publication.DOI != null &&
                 PubsByDOI.ContainsKey(publication.DOI))
                 return PubsByDOI[publication.DOI];
 
@@ -219,7 +219,7 @@ namespace Genometric.TVQ.WebService.Crawlers
 
         public bool TryAddToolPublicationAssociation(Tool tool, ToolPublicationAssociation association)
         {
-            if (tool == null || 
+            if (tool == null ||
                 association == null ||
                 association.Publication == null ||
                 ToolPublicationAssociationExists(tool, association))
@@ -261,7 +261,7 @@ namespace Genometric.TVQ.WebService.Crawlers
                             Publication = publication,
                             Tool = association.Tool
                         });
-                
+
                 TryRemovePublication(duplicate);
                 TryAddPublication(publication);
                 return publication;

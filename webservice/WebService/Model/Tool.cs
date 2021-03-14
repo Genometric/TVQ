@@ -50,9 +50,9 @@ namespace Genometric.TVQ.WebService.Model
 
         public SortedList<DateTime, Publication> GetSortedPublications()
         {
-            // Do NOT use SortedDictionary because there could be 
+            // Do NOT use SortedDictionary because there could be
             // multiple publications with the same publication date.
-            // The custom comparer used here handles duplicates as greater. 
+            // The custom comparer used here handles duplicates as greater.
             var rtv = new SortedList<DateTime, Publication>(new DuplicateKeyComparer<DateTime>());
 
             foreach (var pubAssociation in PublicationAssociations)
@@ -93,7 +93,7 @@ namespace Genometric.TVQ.WebService.Model
 
             name = name.Trim();
 
-            /// The following code removes some common prefixes, 
+            /// The following code removes some common prefixes,
             /// in order to better match tools between repositories using their names.
             name = Utilities.RemovePrefix(name, "bioconductor-");
             name = Utilities.RemovePrefix(name, "r-");

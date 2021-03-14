@@ -51,7 +51,7 @@ namespace Genometric.TVQ.WebService.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         /// <summary>
-        /// Example: 
+        /// Example:
         /// {
         ///     "Repository":
         ///     {
@@ -68,7 +68,7 @@ namespace Genometric.TVQ.WebService.Controllers
                 return BadRequest();
             if (job.Repository == null)
                 return BadRequest("missing repository ID.");
-            
+
             var repository = _context.Repositories.Find(job.Repository.ID);
             if (repository == null)
                 return BadRequest("invalid repository ID.");

@@ -26,7 +26,7 @@ namespace Genometric.TVQ.WebService.Controllers
         public List<ToolDTO> GetTools()
         {
             // As an exception, return List instead of IEnumerable
-            // in this API, because the tools count can be more 
+            // in this API, because the tools count can be more
             // than the default maximum size of IEnumerable.
             var tools = from tool in _context.Tools
                         select new ToolDTO(tool);

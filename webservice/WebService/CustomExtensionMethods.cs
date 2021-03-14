@@ -17,16 +17,16 @@ namespace Genometric.TVQ.WebService
                 options =>
                 {
                     options
-                    /// There are some issues with lazy loading, in particular in 
-                    /// controllers that query an entity of given ID. 
+                    /// There are some issues with lazy loading, in particular in
+                    /// controllers that query an entity of given ID.
                     .UseLazyLoadingProxies(false)
                     .UseSqlServer(
                         configuration.GetConnectionString("DefaultConnection"),
                         sqlServerOptionsAction: sqlOptions =>
                         {
                             sqlOptions.MigrationsAssembly(typeof(Startup).GetTypeInfo().Assembly.GetName().Name);
-                            /// Configuring Connection Resiliency: 
-                            /// https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency 
+                            /// Configuring Connection Resiliency:
+                            /// https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency
                             sqlOptions.EnableRetryOnFailure(
                                 maxRetryCount: 10,
                                 maxRetryDelay: TimeSpan.FromSeconds(30),

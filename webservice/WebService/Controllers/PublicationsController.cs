@@ -26,7 +26,7 @@ namespace Genometric.TVQ.WebService.Controllers
         public async Task<ActionResult<IEnumerable<PublicationDTO>>> GetPublications()
         {
             // As an exception, return List instead of IEnumerable
-            // in this API, because the tools count can be more 
+            // in this API, because the tools count can be more
             // than the default maximum size of IEnumerable.
             var publications = from publication in _context.Publications.Include(x => x.ToolAssociations)
                                select new PublicationDTO(publication);
@@ -38,8 +38,8 @@ namespace Genometric.TVQ.WebService.Controllers
         public async Task<ActionResult<Publication>> GetPublication(int id)
         {
             /// Instead of `Include(...).FirstOrDefaultAsync(...)` in the following,
-            /// we could have used `FindAsync` which checks context before sending 
-            /// a query to the database. However, when using `FindAsync` we cannot ask 
+            /// we could have used `FindAsync` which checks context before sending
+            /// a query to the database. However, when using `FindAsync` we cannot ask
             /// to include Publication info of a citation.
             var publication = await
                 _context.Publications

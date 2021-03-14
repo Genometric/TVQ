@@ -57,11 +57,11 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
                     new BaseJsonConverter(
                         propertyMappings: new Dictionary<string, string>
                         {
-                            { "title", nameof(Publication.Title) }, 
-                            { "year", nameof(Publication.Year) }, 
-                            { "citedBy", nameof(Publication.CitedBy) }, 
-                            { "doi", nameof(Publication.DOI) }, 
-                            { "citation", nameof(Publication.BibTeXEntry) }, 
+                            { "title", nameof(Publication.Title) },
+                            { "year", nameof(Publication.Year) },
+                            { "citedBy", nameof(Publication.CitedBy) },
+                            { "doi", nameof(Publication.DOI) },
+                            { "citation", nameof(Publication.BibTeXEntry) },
                             { "pmid", nameof(Publication.PubMedID) }
                         }))
             };
