@@ -7,7 +7,7 @@
 # | Building the Webapp |
 # -----------------------
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /app
 
 # copy csproj and restore as distinct layers
@@ -34,7 +34,7 @@ RUN dotnet publish WebService.csproj -c Release -o out
 # | Build the Webapp for runtime |
 # --------------------------------
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine AS runtime
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS runtime
 
 # The following commands are required because of breaking
 # changes introduced in .NET Core 3 and SQL docker container.
