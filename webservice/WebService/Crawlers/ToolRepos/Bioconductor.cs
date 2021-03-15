@@ -166,7 +166,18 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
         private void GetAddedDate()
         {
             var dateAddedFileName = SessionTempPath + Utilities.GetRandomString();
-            WebClient.DownloadFileTaskAsync(Repo.GetURI() + _dateAddedFileName, dateAddedFileName).Wait();
+
+            try
+            {
+                WebClient.DownloadFileTaskAsync(Repo.GetURI() + _dateAddedFileName, dateAddedFileName).Wait();
+            }
+            catch (AggregateException e)
+            {
+                Logger.LogError(
+                    $"Cannot download Bioconductor file {Repo.GetURI() + _dateAddedFileName}; " +
+                    $"Container may not be able to access the Internet; Error: {e.Message}");
+            }
+
             _toolsAddToRepoDates = new Dictionary<string, DateTime?>();
 
             string line;
