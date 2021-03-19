@@ -6,7 +6,7 @@ import os
 import json
 
 
-FIRST_APPEARANCE_FILENAME = "sample.json"
+FIRST_APPEARANCE_FILENAME = "../../data/bioconductor/first_appearance.json"
 MISSING_CACHE_RELEASES = ["1.1", "1.2", "1.3"]
 
 
@@ -33,7 +33,7 @@ def load_cached_releases(releases):
         branch = os.path.splitext(os.path.basename(filename))[0]
         version = branch_to_version(branch)
         with open(filename) as f:
-            releases[version].packages = [line.replace("/", "").replace("\n", "")
+            releases[version].packages = [line.replace("/", "").replace("\n", "").strip()
                                           for line in f.readlines()]
         cached_versions.append(version)
     return releases, cached_versions
@@ -63,7 +63,7 @@ def get_manifest(release):
 
     software_file = os.path.join(git_clone_dir, "software.txt")
     with open(software_file) as f:
-        software = [line.replace("Package: ", "").replace("\n", "")
+        software = [line.replace("Package: ", "").replace("\n", "").strip()
                      for line in f.readlines()
                      if (line.strip() and "## Blank lines between all entries" not in line)]
     return software
@@ -73,9 +73,11 @@ if __name__ == "__main__":
     print("Getting release dates ...   ", end="")
     releases = get_release_dates()
     print(f"found {len(releases)} releases dates.")
+
     print("Getting cached releases ... ", end="")
     releases, cached_versions = load_cached_releases(releases)
     print(f"found {len(cached_versions)} releases: {cached_versions}")
+
     print("Getting the list of packages for releases:")
     i = 0
     for release in releases:
@@ -93,7 +95,7 @@ if __name__ == "__main__":
         print("done.")
 
     print(f"Serializing first appearance dates to file {FIRST_APPEARANCE_FILENAME} ", end="")
-    with open("./sample.json", "w") as f:
+    with open(FIRST_APPEARANCE_FILENAME, "w") as f:
         json.dump(releases, f, indent="\t", default = lambda x: x.__dict__)
     print("done.")
     print("All process completed successfully.")
