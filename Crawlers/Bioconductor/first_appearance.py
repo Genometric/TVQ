@@ -69,6 +69,18 @@ def get_manifest(release):
     return software
 
 
+def keep_newly_add_packages_only(releases):
+    versions = list(releases.keys())
+    versions.sort()
+    packages_in_previous_releases = releases[versions[0]].packages.copy()
+
+    for i in range(1, len(versions)):
+        releases[versions[i]].packages = list(set(releases[versions[i]].packages) - set(packages_in_previous_releases))
+        packages_in_previous_releases.extend(releases[versions[i]].packages)
+
+    return releases
+
+
 if __name__ == "__main__":
     print("Getting release dates ...   ", end="")
     releases = get_release_dates()
@@ -93,6 +105,10 @@ if __name__ == "__main__":
 
         releases[release].packages = get_manifest(releases[release].branch)
         print("done.")
+
+    print("Removing packages included in previous releases from each release ... ", end="")
+    releases = keep_newly_add_packages_only(releases)
+    print("done.")
 
     print(f"Serializing first appearance dates to file {FIRST_APPEARANCE_FILENAME} ", end="")
     with open(FIRST_APPEARANCE_FILENAME, "w") as f:
