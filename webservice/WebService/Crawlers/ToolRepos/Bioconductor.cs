@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
@@ -16,7 +17,7 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
     {
         private readonly string _citationsFileName = "citations.json";
         private readonly string _statsFileName = "package_stats.tsv";
-        private readonly string _dateAddedFileName = "first_appearance.csv";
+        private readonly string _dateAddedFileName = "first_appearance.json";
         private readonly string _biocViews = "biocViews.json";
 
         private Dictionary<string, DateTime?> _toolsAddToRepoDates;
@@ -178,17 +179,16 @@ namespace Genometric.TVQ.WebService.Crawlers.ToolRepos
                     $"Container may not be able to access the Internet; Error: {e.Message}");
             }
 
-            _toolsAddToRepoDates = new Dictionary<string, DateTime?>();
 
-            string line;
-            using var reader = new StreamReader(dateAddedFileName);
-            reader.ReadLine();
-            while ((line = reader.ReadLine()) != null)
-            {
-                var cols = line.Split(',');
-                _toolsAddToRepoDates.TryAdd(cols[1].Trim(),
-                                            DateTime.Parse(cols[3], CultureInfo.CurrentCulture));
-            }
+            var datesJson = File.ReadAllText(dateAddedFileName);
+            var dates = JsonSerializer.Deserialize<Dictionary<string, BioconductorRelease>>(datesJson);
+
+            _toolsAddToRepoDates = new Dictionary<string, DateTime?>();
+            foreach (var version in dates)
+                foreach (var package in version.Value.Packages)
+                    _toolsAddToRepoDates.TryAdd(
+                        package,
+                        DateTime.Parse(version.Value.ReleaseDate, CultureInfo.CurrentCulture));
         }
     }
 }
