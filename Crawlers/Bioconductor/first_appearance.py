@@ -4,17 +4,23 @@ import urllib.request
 import yaml
 import os
 import json
+from distutils.version import StrictVersion
 
 
 FIRST_APPEARANCE_FILENAME = "../../data/bioconductor/first_appearance.json"
 MISSING_CACHE_RELEASES = ["1.1", "1.2", "1.3"]
-
+PACKAGES_IN_PREVIOUS_RELEASES = set()
 
 class Release:
     def __init__(self, branch, release_date):
         self.branch = branch
         self.release_date = release_date
         self.packages = []
+
+    def update_packages(self, packages):
+        self.packages = [x for x in packages if x not in PACKAGES_IN_PREVIOUS_RELEASES]
+        self.packages.sort(key=str.casefold)
+        PACKAGES_IN_PREVIOUS_RELEASES.update(self.packages)
 
 
 def version_to_branch(version):
@@ -33,8 +39,9 @@ def load_cached_releases(releases):
         branch = os.path.splitext(os.path.basename(filename))[0]
         version = branch_to_version(branch)
         with open(filename) as f:
-            releases[version].packages = [line.replace("/", "").replace("\n", "").strip()
-                                          for line in f.readlines()]
+            packages = [line.replace("/", "").replace("\n", "").strip()
+                        for line in f.readlines()]
+            releases[version].update_packages(packages)
         cached_versions.append(version)
     return releases, cached_versions
 
@@ -63,22 +70,10 @@ def get_manifest(release):
 
     software_file = os.path.join(git_clone_dir, "software.txt")
     with open(software_file) as f:
-        software = [line.replace("Package: ", "").replace("\n", "").strip()
+        packages = [line.replace("Package: ", "").replace("\n", "").strip()
                      for line in f.readlines()
                      if (line.strip() and "## Blank lines between all entries" not in line)]
-    return software
-
-
-def keep_newly_add_packages_only(releases):
-    versions = list(releases.keys())
-    versions.sort()
-    packages_in_previous_releases = releases[versions[0]].packages.copy()
-
-    for i in range(1, len(versions)):
-        releases[versions[i]].packages = list(set(releases[versions[i]].packages) - set(packages_in_previous_releases))
-        packages_in_previous_releases.extend(releases[versions[i]].packages)
-
-    return releases
+    return packages
 
 
 if __name__ == "__main__":
@@ -92,7 +87,8 @@ if __name__ == "__main__":
 
     print("Getting the list of packages for releases:")
     i = 0
-    for release in releases:
+    # Version sorting based on this SO post: https://stackoverflow.com/a/2574230/947889
+    for release in sorted(releases.keys(), key=StrictVersion):
         version = branch_to_version(release)
         i += 1
         print(f"\tRelease: {version} [{i:02d}/{len(releases)}] ... ", end="")
@@ -103,12 +99,8 @@ if __name__ == "__main__":
             print("list of packages for this release is not available; skipping.")
             continue
 
-        releases[release].packages = get_manifest(releases[release].branch)
+        releases[release].update_packages(get_manifest(releases[release].branch))
         print("done.")
-
-    print("Removing packages included in previous releases from each release ... ", end="")
-    releases = keep_newly_add_packages_only(releases)
-    print("done.")
 
     print(f"Serializing first appearance dates to file {FIRST_APPEARANCE_FILENAME} ", end="")
     with open(FIRST_APPEARANCE_FILENAME, "w") as f:
