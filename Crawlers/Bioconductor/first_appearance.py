@@ -107,3 +107,4 @@ if __name__ == "__main__":
         json.dump(releases, f, indent="\t", default = lambda x: x.__dict__)
     print("done.")
     print("All process completed successfully.")
+

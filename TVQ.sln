@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToolShedCrawler", "Crawlers\ToolShed\ToolShedCrawler.csproj", "{C63FCD37-C34C-4D14-9D59-FE48A954E2D5}"
 EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Bioconductor", "Crawlers\Bioconductor\Bioconductor.pyproj", "{04EB6157-27D2-4C88-9885-961DC04DB7A0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +44,8 @@ Global
 		{C63FCD37-C34C-4D14-9D59-FE48A954E2D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C63FCD37-C34C-4D14-9D59-FE48A954E2D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C63FCD37-C34C-4D14-9D59-FE48A954E2D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04EB6157-27D2-4C88-9885-961DC04DB7A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04EB6157-27D2-4C88-9885-961DC04DB7A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
