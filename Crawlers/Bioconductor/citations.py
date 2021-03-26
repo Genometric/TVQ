@@ -10,7 +10,8 @@ import shutil, errno
 
 R_SCRIPT_PATH = "C:\\Program Files\\R\\R-3.6.1\\bin\\Rscript.exe"
 R_LIB_DIRECTORY = "C:\\Program Files\\R\\R-3.6.1\\library"
-FIRST_APPEARANCE_FILENAME = "../../data/bioconductor/first_appearance.json"
+BIOCONDUCTOR_DATA_DIR = "../../data/bioconductor/"
+FIRST_APPEARANCE_FILENAME = os.path.join(BIOCONDUCTOR_DATA_DIR, "first_appearance.json")
 CITATIONS_FILENAME = "../../data/bioconductor/citations.json"
 
 
@@ -57,7 +58,7 @@ def uninstall_package(package_name):
     shutil.rmtree(package_dir)
 
 
-def get_citation(package_name):
+def get_citation(package_name, unsuccessful_clones, unsuccessful_installs):
     """
     The overall process:
     1. Clone the package repository;
@@ -78,8 +79,15 @@ def get_citation(package_name):
             f"git clone https://git.bioconductor.org/packages/{package_name} {git_clone_dir}",
             shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError:
-        print("failed, skipping.")
-        return None
+        try:
+            print("\tretry cloning...", end="")
+            subprocess.check_output(
+                f"git clone https://git.bioconductor.org/packages/{package_name} {git_clone_dir}",
+                shell=True, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError:
+            print("failed, skipping.")
+            unsuccessful_clones.append(package_name)
+            return None
     print("done", end="")
 
     # Copying the cloned repository to R's library path
@@ -95,6 +103,7 @@ def get_citation(package_name):
             shutil.move(git_clone_dir, R_LIB_DIRECTORY)
         except shutil.Error:
             print("failed, skipping.")
+            unsuccessful_installs.append(package_name)
             return None
     print("done", end="")
 
@@ -119,24 +128,25 @@ def get_citation(package_name):
 if __name__ == "__main__":
     packages = get_package_names()
     citations = {}
-    unsuccessful_packages = []
+    unsuccessful_clones = []
+    unsuccessful_installs = []
     print("Getting citation information ...")
     i = 0
     for package in packages:
         i += 1
         print(f"[{i:02d}/{len(packages)}] {package}:\t", end="")
-        bibitem = get_citation(package)
+        bibitem = get_citation(package, unsuccessful_clones, unsuccessful_installs)
         if bibitem:
             citations[package] = bibitem
             print("\trecorded.")
-        else:
-            unsuccessful_packages.append(package)
 
     print(f"Writing citations to {CITATIONS_FILENAME} ...", end="")
     with open(CITATIONS_FILENAME, "w") as f:
         json.dump(citations, f, indent="\t")
     print("done.")
 
-    with open("unsuccessful_packages.json", "w") as f:
-        json.dump(unsuccessful_packages, f, indent="\t")
+    with open(os.path.join(BIOCONDUCTOR_DATA_DIR, "unsuccessful_clones.json"), "w") as f:
+        json.dump(unsuccessful_clones, f, indent="\t")
 
+    with open(os.path.join(BIOCONDUCTOR_DATA_DIR, "unsuccessful_installs.json"), "w") as f:
+        json.dump(unsuccessful_installs, f, indent="\t")
