@@ -4,7 +4,7 @@ services:
 
   sql.data:
     container_name: tvq_db
-    image: microsoft/mssql-server-linux:2017-latest
+    image: mcr.microsoft.com/mssql/server:2019-latest
     # environment:
       # - ID=SA
     #  - SA_PASSWORD=Pass_word

@@ -1,15 +1,17 @@
+import json
+import os
 import subprocess
 import tempfile
 import urllib.request
 import yaml
-import os
-import json
 from distutils.version import StrictVersion
 
 
 FIRST_APPEARANCE_FILENAME = "../../data/bioconductor/first_appearance.json"
 MISSING_CACHE_RELEASES = ["1.1", "1.2", "1.3"]
 PACKAGES_IN_PREVIOUS_RELEASES = set()
+SKIP_PACKAGES = ["Makefile", "README"]
+
 
 class Release:
     def __init__(self, branch, release_date):
@@ -18,7 +20,9 @@ class Release:
         self.packages = []
 
     def update_packages(self, packages):
-        self.packages = [x for x in packages if x not in PACKAGES_IN_PREVIOUS_RELEASES]
+        self.packages = [x for x in packages
+                         if x not in PACKAGES_IN_PREVIOUS_RELEASES and
+                         x not in SKIP_PACKAGES]
         self.packages.sort(key=str.casefold)
         PACKAGES_IN_PREVIOUS_RELEASES.update(self.packages)
 
@@ -47,7 +51,8 @@ def load_cached_releases(releases):
 
 
 def get_release_dates():
-    (config_yaml, _) = urllib.request.urlretrieve("https://bioconductor.org/config.yaml")
+    (config_yaml, _) = urllib.request.urlretrieve(
+        "https://bioconductor.org/config.yaml")
     with open(config_yaml, 'r') as stream:
         try:
             config = yaml.safe_load(stream)
@@ -65,21 +70,24 @@ def get_release_dates():
 def get_manifest(release):
     git_clone_dir = tempfile.mkdtemp(prefix="tvq_")
     null_output = open(os.devnull, 'w')
-    subprocess.run(f"git clone -b {release} https://git.bioconductor.org/admin/manifest.git {git_clone_dir}",
+    subprocess.run(f"git clone -b {release} "
+                   f"https://git.bioconductor.org/admin/manifest.git "
+                   f"{git_clone_dir}",
                    shell=True, stdout=null_output, stderr=subprocess.STDOUT)
 
     software_file = os.path.join(git_clone_dir, "software.txt")
     with open(software_file) as f:
         packages = [line.replace("Package: ", "").replace("\n", "").strip()
-                     for line in f.readlines()
-                     if (line.strip() and "## Blank lines between all entries" not in line)]
+                    for line in f.readlines()
+                    if (line.strip() and
+                        "## Blank lines between all entries" not in line)]
     return packages
 
 
-if __name__ == "__main__":
+def main():
     print("Getting release dates ...   ", end="")
     releases = get_release_dates()
-    print(f"found {len(releases)} releases dates.")
+    print(f"found {len(releases)} release dates.")
 
     print("Getting cached releases ... ", end="")
     releases, cached_versions = load_cached_releases(releases)
@@ -87,7 +95,8 @@ if __name__ == "__main__":
 
     print("Getting the list of packages for releases:")
     i = 0
-    # Version sorting based on this SO post: https://stackoverflow.com/a/2574230/947889
+    # Version sorting based on this SO post:
+    # https://stackoverflow.com/a/2574230/947889
     for release in sorted(releases.keys(), key=StrictVersion):
         version = branch_to_version(release)
         i += 1
@@ -96,15 +105,21 @@ if __name__ == "__main__":
             print("using cached information; skipping.")
             continue
         if version in MISSING_CACHE_RELEASES:
-            print("list of packages for this release is not available; skipping.")
+            print("list of packages for this release "
+                  "is not available; skipping.")
             continue
 
-        releases[release].update_packages(get_manifest(releases[release].branch))
+        releases[release].update_packages(
+            get_manifest(releases[release].branch))
         print("done.")
 
-    print(f"Serializing first appearance dates to file {FIRST_APPEARANCE_FILENAME} ", end="")
+    print(f"Serializing first appearance dates to file "
+          f"{FIRST_APPEARANCE_FILENAME} ", end="")
     with open(FIRST_APPEARANCE_FILENAME, "w") as f:
         json.dump(releases, f, indent="\t", default = lambda x: x.__dict__)
     print("done.")
     print("All process completed successfully.")
 
+
+if __name__ == "__main__":
+    main()

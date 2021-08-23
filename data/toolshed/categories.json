@@ -6,7 +6,7 @@
     "description": "Tools for working with assemblies",
     "deleted": false,
     "url": "/api/categories/3c4a991608b4c8dd",
-    "repositories": 159
+    "repositories": 161
   },
   {
     "model_class": "Category",
@@ -42,7 +42,7 @@
     "description": "Tools for use in computational chemistry",
     "deleted": false,
     "url": "/api/categories/bdfa208f0cf6504e",
-    "repositories": 159
+    "repositories": 161
   },
   {
     "model_class": "Category",
@@ -150,7 +150,7 @@
     "description": "Tools for annotating genomic information",
     "deleted": false,
     "url": "/api/categories/c6dafba9ea5df1a8",
-    "repositories": 46
+    "repositories": 47
   },
   {
     "model_class": "Category",
@@ -204,7 +204,7 @@
     "description": "Utilities to support imaging",
     "deleted": false,
     "url": "/api/categories/f32bb8f087d8a30d",
-    "repositories": 97
+    "repositories": 103
   },
   {
     "model_class": "Category",
@@ -213,7 +213,7 @@
     "description": "Tools for machine learning",
     "deleted": false,
     "url": "/api/categories/521231119a61cff1",
-    "repositories": 49
+    "repositories": 50
   },
   {
     "model_class": "Category",
@@ -222,7 +222,7 @@
     "description": "Tools for use in the study of Metabolomics",
     "deleted": false,
     "url": "/api/categories/c1df3132f6334b0e",
-    "repositories": 125
+    "repositories": 126
   },
   {
     "model_class": "Category",
@@ -231,7 +231,7 @@
     "description": "Tools enabling the study of metagenomes",
     "deleted": false,
     "url": "/api/categories/13b9894bdf1bf60c",
-    "repositories": 336
+    "repositories": 337
   },
   {
     "model_class": "Category",
@@ -258,7 +258,7 @@
     "description": "Tools for analyzing Nanopore data",
     "deleted": false,
     "url": "/api/categories/fe9ae4f69e31ee78",
-    "repositories": 10
+    "repositories": 11
   },
   {
     "model_class": "Category",
@@ -294,7 +294,7 @@
     "description": "Tools enabling the study of proteins",
     "deleted": false,
     "url": "/api/categories/4963efc937542d6d",
-    "repositories": 394
+    "repositories": 395
   },
   {
     "model_class": "Category",
@@ -303,7 +303,7 @@
     "description": "Utilities for RNA",
     "deleted": false,
     "url": "/api/categories/5ec5cd01c08a1944",
-    "repositories": 401
+    "repositories": 402
   },
   {
     "model_class": "Category",
@@ -312,7 +312,7 @@
     "description": "Tools for manipulating alignments in the SAM format",
     "deleted": false,
     "url": "/api/categories/006f4bd910cb3717",
-    "repositories": 110
+    "repositories": 111
   },
   {
     "model_class": "Category",
@@ -321,7 +321,7 @@
     "description": "Tools for performing Protein and DNA/RNA analysis",
     "deleted": false,
     "url": "/api/categories/c0b55599c0b094b7",
-    "repositories": 1031
+    "repositories": 1058
   },
   {
     "model_class": "Category",
@@ -339,7 +339,7 @@
     "description": "Tools for High Energy X-ray Imaging, Diffraction, and Modeling of Microstructures",
     "deleted": false,
     "url": "/api/categories/4c8d49ef284b7a1f",
-    "repositories": 1
+    "repositories": 2
   },
   {
     "model_class": "Category",
@@ -357,7 +357,7 @@
     "description": "Tools for manipulating data",
     "deleted": false,
     "url": "/api/categories/175812cd7caaf439",
-    "repositories": 161
+    "repositories": 166
   },
   {
     "model_class": "Category",
@@ -366,7 +366,7 @@
     "description": "Repositories that contain third-party tool dependency package installation definitions",
     "deleted": false,
     "url": "/api/categories/5483924c34f005f2",
-    "repositories": 657
+    "repositories": 658
   },
   {
     "model_class": "Category",
@@ -384,7 +384,7 @@
     "description": "Tools for use in the study of Transcriptomics.",
     "deleted": false,
     "url": "/api/categories/f6d7b0037d901d9b",
-    "repositories": 333
+    "repositories": 334
   },
   {
     "model_class": "Category",
@@ -393,7 +393,7 @@
     "description": "Tools for single nucleotide polymorphism data such as WGA",
     "deleted": false,
     "url": "/api/categories/f9cad7b01a472135",
-    "repositories": 290
+    "repositories": 292
   },
   {
     "model_class": "Category",
@@ -402,7 +402,7 @@
     "description": "Tools for visualizing data",
     "deleted": false,
     "url": "/api/categories/ed01147b4aa1e8de",
-    "repositories": 209
+    "repositories": 212
   },
   {
     "model_class": "Category",
@@ -411,6 +411,6 @@
     "description": "Tools enabling access to web services",
     "deleted": false,
     "url": "/api/categories/952fa104d5d2271a",
-    "repositories": 115
+    "repositories": 116
   }
 ]

@@ -38,13 +38,16 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0 AS runtime
 
 # The following commands are required because of breaking
 # changes introduced in .NET Core 3 and SQL docker container.
-RUN apk add icu-libs
+RUN apt-get update -y
+RUN apt-get install -y libicu-dev
+# RUN apk add icu-libs
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 # Bash is needed for the wait_for_it script.
-RUN apk update
-RUN apk upgrade
-RUN apk add --no-cache bash
+#RUN apk update
+#RUN apk upgrade
+#RUN apk add --no-cache bash
+
 
 WORKDIR /app
 COPY --from=build /app/webservice/WebService/out ./
