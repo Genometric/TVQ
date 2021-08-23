@@ -28,14 +28,28 @@ To start Webservice, run the following command at the
 root of the project path:
 
 ```shell
-$ docker-compose up
+$ docker compose up
 ```
 
-The service will be listening on port `8000`. You can access
+Or to build the webservice, you may run the following
+from the root of the project path:
+
+```shell
+$ docker build --no-cache -f ./webservice/WebService/Dockerfile .
+```
+
+The service will be listening on port `3030`. You can access
 its API at the following address:
 
 ```
-http://localhost:8000/api/v1/
+http://localhost:3030/api/v1/
+```
+
+For instance, try the following endpoint to get a list
+of the defined repositories:
+
+```
+http://localhost:3030/api/v1/repositories
 ```
 
 The API is RESTful and comes with a Swagger documentation.
@@ -45,14 +59,14 @@ once the Webservice is running, you may go to the following
 address to access your local Swagger documentation:
 
 ```
-http://localhost:8000/swagger/index.html
+http://localhost:3030/swagger/index.html
 ```
 
 Or you may access Swagger `JSON` or `YAML` description at:
 
 ```
-http://localhost:8000/swagger/v1/swagger.json
-http://localhost:8000/swagger/v1/swagger.yaml
+http://localhost:3030/swagger/v1/swagger.json
+http://localhost:3030/swagger/v1/swagger.yaml
 ```
 
 Note that every crawling request you submit (e.g.,
@@ -66,7 +80,7 @@ schedule and execute the job in background.
 Send a repository (Package management systems such as Bioconda and Bioconductor) crawling request:
 
 ```shell
-curl -H "Content-Type: application/json" -X POST http://localhost:8000/api/v1/RepoCrawlingJobs -d "{Repository:{\"ID\":4}}"
+curl -H "Content-Type: application/json" -X POST http://localhost:3030/api/v1/RepoCrawlingJobs -d "{Repository:{\"ID\":4}}"
 ```
 which will respond with the created crawling job:
 
